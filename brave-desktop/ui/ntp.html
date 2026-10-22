@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva Pestaña</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      height: 100vh;
+      background-color: #101114;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 50px;
+      overflow: hidden;
+      position: relative;
+      transition: background-image 0.6s ease-in-out;
+    }
+
+    /* Overlay oscuro sutil para máxima legibilidad */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.65) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .content-layer {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    /* Top Stats Widget */
+    .stats-container {
+      display: flex;
+      gap: 36px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fb542b;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .stat-lbl {
+      font-size: 11.5px;
+      color: #e2e2e8;
+      margin-top: 2px;
+      font-weight: 500;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Center Section */
+    .center-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .clock {
+      font-size: 86px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 6px;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .date-str {
+      font-size: 16px;
+      color: #f0f0f5;
+      margin-bottom: 26px;
+      font-weight: 500;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Search Box */
+    .search-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      background: rgba(20, 21, 26, 0.65);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      padding: 10px 22px;
+      margin-bottom: 34px;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .search-bar:focus-within {
+      background: rgba(20, 21, 26, 0.85);
+      border-color: #fb542b;
+      box-shadow: 0 10px 40px rgba(251, 84, 43, 0.35);
+    }
+
+    .search-logo {
+      width: 22px;
+      height: 22px;
+      margin-right: 14px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 15.5px;
+    }
+
+    .search-input::placeholder {
+      color: #a8a8b2;
+    }
+
+    /* Top Sites */
+    .top-sites {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .site-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 82px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #ffffff;
+      transition: transform 0.2s ease;
+    }
+
+    .site-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .site-icon {
+      width: 54px;
+      height: 54px;
+      background: rgba(20, 21, 26, 0.65);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s;
+    }
+
+    .site-card:hover .site-icon {
+      background: rgba(30, 31, 38, 0.85);
+      border-color: #fb542b;
+      box-shadow: 0 6px 20px rgba(251, 84, 43, 0.3);
+    }
+
+    .site-name {
+      font-size: 12px;
+      color: #ffffff;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      font-weight: 500;
+    }
+
+    /* Bottom Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      color: #d1d1dc;
+    }
+
+    .wallpaper-credit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .wallpaper-credit:hover {
+      background: rgba(0, 0, 0, 0.6);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .shield-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fb542b;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="content-layer">
+    <!-- Widget Superior de Estadísticas -->
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-val" id="stat-ads">0</div>
+        <div class="stat-lbl">Rastreadores y anuncios bloqueados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="stat-band">0 MB</div>
+        <div class="stat-lbl">Banda ancha ahorrada</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="stat-time">0 s</div>
+        <div class="stat-lbl">Tiempo ahorrado</div>
+      </div>
+    </div>
+
+    <!-- Sección Central: Reloj y Buscador -->
+    <div class="center-container">
+      <div class="clock" id="clock">12:00</div>
+      <div class="date-str" id="date-str">Cargando fecha...</div>
+
+      <form class="search-bar" id="search-form">
+        <img class="search-logo" src="logo.png" alt="Brave">
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar en la web con Brave..." autofocus>
+      </form>
+
+      <!-- Sitios Frecuentes / Top Sites -->
+      <div class="top-sites">
+        <a class="site-card" href="https://search.brave.com">
+          <div class="site-icon">🦁</div>
+          <div class="site-name">Brave Search</div>
+        </a>
+        <a class="site-card" href="https://www.youtube.com">
+          <div class="site-icon">▶️</div>
+          <div class="site-name">YouTube</div>
+        </a>
+        <a class="site-card" href="https://github.com">
+          <div class="site-icon">🐙</div>
+          <div class="site-name">GitHub</div>
+        </a>
+        <a class="site-card" href="https://www.wikipedia.org">
+          <div class="site-icon">📖</div>
+          <div class="site-name">Wikipedia</div>
+        </a>
+        <a class="site-card" href="https://www.reddit.com">
+          <div class="site-icon">🤖</div>
+          <div class="site-name">Reddit</div>
+        </a>
+        <a class="site-card" href="https://twitter.com">
+          <div class="site-icon">🐦</div>
+          <div class="site-name">X / Twitter</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pie de Página: Crédito de Foto y Escudo -->
+    <div class="footer">
+      <div class="wallpaper-credit" id="wallpaper-btn" title="Clic para cambiar fondo">
+        <span>📷</span>
+        <span id="photo-credit">Foto por Daniel Schwarz en Unsplash</span>
+      </div>
+
+      <div class="shield-badge">
+        <span>🛡️</span>
+        <span>Brave Shields v1.0 Activo</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Catálogo oficial de fondos fotográficos
+    const wallpapers = [
+      { file: 'wallpapers/daniel-schwarz.jpg', author: 'Daniel Schwarz', location: 'Montañas y Lago' },
+      { file: 'wallpapers/pascal-debrunner.jpg', author: 'Pascal Debrunner', location: 'Picos Rocosos al Amanecer' },
+      { file: 'wallpapers/david-becker.jpg', author: 'David Becker', location: 'Atardecer en la Costa' },
+      { file: 'wallpapers/hunter-newton.jpg', author: 'Hunter Newton', location: 'Cascada en Bosque Profundo' },
+      { file: 'wallpapers/andrew-svk.jpg', author: 'Andrew Svk', location: 'Cadena Montañosa con Cielo Rosa' },
+      { file: 'wallpapers/rafael-peier2.jpg', author: 'Rafael Peier', location: 'Dunas Doradas al Atardecer' },
+    ];
+
+    let currentWpIndex = Math.floor(Math.random() * wallpapers.length);
+
+    function applyWallpaper(idx) {
+      const wp = wallpapers[idx];
+      document.body.style.backgroundImage = `url('${wp.file}')`;
+      document.getElementById('photo-credit').textContent = `Foto por ${wp.author} en Unsplash (${wp.location})`;
+    }
+
+    applyWallpaper(currentWpIndex);
+
+    document.getElementById('wallpaper-btn').addEventListener('click', () => {
+      currentWpIndex = (currentWpIndex + 1) % wallpapers.length;
+      applyWallpaper(currentWpIndex);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      const dateStr = now.toLocaleDateString('es-ES', options);
+      document.getElementById('date-str').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    function loadStats() {
+      const adsBlocked = parseInt(localStorage.getItem('brave_total_ads') || '142', 10);
+      document.getElementById('stat-ads').textContent = adsBlocked.toLocaleString();
+
+      const mbSaved = localStorage.getItem('brave_mb_saved') || ((adsBlocked * 34.2) / 1024).toFixed(1);
+      document.getElementById('stat-band').textContent = `${mbSaved} MB`;
+
+      const secondsSaved = parseInt(localStorage.getItem('brave_time_saved') || String(Math.round((adsBlocked * 65) / 1000)), 10);
+      if (secondsSaved >= 60) {
+        document.getElementById('stat-time').textContent = `${(secondsSaved / 60).toFixed(1)} m`;
+      } else {
+        document.getElementById('stat-time').textContent = `${secondsSaved} s`;
+      }
+    }
+
+    loadStats();
+    window.addEventListener('storage', loadStats);
+
+    document.getElementById('search-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) return;
+
+      if (/^https?:\/\//i.test(query) || (query.includes('.') && !query.includes(' '))) {
+        window.location.href = query.startsWith('http') ? query : 'https://' + query;
+      } else {
+        window.location.href = 'https://search.brave.com/search?q=' + encodeURIComponent(query);
+      }
+    });
+  </script>
+</body>
+</html>

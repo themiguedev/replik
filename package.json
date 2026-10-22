@@ -1,0 +1,18 @@
+{
+  "name": "replik",
+  "version": "1.0.0",
+  "description": "Réplica completa de escritorio de Brave Browser (Educativa) con motor de Shields, privacidad avanzada y ejecutable portable para Windows x64.",
+  "author": "Miguelangel Contreras Guillen (@themiguedev)",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "npx electron brave-desktop/dist/main.mjs",
+    "build": "esbuild brave-desktop/main.ts --bundle --platform=node --external:electron --format=esm --outfile=brave-desktop/dist/main.mjs",
+    "portable": "npm run build && electron-builder build --win portable --project brave-desktop"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.25.0"
+  }
+}

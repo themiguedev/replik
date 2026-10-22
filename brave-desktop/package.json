@@ -1,0 +1,33 @@
+{
+  "name": "brave-replica",
+  "version": "1.0.0",
+  "description": "Brave Browser Educational Replica",
+  "main": "dist/main.mjs",
+  "type": "module",
+  "author": "Miguelangel Contreras Guillen",
+  "license": "MIT",
+  "build": {
+    "electronVersion": "45.0.0",
+    "appId": "com.themiguedev.brave.replica",
+    "productName": "Brave-Replica",
+    "asar": false,
+    "directories": {
+      "output": "../../dist-portable"
+    },
+    "files": [
+      "dist/**/*",
+      "preload.cjs",
+      "farbling.js",
+      "ui/**/*",
+      "data/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "ui/icon.ico"
+    },
+    "portable": {
+      "artifactName": "Brave-Replica-Portable.exe"
+    }
+  }
+}

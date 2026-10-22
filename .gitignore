@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-portable/win-unpacked/
+*.log
+.DS_Store
+Thumbs.db

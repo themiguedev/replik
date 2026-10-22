@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Brave Browser</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Barra de Pestañas y Título Nativo (Frameless Titlebar) -->
+  <div class="tab-bar-container" id="titlebar">
+    <div class="tab-bar" id="tab-bar">
+      <!-- Pestañas dinámicas tipo píldora se inyectan aquí -->
+    </div>
+    <div class="tab-new" id="new-tab-btn" title="Nueva pestaña (Ctrl+T)">+</div>
+
+    <!-- Región arrastrable de la ventana -->
+    <div class="titlebar-drag-region" id="titlebar-drag-region"></div>
+
+    <!-- Menú de búsqueda de pestañas -->
+    <button class="titlebar-btn tab-search-btn" id="tab-search-btn" title="Buscar pestañas">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M3.2 5.5l4.8 4.8 4.8-4.8.8.8-5.6 5.6-5.6-5.6z"/>
+      </svg>
+    </button>
+
+    <!-- Botones de Control de Ventana (Estilo Windows / Brave Nativo) -->
+    <div class="window-controls" id="window-controls">
+      <button class="win-btn" id="win-btn-minimize" title="Minimizar">
+        <svg width="10" height="1" viewBox="0 0 10 1" fill="currentColor">
+          <path d="M0 0h10v1H0z"/>
+        </svg>
+      </button>
+      <button class="win-btn" id="win-btn-maximize" title="Maximizar">
+        <svg id="win-icon-maximize" width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+          <path d="M1 1h8v8H1V1zm1 1v6h6V2H2z"/>
+        </svg>
+      </button>
+      <button class="win-btn win-btn-close" id="win-btn-close" title="Cerrar">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+          <path d="M1 0L0 1l4 4-4 4 1 1 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra de Herramientas / Omnibox -->
+  <div class="toolbar">
+    <button class="nav-btn" id="btn-back" title="Atrás (Alt+←)" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <button class="nav-btn" id="btn-forward" title="Adelante (Alt+→)" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+    <button class="nav-btn" id="btn-reload" title="Recargar (Ctrl+R)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+    </button>
+    <button class="nav-btn" id="btn-home" title="Página principal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </button>
+    <div class="tor-indicator" id="tor-badge" title="Enrutamiento Onion anónimo a través de 3 relevos Tor">🧅 Tor</div>
+
+    <div class="omnibox-container">
+      <div class="lock-icon" id="lock-icon" title="Ver información del sitio y permisos">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <input type="text" id="url-input" placeholder="Buscar en la web o ingresar una URL..." autocomplete="off">
+      
+      <!-- Indicador Dinámico de Zoom -->
+      <div class="zoom-indicator" id="zoom-indicator" style="display: none;" title="Restablecer zoom al 100%">
+        <span id="zoom-value">100%</span>
+        <span class="zoom-reset-btn" id="zoom-reset-btn">✕</span>
+      </div>
+
+      <!-- Botón de Speedreader (Modo Lectura) -->
+      <button class="speedreader-btn" id="btn-speedreader" title="Activar Brave Speedreader (Modo Lectura)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
+      </button>
+
+      <!-- Botón de Código QR para compartir -->
+      <button class="qr-btn" id="btn-qr-code" title="Crear código QR para esta página">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </button>
+
+      <!-- Botón del León de Brave Shields -->
+      <button class="shields-btn" id="shields-btn" title="Brave Shields">
+        <svg class="shields-lion-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 10l3 2 3-2"/>
+          <path d="M12 12v4.5"/>
+        </svg>
+        <span id="shields-counter">0</span>
+      </button>
+
+      <!-- Menú Flotante de Sugerencias y Autocompletado -->
+      <div class="omnibox-suggestions" id="omnibox-suggestions"></div>
+    </div>
+
+    <!-- Indicador de Batería y Ahorro de Energía -->
+    <div class="battery-indicator" id="battery-indicator" title="Estado de batería y modo ahorro">🔋 100%</div>
+
+    <!-- Botón Captura de Pantalla Web (Brave Web Capture) -->
+    <button class="nav-btn-icon" id="btn-screenshot" title="Captura de pantalla (Ctrl+Shift+S)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+    </button>
+
+    <!-- Botón Control Global de Multimedia -->
+    <button class="global-media-btn" id="btn-global-media" title="Control global de reproducción multimedia">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"></path>
+        <circle cx="6" cy="18" r="3"></circle>
+        <circle cx="18" cy="16" r="3"></circle>
+      </svg>
+    </button>
+
+    <!-- Botón Imagen en Imagen (Picture-in-Picture) -->
+    <button class="nav-btn-icon" id="btn-pip" title="Imagen en imagen (PiP flotante)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+        <rect x="12" y="10" width="8" height="7" rx="1"></rect>
+      </svg>
+    </button>
+
+    <!-- Botón Brave Playlist -->
+    <button class="nav-btn-icon" id="btn-playlist" title="Guardar en Brave Playlist">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Botón Pantalla Dividida (Split View) -->
+    <button class="nav-btn-icon" id="btn-split-view" title="Alternar pantalla dividida (Alt+S)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+        <line x1="12" y1="3" x2="12" y2="21"></line>
+      </svg>
+    </button>
+
+    <!-- Botón Modo Oscuro Forzado -->
+    <button class="nav-btn-icon" id="btn-force-dark" title="Forzar modo oscuro en sitios web">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <!-- Botón Traducir -->
+    <button class="nav-btn-icon" id="btn-translate" title="Traducir página al español">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
+    </button>
+
+    <!-- Botón Extensiones -->
+    <button class="nav-btn-icon" id="btn-extensions" title="Extensiones (brave://extensions)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"></path>
+      </svg>
+    </button>
+
+    <!-- Botón Selector de Perfil -->
+    <button class="profile-btn" id="btn-profile" title="Perfil de usuario">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </button>
+
+    <!-- Botón Menú Principal -->
+    <button class="nav-btn" id="btn-menu" title="Personalizar y controlar Brave">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="5" r="2"></circle>
+        <circle cx="12" cy="12" r="2"></circle>
+        <circle cx="12" cy="19" r="2"></circle>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Barra Visual de Marcadores (Ctrl + Shift + B) -->
+  <div class="bookmarks-bar" id="bookmarks-bar">
+    <div id="bookmarks-list" style="display: flex; align-items: center; gap: 4px; flex: 1;">
+      <!-- Marcadores cargados dinámicamente -->
+    </div>
+  </div>
+
+  <!-- Contenedor del Navegador Web (Múltiples Webviews) -->
+  <div class="browser-content" id="browser-content">
+    <!-- Webviews de cada pestaña se insertan aquí -->
+
+    <!-- Barra de Respaldo Wayback Machine (Internet Archive) -->
+    <div class="wayback-bar" id="wayback-bar">
+      <div class="wayback-bar-left">
+        <span style="font-size: 16px;">🏛️</span>
+        <span id="wayback-text">Esta página no está disponible. ¿Deseas comprobar si hay una versión guardada en Wayback Machine?</span>
+      </div>
+      <div class="wayback-bar-actions">
+        <button class="btn-wayback-action btn-wayback-check" id="btn-wayback-check">Ver versión archivada</button>
+        <button class="btn-wayback-action btn-wayback-close" id="btn-wayback-close">✕</button>
+      </div>
+    </div>
+
+    <!-- Barra Flotante de Búsqueda en Página (Ctrl + F) -->
+    <div class="find-in-page-bar" id="find-in-page-bar">
+      <input type="text" id="find-in-page-input" placeholder="Buscar en la página..." autocomplete="off">
+      <span class="find-count" id="find-in-page-count">0/0</span>
+      <button class="btn-find-nav" id="btn-find-prev" title="Anterior (Shift+Enter)">▲</button>
+      <button class="btn-find-nav" id="btn-find-next" title="Siguiente (Enter)">▼</button>
+      <button class="btn-find-close" id="btn-find-close" title="Cerrar (Esc)">✕</button>
+    </div>
+
+    <!-- Modo Lectura Speedreader Overlay -->
+    <div class="speedreader-overlay" id="speedreader-overlay">
+      <div class="speedreader-header">
+        <span style="font-weight: 700; color: var(--brave-orange);">📖 Brave Speedreader</span>
+        <button class="btn-exit-reader" id="btn-close-speedreader">✕ Salir de Speedreader</button>
+      </div>
+      <h1 class="speedreader-title" id="speedreader-title">Título del artículo</h1>
+      <div class="speedreader-meta" id="speedreader-meta">Lectura limpia sin rastreadores ni anuncios</div>
+      <div class="speedreader-content" id="speedreader-content">Contenido del artículo...</div>
+    </div>
+
+    <!-- Panel Emergente de Brave Shields (Avanzado) -->
+    <div class="shields-popup" id="shields-popup">
+      <div class="popup-header">
+        <div class="popup-title">
+          <span>🦁</span>
+          <span>Brave Shields</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="shields-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="site-domain" id="popup-domain">search.brave.com</div>
+
+      <div class="stat-card">
+        <div class="stat-number" id="popup-blocked-count">0</div>
+        <div class="stat-label">Rastreadores y anuncios bloqueados</div>
+      </div>
+
+      <!-- Métricas Dinámicas de Ahorro y Rendimiento -->
+      <div class="savings-grid">
+        <div class="savings-card">
+          <div class="savings-val" id="popup-bandwidth-saved">0 MB</div>
+          <div class="savings-lbl">Ancho de banda ahorrado</div>
+        </div>
+        <div class="savings-card">
+          <div class="savings-val" id="popup-time-saved">0 s</div>
+          <div class="savings-lbl">Tiempo estimado ganado</div>
+        </div>
+      </div>
+
+      <!-- Controles Avanzados -->
+      <div class="advanced-section-title">Controles Avanzados</div>
+      
+      <div class="control-row">
+        <span class="control-label">Rastreadores y anuncios</span>
+        <button class="control-badge" id="btn-toggle-aggressive">Estándar</button>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Bloquear scripts (JavaScript)</span>
+        <label class="switch switch-sm">
+          <input type="checkbox" id="scripts-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Navegación olvidadiza (Limpiar al salir)</span>
+        <label class="switch switch-sm">
+          <input type="checkbox" id="forgetful-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Protección de huella (Farbling)</span>
+        <span class="status-active">Activado</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Des-rastreo de URLs (De-AMP)</span>
+        <span class="status-active">Activado</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">HTTPS Everywhere Forzado</span>
+        <span class="status-active">Activado</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Protección red local (Anti-Portscan)</span>
+        <span class="status-active">Activado</span>
+      </div>
+    </div>
+
+    <!-- Menú Principal Desplegable -->
+    <div class="main-menu" id="main-menu">
+      <div class="menu-item" id="menu-new-tab">
+        <span>Nueva pestaña</span>
+        <span class="menu-shortcut">Ctrl+T</span>
+      </div>
+      <div class="menu-item" id="menu-reopen-tab">
+        <span>Reabrir pestaña cerrada</span>
+        <span class="menu-shortcut">Ctrl+Shift+T</span>
+      </div>
+      <div class="menu-item" id="menu-new-private">
+        <span>Nueva ventana privada</span>
+        <span class="menu-shortcut">Ctrl+Shift+N</span>
+      </div>
+      <div class="menu-item" id="menu-new-tor">
+        <span>Nueva ventana privada con Tor</span>
+        <span class="menu-shortcut">Alt+Shift+N</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-bookmarks">
+        <span>Añadir a marcadores</span>
+        <span class="menu-shortcut">Ctrl+D</span>
+      </div>
+      <div class="menu-item" id="menu-toggle-bookmarks">
+        <span>Barra de marcadores</span>
+        <span class="menu-shortcut">Ctrl+Shift+B</span>
+      </div>
+      <div class="menu-item" id="menu-history">
+        <span>Historial</span>
+        <span class="menu-shortcut">Ctrl+H</span>
+      </div>
+      <div class="menu-item" id="menu-downloads">
+        <span>Descargas</span>
+        <span class="menu-shortcut">Ctrl+J</span>
+      </div>
+      <div class="menu-item" id="menu-find">
+        <span>Buscar en la página</span>
+        <span class="menu-shortcut">Ctrl+F</span>
+      </div>
+      <div class="menu-item" id="menu-screenshot">
+        <span>Captura de pantalla</span>
+        <span class="menu-shortcut">Ctrl+Shift+S</span>
+      </div>
+      <div class="menu-item" id="menu-print">
+        <span>Imprimir...</span>
+        <span class="menu-shortcut">Ctrl+P</span>
+      </div>
+      <div class="menu-item" id="menu-sync">
+        <span>Sincronización</span>
+        <span class="menu-shortcut">🔄</span>
+      </div>
+      <div class="menu-item" id="menu-adblock">
+        <span>Filtros Adblock</span>
+        <span class="menu-shortcut">🛡️</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-settings">
+        <span>Configuración</span>
+        <span class="menu-shortcut">Ctrl+,</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-devtools">
+        <span>Herramientas para desarrolladores</span>
+        <span class="menu-shortcut">F12</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-playlist">
+        <span>Brave Playlist</span>
+        <span class="menu-shortcut">📑</span>
+      </div>
+      <div class="menu-item" id="menu-extensions">
+        <span>Extensiones</span>
+        <span class="menu-shortcut">🧩</span>
+      </div>
+      <div class="menu-item" id="menu-task-manager">
+        <span>Administrador de tareas</span>
+        <span class="menu-shortcut">Shift+Esc</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-about">
+        <span>Acerca de Brave (Réplica Educativa)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta Flotante de Pestaña con Miniatura Visual (Tab Hover Card) -->
+  <div class="tab-hover-card" id="tab-hover-card">
+    <div class="hover-card-preview-container" id="hover-card-preview-container">
+      <img class="hover-card-preview" id="hover-card-preview" src="" alt="Vista previa de pestaña">
+      <div class="hover-card-preview-placeholder" id="hover-card-placeholder">🦁 Brave Tab</div>
+    </div>
+    <div class="hover-card-title" id="hover-card-title">Título de la pestaña</div>
+    <div class="hover-card-domain" id="hover-card-domain">dominio.com</div>
+    <div class="hover-card-metrics">
+      <span class="hover-card-mem" id="hover-card-mem">💾 Memoria: 38 MB</span>
+      <span class="hover-card-status" id="hover-card-status">Activa</span>
+    </div>
+  </div>
+
+  <!-- Popup Control Global de Multimedia -->
+  <div class="global-media-popup" id="global-media-popup">
+    <div style="font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+      <span>🎵</span> Control Multimedia
+    </div>
+    <div id="media-cards-container" style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0;">
+        No hay multimedia reproduciéndose en este momento.
+      </div>
+    </div>
+  </div>
+
+  <!-- Menú Contextual de Página Web -->
+  <div class="brave-context-menu" id="custom-context-menu">
+    <div class="context-menu-item" id="ctx-open-new-tab">Abrir enlace en una pestaña nueva</div>
+    <div class="context-menu-item" id="ctx-open-private-tab">Abrir enlace en ventana privada</div>
+    <div class="context-menu-item" id="ctx-open-tor-tab">Abrir enlace en ventana privada con Tor</div>
+    <div class="context-menu-item" id="ctx-copy-link">Copiar dirección del enlace</div>
+    <div class="context-menu-divider" id="ctx-link-divider"></div>
+    <div class="context-menu-item" id="ctx-search-selection">Buscar con Brave Search</div>
+    <div class="context-menu-item" id="ctx-copy-selection">Copiar</div>
+    <div class="context-menu-divider" id="ctx-text-divider"></div>
+    <div class="context-menu-item" id="ctx-nav-back">Atrás</div>
+    <div class="context-menu-item" id="ctx-nav-forward">Adelante</div>
+    <div class="context-menu-item" id="ctx-nav-reload">Recargar</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="ctx-open-pip">Ver en Imagen en Imagen (PiP)</div>
+    <div class="context-menu-item" id="ctx-split-tab">Ver en pantalla dividida (Split View)</div>
+    <div class="context-menu-item" id="ctx-block-element">Bloquear elemento en la página (Zapper)</div>
+    <div class="context-menu-item" id="ctx-force-copy">Desbloquear copia y clic derecho</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="ctx-speedreader">Activar Speedreader (Modo lectura)</div>
+    <div class="context-menu-item" id="ctx-add-bookmark">Añadir a marcadores</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="ctx-devtools">Inspeccionar elemento</div>
+  </div>
+
+  <!-- Buscador Rápido de Pestañas (Tab Search Popup) -->
+  <div class="tab-search-popup" id="tab-search-popup">
+    <div class="tab-search-header">
+      <input type="text" id="tab-search-input" placeholder="Buscar en pestañas abiertas y recientes..." autocomplete="off">
+    </div>
+    <div class="tab-search-results" id="tab-search-results">
+      <div class="tab-search-section-title">Pestañas abiertas</div>
+      <div id="tab-search-open-list"></div>
+      <div class="tab-search-section-title">Cerradas recientemente</div>
+      <div id="tab-search-closed-list"></div>
+    </div>
+  </div>
+
+  <!-- Popup Selector de Perfiles -->
+  <div class="profile-popup" id="profile-popup">
+    <div class="profile-header">
+      <div class="profile-avatar-circle" id="profile-current-avatar">👤</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-current-name">Perfil Personal</div>
+        <div class="profile-sub">Brave Perfil Principal</div>
+      </div>
+    </div>
+    <div class="menu-divider"></div>
+    <div class="profile-list-title">Cambiar de perfil</div>
+    <div class="profile-option active" data-profile="personal">
+      <span class="profile-opt-icon">👤</span>
+      <div class="profile-opt-text">
+        <div class="profile-opt-title">Personal</div>
+        <div class="profile-opt-desc">Marcadores y configuración activa</div>
+      </div>
+      <span class="profile-opt-check">✓</span>
+    </div>
+    <div class="profile-option" data-profile="work">
+      <span class="profile-opt-icon">💼</span>
+      <div class="profile-opt-text">
+        <div class="profile-opt-title">Trabajo</div>
+        <div class="profile-opt-desc">Espacio de trabajo y proyectos</div>
+      </div>
+      <span class="profile-opt-check"></span>
+    </div>
+    <div class="profile-option" data-profile="guest">
+      <span class="profile-opt-icon">🕶️</span>
+      <div class="profile-opt-text">
+        <div class="profile-opt-title">Modo Invitado</div>
+        <div class="profile-opt-desc">Sesión temporal sin historial ni datos</div>
+      </div>
+      <span class="profile-opt-check"></span>
+    </div>
+  </div>
+
+  <!-- Barra de Traductor Nativo Brave Translate -->
+  <div class="translate-bar" id="translate-bar">
+    <div class="translate-bar-left">
+      <span class="translate-icon">🌐</span>
+      <span id="translate-status-text">¿Traducir esta página al español?</span>
+    </div>
+    <div class="translate-bar-actions">
+      <button class="btn-translate-action btn-translate-confirm" id="btn-do-translate">Traducir</button>
+      <button class="btn-translate-action btn-translate-revert" id="btn-revert-translate" style="display: none;">Ver original</button>
+      <button class="btn-translate-action btn-translate-close" id="btn-close-translate">✕</button>
+    </div>
+  </div>
+
+  <!-- Modal Administrador de Tareas Interno de Brave (Shift + Esc) -->
+  <div class="task-manager-modal" id="task-manager-modal">
+    <div class="task-manager-dialog">
+      <div class="task-manager-header">
+        <div class="task-manager-title">
+          <span>⚡ Administrador de tareas - Brave</span>
+        </div>
+        <button class="task-manager-close" id="btn-close-task-manager">✕</button>
+      </div>
+      <div class="task-manager-body">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width: 50%;">Tarea / Pestaña</th>
+              <th style="width: 20%;">Uso de RAM</th>
+              <th style="width: 15%;">CPU</th>
+              <th style="width: 15%; text-align: right;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="task-manager-tbody">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+      <div class="task-manager-footer">
+        <span id="task-manager-total-ram">Memoria total usada por pestañas: ~120 MB</span>
+        <button class="btn-end-process" id="btn-task-end-process" disabled>Finalizar proceso</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menú Contextual de Pestaña -->
+  <div class="brave-context-menu" id="tab-context-menu">
+    <div class="context-menu-item" id="tab-ctx-new-right">Nueva pestaña a la derecha</div>
+    <div class="context-menu-item" id="tab-ctx-pin">Fijar pestaña</div>
+    <div class="context-menu-item" id="tab-ctx-mute">Silenciar pestaña</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="tab-ctx-group-orange">Añadir al grupo Naranja</div>
+    <div class="context-menu-item" id="tab-ctx-group-purple">Añadir al grupo Morado</div>
+    <div class="context-menu-item" id="tab-ctx-group-blue">Añadir al grupo Azul</div>
+    <div class="context-menu-item" id="tab-ctx-remove-group">Quitar del grupo</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="tab-ctx-sleep">Suspender pestaña (Ahorrar memoria)</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" id="tab-ctx-close">Cerrar pestaña</div>
+    <div class="context-menu-item" id="tab-ctx-close-others">Cerrar las demás pestañas</div>
+  </div>
+
+  <!-- Popup de Extensiones -->
+  <div class="extensions-popup" id="extensions-popup">
+    <div class="extensions-popup-header">
+      <div style="font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 8px;">
+        <span>🧩</span> Extensiones de Brave
+      </div>
+      <button class="btn-manage-ext" id="btn-goto-extensions">Administrar</button>
+    </div>
+    <div class="extensions-popup-body" id="extensions-popup-list">
+      <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0;">
+        Cargando extensiones...
+      </div>
+    </div>
+    <div class="extensions-popup-footer">
+      <button class="btn-webstore-link" id="btn-popup-webstore">🛍️ Abrir Chrome Web Store</button>
+    </div>
+  </div>
+
+  <!-- Popup Generador de Códigos QR para compartir -->
+  <div class="qr-popup" id="qr-popup">
+    <div class="qr-popup-header">
+      <span style="font-weight: 700; font-size: 13px;">📱 Compartir con código QR</span>
+      <button class="qr-popup-close" id="btn-close-qr">✕</button>
+    </div>
+    <div class="qr-popup-body">
+      <div id="qr-code-container" class="qr-code-container"></div>
+      <input type="text" id="qr-url-display" readonly style="width: 100%; background: #141517; border: 1px solid #2e2f38; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11.5px; text-overflow: ellipsis; box-sizing: border-box;">
+    </div>
+    <div class="qr-popup-footer">
+      <button class="btn-qr-copy" id="btn-qr-copy">Copiar enlace</button>
+    </div>
+  </div>
+
+  <!-- Modal / Popup de Información del Sitio y Permisos Granulares (Candado) -->
+  <div class="site-info-popup" id="site-info-popup">
+    <div class="site-info-header">
+      <div class="site-info-icon-badge" id="site-info-icon-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <div class="site-info-header-text">
+        <div class="site-info-domain" id="site-info-domain">sitio.com</div>
+        <div class="site-info-security" id="site-info-security">La conexión es segura</div>
+      </div>
+      <button class="site-info-close" id="site-info-close">✕</button>
+    </div>
+    <div class="site-info-desc" id="site-info-desc">
+      Tus datos (contraseñas, datos de tarjetas de crédito) se mantienen privados al transmitirse a este sitio web mediante cifrado HTTPS moderno.
+    </div>
+    <div class="site-info-divider"></div>
+    <div class="site-info-section-title">Permisos para este sitio</div>
+    <div class="site-permissions-list" id="site-permissions-list">
+      <!-- Inyectado dinámicamente con selector Permitir / Bloquear -->
+    </div>
+    <div class="site-info-divider"></div>
+    <div class="site-info-actions">
+      <button class="site-info-action-btn" id="site-info-btn-reset">Restablecer permisos</button>
+      <button class="site-info-action-btn site-info-action-settings" id="site-info-btn-settings">Configuración del sitio</button>
+    </div>
+  </div>
+
+  <!-- Modal Flotante de Captura de Pantalla Web (Web Capture) -->
+  <div class="capture-popup" id="capture-popup">
+    <div class="capture-popup-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span style="font-weight: 700; font-size: 13px;">Captura de pantalla web</span>
+      </div>
+      <button class="capture-popup-close" id="btn-close-capture">✕</button>
+    </div>
+    <div class="capture-popup-body">
+      <img id="capture-preview-img" alt="Vista previa de captura" style="max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain; background: #000;">
+    </div>
+    <div class="capture-popup-footer">
+      <button class="btn-capture-act" id="btn-capture-copy">📋 Copiar al portapapeles</button>
+      <button class="btn-capture-act btn-capture-save" id="btn-capture-save">💾 Guardar imagen PNG</button>
+    </div>
+  </div>
+
+  <!-- Toast Global de Notificaciones -->
+  <div class="app-toast" id="app-toast">Notificación</div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

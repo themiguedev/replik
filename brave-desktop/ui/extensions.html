@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Extensiones de Brave</title>
+  <style>
+    :root {
+      --bg-page: #19191c;
+      --bg-card: #212226;
+      --bg-inner: #141517;
+      --border-color: #2e2f38;
+      --brave-orange: #fb542b;
+      --text-main: #ffffff;
+      --text-muted: #9e9ea7;
+      --text-sub: #72727d;
+      --green-accent: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-y: auto;
+      padding: 30px 24px 80px 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Bar */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 18px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      font-size: 30px;
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background-color: #292a30;
+      border: 1px solid #383a42;
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background-color: #353740;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background-color: var(--brave-orange);
+      border-color: var(--brave-orange);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #e0441d;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #44464f;
+      transition: 0.25s;
+      border-radius: 22px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--brave-orange);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Section */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge-count {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Extensions Grid */
+    .extensions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    .ext-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .ext-card:hover {
+      border-color: rgba(251, 84, 43, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .ext-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .ext-info {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .ext-icon {
+      font-size: 24px;
+      width: 38px;
+      height: 38px;
+      background-color: var(--bg-inner);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ext-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .ext-ver {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .ext-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .ext-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #f87171;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .btn-remove:hover {
+      background-color: rgba(248, 113, 113, 0.15);
+    }
+
+    /* Empty state */
+    .empty-state {
+      background-color: var(--bg-card);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #212226;
+      border: 1px solid var(--brave-orange);
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+      animation: fadeIn 0.2s ease-out;
+      z-index: 99999;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="header-left">
+        <span class="header-icon">🧩</span>
+        <div>
+          <div class="header-title">Extensiones de Brave</div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Gestiona tus extensiones, carga extensiones desempaquetadas o descarga desde Chrome Web Store.
+          </div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btn-load-unpacked">
+          <span>📂 Cargar descomprimida</span>
+        </button>
+        <button class="btn" id="btn-open-webstore">
+          <span>🛍️ Abrir Chrome Web Store</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Box: Descarga directa desde Chrome Web Store -->
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="font-weight: 700; font-size: 14.5px; display: flex; align-items: center; gap: 8px;">
+          <span>🌐</span>
+          <span>Descargar e Instalar Extensión desde Chrome Web Store</span>
+        </div>
+        <span style="font-size: 11px; color: var(--text-muted);">Descarga automática de paquete .CRX</span>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="store-input" placeholder="Pega el enlace o ID de la tienda (ej: https://chromewebstore.google.com/detail/.../eimadpbcbfnmbkopoojfekhnkhdbieeh)" style="flex: 1; background: var(--bg-inner); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;">
+        <button class="btn btn-primary" id="btn-download-store" style="white-space: nowrap;">
+          <span>⬇ Descargar e Instalar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Section 1: Installed Extensions -->
+    <div>
+      <div class="section-title">
+        <span>Extensiones instaladas</span>
+        <span class="badge-count" id="installed-count">0</span>
+      </div>
+      <div class="extensions-grid" id="installed-grid">
+        <!-- Generado dinámicamente -->
+      </div>
+      <div class="empty-state" id="installed-empty" style="display: none;">
+        <span style="font-size: 32px;">🧩</span>
+        <span>No tienes extensiones instaladas aún.</span>
+        <span style="font-size: 12px;">Puedes cargar una carpeta descomprimida o instalar una de las recomendadas a continuación.</span>
+      </div>
+    </div>
+
+    <!-- Section 2: Recommended / Store Presets -->
+    <div style="margin-top: 10px;">
+      <div class="section-title">
+        <span>Extensiones recomendadas para Brave (Instalación con 1 Clic)</span>
+        <span class="badge-count">Populares</span>
+      </div>
+      <div class="extensions-grid" id="presets-grid">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast-msg">Mensaje</div>
+
+  <script>
+    const installedGrid = document.getElementById('installed-grid');
+    const installedEmpty = document.getElementById('installed-empty');
+    const presetsGrid = document.getElementById('presets-grid');
+    const installedCount = document.getElementById('installed-count');
+    const btnLoadUnpacked = document.getElementById('btn-load-unpacked');
+    const btnOpenWebstore = document.getElementById('btn-open-webstore');
+    const storeInput = document.getElementById('store-input');
+    const btnDownloadStore = document.getElementById('btn-download-store');
+    const toastMsg = document.getElementById('toast-msg');
+
+    function showToast(text) {
+      toastMsg.textContent = text;
+      toastMsg.classList.add('show');
+      setTimeout(() => toastMsg.classList.remove('show'), 2800);
+    }
+
+    async function loadExtensions() {
+      if (!window.braveAPI || !window.braveAPI.listExtensions) return;
+      try {
+        const data = await window.braveAPI.listExtensions();
+        renderInstalled(data.installed || []);
+        renderPresets(data.presets || {}, data.installed || []);
+      } catch (err) {
+        console.error('Error cargando extensiones:', err);
+      }
+    }
+
+    function renderInstalled(list) {
+      installedCount.textContent = list.length;
+      if (list.length === 0) {
+        installedGrid.innerHTML = '';
+        installedEmpty.style.display = 'flex';
+        return;
+      }
+      installedEmpty.style.display = 'none';
+      installedGrid.innerHTML = '';
+
+      list.forEach((ext) => {
+        const card = document.createElement('div');
+        card.className = 'ext-card';
+        card.innerHTML = `
+          <div class="ext-card-header">
+            <div class="ext-info">
+              <div class="ext-icon">${ext.icon || '🧩'}</div>
+              <div>
+                <div class="ext-name">${ext.name}</div>
+                <div class="ext-ver">v${ext.version || '1.0'}</div>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" class="ext-toggle" ${ext.enabled ? 'checked' : ''} data-id="${ext.id}">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="ext-desc">${ext.description || 'Sin descripción'}</div>
+          <div class="ext-footer">
+            <span style="font-size: 11px; color: #4ade80;">● Activa en Brave</span>
+            <button class="btn-remove" data-id="${ext.id}">Quitar</button>
+          </div>
+        `;
+
+        card.querySelector('.ext-toggle').addEventListener('change', async (e) => {
+          const checked = e.target.checked;
+          await window.braveAPI.toggleExtension(ext.id, checked);
+          showToast(`Extensión "${ext.name}" ${checked ? 'activada' : 'desactivada'}`);
+        });
+
+        card.querySelector('.btn-remove').addEventListener('click', async () => {
+          if (confirm(`¿Quitar la extensión "${ext.name}"?`)) {
+            await window.braveAPI.removeExtension(ext.id);
+            showToast(`Extensión "${ext.name}" eliminada.`);
+            loadExtensions();
+          }
+        });
+
+        installedGrid.appendChild(card);
+      });
+    }
+
+    function renderPresets(presets, installed) {
+      presetsGrid.innerHTML = '';
+      const installedNames = new Set(installed.map((i) => i.name.toLowerCase()));
+
+      Object.entries(presets).forEach(([key, item]) => {
+        const isInstalled = installedNames.has(item.name.toLowerCase());
+        const card = document.createElement('div');
+        card.className = 'ext-card';
+        card.innerHTML = `
+          <div class="ext-card-header">
+            <div class="ext-info">
+              <div class="ext-icon">${item.icon}</div>
+              <div>
+                <div class="ext-name">${item.name}</div>
+                <div class="ext-ver">Recomendada</div>
+              </div>
+            </div>
+          </div>
+          <div class="ext-desc">${item.desc}</div>
+          <div class="ext-footer">
+            <a href="${item.url}" target="_blank" style="font-size: 11px; color: var(--brave-orange); text-decoration: none;">Ver en Web Store ↗</a>
+            <button class="btn ${isInstalled ? '' : 'btn-primary'} btn-preset-install" data-key="${key}">
+              ${isInstalled ? '✓ Instalada' : 'Instalar'}
+            </button>
+          </div>
+        `;
+
+        const btn = card.querySelector('.btn-preset-install');
+        btn.addEventListener('click', async () => {
+          if (isInstalled) {
+            showToast(`"${item.name}" ya está instalada.`);
+            return;
+          }
+          btn.textContent = 'Instalando...';
+          btn.disabled = true;
+          try {
+            const res = await window.braveAPI.installPresetExtension(key);
+            if (res.success) {
+              showToast(`¡Extensión "${item.name}" instalada y activada con éxito!`);
+              loadExtensions();
+            } else {
+              showToast(res.error || 'No se pudo instalar.');
+              btn.textContent = 'Instalar';
+              btn.disabled = false;
+            }
+          } catch {
+            showToast('Error al instalar.');
+            btn.textContent = 'Instalar';
+            btn.disabled = false;
+          }
+        });
+
+        presetsGrid.appendChild(card);
+      });
+    }
+
+    btnLoadUnpacked.addEventListener('click', async () => {
+      try {
+        const res = await window.braveAPI.loadUnpackedExtension();
+        if (res.canceled) return;
+        if (res.success) {
+          showToast(`¡Extensión "${res.extension.name}" cargada correctamente!`);
+          loadExtensions();
+        } else {
+          alert(res.error || 'Error al cargar la extensión.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    btnOpenWebstore.addEventListener('click', () => {
+      window.open('https://chromewebstore.google.com', '_blank');
+    });
+
+    btnDownloadStore.addEventListener('click', async () => {
+      const val = storeInput.value.trim();
+      if (!val) {
+        showToast('Pega una URL o ID de la extensión');
+        return;
+      }
+      btnDownloadStore.textContent = 'Descargando...';
+      btnDownloadStore.disabled = true;
+      try {
+        const res = await window.braveAPI.downloadStoreExtension(val);
+        if (res && res.success) {
+          showToast(`¡Extensión "${res.extension.name}" descargada e instalada!`);
+          storeInput.value = '';
+          loadExtensions();
+        } else {
+          alert(res.error || 'Error al descargar la extensión');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btnDownloadStore.innerHTML = '<span>⬇ Descargar e Instalar</span>';
+        btnDownloadStore.disabled = false;
+      }
+    });
+
+    // Intentar cargar de inmediato y escuchar si el puente se inyecta
+    loadExtensions();
+    window.addEventListener('brave-bridge-ready', () => {
+      loadExtensions();
+    });
+    // Reintentar brevemente si tarda unos milisegundos en inicializarse
+    setTimeout(loadExtensions, 200);
+    setTimeout(loadExtensions, 800);
+  </script>
+</body>
+</html>

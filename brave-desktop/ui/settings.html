@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración de Brave</title>
+  <style>
+    :root {
+      --bg-page: #19191c;
+      --bg-sidebar: #141517;
+      --bg-card: #212226;
+      --border-color: #2e2f38;
+      --brave-orange: #fb542b;
+      --brave-orange-hover: #ff6f4a;
+      --text-main: #ffffff;
+      --text-muted: #9e9ea7;
+      --text-sub: #72727d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 260px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 12px;
+      gap: 6px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px 20px 12px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background-color: rgba(251, 84, 43, 0.15);
+      color: var(--brave-orange);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 16px;
+    }
+
+    /* Main Settings Content Area */
+    .content {
+      flex: 1;
+      padding: 32px 48px;
+      overflow-y: auto;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 8px 18px;
+      margin-bottom: 30px;
+      gap: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-sub);
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+
+    .settings-group {
+      max-width: 720px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-width: 500px;
+    }
+
+    .setting-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .setting-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Custom Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #3e3f48;
+      transition: 0.25s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--brave-orange);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Select Dropdown */
+    .setting-select {
+      background-color: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .setting-select:focus {
+      border-color: var(--brave-orange);
+    }
+
+    /* Version Badge */
+    .version-card {
+      max-width: 720px;
+      background: linear-gradient(135deg, rgba(251, 84, 43, 0.1) 0%, rgba(76, 84, 210, 0.1) 100%);
+      border: 1px solid rgba(251, 84, 43, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .version-logo {
+      width: 56px;
+      height: 56px;
+    }
+
+    .version-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .version-details {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Sync Styles */
+    .btn-sync-action {
+      background: var(--brave-orange);
+      border: none;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-sync-action:hover {
+      background: var(--brave-orange-hover);
+    }
+    .btn-sync-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-sync-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--brave-orange);
+    }
+    .phrase-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      background-color: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .phrase-word {
+      background-color: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-family: monospace;
+      display: flex;
+      gap: 6px;
+    }
+    .phrase-word-idx {
+      color: var(--brave-orange);
+      font-weight: 700;
+    }
+    .device-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background-color: var(--bg-sidebar);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra Lateral de Navegación -->
+  <div class="sidebar">
+    <div class="brand">
+      <img src="logo.png" class="brand-logo" alt="Brave Logo">
+      <div class="brand-title">Configuración</div>
+    </div>
+
+    <div class="nav-item active" data-section="shields">
+      <span class="nav-icon">🛡️</span>
+      <span>Brave Shields</span>
+    </div>
+    <div class="nav-item" data-section="privacy">
+      <span class="nav-icon">🔒</span>
+      <span>Privacidad y seguridad</span>
+    </div>
+    <div class="nav-item" data-section="appearance">
+      <span class="nav-icon">🎨</span>
+      <span>Aspecto</span>
+    </div>
+    <div class="nav-item" data-section="search">
+      <span class="nav-icon">🔍</span>
+      <span>Motor de búsqueda</span>
+    </div>
+    <div class="nav-item" data-section="sync">
+      <span class="nav-icon">🔄</span>
+      <span>Sincronización (Sync)</span>
+    </div>
+    <div class="nav-item" data-section="about">
+      <span class="nav-icon">🦁</span>
+      <span>Acerca de Brave</span>
+    </div>
+  </div>
+
+  <!-- Contenido de Configuración -->
+  <div class="content">
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" placeholder="Buscar en la configuración...">
+    </div>
+
+    <!-- SECCIÓN 1: BRAVE SHIELDS -->
+    <div id="section-shields" class="settings-tab">
+      <div class="section-title">Protección de Brave Shields</div>
+      
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Bloqueo de rastreadores y anuncios</div>
+            <div class="setting-desc">Determina el nivel de filtrado de solicitudes de red y anuncios intrusivos.</div>
+          </div>
+          <select class="setting-select" id="opt-shields-level">
+            <option value="standard">Estándar (Recomendado)</option>
+            <option value="aggressive">Agresivo</option>
+            <option value="disabled">Desactivado</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Protección contra huellas digitales (Farbling)</div>
+            <div class="setting-desc">Añade ruido imperceptible a Canvas, Audio y WebGL para impedir que los rastreadores identifiquen tu dispositivo.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="opt-farbling" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Des-rastreo de URLs y De-AMP</div>
+            <div class="setting-desc">Elimina identificadores de clic (fbclid, gclid, etc.) y redirige páginas AMP hacia sus URLs canónicas originales.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="opt-query-strip" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Bloqueo global de scripts (JavaScript)</div>
+            <div class="setting-desc">Deshabilita JavaScript de forma predeterminada en todos los sitios web (modo de máxima seguridad).</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="opt-block-scripts">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: PRIVACIDAD Y SEGURIDAD -->
+    <div id="section-privacy" class="settings-tab" style="display: none;">
+      <div class="section-title">Privacidad y seguridad</div>
+      
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Sustitución de recursos (Surrogate Redirection)</div>
+            <div class="setting-desc">Redirige rastreadores de analítica a scripts neutros (1x1.gif, noop.js) para evitar que los sitios web se rompan.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked disabled>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Borrar datos de navegación al salir</div>
+            <div class="setting-desc">Elimina cookies y memoria caché automáticamente al cerrar el navegador.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="opt-clear-on-exit">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: ASPECTO -->
+    <div id="section-appearance" class="settings-tab" style="display: none;">
+      <div class="section-title">Aspecto y Personalización</div>
+      
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Tema de color de Brave</div>
+            <div class="setting-desc">Elige la paleta visual para las barras de herramientas y ventanas.</div>
+          </div>
+          <select class="setting-select" id="opt-theme">
+            <option value="dark">Oscuro (Predeterminado de Brave)</option>
+            <option value="system">Seguir el sistema operativo</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Mostrar botón de inicio</div>
+            <div class="setting-desc">Muestra el botón con icono de casa en la barra de herramientas para volver a la Nueva Pestaña.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked disabled>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 4: MOTOR DE BÚSQUEDA -->
+    <div id="section-search" class="settings-tab" style="display: none;">
+      <div class="section-title">Motor de Búsqueda</div>
+      
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Motor de búsqueda en la barra de direcciones</div>
+            <div class="setting-desc">Motor que se utiliza al realizar búsquedas directamente desde el Omnibox o la Nueva Pestaña.</div>
+          </div>
+          <select class="setting-select" id="opt-search-engine">
+            <option value="brave">Brave Search (Privado)</option>
+            <option value="google">Google</option>
+            <option value="duckduckgo">DuckDuckGo</option>
+            <option value="bing">Bing</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 5: SINCRONIZACIÓN (BRAVE SYNC) -->
+    <div id="section-sync" class="settings-tab" style="display: none;">
+      <div class="section-title">Brave Sync (Sincronización segura)</div>
+      
+      <div class="settings-group">
+        <div style="padding: 24px;">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+            <span style="font-size: 28px;">🔄</span>
+            <div>
+              <div style="font-size: 16px; font-weight: 700;">Cadena de sincronización cifrada de extremo a extremo</div>
+              <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">
+                Brave Sync utiliza una frase de 25 palabras cifrada para sincronizar tus datos de forma privada entre dispositivos sin cuentas ni contraseñas en servidores.
+              </div>
+            </div>
+          </div>
+
+          <div id="sync-setup-panel">
+            <div style="display: flex; gap: 12px; margin-top: 18px;">
+              <button class="btn-sync-action" id="btn-start-sync">Iniciar nueva cadena de sincronización</button>
+              <button class="btn-sync-secondary" id="btn-join-sync">Tengo un código de sincronización</button>
+            </div>
+          </div>
+
+          <div id="sync-active-panel" style="display: none; margin-top: 18px;">
+            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 12px 16px; color: #4ade80; font-size: 13px; font-weight: 600; margin-bottom: 16px;">
+              ✓ Este dispositivo forma parte de una cadena de sincronización activa.
+            </div>
+
+            <div style="font-size: 13.5px; font-weight: 600;">Frase de recuperación de la cadena (25 palabras):</div>
+            <div class="phrase-grid" id="phrase-container">
+              <!-- Palabras inyectadas dinámicamente -->
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+              <button class="btn-sync-secondary" id="btn-copy-phrase">📋 Copiar frase al portapapeles</button>
+              <button class="btn-sync-secondary" id="btn-leave-sync" style="color: #ef4444;">Desconectar de la cadena</button>
+            </div>
+
+            <div style="font-size: 14px; font-weight: 700; margin-bottom: 10px;">Elementos a sincronizar:</div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer;">
+                <input type="checkbox" checked> <span>Marcadores</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer;">
+                <input type="checkbox" checked> <span>Historial de navegación</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer;">
+                <input type="checkbox" checked> <span>Contraseñas guardadas</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer;">
+                <input type="checkbox" checked> <span>Configuración y preferencias</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer;">
+                <input type="checkbox" checked> <span>Pestañas abiertas</span>
+              </label>
+            </div>
+
+            <div style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">Dispositivos en esta cadena:</div>
+            <div class="device-row">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span>💻</span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 600;">Este ordenador (Windows x64)</div>
+                  <div style="font-size: 11.5px; color: var(--text-muted);">Añadido hoy • Dispositivo actual</div>
+                </div>
+              </div>
+              <span style="font-size: 12px; color: #4ade80; font-weight: 600;">Activo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 6: ACERCA DE BRAVE -->
+    <div id="section-about" class="settings-tab" style="display: none;">
+      <div class="section-title">Acerca de Brave Browser</div>
+      
+      <div class="version-card">
+        <img src="logo.png" class="version-logo" alt="Brave Lion">
+        <div>
+          <div class="version-title">Brave Browser (Réplica Educativa)</div>
+          <div class="version-details">
+            Versión: 1.0.0 (x64 Windows Portable)<br>
+            Motor: Chromium v45.0.0 (Electron Core) + Brave Shields Engine<br>
+            Filtros cargados: EasyList + uBlock Origin + Brave Query Stripping<br>
+            Desarrollado con fines educativos y de ingeniería inversa.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navegación lateral entre pestañas de configuración
+    const navItems = document.querySelectorAll('.nav-item');
+    const tabs = document.querySelectorAll('.settings-tab');
+
+    navItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        navItems.forEach((n) => n.classList.remove('active'));
+        item.classList.add('active');
+
+        const target = item.getAttribute('data-section');
+        tabs.forEach((tab) => {
+          if (tab.id === `section-${target}`) {
+            tab.style.display = 'block';
+          } else {
+            tab.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Cargar y guardar preferencias en localStorage
+    const optLevel = document.getElementById('opt-shields-level');
+    const optFarbling = document.getElementById('opt-farbling');
+    const optQueryStrip = document.getElementById('opt-query-strip');
+    const optEngine = document.getElementById('opt-search-engine');
+
+    optLevel.value = localStorage.getItem('brave_setting_level') || 'standard';
+    optFarbling.checked = localStorage.getItem('brave_setting_farbling') !== 'false';
+    optQueryStrip.checked = localStorage.getItem('brave_setting_query') !== 'false';
+    optEngine.value = localStorage.getItem('brave_setting_engine') || 'brave';
+
+    optLevel.addEventListener('change', () => {
+      localStorage.setItem('brave_setting_level', optLevel.value);
+    });
+
+    optFarbling.addEventListener('change', () => {
+      localStorage.setItem('brave_setting_farbling', String(optFarbling.checked));
+    });
+
+    optQueryStrip.addEventListener('change', () => {
+      localStorage.setItem('brave_setting_query', String(optQueryStrip.checked));
+    });
+
+    optEngine.addEventListener('change', () => {
+      localStorage.setItem('brave_setting_engine', optEngine.value);
+    });
+
+    // Lógica de Brave Sync (25 palabras)
+    const BIP39_WORDS = [
+      'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse',
+      'access', 'accident', 'account', 'accuse', 'achieve', 'acid', 'acoustic', 'acquire', 'across', 'act',
+      'action', 'actor', 'actress', 'actual', 'adapt', 'add', 'addict', 'address', 'adjust', 'admit',
+      'adult', 'advance', 'advice', 'aerobic', 'affair', 'afford', 'afraid', 'again', 'age', 'agent',
+      'agree', 'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album', 'alcohol', 'alert'
+    ];
+
+    function generateSyncPhrase() {
+      const words = [];
+      for (let i = 0; i < 25; i++) {
+        const rand = Math.floor(Math.random() * BIP39_WORDS.length);
+        words.push(BIP39_WORDS[rand]);
+      }
+      return words;
+    }
+
+    const syncSetupPanel = document.getElementById('sync-setup-panel');
+    const syncActivePanel = document.getElementById('sync-active-panel');
+    const phraseContainer = document.getElementById('phrase-container');
+    const btnStartSync = document.getElementById('btn-start-sync');
+    const btnJoinSync = document.getElementById('btn-join-sync');
+    const btnCopyPhrase = document.getElementById('btn-copy-phrase');
+    const btnLeaveSync = document.getElementById('btn-leave-sync');
+
+    function renderSyncState() {
+      const stored = localStorage.getItem('brave_sync_phrase');
+      if (stored) {
+        syncSetupPanel.style.display = 'none';
+        syncActivePanel.style.display = 'block';
+        const words = JSON.parse(stored);
+        phraseContainer.innerHTML = '';
+        words.forEach((w, i) => {
+          const div = document.createElement('div');
+          div.className = 'phrase-word';
+          div.innerHTML = `<span class="phrase-word-idx">${i + 1}.</span> <span>${w}</span>`;
+          phraseContainer.appendChild(div);
+        });
+      } else {
+        syncSetupPanel.style.display = 'block';
+        syncActivePanel.style.display = 'none';
+      }
+    }
+
+    btnStartSync.addEventListener('click', () => {
+      const phrase = generateSyncPhrase();
+      localStorage.setItem('brave_sync_phrase', JSON.stringify(phrase));
+      renderSyncState();
+    });
+
+    btnJoinSync.addEventListener('click', () => {
+      const entered = prompt('Introduce tu código de sincronización de 25 palabras (separadas por espacio):');
+      if (entered) {
+        const words = entered.trim().split(/\s+/);
+        if (words.length >= 24) {
+          localStorage.setItem('brave_sync_phrase', JSON.stringify(words));
+          renderSyncState();
+        } else {
+          alert('El código debe contener al menos 24 o 25 palabras válidas.');
+        }
+      }
+    });
+
+    btnCopyPhrase.addEventListener('click', () => {
+      const stored = localStorage.getItem('brave_sync_phrase');
+      if (stored) {
+        const words = JSON.parse(stored).join(' ');
+        navigator.clipboard.writeText(words).then(() => {
+          alert('Frase de sincronización copiada al portapapeles.');
+        });
+      }
+    });
+
+    btnLeaveSync.addEventListener('click', () => {
+      if (confirm('¿Deseas desconectar este dispositivo de la cadena de sincronización?')) {
+        localStorage.removeItem('brave_sync_phrase');
+        renderSyncState();
+      }
+    });
+
+    renderSyncState();
+
+    // Activar pestaña según hash en URL si existe
+    if (window.location.hash) {
+      const sec = window.location.hash.replace('#', '');
+      const targetNav = document.querySelector(`.nav-item[data-section="${sec}"]`);
+      if (targetNav) targetNav.click();
+    }
+  </script>
+</body>
+</html>
