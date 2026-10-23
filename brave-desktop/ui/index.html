@@ -470,6 +470,9 @@
     <div class="context-menu-item" id="ctx-open-tor-tab">Abrir enlace en ventana privada con Tor</div>
     <div class="context-menu-item" id="ctx-copy-link">Copiar dirección del enlace</div>
     <div class="context-menu-divider" id="ctx-link-divider"></div>
+    <div class="context-menu-item" id="ctx-open-image-tab" style="display: none;">Abrir imagen en pestaña nueva</div>
+    <div class="context-menu-item" id="ctx-copy-image-link" style="display: none;">Copiar dirección de la imagen</div>
+    <div class="context-menu-divider" id="ctx-image-divider" style="display: none;"></div>
     <div class="context-menu-item" id="ctx-search-selection">Buscar con Brave Search</div>
     <div class="context-menu-item" id="ctx-copy-selection">Copiar</div>
     <div class="context-menu-divider" id="ctx-text-divider"></div>
@@ -585,6 +588,8 @@
 
   <!-- Menú Contextual de Pestaña -->
   <div class="brave-context-menu" id="tab-context-menu">
+    <div class="context-menu-item" id="tab-ctx-reload">Volver a cargar</div>
+    <div class="context-menu-item" id="tab-ctx-duplicate">Duplicar pestaña</div>
     <div class="context-menu-item" id="tab-ctx-new-right">Nueva pestaña a la derecha</div>
     <div class="context-menu-item" id="tab-ctx-pin">Fijar pestaña</div>
     <div class="context-menu-item" id="tab-ctx-mute">Silenciar pestaña</div>
@@ -597,6 +602,7 @@
     <div class="context-menu-item" id="tab-ctx-sleep">Suspender pestaña (Ahorrar memoria)</div>
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" id="tab-ctx-close">Cerrar pestaña</div>
+    <div class="context-menu-item" id="tab-ctx-close-right">Cerrar pestañas a la derecha</div>
     <div class="context-menu-item" id="tab-ctx-close-others">Cerrar las demás pestañas</div>
   </div>
 
@@ -657,6 +663,11 @@
       <!-- Inyectado dinámicamente con selector Permitir / Bloquear -->
     </div>
     <div class="site-info-divider"></div>
+    <div class="site-info-divider"></div>
+    <div class="site-info-cookies-row" style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0;">
+      <span style="font-size: 12.5px; color: #dedee4; display: flex; align-items: center; gap: 6px;">🍪 Cookies y datos locales</span>
+      <button class="site-info-action-btn" id="site-info-btn-clear-cookies" style="font-size: 11px; padding: 3px 8px;">Borrar datos</button>
+    </div>
     <div class="site-info-actions">
       <button class="site-info-action-btn" id="site-info-btn-reset">Restablecer permisos</button>
       <button class="site-info-action-btn site-info-action-settings" id="site-info-btn-settings">Configuración del sitio</button>
@@ -809,6 +820,7 @@
       <button class="btn-download-act" id="btn-download-cancel" style="color: #f87171; border-color: rgba(248, 113, 113, 0.4);">✕ Cancelar</button>
       <button class="btn-download-act" id="btn-download-open" style="display: none;">Abrir archivo</button>
       <button class="btn-download-act" id="btn-download-folder" style="display: none;">Mostrar en carpeta</button>
+      <button class="btn-download-act" id="btn-download-all">Todas las descargas (Ctrl+J)</button>
       <button class="btn-download-close" id="btn-download-close" title="Cerrar">✕</button>
     </div>
   </div>

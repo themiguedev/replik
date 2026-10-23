@@ -1952,14 +1952,23 @@ function openPageContextMenu(x, y, params) {
   const copyItem = document.getElementById('ctx-copy-selection');
   const textDivider = document.getElementById('ctx-text-divider');
 
+  const openImageItem = document.getElementById('ctx-open-image-tab');
+  const copyImageItem = document.getElementById('ctx-copy-image-link');
+  const imageDivider = document.getElementById('ctx-image-divider');
+
   const hasLink = Boolean(params && params.linkURL);
   const hasText = Boolean(params && params.selectionText && params.selectionText.trim());
+  const hasImage = Boolean(params && (params.mediaType === 'image' || params.srcURL));
 
   linkItem.style.display = hasLink ? 'block' : 'none';
   linkPrivateItem.style.display = hasLink ? 'block' : 'none';
   linkTorItem.style.display = hasLink ? 'block' : 'none';
   copyLinkItem.style.display = hasLink ? 'block' : 'none';
   linkDivider.style.display = hasLink ? 'block' : 'none';
+
+  if (openImageItem) openImageItem.style.display = hasImage ? 'block' : 'none';
+  if (copyImageItem) copyImageItem.style.display = hasImage ? 'block' : 'none';
+  if (imageDivider) imageDivider.style.display = hasImage ? 'block' : 'none';
 
   searchItem.style.display = hasText ? 'block' : 'none';
   copyItem.style.display = hasText ? 'block' : 'none';
@@ -1976,6 +1985,26 @@ function openPageContextMenu(x, y, params) {
 }
 
 // Eventos de opciones de contexto de página
+const ctxOpenImageTab = document.getElementById('ctx-open-image-tab');
+if (ctxOpenImageTab) {
+  ctxOpenImageTab.addEventListener('click', () => {
+    if (contextMenuTargetData && contextMenuTargetData.srcURL) {
+      createTab(contextMenuTargetData.srcURL);
+    }
+    customContextMenu.classList.remove('open');
+  });
+}
+
+const ctxCopyImageLink = document.getElementById('ctx-copy-image-link');
+if (ctxCopyImageLink) {
+  ctxCopyImageLink.addEventListener('click', () => {
+    if (contextMenuTargetData && contextMenuTargetData.srcURL) {
+      navigator.clipboard.writeText(contextMenuTargetData.srcURL);
+      showGlobalToast('Dirección de la imagen copiada');
+    }
+    customContextMenu.classList.remove('open');
+  });
+}
 document.getElementById('ctx-open-new-tab').addEventListener('click', () => {
   if (contextMenuTargetData && contextMenuTargetData.linkURL) {
     createTab(contextMenuTargetData.linkURL);
@@ -2251,6 +2280,36 @@ document.getElementById('ctx-devtools').addEventListener('click', () => {
 });
 
 // Eventos de opciones de contexto de pestaña
+const tabCtxDuplicate = document.getElementById('tab-ctx-duplicate');
+if (tabCtxDuplicate) {
+  tabCtxDuplicate.addEventListener('click', () => {
+    const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
+    if (tab) createTab(tab.url, false);
+    tabContextMenu.classList.remove('open');
+  });
+}
+
+const tabCtxReload = document.getElementById('tab-ctx-reload');
+if (tabCtxReload) {
+  tabCtxReload.addEventListener('click', () => {
+    const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
+    if (tab && tab.webviewEl) tab.webviewEl.reload();
+    tabContextMenu.classList.remove('open');
+  });
+}
+
+const tabCtxCloseRight = document.getElementById('tab-ctx-close-right');
+if (tabCtxCloseRight) {
+  tabCtxCloseRight.addEventListener('click', () => {
+    const targetIdx = tabs.findIndex((t) => t.id === contextMenuTargetTabId);
+    if (targetIdx !== -1) {
+      const toClose = tabs.slice(targetIdx + 1).filter((t) => !t.isPinned);
+      toClose.forEach((t) => closeTab(t.id));
+    }
+    tabContextMenu.classList.remove('open');
+  });
+}
+
 document.getElementById('tab-ctx-new-right').addEventListener('click', () => {
   createTab(ntpUrl);
   tabContextMenu.classList.remove('open');
@@ -4393,6 +4452,21 @@ if (siteInfoBtnSettings) {
   });
 }
 
+const siteInfoBtnClearCookies = document.getElementById('site-info-btn-clear-cookies');
+if (siteInfoBtnClearCookies) {
+  siteInfoBtnClearCookies.addEventListener('click', async () => {
+    const tab = getActiveTab();
+    if (!tab) return;
+    const domain = tab.domain || extractDomain(tab.url);
+    if (window.braveAPI && window.braveAPI.clearDomainData) {
+      await window.braveAPI.clearDomainData(domain);
+      showGlobalToast(`Cookies y datos borrados para ${domain}`);
+      if (tab.webviewEl) tab.webviewEl.reload();
+      if (siteInfoPopup) siteInfoPopup.classList.remove('open');
+    }
+  });
+}
+
 // ==========================================
 // 29. CAPTURA DE PANTALLA WEB (BRAVE WEB CAPTURE)
 // ==========================================
@@ -4829,6 +4903,36 @@ if (btnDownloadFolder) {
     }
   });
 }
+
+const btnDownloadAll = document.getElementById('btn-download-all');
+if (btnDownloadAll) {
+  btnDownloadAll.addEventListener('click', () => {
+    createTab(downloadsUrl);
+    if (downloadBar) downloadBar.classList.remove('active');
+  });
+}
+
+// Soporte para soltar enlaces o texto directamente en la barra de pestañas para abrir
+[tabBar, newTabBtn].forEach((el) => {
+  if (!el) return;
+  el.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+  });
+  el.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (!e.dataTransfer) return;
+    const raw = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+    if (raw && raw.trim() && !draggedTabId) {
+      let url = raw.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://')) {
+        url = 'https://search.brave.com/search?q=' + encodeURIComponent(url);
+      }
+      createTab(url);
+      showGlobalToast('Enlace abierto en nueva pestaña');
+    }
+  });
+});
 
 if (window.braveAPI && window.braveAPI.onDownloadStarted) {
   window.braveAPI.onDownloadStarted((data) => {
