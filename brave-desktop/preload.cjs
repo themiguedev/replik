@@ -77,6 +77,24 @@ contextBridge.exposeInMainWorld('braveAPI', {
   removeExtension: (id) => ipcRenderer.invoke('extensions:remove', id),
   installPresetExtension: (presetId) => ipcRenderer.invoke('extensions:install-preset', presetId),
   downloadStoreExtension: (idOrUrl) => ipcRenderer.invoke('extensions:download-from-store', idOrUrl),
+
+  // Pipeline de Descargas
+  openPath: (filePath) => ipcRenderer.invoke('browser:open-path', filePath),
+  showItemInFolder: (filePath) => ipcRenderer.invoke('browser:show-item-in-folder', filePath),
+  onDownloadStarted: (callback) => ipcRenderer.on('download:started', (_e, data) => callback(data)),
+  onDownloadProgress: (callback) => ipcRenderer.on('download:progress', (_e, data) => callback(data)),
+  onDownloadCompleted: (callback) => ipcRenderer.on('download:completed', (_e, data) => callback(data)),
+  onDownloadFailed: (callback) => ipcRenderer.on('download:failed', (_e, data) => callback(data)),
+
+  // Autenticación HTTP Básica
+  onAuthRequired: (callback) => ipcRenderer.on('browser:auth-required', (_e, data) => callback(data)),
+  submitAuth: (authId, username, password, cancel) => ipcRenderer.invoke('browser:auth-response', { authId, username, password, cancel }),
+
+  // Ratón y Caída de Pestañas
+  onNavigateBack: (callback) => ipcRenderer.on('browser:navigate-back', () => callback()),
+  onNavigateForward: (callback) => ipcRenderer.on('browser:navigate-forward', () => callback()),
+  onTabCrashed: (callback) => ipcRenderer.on('browser:tab-crashed', (_e, data) => callback(data)),
+
   getSessionPartition: () => {
     const isPrivate = process.argv.includes('--private-mode') || process.argv.includes('--tor-mode');
     if (isPrivate) {

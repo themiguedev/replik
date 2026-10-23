@@ -43,6 +43,8 @@ Ambos binarios también se encuentran versionados en la raíz del repositorio co
 
 ### ⚡ 3. Resiliencia de Sesión y Multitarea
 * **Restauración Completa de Sesión ("Continuar donde lo dejaste")**: Guarda el estado de todas las pestañas abiertas y fijadas, restaurándolas al reiniciar el navegador de manera automática (configurable en Ajustes).
+* **Crash Recovery ante Caídas de Proceso (`render-process-gone`)**: Banner amarillo superior con detección automática de caídas de pestañas y botón directo de recuperación ("Volver a cargar").
+* **Soporte de Autenticación HTTP Básica**: Diálogo modal interactivo para acceso a routers locales (`192.168.1.1`), servidores proxy y sitios con `.htaccess`.
 * **Divisor Arrastrable en Pantalla Dividida (Split View Resizer)**: Separador interactivo entre pestañas paralelas con ajuste fino y doble clic para restablecer la proporción al 50%/50%.
 * **Ahorro de Memoria (Memory Saver / Sleeping Tabs)**: Suspensión automática de pestañas en segundo plano y reactivación instantánea al seleccionarlas.
 * **Tarjetas Flotantes (Tab Hover Cards)**: Previsualización de miniaturas y consumo estimado de memoria RAM al pasar el cursor sobre las pestañas.
@@ -50,18 +52,21 @@ Ambos binarios también se encuentran versionados en la raíz del repositorio co
 * **Silenciar Pestañas con 1 Clic**: Indicador de audio dinámico sobre el favicon de la pestaña para silenciar o reactivar el sonido.
 * **Pestañas Fijadas Auténticas**: Pestañas compactas protegidas contra cierre accidental y restauradas automáticamente en el inicio.
 * **Reabrir Pestañas Cerradas (`Ctrl + Shift + T`)**: Pila de recuperación de pestañas cerradas recientemente con su historial.
-* **Control de Zoom Persistente**: Ajuste fino con `Ctrl +`, `Ctrl -`, `Ctrl 0` con memoria por dominio e indicador interactivo en el Omnibox.
+* **Control de Zoom Persistente**: Ajuste fino con `Ctrl +`, `Ctrl -`, `Ctrl 0` y `Ctrl + Scroll` de ratón con memoria por dominio e indicador interactivo en el Omnibox.
 
-### 🛠️ 4. Productividad y Autocompletado
+### 🛠️ 4. Productividad, Descargas y Autocompletado
+* **Pipeline Nativo de Descargas**: Captura del evento `will-download`, barra inferior no flotante con progreso en vivo, tamaño, porcentaje, botones *"Abrir archivo"* y *"Mostrar en carpeta"*, y registro en `brave://downloads`.
+* **Ergonomía Avanzada de Ratón**: Zoom mediante `Ctrl + Scroll`, botones laterales Mouse 4 y Mouse 5 para Atrás / Adelante, y apertura de enlaces en segundo plano mediante clic central (rueda) sin robar el foco.
 * **Gestor Local de Contraseñas y Autocompletado**: Detección de envíos de formularios, aviso flotante para guardar credenciales, autocompletado en páginas web y panel de administración en configuración.
 * **Atajos de Búsqueda Rápidos (!bangs y :)**: Búsqueda instantánea desde el Omnibox con `:g` / `!g` (Google), `:yt` / `!yt` (YouTube), `:w` / `!w` (Wikipedia), `:ddg` / `!ddg` (DuckDuckGo), `:gh` / `!gh` (GitHub), `:b` / `!b` (Brave Search), `:r` / `!r` (Reddit) y `:m` / `!m` (Google Maps).
+* **Brave Speedreader Inteligente**: Extracción avanzada con heurísticas Readability para artículos limpios, tiempo estimado de lectura y filtrado de elementos distractores.
+* **Nueva Pestaña (NTP) Personalizable**: Galería de fondos fotográficos rotativos de alta calidad, toggles para reloj y estadísticas, y gestor de accesos directos personalizados.
 * **Captura de Pantalla Web Nativa (Brave Web Capture)**: Herramienta de recorte con atajo `Ctrl + Shift + S`, vista previa flotante, copia directa al portapapeles y guardado como PNG.
 * **Impresión Nativa y Guardar como PDF (`Ctrl + P`)**: Diálogo de impresión de Chromium para impresión física o exportación a PDF vectorial.
 * **Búsqueda Interna en la Página (`Ctrl + F`)**: Barra flotante con contador de coincidencias en tiempo real y navegación anterior/siguiente.
 * **Integración con Wayback Machine**: Detección de errores 404/red con botón directo para ver la versión archivada en Internet Archive.
 * **Generador de Códigos QR**: Generación de códigos QR vectoriales para compartir páginas rápidamente a dispositivos móviles.
 * **Modo Imagen en Imagen Nativo (PiP)**: Ventana flotante desacoplada para reproducir vídeos de YouTube u otras plataformas mientras navegas.
-* **Brave Speedreader**: Modo lectura limpio y sin distracciones para artículos y noticias.
 * **Soporte para Extensiones**: Gestor de extensiones Chromium compatibles mediante carga de extensiones desempaquetadas, archivos CRX o carpetas ZIP.
 * **Navegación Descentralizada**: Resolución nativa de identificadores descentralizados `ipfs://` e `ipns://`.
 

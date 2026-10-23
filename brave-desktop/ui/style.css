@@ -2882,3 +2882,277 @@ input:checked + .slider:before {
   box-shadow: 0 0 10px var(--brave-orange);
 }
 
+/* ========================================================
+   CRASH RECOVERY BANNER
+======================================================== */
+.tab-crash-banner {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #2b2413;
+  color: #fbbf24;
+  border-bottom: 1px solid #78350f;
+  padding: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 999;
+  font-size: 13px;
+  animation: slideDown 0.15s ease-out;
+}
+.tab-crash-banner.active {
+  display: flex;
+}
+.crash-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.crash-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-crash-reload {
+  background: #f59e0b;
+  color: #000;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-crash-reload:hover {
+  background: #d97706;
+}
+.btn-crash-close {
+  background: none;
+  border: none;
+  color: #fbbf24;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+/* ========================================================
+   BARRA DE DESCARGAS (Download Bar)
+======================================================== */
+.download-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-toolbar);
+  border-top: 1px solid var(--border-color);
+  padding: 8px 18px;
+  z-index: 9999;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.18s ease-out;
+}
+.download-bar.active {
+  display: flex;
+}
+.download-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  max-width: 600px;
+}
+.download-icon {
+  font-size: 20px;
+}
+.download-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+}
+.download-filename {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+.download-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.download-progress-container {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 120px;
+}
+.download-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--brave-orange);
+  transition: width 0.15s ease;
+}
+.download-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-download-act {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-download-act:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--brave-orange);
+}
+.btn-download-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px;
+}
+.btn-download-close:hover {
+  color: var(--text-main);
+}
+
+/* ========================================================
+   MODAL DE AUTENTICACIÓN HTTP BÁSICA (Auth Modal)
+======================================================== */
+.auth-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10001;
+  align-items: center;
+  justify-content: center;
+}
+.auth-modal.open {
+  display: flex;
+}
+.auth-dialog {
+  background: var(--bg-popup);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  animation: popIn 0.15s ease-out;
+}
+.auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+.auth-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.auth-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+}
+.auth-close:hover {
+  color: var(--text-main);
+}
+.auth-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.auth-field label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.auth-field input {
+  background: var(--bg-omnibox);
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 13px;
+  outline: none;
+}
+.auth-field input:focus {
+  border-color: var(--brave-orange);
+}
+.auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.1);
+}
+.btn-auth-cancel {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.btn-auth-cancel:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+}
+.btn-auth-submit {
+  background: var(--brave-orange);
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-auth-submit:hover {
+  background: var(--brave-orange-hover);
+}
+
+

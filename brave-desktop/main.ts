@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, session } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, session, shell } from 'electron';
 import child_process from 'node:child_process';
 import fs from 'node:fs';
 import https from 'node:https';
@@ -609,6 +609,17 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
       forwardShortcut(input);
     });
 
+    // Detección de Caída de Proceso (Crash Recovery)
+    webContents.on('render-process-gone', (_e, details) => {
+      if (!win.isDestroyed()) {
+        win.webContents.send('browser:tab-crashed', {
+          webContentsId: webContents.id,
+          reason: details.reason,
+          exitCode: details.exitCode,
+        });
+      }
+    });
+
     webContents.on('context-menu', (_e, params) => {
       if (!win.isDestroyed()) {
         win.webContents.send('browser:context-menu', params);
@@ -631,6 +642,15 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
         webContents.insertCSS(css).catch(() => {});
       }
     });
+  });
+
+  // Botones laterales del ratón (Mouse 4 = Atrás, Mouse 5 = Adelante)
+  win.on('app-command', (_e, cmd) => {
+    if (cmd === 'browser-backward') {
+      win.webContents.send('browser:navigate-back');
+    } else if (cmd === 'browser-forward') {
+      win.webContents.send('browser:navigate-forward');
+    }
   });
 
   win.on('closed', () => {
@@ -889,6 +909,114 @@ ipcMain.handle('browser:write-file', async (_event, filePath: string, base64Data
   } catch (err: any) {
     return { success: false, error: err?.message || String(err) };
   }
+});
+
+// ========================================================
+// PIPELINE NATIVO DE DESCARGAS (Download Pipeline)
+// ========================================================
+ipcMain.handle('browser:open-path', async (_event, filePath: string) => {
+  if (!filePath || !fs.existsSync(filePath)) return { success: false, error: 'Archivo no encontrado' };
+  try {
+    const err = await shell.openPath(filePath);
+    return { success: !err, error: err };
+  } catch (e: any) {
+    return { success: false, error: e?.message || String(e) };
+  }
+});
+
+ipcMain.handle('browser:show-item-in-folder', (_event, filePath: string) => {
+  if (!filePath || !fs.existsSync(filePath)) return { success: false };
+  shell.showItemInFolder(filePath);
+  return { success: true };
+});
+
+function attachDownloadHandler(ses: Electron.Session) {
+  ses.on('will-download', (_event, item, webContents) => {
+    const filename = item.getFilename();
+    const totalBytes = item.getTotalBytes();
+    const downloadId = `dl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const savePath = path.join(app.getPath('downloads'), filename);
+    item.setSavePath(savePath);
+
+    const win = BrowserWindow.fromWebContents(webContents.isDestroyed() ? mainWindow! : webContents.getOwnerBrowserWindow() || mainWindow!);
+
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('download:started', {
+        id: downloadId,
+        filename,
+        totalBytes,
+        savePath,
+      });
+    }
+
+    item.on('updated', (_evt, state) => {
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('download:progress', {
+          id: downloadId,
+          filename,
+          receivedBytes: item.getReceivedBytes(),
+          totalBytes: item.getTotalBytes(),
+          state,
+        });
+      }
+    });
+
+    item.once('done', (_evt, state) => {
+      if (win && !win.isDestroyed()) {
+        if (state === 'completed') {
+          win.webContents.send('download:completed', {
+            id: downloadId,
+            filename,
+            savePath,
+            totalBytes: item.getTotalBytes(),
+          });
+        } else {
+          win.webContents.send('download:failed', {
+            id: downloadId,
+            filename,
+            state,
+          });
+        }
+      }
+    });
+  });
+}
+
+// ========================================================
+// AUTENTICACIÓN HTTP BÁSICA (HTTP Basic Auth)
+// ========================================================
+const pendingAuthCallbacks = new Map<string, (username?: string, password?: string) => void>();
+
+app.on('login', (event, webContents, request, authInfo, callback) => {
+  event.preventDefault();
+  const authId = `auth_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  pendingAuthCallbacks.set(authId, callback);
+
+  const win = BrowserWindow.fromWebContents(webContents.isDestroyed() ? mainWindow! : webContents.getOwnerBrowserWindow() || mainWindow!);
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('browser:auth-required', {
+      authId,
+      host: authInfo.host,
+      realm: authInfo.realm,
+      url: request.url,
+      port: authInfo.port,
+    });
+  } else {
+    callback(); // cancel
+  }
+});
+
+ipcMain.handle('browser:auth-response', (_event, { authId, username, password, cancel }: { authId: string; username?: string; password?: string; cancel?: boolean }) => {
+  const cb = pendingAuthCallbacks.get(authId);
+  if (cb) {
+    pendingAuthCallbacks.delete(authId);
+    if (cancel) {
+      cb();
+    } else {
+      cb(username, password);
+    }
+  }
+  return { success: true };
 });
 
 // Extensiones y Reglas Personalizadas
@@ -1289,11 +1417,14 @@ app.whenReady().then(async () => {
 
   attachSessionInterception(session.defaultSession);
   attachSessionInterception(persistSession);
+  attachDownloadHandler(session.defaultSession);
+  attachDownloadHandler(persistSession);
 
   // Interceptar automáticamente cualquier nueva sesión (incluyendo privadas en RAM) y cargar extensiones activas
   app.on('session-created', async (newSession) => {
     newSession.setUserAgent(cleanUA);
     attachSessionInterception(newSession);
+    attachDownloadHandler(newSession);
 
     const list = loadInstalledExtensionsList();
     for (const ext of list) {

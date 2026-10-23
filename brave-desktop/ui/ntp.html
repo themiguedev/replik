@@ -245,12 +245,129 @@
       color: #fb542b;
       font-weight: 600;
     }
+
+    .customize-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .customize-btn:hover {
+      background: rgba(0, 0, 0, 0.65);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .ntp-modal {
+      display: none;
+      position: fixed;
+      bottom: 70px;
+      right: 50px;
+      width: 320px;
+      background: rgba(25, 26, 31, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+      padding: 18px;
+      z-index: 100;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .ntp-modal.open {
+      display: flex;
+    }
+    .ntp-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+      font-weight: 700;
+      font-size: 13.5px;
+    }
+    .ntp-modal-close {
+      background: none;
+      border: none;
+      color: #9e9ea7;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .ntp-modal-close:hover {
+      color: #fff;
+    }
+    .ntp-switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .ntp-switch-row input[type="checkbox"] {
+      accent-color: #fb542b;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .btn-add-shortcut {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+      transition: background 0.15s;
+    }
+    .btn-add-shortcut:hover {
+      background: rgba(251, 84, 43, 0.25);
+      border-color: #fb542b;
+    }
+    .site-card-add {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 82px;
+      height: 76px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .site-card-add:hover {
+      border-color: #fb542b;
+      background: rgba(251, 84, 43, 0.1);
+      transform: translateY(-4px);
+    }
+    .site-card-add-icon {
+      font-size: 24px;
+      color: #a8a8b2;
+    }
+    .site-card-add-text {
+      font-size: 11px;
+      color: #a8a8b2;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
   <div class="content-layer">
     <!-- Widget Superior de Estadísticas -->
-    <div class="stats-container">
+    <div class="stats-container" id="stats-container">
       <div class="stat-item">
         <div class="stat-val" id="stat-ads">0</div>
         <div class="stat-lbl">Rastreadores y anuncios bloqueados</div>
@@ -267,8 +384,10 @@
 
     <!-- Sección Central: Reloj y Buscador -->
     <div class="center-container">
-      <div class="clock" id="clock">12:00</div>
-      <div class="date-str" id="date-str">Cargando fecha...</div>
+      <div id="clock-container" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="clock" id="clock">12:00</div>
+        <div class="date-str" id="date-str">Cargando fecha...</div>
+      </div>
 
       <form class="search-bar" id="search-form">
         <img class="search-logo" src="logo.png" alt="Brave">
@@ -276,46 +395,56 @@
       </form>
 
       <!-- Sitios Frecuentes / Top Sites -->
-      <div class="top-sites">
-        <a class="site-card" href="https://search.brave.com">
-          <div class="site-icon">🦁</div>
-          <div class="site-name">Brave Search</div>
-        </a>
-        <a class="site-card" href="https://www.youtube.com">
-          <div class="site-icon">▶️</div>
-          <div class="site-name">YouTube</div>
-        </a>
-        <a class="site-card" href="https://github.com">
-          <div class="site-icon">🐙</div>
-          <div class="site-name">GitHub</div>
-        </a>
-        <a class="site-card" href="https://www.wikipedia.org">
-          <div class="site-icon">📖</div>
-          <div class="site-name">Wikipedia</div>
-        </a>
-        <a class="site-card" href="https://www.reddit.com">
-          <div class="site-icon">🤖</div>
-          <div class="site-name">Reddit</div>
-        </a>
-        <a class="site-card" href="https://twitter.com">
-          <div class="site-icon">🐦</div>
-          <div class="site-name">X / Twitter</div>
-        </a>
+      <div class="top-sites" id="top-sites-container">
+        <!-- Renderizado dinámico -->
       </div>
     </div>
 
-    <!-- Pie de Página: Crédito de Foto y Escudo -->
+    <!-- Pie de Página: Crédito de Foto y Personalización -->
     <div class="footer">
       <div class="wallpaper-credit" id="wallpaper-btn" title="Clic para cambiar fondo">
         <span>📷</span>
         <span id="photo-credit">Foto por Daniel Schwarz en Unsplash</span>
       </div>
 
-      <div class="shield-badge">
-        <span>🛡️</span>
-        <span>Brave Shields v1.0 Activo</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="customize-btn" id="btn-customize-ntp" title="Personalizar panel de Nueva Pestaña">
+          <span>⚙️</span>
+          <span>Personalizar</span>
+        </button>
+
+        <div class="shield-badge">
+          <span>🛡️</span>
+          <span>Brave Shields v1.0 Activo</span>
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- Modal / Flyout de Personalización de la Nueva Pestaña -->
+  <div class="ntp-modal" id="ntp-modal">
+    <div class="ntp-modal-header">
+      <span>Personalizar panel</span>
+      <button class="ntp-modal-close" id="btn-close-ntp-modal">✕</button>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <label class="ntp-switch-row">
+        <span>Estadísticas de Shields</span>
+        <input type="checkbox" id="chk-ntp-stats" checked>
+      </label>
+      <label class="ntp-switch-row">
+        <span>Reloj y fecha</span>
+        <input type="checkbox" id="chk-ntp-clock" checked>
+      </label>
+      <label class="ntp-switch-row">
+        <span>Sitios frecuentes</span>
+        <input type="checkbox" id="chk-ntp-sites" checked>
+      </label>
+    </div>
+    <button class="btn-add-shortcut" id="btn-modal-add-shortcut">
+      <span>➕</span>
+      <span>Añadir acceso directo</span>
+    </button>
   </div>
 
   <script>
@@ -385,6 +514,153 @@
         window.location.href = query.startsWith('http') ? query : 'https://' + query;
       } else {
         window.location.href = 'https://search.brave.com/search?q=' + encodeURIComponent(query);
+      }
+    });
+
+    // Gestión y renderizado de Accesos Directos (Top Sites)
+    const defaultSites = [
+      { name: 'Brave Search', url: 'https://search.brave.com', icon: '🦁' },
+      { name: 'YouTube', url: 'https://www.youtube.com', icon: '▶️' },
+      { name: 'GitHub', url: 'https://github.com', icon: '🐙' },
+      { name: 'Wikipedia', url: 'https://www.wikipedia.org', icon: '📖' },
+      { name: 'Reddit', url: 'https://www.reddit.com', icon: '🤖' },
+      { name: 'X / Twitter', url: 'https://twitter.com', icon: '🐦' }
+    ];
+
+    function getTopSites() {
+      try {
+        const custom = JSON.parse(localStorage.getItem('ntp_custom_sites'));
+        if (Array.isArray(custom)) return custom;
+      } catch {}
+      return defaultSites;
+    }
+
+    function renderTopSites() {
+      const container = document.getElementById('top-sites-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const list = getTopSites();
+
+      list.forEach((s, idx) => {
+        const a = document.createElement('a');
+        a.className = 'site-card';
+        a.href = s.url;
+        a.innerHTML = `
+          <div class="site-icon">${s.icon || '🌐'}</div>
+          <div class="site-name">${s.name}</div>
+        `;
+        a.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          if (confirm(`¿Eliminar acceso directo a "${s.name}"?`)) {
+            list.splice(idx, 1);
+            localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
+            renderTopSites();
+          }
+        });
+        container.appendChild(a);
+      });
+
+      // Tarjeta "+" para añadir acceso directo
+      const addCard = document.createElement('div');
+      addCard.className = 'site-card-add';
+      addCard.innerHTML = `
+        <div class="site-card-add-icon">+</div>
+        <div class="site-card-add-text">Añadir</div>
+      `;
+      addCard.addEventListener('click', promptAddShortcut);
+      container.appendChild(addCard);
+    }
+
+    function promptAddShortcut() {
+      const name = prompt('Nombre del acceso directo (ej. Google):');
+      if (!name) return;
+      const url = prompt('URL del sitio (ej. https://google.com):');
+      if (!url) return;
+      const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+      const list = getTopSites();
+      list.push({ name, url: fullUrl, icon: '⭐' });
+      localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
+      renderTopSites();
+    }
+
+    renderTopSites();
+
+    // Personalización del panel NTP (Toggles)
+    const ntpModal = document.getElementById('ntp-modal');
+    const btnCustomize = document.getElementById('btn-customize-ntp');
+    const btnCloseNtpModal = document.getElementById('btn-close-ntp-modal');
+    const btnModalAddShortcut = document.getElementById('btn-modal-add-shortcut');
+
+    const chkNtpStats = document.getElementById('chk-ntp-stats');
+    const chkNtpClock = document.getElementById('chk-ntp-clock');
+    const chkNtpSites = document.getElementById('chk-ntp-sites');
+
+    const statsContainer = document.getElementById('stats-container');
+    const clockContainer = document.getElementById('clock-container');
+    const topSitesContainer = document.getElementById('top-sites-container');
+
+    function applyNtpVisibility() {
+      const showStats = localStorage.getItem('ntp_show_stats') !== 'false';
+      const showClock = localStorage.getItem('ntp_show_clock') !== 'false';
+      const showSites = localStorage.getItem('ntp_show_sites') !== 'false';
+
+      if (chkNtpStats) chkNtpStats.checked = showStats;
+      if (chkNtpClock) chkNtpClock.checked = showClock;
+      if (chkNtpSites) chkNtpSites.checked = showSites;
+
+      if (statsContainer) statsContainer.style.display = showStats ? 'flex' : 'none';
+      if (clockContainer) clockContainer.style.display = showClock ? 'flex' : 'none';
+      if (topSitesContainer) topSitesContainer.style.display = showSites ? 'flex' : 'none';
+    }
+
+    applyNtpVisibility();
+
+    if (btnCustomize) {
+      btnCustomize.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (ntpModal) ntpModal.classList.toggle('open');
+      });
+    }
+
+    if (btnCloseNtpModal) {
+      btnCloseNtpModal.addEventListener('click', () => {
+        if (ntpModal) ntpModal.classList.remove('open');
+      });
+    }
+
+    if (btnModalAddShortcut) {
+      btnModalAddShortcut.addEventListener('click', () => {
+        if (ntpModal) ntpModal.classList.remove('open');
+        promptAddShortcut();
+      });
+    }
+
+    if (chkNtpStats) {
+      chkNtpStats.addEventListener('change', () => {
+        localStorage.setItem('ntp_show_stats', String(chkNtpStats.checked));
+        applyNtpVisibility();
+      });
+    }
+
+    if (chkNtpClock) {
+      chkNtpClock.addEventListener('change', () => {
+        localStorage.setItem('ntp_show_clock', String(chkNtpClock.checked));
+        applyNtpVisibility();
+      });
+    }
+
+    if (chkNtpSites) {
+      chkNtpSites.addEventListener('change', () => {
+        localStorage.setItem('ntp_show_sites', String(chkNtpSites.checked));
+        applyNtpVisibility();
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (ntpModal && ntpModal.classList.contains('open')) {
+        if (!ntpModal.contains(e.target) && e.target !== btnCustomize && !btnCustomize.contains(e.target)) {
+          ntpModal.classList.remove('open');
+        }
       }
     });
   </script>

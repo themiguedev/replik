@@ -230,6 +230,18 @@
       </div>
     </div>
 
+    <!-- Banner de Caída de Pestaña (Crash Recovery) -->
+    <div class="tab-crash-banner" id="tab-crash-banner">
+      <div class="crash-banner-left">
+        <span style="font-size: 16px;">⚠️</span>
+        <span id="crash-banner-text">¡Vaya! Se ha producido un error al mostrar esta página web.</span>
+      </div>
+      <div class="crash-banner-actions">
+        <button class="btn-crash-reload" id="btn-crash-reload">Volver a cargar</button>
+        <button class="btn-crash-close" id="btn-crash-close">✕</button>
+      </div>
+    </div>
+
     <!-- Barra Flotante de Búsqueda en Página (Ctrl + F) -->
     <div class="find-in-page-bar" id="find-in-page-bar">
       <input type="text" id="find-in-page-input" placeholder="Buscar en la página..." autocomplete="off">
@@ -772,6 +784,53 @@
       <button class="btn-pw-never" id="btn-pw-never">Nunca</button>
       <button class="btn-pw-notnow" id="btn-pw-notnow">Ahora no</button>
       <button class="btn-pw-save" id="btn-pw-save">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Barra Inferior de Descargas (Download Pipeline) -->
+  <div class="download-bar" id="download-bar">
+    <div class="download-bar-left">
+      <span class="download-icon">📥</span>
+      <div class="download-info">
+        <div class="download-filename" id="download-filename">archivo.zip</div>
+        <div class="download-meta" id="download-meta">Iniciando descarga...</div>
+      </div>
+      <div class="download-progress-container">
+        <div class="download-progress-fill" id="download-progress-fill"></div>
+      </div>
+    </div>
+    <div class="download-bar-actions">
+      <button class="btn-download-act" id="btn-download-open" style="display: none;">Abrir archivo</button>
+      <button class="btn-download-act" id="btn-download-folder" style="display: none;">Mostrar en carpeta</button>
+      <button class="btn-download-close" id="btn-download-close" title="Cerrar">✕</button>
+    </div>
+  </div>
+
+  <!-- Modal de Autenticación HTTP Básica (HTTP Basic Auth) -->
+  <div class="auth-modal" id="auth-modal">
+    <div class="auth-dialog">
+      <div class="auth-header">
+        <div class="auth-title">
+          <span>🔒</span>
+          <span>Autenticación requerida</span>
+        </div>
+        <button class="auth-close" id="btn-auth-close">✕</button>
+      </div>
+      <div class="auth-body">
+        <div class="auth-desc" id="auth-desc">El servidor solicita un nombre de usuario y una contraseña.</div>
+        <div class="auth-field">
+          <label for="auth-username">Nombre de usuario</label>
+          <input type="text" id="auth-username" autocomplete="off" placeholder="Usuario">
+        </div>
+        <div class="auth-field">
+          <label for="auth-password">Contraseña</label>
+          <input type="password" id="auth-password" autocomplete="off" placeholder="Contraseña">
+        </div>
+      </div>
+      <div class="auth-footer">
+        <button class="btn-auth-cancel" id="btn-auth-cancel">Cancelar</button>
+        <button class="btn-auth-submit" id="btn-auth-submit">Iniciar sesión</button>
+      </div>
     </div>
   </div>
 

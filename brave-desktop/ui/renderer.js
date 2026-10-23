@@ -968,7 +968,8 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   });
 
   webviewEl.addEventListener('new-window', (e) => {
-    createTab(e.url);
+    const isBg = e.disposition === 'background-tab';
+    createTab(e.url, { background: isBg });
   });
 
   // Inyección de API bridge para páginas internas (brave://extensions, brave://adblock)
@@ -1091,7 +1092,12 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     }
   });
 
-  switchTab(id);
+  if (!options.background) {
+    switchTab(id);
+  } else {
+    tabData.webviewEl.classList.add('hidden');
+    throttleBackgroundTab(tabData);
+  }
   return tabData;
 }
 
@@ -1516,26 +1522,87 @@ function toggleSpeedreader() {
 
   tab.webviewEl.executeJavaScript(`
     (() => {
-      const title = document.querySelector('h1')?.innerText || document.title;
-      const paragraphs = Array.from(document.querySelectorAll('article p, main p, .post-content p, p'))
-        .map(p => p.innerText.trim())
-        .filter(t => t.length > 50);
-      return { title, paragraphs };
+      // 1. Detección de metadatos del artículo
+      const title = document.querySelector('h1')?.innerText?.trim() || 
+                    document.querySelector('meta[property="og:title"]')?.content || 
+                    document.title;
+
+      const author = document.querySelector('meta[name="author"]')?.content || 
+                     document.querySelector('.author, .byline, [rel="author"]')?.innerText?.trim() || 
+                     '';
+
+      const heroImg = document.querySelector('article img, main img, figure img, meta[property="og:image"]')?.src || 
+                      document.querySelector('meta[property="og:image"]')?.content || 
+                      '';
+
+      // 2. Localizar el contenedor principal con heurísticas Readability
+      const candidates = Array.from(document.querySelectorAll('article, [role="main"], main, .article-body, .post-content, .entry-content, .story-body'));
+      let mainEl = candidates[0];
+
+      if (!mainEl) {
+        // Buscar el contenedor con mayor densidad de párrafos
+        let maxScore = 0;
+        document.querySelectorAll('div, section').forEach(el => {
+          const pList = el.querySelectorAll(':scope > p, :scope > div > p');
+          let score = 0;
+          pList.forEach(p => { if (p.innerText.trim().length > 60) score += p.innerText.trim().length; });
+          if (score > maxScore) {
+            maxScore = score;
+            mainEl = el;
+          }
+        });
+      }
+
+      if (!mainEl) mainEl = document.body;
+
+      // 3. Clonar y limpiar elementos no deseados
+      const clone = mainEl.cloneNode(true);
+      clone.querySelectorAll('script, style, iframe, nav, footer, header, aside, .ad, .ads, .social-share, .comments, form, button').forEach(n => n.remove());
+
+      // 4. Extraer elementos de lectura formateados (párrafos, subtítulos e imágenes)
+      const contentParts = [];
+      let totalWords = 0;
+
+      clone.querySelectorAll('h2, h3, p, figure, img').forEach(el => {
+        const tag = el.tagName.toLowerCase();
+        if (tag === 'h2' || tag === 'h3') {
+          const txt = el.innerText.trim();
+          if (txt.length > 3) contentParts.push('<' + tag + '>' + txt + '</' + tag + '>');
+        } else if (tag === 'p') {
+          const txt = el.innerText.trim();
+          if (txt.length > 35) {
+            totalWords += txt.split(/\\s+/).length;
+            contentParts.push('<p>' + txt + '</p>');
+          }
+        } else if (tag === 'img' && el.src && el.src.startsWith('http')) {
+          const alt = el.alt ? '<figcaption>' + el.alt + '</figcaption>' : '';
+          contentParts.push('<figure><img src="' + el.src + '" alt="' + (el.alt || '') + '" style="max-width:100%; border-radius:8px; margin:16px 0;">' + alt + '</figure>');
+        }
+      });
+
+      return {
+        title,
+        author,
+        heroImg,
+        totalWords,
+        htmlContent: contentParts.join('')
+      };
     })()
   `).then((data) => {
-    if (!data || !data.paragraphs || data.paragraphs.length === 0) {
-      alert('Speedreader: No se pudo detectar suficiente contenido de artículo legible en esta página.');
+    if (!data || !data.htmlContent || data.totalWords < 40) {
+      showGlobalToast('Speedreader: No se detectó un artículo legible en esta página.');
       return;
     }
 
+    const readMin = Math.max(1, Math.round(data.totalWords / 200));
     speedreaderTitle.textContent = data.title || tab.title;
-    speedreaderMeta.textContent = `${tab.domain} • ~${Math.max(1, Math.round(data.paragraphs.length / 3))} min de lectura • Modo limpio sin rastreadores ni anuncios`;
-    speedreaderContent.innerHTML = data.paragraphs.map(p => `<p>${p}</p>`).join('');
+    speedreaderMeta.textContent = `${tab.domain}${data.author ? ' • Por ' + data.author : ''} • ~${readMin} min de lectura • Modo limpio sin anuncios`;
+    speedreaderContent.innerHTML = data.htmlContent;
 
     speedreaderOverlay.classList.add('active');
     btnSpeedreader.classList.add('active');
   }).catch(() => {
-    alert('No se pudo activar Speedreader en este sitio web.');
+    showGlobalToast('No se pudo activar Speedreader en este sitio web.');
   });
 }
 
@@ -4397,6 +4464,223 @@ window.addEventListener('storage', (e) => {
     applyThemeAndAccent();
   }
 });
+
+// ==========================================
+// 36. ERGONOMÍA AVANZADA DE RATÓN Y GESTOS
+// ==========================================
+// Zoom con rueda del ratón (Ctrl + Scroll)
+window.addEventListener(
+  'wheel',
+  (e) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const tab = getActiveTab();
+      if (!tab || !tab.webviewEl) return;
+      const current = tab.zoomFactor || 1.0;
+      const step = e.deltaY < 0 ? 0.1 : -0.1;
+      const nextZoom = Math.min(3.0, Math.max(0.25, Math.round((current + step) * 10) / 10));
+      applyZoom(tab, nextZoom);
+    }
+  },
+  { passive: false }
+);
+
+// Botones laterales del ratón (Mouse 4 = Atrás, Mouse 5 = Adelante)
+window.addEventListener('mouseup', (e) => {
+  const tab = getActiveTab();
+  if (!tab || !tab.webviewEl) return;
+  if (e.button === 3) {
+    if (tab.webviewEl.canGoBack()) tab.webviewEl.goBack();
+  } else if (e.button === 4) {
+    if (tab.webviewEl.canGoForward()) tab.webviewEl.goForward();
+  }
+});
+
+if (window.braveAPI && window.braveAPI.onNavigateBack) {
+  window.braveAPI.onNavigateBack(() => {
+    const tab = getActiveTab();
+    if (tab && tab.webviewEl && tab.webviewEl.canGoBack()) tab.webviewEl.goBack();
+  });
+}
+if (window.braveAPI && window.braveAPI.onNavigateForward) {
+  window.braveAPI.onNavigateForward(() => {
+    const tab = getActiveTab();
+    if (tab && tab.webviewEl && tab.webviewEl.canGoForward()) tab.webviewEl.goForward();
+  });
+}
+
+// ==========================================
+// 37. PIPELINE NATIVO DE DESCARGAS (Downloads)
+// ==========================================
+const downloadBar = document.getElementById('download-bar');
+const downloadFilename = document.getElementById('download-filename');
+const downloadMeta = document.getElementById('download-meta');
+const downloadProgressFill = document.getElementById('download-progress-fill');
+const btnDownloadOpen = document.getElementById('btn-download-open');
+const btnDownloadFolder = document.getElementById('btn-download-folder');
+const btnDownloadClose = document.getElementById('btn-download-close');
+
+let currentDownloadPath = '';
+
+if (btnDownloadClose) {
+  btnDownloadClose.addEventListener('click', () => {
+    if (downloadBar) downloadBar.classList.remove('active');
+  });
+}
+
+if (btnDownloadOpen) {
+  btnDownloadOpen.addEventListener('click', () => {
+    if (currentDownloadPath && window.braveAPI && window.braveAPI.openPath) {
+      window.braveAPI.openPath(currentDownloadPath);
+    }
+  });
+}
+
+if (btnDownloadFolder) {
+  btnDownloadFolder.addEventListener('click', () => {
+    if (currentDownloadPath && window.braveAPI && window.braveAPI.showItemInFolder) {
+      window.braveAPI.showItemInFolder(currentDownloadPath);
+    }
+  });
+}
+
+if (window.braveAPI && window.braveAPI.onDownloadStarted) {
+  window.braveAPI.onDownloadStarted((data) => {
+    currentDownloadPath = data.savePath;
+    if (downloadBar) downloadBar.classList.add('active');
+    if (downloadFilename) downloadFilename.textContent = data.filename;
+    if (downloadMeta) downloadMeta.textContent = 'Iniciando descarga...';
+    if (downloadProgressFill) downloadProgressFill.style.width = '5%';
+    if (btnDownloadOpen) btnDownloadOpen.style.display = 'none';
+    if (btnDownloadFolder) btnDownloadFolder.style.display = 'none';
+  });
+
+  window.braveAPI.onDownloadProgress((data) => {
+    if (downloadBar && !downloadBar.classList.contains('active')) {
+      downloadBar.classList.add('active');
+    }
+    if (downloadFilename) downloadFilename.textContent = data.filename;
+    if (data.totalBytes > 0) {
+      const pct = Math.min(100, Math.round((data.receivedBytes / data.totalBytes) * 100));
+      if (downloadProgressFill) downloadProgressFill.style.width = pct + '%';
+      const recMB = (data.receivedBytes / (1024 * 1024)).toFixed(1);
+      const totMB = (data.totalBytes / (1024 * 1024)).toFixed(1);
+      if (downloadMeta) downloadMeta.textContent = `${recMB} MB de ${totMB} MB (${pct}%)`;
+    } else {
+      const recMB = (data.receivedBytes / (1024 * 1024)).toFixed(1);
+      if (downloadMeta) downloadMeta.textContent = `${recMB} MB descargados`;
+    }
+  });
+
+  window.braveAPI.onDownloadCompleted((data) => {
+    currentDownloadPath = data.savePath;
+    if (downloadProgressFill) downloadProgressFill.style.width = '100%';
+    if (downloadMeta) downloadMeta.textContent = 'Descarga completada con éxito';
+    if (btnDownloadOpen) btnDownloadOpen.style.display = 'inline-block';
+    if (btnDownloadFolder) btnDownloadFolder.style.display = 'inline-block';
+
+    // Registrar en brave_downloads para brave://downloads
+    try {
+      const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+      dlList.unshift({
+        id: data.id,
+        filename: data.filename,
+        path: data.savePath,
+        size: data.totalBytes,
+        date: new Date().toISOString(),
+      });
+      localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 50)));
+    } catch {}
+
+    showGlobalToast(`🦁 Descarga completada: ${data.filename}`);
+  });
+
+  window.braveAPI.onDownloadFailed((data) => {
+    if (downloadMeta) downloadMeta.textContent = `Descarga interrumpida (${data.state})`;
+    showGlobalToast(`Error en la descarga de ${data.filename}`);
+  });
+}
+
+// ==========================================
+// 38. AUTENTICACIÓN HTTP BÁSICA (HTTP Auth Modal)
+// ==========================================
+const authModal = document.getElementById('auth-modal');
+const authDesc = document.getElementById('auth-desc');
+const authUsernameInput = document.getElementById('auth-username');
+const authPasswordInput = document.getElementById('auth-password');
+const btnAuthCancel = document.getElementById('btn-auth-cancel');
+const btnAuthSubmit = document.getElementById('btn-auth-submit');
+const btnAuthClose = document.getElementById('btn-auth-close');
+
+let activeAuthId = null;
+
+function closeAuthDialog(cancel = true) {
+  if (activeAuthId && window.braveAPI && window.braveAPI.submitAuth) {
+    if (cancel) {
+      window.braveAPI.submitAuth(activeAuthId, '', '', true);
+    } else {
+      const u = authUsernameInput ? authUsernameInput.value : '';
+      const p = authPasswordInput ? authPasswordInput.value : '';
+      window.braveAPI.submitAuth(activeAuthId, u, p, false);
+    }
+  }
+  activeAuthId = null;
+  if (authModal) authModal.classList.remove('open');
+}
+
+if (btnAuthCancel) btnAuthCancel.addEventListener('click', () => closeAuthDialog(true));
+if (btnAuthClose) btnAuthClose.addEventListener('click', () => closeAuthDialog(true));
+if (btnAuthSubmit) btnAuthSubmit.addEventListener('click', () => closeAuthDialog(false));
+
+if (authPasswordInput) {
+  authPasswordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') closeAuthDialog(false);
+  });
+}
+
+if (window.braveAPI && window.braveAPI.onAuthRequired) {
+  window.braveAPI.onAuthRequired((data) => {
+    activeAuthId = data.authId;
+    if (authDesc) {
+      authDesc.textContent = `El servidor "${data.host}${data.port ? ':' + data.port : ''}" solicita autenticación.${data.realm ? ' Mensaje: ' + data.realm : ''}`;
+    }
+    if (authUsernameInput) authUsernameInput.value = '';
+    if (authPasswordInput) authPasswordInput.value = '';
+    if (authModal) authModal.classList.add('open');
+    if (authUsernameInput) authUsernameInput.focus();
+  });
+}
+
+// ==========================================
+// 39. RESILIENCIA ANTE CAÍDAS DE PESTAÑA (Crash Recovery)
+// ==========================================
+const tabCrashBanner = document.getElementById('tab-crash-banner');
+const crashBannerText = document.getElementById('crash-banner-text');
+const btnCrashReload = document.getElementById('btn-crash-reload');
+const btnCrashClose = document.getElementById('btn-crash-close');
+
+if (btnCrashClose) {
+  btnCrashClose.addEventListener('click', () => {
+    if (tabCrashBanner) tabCrashBanner.classList.remove('active');
+  });
+}
+
+if (btnCrashReload) {
+  btnCrashReload.addEventListener('click', () => {
+    if (tabCrashBanner) tabCrashBanner.classList.remove('active');
+    const tab = getActiveTab();
+    if (tab && tab.webviewEl) tab.webviewEl.reload();
+  });
+}
+
+if (window.braveAPI && window.braveAPI.onTabCrashed) {
+  window.braveAPI.onTabCrashed((data) => {
+    if (crashBannerText) {
+      crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${data.reason || 'cierre inesperado'}).`;
+    }
+    if (tabCrashBanner) tabCrashBanner.classList.add('active');
+  });
+}
 
 // ==========================================
 // 35. RESTAURACIÓN Y PUESTA EN MARCHA (Startup)
