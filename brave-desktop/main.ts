@@ -491,8 +491,8 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
   const win = new BrowserWindow({
     width: 1360,
     height: 880,
-    minWidth: 900,
-    minHeight: 600,
+    minWidth: 520,
+    minHeight: 400,
     title,
     backgroundColor,
     icon: path.join(baseDir, 'ui', 'icon.ico'),

@@ -363,6 +363,54 @@
       color: #a8a8b2;
       margin-top: 4px;
     }
+
+    /* Responsividad Adaptativa de NTP */
+    @media (max-height: 750px) {
+      body {
+        padding: 20px 30px;
+      }
+      .clock {
+        font-size: 56px;
+      }
+      .date-str {
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      .search-bar {
+        margin-bottom: 20px;
+        padding: 8px 18px;
+      }
+      .stat-val {
+        font-size: 22px;
+      }
+    }
+
+    @media (max-width: 800px) {
+      body {
+        padding: 16px 20px;
+        overflow-y: auto;
+      }
+      .stats-container {
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .clock {
+        font-size: 48px;
+      }
+      .search-bar {
+        padding: 8px 16px;
+      }
+      .top-sites {
+        gap: 12px;
+      }
+      .site-card {
+        width: 68px;
+      }
+      .site-icon {
+        width: 44px;
+        height: 44px;
+      }
+    }
   </style>
 </head>
 <body>

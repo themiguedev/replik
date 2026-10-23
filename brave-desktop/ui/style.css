@@ -119,7 +119,9 @@ body {
   gap: 4px;
   overflow-x: auto;
   overflow-y: hidden;
-  max-width: calc(100vw - 230px);
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 190px);
   -webkit-app-region: no-drag;
 }
 
@@ -132,15 +134,16 @@ body {
   display: flex;
   align-items: center;
   background-color: transparent;
-  padding: 0 10px;
+  padding: 0 8px;
   border-radius: 8px;
   font-size: 12px;
-  width: 210px;
-  min-width: 110px;
+  flex: 0 1 210px;
+  min-width: 44px;
+  max-width: 210px;
   height: 32px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, max-width 0.15s ease, min-width 0.15s ease;
   color: #9aa0a6;
   -webkit-app-region: no-drag;
   margin: 4px 0;
@@ -181,6 +184,7 @@ body {
 
 .tab-title {
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -289,6 +293,8 @@ body {
   display: flex;
   align-items: center;
   height: 100%;
+  flex-shrink: 0;
+  margin-left: auto;
   -webkit-app-region: no-drag !important;
   z-index: 99999 !important;
   position: relative;
@@ -347,6 +353,10 @@ body {
   padding: 6px 10px;
   gap: 8px;
   border-bottom: 1px solid var(--border-color);
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  flex-wrap: nowrap;
 }
 
 .nav-btn {
@@ -378,7 +388,8 @@ body {
 
 /* Omnibox */
 .omnibox-container {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 140px;
   display: flex;
   align-items: center;
   background-color: var(--bg-omnibox);
@@ -3254,5 +3265,171 @@ input:checked + .slider:before {
 .btn-auth-submit:hover {
   background: var(--brave-orange-hover);
 }
+
+/* ========================================================
+   DISEÑO RESPONSIVO Y ADAPTATIVO (Multi-resolución y Ventana)
+   ======================================================== */
+
+/* 1. Ajustes de Barra de Título y Pestañas */
+@media (max-width: 900px) {
+  .tab {
+    padding: 0 6px;
+    font-size: 11.5px;
+  }
+  .tab-icon {
+    margin-right: 5px;
+  }
+}
+
+/* 2. Responsividad Progresiva de Botones de la Barra de Herramientas */
+@media (max-width: 1150px) {
+  #btn-split-view,
+  .battery-indicator {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  #btn-force-dark,
+  #btn-translate {
+    display: none !important;
+  }
+  .toolbar {
+    gap: 6px;
+    padding: 5px 8px;
+  }
+}
+
+@media (max-width: 860px) {
+  #btn-home,
+  #btn-speedreader,
+  #btn-profile,
+  .zoom-indicator,
+  #tab-search-btn {
+    display: none !important;
+  }
+  .toolbar {
+    gap: 5px;
+  }
+  .omnibox-container {
+    padding: 0 8px;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 720px) {
+  #btn-global-media,
+  #btn-extensions,
+  #btn-qr-code {
+    display: none !important;
+  }
+  .toolbar {
+    gap: 4px;
+    padding: 4px 6px;
+  }
+  .nav-btn {
+    width: 26px;
+    height: 26px;
+  }
+  .omnibox-container {
+    height: 30px;
+    border-radius: 16px;
+    font-size: 13px;
+  }
+  .tab-new {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  #btn-reader-mode,
+  #btn-star {
+    display: none !important;
+  }
+  .tab-title {
+    display: none !important;
+  }
+  .tab {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+  }
+  .tab-icon {
+    margin-right: 0 !important;
+  }
+  .tab-close {
+    display: none !important;
+  }
+  .main-menu {
+    right: 4px !important;
+    left: 4px !important;
+    width: auto !important;
+    max-width: calc(100vw - 8px) !important;
+  }
+  .shields-popup {
+    right: 4px !important;
+    left: 4px !important;
+    width: auto !important;
+    max-width: calc(100vw - 8px) !important;
+  }
+  .global-media-popup {
+    right: 4px !important;
+    left: 4px !important;
+    width: auto !important;
+    max-width: calc(100vw - 8px) !important;
+  }
+}
+
+/* 3. Ajustes de Altura Reducida (Laptops 768p / Ventanas Bajas) */
+@media (max-height: 700px) {
+  .main-menu,
+  .shields-popup,
+  .global-media-popup {
+    max-height: calc(100% - 10px) !important;
+  }
+  .menu-item {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+  .shields-popup {
+    padding: 12px;
+  }
+  .task-manager-dialog,
+  .clear-data-dialog,
+  .auth-dialog {
+    max-height: 90vh !important;
+    padding: 14px;
+  }
+}
+
+/* 4. Modales y Diálogos Adaptables */
+@media (max-width: 680px) {
+  .task-manager-dialog,
+  .clear-data-dialog,
+  .auth-dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+  }
+  .task-manager-table th,
+  .task-manager-table td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .wayback-bar,
+  .tab-crash-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .wayback-bar-actions,
+  .crash-banner-actions {
+    margin-left: auto;
+  }
+}
+
 
 
