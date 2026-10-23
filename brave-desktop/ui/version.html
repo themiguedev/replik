@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acerca de Brave - Versión</title>
+  <style>
+    :root {
+      --bg-page: #19191c;
+      --bg-card: #212226;
+      --border-color: #2e2f38;
+      --brave-orange: #fb542b;
+      --text-main: #ffffff;
+      --text-muted: #9e9ea7;
+      --text-sub: #72727d;
+      --font-mono: "Consolas", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: text;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 40px 60px;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      max-width: 860px;
+      width: 100%;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .title-icon {
+      font-size: 32px;
+    }
+
+    .title-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .btn-copy {
+      background: rgba(251, 84, 43, 0.15);
+      border: 1px solid rgba(251, 84, 43, 0.4);
+      color: var(--brave-orange);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .btn-copy:hover {
+      background: var(--brave-orange);
+      color: #ffffff;
+    }
+
+    .version-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      max-width: 860px;
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .version-row {
+      display: flex;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .version-row:last-child {
+      border-bottom: none;
+    }
+
+    .version-label {
+      width: 220px;
+      min-width: 200px;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    .version-val {
+      flex: 1;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .badge-brave {
+      display: inline-block;
+      background: var(--brave-orange);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    .footer-note {
+      max-width: 860px;
+      color: var(--text-sub);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="title-group">
+      <span class="title-icon">🦁</span>
+      <div>
+        <div class="title-text">Brave Browser Replica <span class="badge-brave">OFICIAL</span></div>
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">Información del sistema y plataforma</div>
+      </div>
+    </div>
+    <button class="btn-copy" id="btn-copy-info">Copiar información</button>
+  </div>
+
+  <div class="version-card">
+    <div class="version-row">
+      <div class="version-label">Brave</div>
+      <div class="version-val"><strong>1.3.0 Chromium: <span id="v-chrome">...</span></strong> (Official Build 64-bit)</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Motor Electron</div>
+      <div class="version-val mono" id="v-electron">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Motor V8 (JavaScript)</div>
+      <div class="version-val mono" id="v-v8">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Entorno Node.js</div>
+      <div class="version-val mono" id="v-node">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Sistema Operativo</div>
+      <div class="version-val" id="v-os">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">User Agent Oficial</div>
+      <div class="version-val mono" id="v-ua">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Ruta del Ejecutable</div>
+      <div class="version-val mono" id="v-exec">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Ruta de Perfil de Usuario</div>
+      <div class="version-val mono" id="v-profile">...</div>
+    </div>
+    <div class="version-row">
+      <div class="version-label">Línea de Comandos</div>
+      <div class="version-val mono" id="v-cmd">...</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Brave es posible gracias al software de código abierto Chromium y el motor modular de protección de privacidad Brave Shields.
+  </div>
+
+  <script>
+    let infoData = null;
+
+    async function loadVersion() {
+      if (window.braveAPI && window.braveAPI.getVersionInfo) {
+        try {
+          infoData = await window.braveAPI.getVersionInfo();
+          renderInfo(infoData);
+          return;
+        } catch {}
+      }
+
+      // Fallback si no está el bridge disponible de inmediato
+      const nav = navigator;
+      renderInfo({
+        braveVersion: '1.3.0',
+        chromiumVersion: '120.0.6099.109',
+        electronVersion: '28.2.0',
+        nodeVersion: '18.18.2',
+        v8Version: '12.0.267.10',
+        osPlatform: 'win32',
+        osArch: 'x64',
+        osRelease: 'Windows 10/11 x64',
+        userAgent: nav.userAgent,
+        execPath: 'Brave-Replica.exe',
+        userDataPath: 'User Data',
+        commandLine: '--normal-mode'
+      });
+    }
+
+    function renderInfo(data) {
+      document.getElementById('v-chrome').textContent = data.chromiumVersion;
+      document.getElementById('v-electron').textContent = 'Electron ' + (data.electronVersion || '28.x');
+      document.getElementById('v-v8').textContent = 'V8 ' + (data.v8Version || '12.x');
+      document.getElementById('v-node').textContent = 'Node.js ' + (data.nodeVersion || '18.x');
+      document.getElementById('v-os').textContent = `${data.osPlatform} ${data.osArch} (${data.osRelease || ''})`;
+      document.getElementById('v-ua').textContent = data.userAgent;
+      document.getElementById('v-exec').textContent = data.execPath;
+      document.getElementById('v-profile').textContent = data.userDataPath;
+      document.getElementById('v-cmd').textContent = data.commandLine;
+    }
+
+    document.getElementById('btn-copy-info').addEventListener('click', () => {
+      if (!infoData) return;
+      const text = `Brave: 1.3.0\nChromium: ${infoData.chromiumVersion}\nElectron: ${infoData.electronVersion}\nNode: ${infoData.nodeVersion}\nV8: ${infoData.v8Version}\nOS: ${infoData.osPlatform} ${infoData.osArch}\nUser-Agent: ${infoData.userAgent}\nExec: ${infoData.execPath}\nUserData: ${infoData.userDataPath}`;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btn-copy-info');
+        btn.textContent = '¡Copiado!';
+        setTimeout(() => { btn.textContent = 'Copiar información'; }, 2000);
+      });
+    });
+
+    window.addEventListener('brave-bridge-ready', loadVersion);
+    loadVersion();
+  </script>
+</body>
+</html>

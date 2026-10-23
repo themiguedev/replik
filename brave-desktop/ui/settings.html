@@ -439,6 +439,10 @@
       <span class="nav-icon">🔒</span>
       <span>Privacidad y seguridad</span>
     </div>
+    <div class="nav-item" data-section="autofill">
+      <span class="nav-icon">📝</span>
+      <span>Autocompletar y Direcciones</span>
+    </div>
     <div class="nav-item" data-section="appearance">
       <span class="nav-icon">🎨</span>
       <span>Aspecto</span>
@@ -586,6 +590,57 @@
       </div>
     </div>
 
+    <!-- SECCIÓN: AUTOCOMPLETAR Y DIRECCIONES -->
+    <div id="section-autofill" class="settings-tab" style="display: none;">
+      <div class="section-title">Autocompletar y Direcciones</div>
+      
+      <div class="settings-group">
+        <div class="setting-info" style="margin-bottom: 16px;">
+          <div class="setting-name">Perfil de identidad personal</div>
+          <div class="setting-desc">Tus datos se guardan exclusivamente en tu dispositivo de forma cifrada y local para autocompletar formularios en la web con un solo clic.</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Nombre completo:</label>
+            <input type="text" id="af-name" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="ej. Juan Pérez">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Correo electrónico:</label>
+            <input type="email" id="af-email" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="juan@ejemplo.com">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Teléfono:</label>
+            <input type="tel" id="af-phone" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="+34 600 000 000">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Empresa / Organización:</label>
+            <input type="text" id="af-org" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="Opcional">
+          </div>
+          <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Dirección postal (Calle, número, piso):</label>
+            <input type="text" id="af-address" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="Calle Principal 123, 2º B">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Ciudad:</label>
+            <input type="text" id="af-city" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="Madrid">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">Código postal / ZIP:</label>
+            <input type="text" id="af-zip" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="28001">
+          </div>
+          <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; color: var(--text-muted);">País:</label>
+            <input type="text" id="af-country" class="setting-select" style="padding: 8px 12px; width: 100%;" placeholder="España">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn-sync-action" id="btn-save-autofill">Guardar perfil de autocompletado</button>
+        </div>
+      </div>
+    </div>
+
     <!-- SECCIÓN 3: ASPECTO -->
     <div id="section-appearance" class="settings-tab" style="display: none;">
       <div class="section-title">Aspecto y Personalización</div>
@@ -626,6 +681,20 @@
             <input type="checkbox" checked disabled>
             <span class="slider"></span>
           </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Hibernación automática de pestañas (Ahorro de memoria)</div>
+            <div class="setting-desc">Suspende el consumo de CPU y memoria RAM de pestañas inactivas en segundo plano.</div>
+          </div>
+          <select class="setting-select" id="opt-tab-snooze">
+            <option value="0">Desactivado</option>
+            <option value="15">Tras 15 minutos</option>
+            <option value="30">Tras 30 minutos (Recomendado)</option>
+            <option value="60">Tras 1 hora</option>
+            <option value="120">Tras 2 horas</option>
+          </select>
         </div>
       </div>
     </div>
@@ -818,6 +887,9 @@
 
     optEngine.addEventListener('change', () => {
       localStorage.setItem('brave_setting_engine', optEngine.value);
+      if (window.braveAPI && window.braveAPI.updateSetting) {
+        window.braveAPI.updateSetting('brave_setting_engine', optEngine.value);
+      }
     });
 
     // Borrar datos de navegación
@@ -919,6 +991,9 @@
       optTheme.value = localStorage.getItem('brave_theme') || 'dark';
       optTheme.addEventListener('change', () => {
         localStorage.setItem('brave_theme', optTheme.value);
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('brave_theme', optTheme.value);
+        }
       });
     }
 
@@ -935,8 +1010,67 @@
         swatch.classList.add('active');
         const acc = swatch.getAttribute('data-accent');
         localStorage.setItem('brave_accent', acc);
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('brave_accent', acc);
+        }
       });
     });
+
+    const optTabSnooze = document.getElementById('opt-tab-snooze');
+    if (optTabSnooze) {
+      optTabSnooze.value = localStorage.getItem('brave_tab_snooze') || '30';
+      optTabSnooze.addEventListener('change', () => {
+        localStorage.setItem('brave_tab_snooze', optTabSnooze.value);
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('brave_tab_snooze', optTabSnooze.value);
+        }
+      });
+    }
+
+    // Lógica de Autocompletar y Direcciones
+    async function loadAutofillProfile() {
+      let prof = {};
+      if (window.braveAPI && window.braveAPI.getProfile) {
+        try { prof = await window.braveAPI.getProfile() || {}; } catch {}
+      } else {
+        try { prof = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}'); } catch {}
+      }
+      if (document.getElementById('af-name')) document.getElementById('af-name').value = prof.name || '';
+      if (document.getElementById('af-email')) document.getElementById('af-email').value = prof.email || '';
+      if (document.getElementById('af-phone')) document.getElementById('af-phone').value = prof.phone || '';
+      if (document.getElementById('af-org')) document.getElementById('af-org').value = prof.org || '';
+      if (document.getElementById('af-address')) document.getElementById('af-address').value = prof.address || '';
+      if (document.getElementById('af-city')) document.getElementById('af-city').value = prof.city || '';
+      if (document.getElementById('af-zip')) document.getElementById('af-zip').value = prof.zip || '';
+      if (document.getElementById('af-country')) document.getElementById('af-country').value = prof.country || '';
+    }
+
+    const btnSaveAutofill = document.getElementById('btn-save-autofill');
+    if (btnSaveAutofill) {
+      btnSaveAutofill.addEventListener('click', async () => {
+        const prof = {
+          name: document.getElementById('af-name').value.trim(),
+          email: document.getElementById('af-email').value.trim(),
+          phone: document.getElementById('af-phone').value.trim(),
+          org: document.getElementById('af-org').value.trim(),
+          address: document.getElementById('af-address').value.trim(),
+          city: document.getElementById('af-city').value.trim(),
+          zip: document.getElementById('af-zip').value.trim(),
+          country: document.getElementById('af-country').value.trim(),
+        };
+        localStorage.setItem('brave_autofill_profile', JSON.stringify(prof));
+        if (window.braveAPI && window.braveAPI.saveProfile) {
+          await window.braveAPI.saveProfile(prof);
+        }
+        btnSaveAutofill.textContent = '✓ ¡Perfil guardado!';
+        setTimeout(() => { btnSaveAutofill.textContent = 'Guardar perfil de autocompletado'; }, 2000);
+      });
+    }
+
+    window.addEventListener('brave-bridge-ready', () => {
+      loadAutofillProfile();
+    });
+    loadAutofillProfile();
 
     // Puesta en marcha / Al iniciar
     const startupRadios = document.querySelectorAll('input[name="startup_option"]');

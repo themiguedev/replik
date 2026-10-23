@@ -204,22 +204,35 @@
   </div>
 
   <script>
-    function getStoredHistory() {
-      try {
-        return JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
-      } catch {
-        return [];
+    let historyItems = [];
+
+    async function loadHistory() {
+      if (window.braveAPI && window.braveAPI.getHistory) {
+        try {
+          historyItems = await window.braveAPI.getHistory();
+          if (Array.isArray(historyItems)) {
+            renderHistory();
+            return;
+          }
+        } catch {}
       }
+
+      try {
+        historyItems = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+      } catch {
+        historyItems = [];
+      }
+      renderHistory();
     }
 
     function renderHistory(filterText = '') {
       const listEl = document.getElementById('history-list');
       listEl.innerHTML = '';
-      const items = getStoredHistory();
 
-      const filtered = items.filter(it => 
-        it.title.toLowerCase().includes(filterText.toLowerCase()) || 
-        it.url.toLowerCase().includes(filterText.toLowerCase())
+      const q = filterText.toLowerCase().trim();
+      const filtered = historyItems.filter(it => 
+        (it.title || '').toLowerCase().includes(q) || 
+        (it.url || '').toLowerCase().includes(q)
       );
 
       if (filtered.length === 0) {
@@ -227,43 +240,62 @@
         return;
       }
 
-      filtered.forEach((it, idx) => {
+      filtered.forEach((it) => {
+        const realIdx = historyItems.indexOf(it);
         const row = document.createElement('div');
         row.className = 'history-item';
         row.innerHTML = `
-          <span class="item-time">${it.time || 'Reciente'}</span>
+          <span class="item-time">${escapeHtml(it.time || 'Reciente')}</span>
           <span class="item-favicon">🌐</span>
-          <a class="item-info" href="${it.url}">
-            <span>${it.title || 'Página Web'}</span>
-            <span class="item-url">${it.url}</span>
+          <a class="item-info" href="${escapeAttr(it.url)}">
+            <span>${escapeHtml(it.title || 'Página Web')}</span>
+            <span class="item-url">${escapeHtml(it.url)}</span>
           </a>
-          <span class="item-delete" title="Eliminar del historial" data-idx="${idx}">✕</span>
+          <span class="item-delete" title="Eliminar del historial" data-idx="${realIdx}">✕</span>
         `;
         listEl.appendChild(row);
       });
 
       document.querySelectorAll('.item-delete').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-          items.splice(idx, 1);
-          localStorage.setItem('brave_browser_history', JSON.stringify(items));
+          if (window.braveAPI && window.braveAPI.deleteHistoryItem) {
+            await window.braveAPI.deleteHistoryItem(idx);
+          }
+          historyItems.splice(idx, 1);
+          localStorage.setItem('brave_browser_history', JSON.stringify(historyItems));
           renderHistory(document.getElementById('search-input').value);
         });
       });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function escapeAttr(text) {
+      return (text || '').replace(/"/g, '&quot;');
     }
 
     document.getElementById('search-input').addEventListener('input', (e) => {
       renderHistory(e.target.value);
     });
 
-    document.getElementById('btn-clear-all').addEventListener('click', () => {
+    document.getElementById('btn-clear-all').addEventListener('click', async () => {
       if (confirm('¿Estás seguro de que deseas borrar todo el historial de navegación?')) {
+        if (window.braveAPI && window.braveAPI.clearHistory) {
+          await window.braveAPI.clearHistory();
+        }
+        historyItems = [];
         localStorage.removeItem('brave_browser_history');
         renderHistory();
       }
     });
 
-    renderHistory();
+    window.addEventListener('brave-bridge-ready', loadHistory);
+    loadHistory();
   </script>
 </body>
 </html>

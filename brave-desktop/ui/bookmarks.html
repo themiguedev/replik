@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Marcadores - Brave</title>
+  <style>
+    :root {
+      --bg-page: #19191c;
+      --bg-card: #212226;
+      --bg-card-hover: rgba(255, 255, 255, 0.04);
+      --border-color: #2e2f38;
+      --brave-orange: #fb542b;
+      --text-main: #ffffff;
+      --text-muted: #9e9ea7;
+      --text-sub: #72727d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Barra Lateral de Carpetas */
+    .sidebar {
+      width: 240px;
+      background-color: #161619;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      gap: 8px;
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-left: 8px;
+    }
+
+    .folder-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .folder-item:hover {
+      background-color: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    .folder-item.active {
+      background-color: rgba(251, 84, 43, 0.15);
+      color: var(--brave-orange);
+      font-weight: 600;
+    }
+
+    /* Contenido Principal */
+    .main-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 32px 48px;
+      overflow-y: auto;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      border-color: var(--brave-orange);
+    }
+
+    .btn-primary {
+      background-color: var(--brave-orange);
+      border-color: var(--brave-orange);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: #e0441d;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 8px 18px;
+      margin-bottom: 24px;
+      gap: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+
+    .bookmarks-container {
+      width: 100%;
+      max-width: 900px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bookmark-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13.5px;
+      gap: 14px;
+      transition: background 0.15s;
+    }
+
+    .bookmark-row:last-child {
+      border-bottom: none;
+    }
+
+    .bookmark-row:hover {
+      background-color: var(--bg-card-hover);
+    }
+
+    .bm-icon {
+      font-size: 18px;
+    }
+
+    .bm-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-decoration: none;
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    .bm-title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bm-title:hover {
+      color: var(--brave-orange);
+    }
+
+    .bm-url {
+      font-size: 11.5px;
+      color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bm-actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .bookmark-row:hover .bm-actions {
+      opacity: 1;
+    }
+
+    .bm-btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+
+    .bm-btn-icon:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Modal para añadir/editar */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #24252a;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 440px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .input-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .input-field input {
+      background: #18191c;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .input-field input:focus {
+      border-color: var(--brave-orange);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-title">
+      <span>🔖</span>
+      <span>Marcadores</span>
+    </div>
+    <div class="folder-item active" data-folder="all">
+      <span>📂</span>
+      <span>Todos los marcadores</span>
+    </div>
+    <div class="folder-item" data-folder="bar">
+      <span>⭐</span>
+      <span>Barra de marcadores</span>
+    </div>
+    <div class="folder-item" data-folder="other">
+      <span>📁</span>
+      <span>Otros marcadores</span>
+    </div>
+  </div>
+
+  <div class="main-view">
+    <div class="header-bar">
+      <h1 style="font-size: 22px;">Gestor de Marcadores</h1>
+      <div class="action-group">
+        <button class="btn-action btn-primary" id="btn-add-modal">➕ Añadir marcador</button>
+        <button class="btn-action" id="btn-import">📥 Importar (HTML)</button>
+        <button class="btn-action" id="btn-export">📤 Exportar (HTML)</button>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="search-input" placeholder="Buscar en los marcadores...">
+    </div>
+
+    <div class="bookmarks-container" id="bookmarks-list">
+      <!-- Elementos renderizados dinámicamente -->
+    </div>
+  </div>
+
+  <input type="file" id="file-import" accept=".html,.htm" style="display:none">
+
+  <!-- Modal Añadir / Editar -->
+  <div class="modal-overlay" id="bm-modal">
+    <div class="modal-card">
+      <div class="modal-title" id="modal-heading">Añadir marcador</div>
+      <div class="input-field">
+        <label>Nombre:</label>
+        <input type="text" id="bm-input-title" placeholder="ej. Brave Search">
+      </div>
+      <div class="input-field">
+        <label>URL:</label>
+        <input type="text" id="bm-input-url" placeholder="https://search.brave.com">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-action" id="btn-cancel-modal">Cancelar</button>
+        <button class="btn-action btn-primary" id="btn-save-modal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let bookmarks = [];
+    let editIndex = -1;
+
+    async function loadBookmarks() {
+      if (window.braveAPI && window.braveAPI.getBookmarks) {
+        try {
+          bookmarks = await window.braveAPI.getBookmarks();
+          if (Array.isArray(bookmarks) && bookmarks.length > 0) {
+            renderList();
+            return;
+          }
+        } catch {}
+      }
+
+      try {
+        bookmarks = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
+      } catch {
+        bookmarks = [];
+      }
+
+      if (bookmarks.length === 0) {
+        bookmarks = [
+          { title: 'Brave Search', url: 'https://search.brave.com' },
+          { title: 'YouTube', url: 'https://youtube.com' },
+          { title: 'GitHub', url: 'https://github.com' },
+          { title: 'Wikipedia', url: 'https://wikipedia.org' }
+        ];
+        saveBookmarks();
+      }
+      renderList();
+    }
+
+    async function saveBookmarks() {
+      localStorage.setItem('brave_bookmarks', JSON.stringify(bookmarks));
+      if (window.braveAPI && window.braveAPI.saveBookmarks) {
+        try {
+          await window.braveAPI.saveBookmarks(bookmarks);
+        } catch {}
+      }
+    }
+
+    function renderList(filter = '') {
+      const container = document.getElementById('bookmarks-list');
+      container.innerHTML = '';
+
+      const q = filter.toLowerCase().trim();
+      const filtered = bookmarks.filter(b => 
+        (b.title || '').toLowerCase().includes(q) || 
+        (b.url || '').toLowerCase().includes(q)
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state">No se encontraron marcadores.</div>';
+        return;
+      }
+
+      filtered.forEach((bm) => {
+        const realIdx = bookmarks.indexOf(bm);
+        const row = document.createElement('div');
+        row.className = 'bookmark-row';
+        row.innerHTML = `
+          <div class="bm-icon">🔖</div>
+          <a class="bm-info" href="${bm.url}" target="_blank">
+            <span class="bm-title">${escapeHtml(bm.title || bm.url)}</span>
+            <span class="bm-url">${escapeHtml(bm.url)}</span>
+          </a>
+          <div class="bm-actions">
+            <button class="bm-btn-icon btn-edit" title="Editar" data-idx="${realIdx}">✏️</button>
+            <button class="bm-btn-icon btn-del" title="Eliminar" data-idx="${realIdx}">🗑️</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      document.querySelectorAll('.btn-edit').forEach(b => {
+        b.addEventListener('click', (e) => {
+          editIndex = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
+          openEditModal(editIndex);
+        });
+      });
+
+      document.querySelectorAll('.btn-del').forEach(b => {
+        b.addEventListener('click', async (e) => {
+          const idx = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
+          if (confirm(`¿Eliminar marcador "${bookmarks[idx].title}"?`)) {
+            bookmarks.splice(idx, 1);
+            await saveBookmarks();
+            renderList(document.getElementById('search-input').value);
+          }
+        });
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Modal
+    const modal = document.getElementById('bm-modal');
+    const inputTitle = document.getElementById('bm-input-title');
+    const inputUrl = document.getElementById('bm-input-url');
+
+    document.getElementById('btn-add-modal').addEventListener('click', () => {
+      editIndex = -1;
+      document.getElementById('modal-heading').textContent = 'Añadir marcador';
+      inputTitle.value = '';
+      inputUrl.value = 'https://';
+      modal.classList.add('open');
+      inputTitle.focus();
+    });
+
+    function openEditModal(idx) {
+      document.getElementById('modal-heading').textContent = 'Editar marcador';
+      inputTitle.value = bookmarks[idx].title || '';
+      inputUrl.value = bookmarks[idx].url || '';
+      modal.classList.add('open');
+      inputTitle.focus();
+    }
+
+    document.getElementById('btn-cancel-modal').addEventListener('click', () => {
+      modal.classList.remove('open');
+    });
+
+    document.getElementById('btn-save-modal').addEventListener('click', async () => {
+      const title = inputTitle.value.trim() || 'Nuevo Marcador';
+      let url = inputUrl.value.trim();
+      if (!url) return;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+      if (editIndex >= 0) {
+        bookmarks[editIndex] = { title, url };
+      } else {
+        bookmarks.unshift({ title, url });
+      }
+
+      await saveBookmarks();
+      modal.classList.remove('open');
+      renderList(document.getElementById('search-input').value);
+    });
+
+    // Búsqueda en vivo
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      renderList(e.target.value);
+    });
+
+    // Exportar HTML (Formato Netscape Bookmarks estándar)
+    document.getElementById('btn-export').addEventListener('click', () => {
+      let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<!-- This is an automatically generated file. -->\n<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n<TITLE>Bookmarks</TITLE>\n<H1>Marcadores de Brave</H1>\n<DL><p>\n`;
+      bookmarks.forEach(b => {
+        html += `    <DT><A HREF="${escapeHtml(b.url)}">${escapeHtml(b.title)}</A>\n`;
+      });
+      html += `</DL><p>\n`;
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `brave_marcadores_${new Date().toISOString().slice(0, 10)}.html`;
+      a.click();
+    });
+
+    // Importar HTML
+    const fileImport = document.getElementById('file-import');
+    document.getElementById('btn-import').addEventListener('click', () => {
+      fileImport.click();
+    });
+
+    fileImport.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        const text = evt.target.result;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        const links = doc.querySelectorAll('a');
+        let addedCount = 0;
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          const title = link.textContent.trim() || href;
+          if (href && /^https?:\/\//i.test(href)) {
+            if (!bookmarks.some(b => b.url === href)) {
+              bookmarks.push({ title, url: href });
+              addedCount++;
+            }
+          }
+        });
+        await saveBookmarks();
+        renderList();
+        alert(`Se importaron ${addedCount} marcadores exitosamente.`);
+      };
+      reader.readAsText(file);
+      fileImport.value = '';
+    });
+
+    window.addEventListener('brave-bridge-ready', loadBookmarks);
+    loadBookmarks();
+  </script>
+</body>
+</html>

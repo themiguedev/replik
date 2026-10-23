@@ -110,6 +110,8 @@ const downloadsUrl = window.braveAPI && window.braveAPI.getDownloadsUrl ? window
 const adblockUrl = window.braveAPI && window.braveAPI.getAdblockUrl ? window.braveAPI.getAdblockUrl() : resolveInternalUrl('adblock.html');
 const playlistUrl = window.braveAPI && window.braveAPI.getPlaylistUrl ? window.braveAPI.getPlaylistUrl() : resolveInternalUrl('playlist.html');
 const extensionsUrl = window.braveAPI && window.braveAPI.getExtensionsUrl ? window.braveAPI.getExtensionsUrl() : resolveInternalUrl('extensions.html');
+const bookmarksUrl = window.braveAPI && window.braveAPI.getBookmarksUrl ? window.braveAPI.getBookmarksUrl() : resolveInternalUrl('bookmarks.html');
+const versionUrl = window.braveAPI && window.braveAPI.getVersionUrl ? window.braveAPI.getVersionUrl() : resolveInternalUrl('version.html');
 
 // Detección de modo Tor o Privado en la ventana
 if (window.braveAPI) {
@@ -341,12 +343,14 @@ let selectedSuggestionIndex = -1;
 
 const INTERNAL_PAGES = [
   { title: 'Configuración de Brave', url: 'brave://settings', icon: '🛡️', badge: 'Brave' },
+  { title: 'Gestor de Marcadores', url: 'brave://bookmarks', icon: '🔖', badge: 'Brave' },
   { title: 'Historial de navegación', url: 'brave://history', icon: '🕒', badge: 'Brave' },
   { title: 'Descargas', url: 'brave://downloads', icon: '📥', badge: 'Brave' },
   { title: 'Brave Sync (25 palabras)', url: 'brave://sync', icon: '🔄', badge: 'Brave' },
   { title: 'Filtros y Reglas Adblock', url: 'brave://adblock', icon: '🛡️', badge: 'Brave' },
   { title: 'Brave Playlist', url: 'brave://playlist', icon: '📑', badge: 'Brave' },
   { title: 'Extensiones de Brave', url: 'brave://extensions', icon: '🧩', badge: 'Brave' },
+  { title: 'Versión del Sistema y Diagnóstico', url: 'brave://version', icon: '🦁', badge: 'Brave' },
   { title: 'Nueva Pestaña', url: 'brave://newtab', icon: '🦁', badge: 'Brave' },
 ];
 
@@ -619,8 +623,15 @@ urlInput.addEventListener('input', () => {
 });
 
 urlInput.addEventListener('focus', () => {
+  urlInput.select();
   if (urlInput.value.trim()) {
     updateOmniboxSuggestions(urlInput.value);
+  }
+});
+
+urlInput.addEventListener('click', () => {
+  if (document.activeElement === urlInput) {
+    urlInput.select();
   }
 });
 
@@ -638,6 +649,8 @@ function extractDomain(url) {
       if (url.includes('settings.html')) return 'Configuración';
       if (url.includes('history.html')) return 'Historial';
       if (url.includes('downloads.html')) return 'Descargas';
+      if (url.includes('bookmarks.html')) return 'Marcadores';
+      if (url.includes('version.html')) return 'Acerca de Brave';
       if (url.includes('adblock.html')) return 'Adblock';
       if (url.includes('playlist.html')) return 'Playlist';
       if (url.includes('extensions.html')) return 'Extensiones';
@@ -972,10 +985,10 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     createTab(e.url, { background: isBg });
   });
 
-  // Inyección de API bridge para páginas internas (brave://extensions, brave://adblock)
+  // Inyección de API bridge para todas las páginas internas (brave://...)
   webviewEl.addEventListener('dom-ready', () => {
     const curUrl = webviewEl.getURL() || '';
-    if (curUrl.includes('extensions.html') || curUrl.includes('adblock.html')) {
+    if (curUrl.startsWith('file://')) {
       const bridgeScript = `
         (function() {
           if (window.__brave_bridge_injected) return;
@@ -997,6 +1010,8 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             }
           };
           window.braveAPI = window.braveAPI || {};
+
+          // Extensiones y Reglas
           window.braveAPI.listExtensions = () => window.__brave_call('listExtensions');
           window.braveAPI.loadUnpackedExtension = () => window.__brave_call('loadUnpackedExtension');
           window.braveAPI.toggleExtension = (id, enabled) => window.__brave_call('toggleExtension', [id, enabled]);
@@ -1004,6 +1019,35 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           window.braveAPI.installPresetExtension = (key) => window.__brave_call('installPresetExtension', [key]);
           window.braveAPI.downloadStoreExtension = (idOrUrl) => window.__brave_call('downloadStoreExtension', [idOrUrl]);
           window.braveAPI.syncCustomRules = (text) => window.__brave_call('syncCustomRules', [text]);
+
+          // Pipeline de Descargas
+          window.braveAPI.getDownloads = () => window.__brave_call('getDownloads');
+          window.braveAPI.clearDownloads = () => window.__brave_call('clearDownloads');
+          window.braveAPI.deleteDownload = (id) => window.__brave_call('deleteDownload', [id]);
+          window.braveAPI.openPath = (path) => window.__brave_call('openPath', [path]);
+          window.braveAPI.showItemInFolder = (path) => window.__brave_call('showItemInFolder', [path]);
+          window.braveAPI.cancelDownload = (id) => window.__brave_call('cancelDownload', [id]);
+
+          // Historial de Navegación
+          window.braveAPI.getHistory = () => window.__brave_call('getHistory');
+          window.braveAPI.clearHistory = () => window.__brave_call('clearHistory');
+          window.braveAPI.deleteHistoryItem = (idx) => window.__brave_call('deleteHistoryItem', [idx]);
+
+          // Estadísticas y Versión
+          window.braveAPI.getShieldsStats = () => window.__brave_call('getSavingsStats');
+          window.braveAPI.getVersionInfo = () => window.__brave_call('getVersionInfo');
+
+          // Gestor de Marcadores
+          window.braveAPI.getBookmarks = () => window.__brave_call('getBookmarks');
+          window.braveAPI.saveBookmarks = (list) => window.__brave_call('saveBookmarks', [list]);
+
+          // Perfil y Autocompletado
+          window.braveAPI.getProfile = () => window.__brave_call('getProfile');
+          window.braveAPI.saveProfile = (prof) => window.__brave_call('saveProfile', [prof]);
+
+          // Configuración en Vivo
+          window.braveAPI.getSettings = () => window.__brave_call('getSettings');
+          window.braveAPI.updateSetting = (key, val) => window.__brave_call('updateSetting', [key, val]);
 
           window.dispatchEvent(new CustomEvent('brave-bridge-ready'));
           if (typeof loadExtensions === 'function') {
@@ -1060,6 +1104,50 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           webviewEl.executeJavaScript(autofillScript).catch(() => {});
         }
       } catch {}
+
+      // Autofill de Perfil Personal de Contacto y Dirección
+      try {
+        const savedProf = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
+        if (savedProf.name || savedProf.email || savedProf.address) {
+          const profileScript = `
+            (function() {
+              if (window.__brave_profile_injected) return;
+              window.__brave_profile_injected = true;
+              const prof = ${JSON.stringify(savedProf)};
+
+              function fillField(input, val) {
+                if (!input || !val || input.value) return;
+                input.value = val;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+
+              document.addEventListener('focusin', function(e) {
+                const el = e.target;
+                if (!el || el.tagName !== 'INPUT' || el.type === 'password' || el.type === 'hidden') return;
+                const name = (el.name || el.id || el.getAttribute('autocomplete') || el.placeholder || '').toLowerCase();
+
+                if (name.includes('name') || name.includes('nombre')) {
+                  if (prof.name) fillField(el, prof.name);
+                } else if (name.includes('email') || name.includes('correo') || el.type === 'email') {
+                  if (prof.email) fillField(el, prof.email);
+                } else if (name.includes('phone') || name.includes('tel') || el.type === 'tel') {
+                  if (prof.phone) fillField(el, prof.phone);
+                } else if (name.includes('address') || name.includes('direcci') || name.includes('street')) {
+                  if (prof.address) fillField(el, prof.address);
+                } else if (name.includes('city') || name.includes('ciudad')) {
+                  if (prof.city) fillField(el, prof.city);
+                } else if (name.includes('zip') || name.includes('postal')) {
+                  if (prof.zip) fillField(el, prof.zip);
+                } else if (name.includes('country') || name.includes('pais')) {
+                  if (prof.country) fillField(el, prof.country);
+                }
+              }, true);
+            })();
+          `;
+          webviewEl.executeJavaScript(profileScript).catch(() => {});
+        }
+      } catch {}
     }
   });
 
@@ -1075,11 +1163,71 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     if (e.message && e.message.startsWith('__BRAVE_RPC__:')) {
       try {
         const payload = JSON.parse(e.message.slice(14));
-        const { callId, action, args } = payload;
-        if (window.braveAPI && typeof window.braveAPI[action] === 'function') {
-          const res = await window.braveAPI[action](...(args || []));
+        const { callId, action, args = [] } = payload;
+        let result = null;
+        let handled = true;
+
+        if (action === 'getDownloads') {
+          result = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+        } else if (action === 'clearDownloads') {
+          localStorage.removeItem('brave_downloads');
+          result = true;
+        } else if (action === 'deleteDownload') {
+          const dlId = args[0];
+          const list = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+          const filtered = list.filter((item) => item.id !== dlId);
+          localStorage.setItem('brave_downloads', JSON.stringify(filtered));
+          result = true;
+        } else if (action === 'getHistory') {
+          result = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+        } else if (action === 'clearHistory') {
+          localStorage.removeItem('brave_browser_history');
+          result = true;
+        } else if (action === 'deleteHistoryItem') {
+          const idx = args[0];
+          const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+          if (idx >= 0 && idx < list.length) {
+            list.splice(idx, 1);
+            localStorage.setItem('brave_browser_history', JSON.stringify(list));
+          }
+          result = true;
+        } else if (action === 'getBookmarks') {
+          result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
+        } else if (action === 'saveBookmarks') {
+          const newList = args[0] || [];
+          localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
+          bookmarks = newList;
+          renderBookmarksBar();
+          result = true;
+        } else if (action === 'getProfile') {
+          result = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
+        } else if (action === 'saveProfile') {
+          localStorage.setItem('brave_autofill_profile', JSON.stringify(args[0] || {}));
+          result = true;
+        } else if (action === 'getSettings') {
+          result = {
+            theme: localStorage.getItem('brave_theme') || 'dark',
+            accent: localStorage.getItem('brave_accent') || 'orange',
+            searchEngine: localStorage.getItem('brave_setting_engine') || 'brave',
+            shieldsLevel: localStorage.getItem('brave_setting_level') || 'standard',
+            tabSnooze: localStorage.getItem('brave_tab_snooze') || '30',
+          };
+        } else if (action === 'updateSetting') {
+          const [key, val] = args;
+          localStorage.setItem(key, val);
+          if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
+          if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
+          if (key === 'brave_setting_engine') currentSearchEngine = val;
+          result = true;
+        } else if (window.braveAPI && typeof window.braveAPI[action] === 'function') {
+          result = await window.braveAPI[action](...args);
+        } else {
+          handled = false;
+        }
+
+        if (handled) {
           webviewEl.executeJavaScript(
-            `window.__brave_rpc_respond && window.__brave_rpc_respond(${JSON.stringify(callId)}, true, ${JSON.stringify(res)});`
+            `window.__brave_rpc_respond && window.__brave_rpc_respond(${JSON.stringify(callId)}, true, ${JSON.stringify(result)});`
           ).catch(() => {});
         } else {
           webviewEl.executeJavaScript(
@@ -1320,6 +1468,14 @@ function updateOmniboxForUrl(url) {
     urlInput.value = 'brave://playlist';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
     lockIcon.title = 'Brave Playlist';
+  } else if (url.includes('bookmarks.html') || url === 'brave://bookmarks') {
+    urlInput.value = 'brave://bookmarks';
+    lockIcon.innerHTML = LOCK_SVG_BRAVE;
+    lockIcon.title = 'Marcadores de Brave';
+  } else if (url.includes('version.html') || url === 'brave://version') {
+    urlInput.value = 'brave://version';
+    lockIcon.innerHTML = LOCK_SVG_BRAVE;
+    lockIcon.title = 'Acerca de Brave - Versión y Diagnóstico';
   } else if (url.includes('extensions.html') || url === 'brave://extensions') {
     urlInput.value = 'brave://extensions';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
@@ -1381,6 +1537,25 @@ function wakeUpSleepingTab(tabData) {
     tabData.webviewEl.src = tabData.savedUrl;
   }
 }
+
+// Hibernación Automática de Pestañas Inactivas (Memory Saver)
+setInterval(() => {
+  const snoozeSetting = parseInt(localStorage.getItem('brave_tab_snooze') || '30', 10);
+  if (snoozeSetting <= 0) return; // 0 = Desactivado
+  const thresholdMs = snoozeSetting * 60 * 1000;
+  const now = Date.now();
+
+  tabs.forEach((tab) => {
+    if (tab.id !== activeTabId && !tab.isPinned && !tab.isAudible && !tab.isSleeping) {
+      if (tab.lastActiveTime && (now - tab.lastActiveTime > thresholdMs)) {
+        const curUrl = tab.webviewEl.getURL() || tab.url;
+        if (curUrl && !curUrl.includes('ntp.html')) {
+          putTabToSleep(tab);
+        }
+      }
+    }
+  });
+}, 30000);
 
 // ==========================================
 // 6. TARJETAS FLOTANTES CON VISTA PREVIA (Tab Hover Cards & Previews)
@@ -1948,6 +2123,15 @@ if (ctxForceCopy) {
   });
 }
 
+const ctxTranslatePage = document.getElementById('ctx-translate-page');
+if (ctxTranslatePage) {
+  ctxTranslatePage.addEventListener('click', () => {
+    customContextMenu.classList.remove('open');
+    if (btnTranslate) btnTranslate.click();
+    if (btnDoTranslate) btnDoTranslate.click();
+  });
+}
+
 document.getElementById('ctx-add-bookmark').addEventListener('click', () => {
   addCurrentPageToBookmarks();
   customContextMenu.classList.remove('open');
@@ -2066,6 +2250,10 @@ function navigateTo(raw) {
   // Enrutamiento de URLs internas de Brave
   else if (lower === 'brave://settings' || lower === 'about:settings' || lower === 'chrome://settings') {
     target = settingsUrl;
+  } else if (lower === 'brave://bookmarks' || lower === 'about:bookmarks' || lower === 'chrome://bookmarks') {
+    target = bookmarksUrl;
+  } else if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') {
+    target = versionUrl;
   } else if (lower === 'brave://history' || lower === 'about:history' || lower === 'chrome://history') {
     target = historyUrl;
   } else if (lower === 'brave://downloads' || lower === 'about:downloads' || lower === 'chrome://downloads') {
@@ -2454,8 +2642,16 @@ document.getElementById('menu-devtools').addEventListener('click', () => {
   mainMenu.classList.remove('open');
 });
 
+const menuBookmarksManager = document.getElementById('menu-bookmarks-manager');
+if (menuBookmarksManager) {
+  menuBookmarksManager.addEventListener('click', () => {
+    createTab(bookmarksUrl);
+    mainMenu.classList.remove('open');
+  });
+}
+
 document.getElementById('menu-about').addEventListener('click', () => {
-  alert('Brave Browser (Réplica Educativa Completa)\nVersión 1.0.0 (x64 Windows Portable)\nMotor: Chromium / Electron Core + Brave Shields Engine\nSoporte: Tor, IPFS, Brave Sync, Speedreader, Memory Saver, Hover Cards, Media Controls y Tab Groups.');
+  createTab(versionUrl);
   mainMenu.classList.remove('open');
 });
 
@@ -4518,13 +4714,26 @@ const downloadMeta = document.getElementById('download-meta');
 const downloadProgressFill = document.getElementById('download-progress-fill');
 const btnDownloadOpen = document.getElementById('btn-download-open');
 const btnDownloadFolder = document.getElementById('btn-download-folder');
+const btnDownloadCancel = document.getElementById('btn-download-cancel');
 const btnDownloadClose = document.getElementById('btn-download-close');
 
 let currentDownloadPath = '';
+let currentDownloadId = '';
 
 if (btnDownloadClose) {
   btnDownloadClose.addEventListener('click', () => {
     if (downloadBar) downloadBar.classList.remove('active');
+  });
+}
+
+if (btnDownloadCancel) {
+  btnDownloadCancel.addEventListener('click', async () => {
+    if (currentDownloadId && window.braveAPI && window.braveAPI.cancelDownload) {
+      await window.braveAPI.cancelDownload(currentDownloadId);
+      if (downloadMeta) downloadMeta.textContent = 'Descarga cancelada';
+      btnDownloadCancel.style.display = 'none';
+      showGlobalToast('✕ Descarga cancelada');
+    }
   });
 }
 
@@ -4546,11 +4755,13 @@ if (btnDownloadFolder) {
 
 if (window.braveAPI && window.braveAPI.onDownloadStarted) {
   window.braveAPI.onDownloadStarted((data) => {
+    currentDownloadId = data.id;
     currentDownloadPath = data.savePath;
     if (downloadBar) downloadBar.classList.add('active');
     if (downloadFilename) downloadFilename.textContent = data.filename;
     if (downloadMeta) downloadMeta.textContent = 'Iniciando descarga...';
     if (downloadProgressFill) downloadProgressFill.style.width = '5%';
+    if (btnDownloadCancel) btnDownloadCancel.style.display = 'inline-block';
     if (btnDownloadOpen) btnDownloadOpen.style.display = 'none';
     if (btnDownloadFolder) btnDownloadFolder.style.display = 'none';
   });
@@ -4576,6 +4787,7 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
     currentDownloadPath = data.savePath;
     if (downloadProgressFill) downloadProgressFill.style.width = '100%';
     if (downloadMeta) downloadMeta.textContent = 'Descarga completada con éxito';
+    if (btnDownloadCancel) btnDownloadCancel.style.display = 'none';
     if (btnDownloadOpen) btnDownloadOpen.style.display = 'inline-block';
     if (btnDownloadFolder) btnDownloadFolder.style.display = 'inline-block';
 
@@ -4585,8 +4797,8 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
       dlList.unshift({
         id: data.id,
         filename: data.filename,
-        path: data.savePath,
-        size: data.totalBytes,
+        savePath: data.savePath,
+        totalBytes: data.totalBytes,
         date: new Date().toISOString(),
       });
       localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 50)));
@@ -4596,8 +4808,35 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
   });
 
   window.braveAPI.onDownloadFailed((data) => {
+    if (btnDownloadCancel) btnDownloadCancel.style.display = 'none';
     if (downloadMeta) downloadMeta.textContent = `Descarga interrumpida (${data.state})`;
     showGlobalToast(`Error en la descarga de ${data.filename}`);
+  });
+}
+
+// Controles Multimedia Globales de Hardware (Media Keys / Windows SMTC)
+if (window.braveAPI && window.braveAPI.onMediaKey) {
+  window.braveAPI.onMediaKey((cmd) => {
+    const targetTab = tabs.find((t) => t.isAudible) || getActiveTab();
+    if (targetTab && targetTab.webviewEl) {
+      targetTab.webviewEl.executeJavaScript(`
+        (function() {
+          const media = Array.from(document.querySelectorAll('video, audio')).find(m => !m.paused) || document.querySelector('video, audio');
+          if (media) {
+            if ("${cmd}" === "media-play-pause") {
+              if (media.paused) media.play(); else media.pause();
+            } else if ("${cmd}" === "media-stop") {
+              media.pause();
+              media.currentTime = 0;
+            } else if ("${cmd}" === "media-next-track") {
+              media.currentTime = Math.min(media.duration || 0, media.currentTime + 10);
+            } else if ("${cmd}" === "media-previous-track") {
+              media.currentTime = Math.max(0, media.currentTime - 10);
+            }
+          }
+        })();
+      `).catch(() => {});
+    }
   });
 }
 

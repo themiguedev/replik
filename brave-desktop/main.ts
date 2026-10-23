@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, session, shell } from 'electron';
 import child_process from 'node:child_process';
 import fs from 'node:fs';
 import https from 'node:https';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BraveShieldsEngine } from '../brave-shields/src/shields-engine.js';
@@ -644,12 +645,19 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
     });
   });
 
-  // Botones laterales del ratón (Mouse 4 = Atrás, Mouse 5 = Adelante)
+  // Botones laterales del ratón (Mouse 4 = Atrás, Mouse 5 = Adelante) y Controles Multimedia
   win.on('app-command', (_e, cmd) => {
     if (cmd === 'browser-backward') {
       win.webContents.send('browser:navigate-back');
     } else if (cmd === 'browser-forward') {
       win.webContents.send('browser:navigate-forward');
+    } else if (
+      cmd === 'media-play-pause' ||
+      cmd === 'media-stop' ||
+      cmd === 'media-next-track' ||
+      cmd === 'media-previous-track'
+    ) {
+      win.webContents.send('browser:media-key', cmd);
     }
   });
 
@@ -930,6 +938,35 @@ ipcMain.handle('browser:show-item-in-folder', (_event, filePath: string) => {
   return { success: true };
 });
 
+const activeDownloadsMap = new Map<string, Electron.DownloadItem>();
+
+ipcMain.handle('browser:cancel-download', (_event, downloadId: string) => {
+  const item = activeDownloadsMap.get(downloadId);
+  if (item) {
+    item.cancel();
+    activeDownloadsMap.delete(downloadId);
+    return { success: true };
+  }
+  return { success: false, error: 'Descarga no encontrada o ya finalizada' };
+});
+
+ipcMain.handle('browser:get-version-info', () => {
+  return {
+    braveVersion: '1.3.0',
+    chromiumVersion: process.versions.chrome || '120.0.6099.109',
+    electronVersion: process.versions.electron,
+    nodeVersion: process.versions.node,
+    v8Version: process.versions.v8,
+    osPlatform: process.platform,
+    osArch: process.arch,
+    osRelease: os.release(),
+    userAgent: session.defaultSession.getUserAgent(),
+    execPath: process.execPath,
+    userDataPath: app.getPath('userData'),
+    commandLine: process.argv.join(' '),
+  };
+});
+
 function attachDownloadHandler(ses: Electron.Session) {
   ses.on('will-download', (_event, item, webContents) => {
     const filename = item.getFilename();
@@ -937,6 +974,7 @@ function attachDownloadHandler(ses: Electron.Session) {
     const downloadId = `dl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const savePath = path.join(app.getPath('downloads'), filename);
     item.setSavePath(savePath);
+    activeDownloadsMap.set(downloadId, item);
 
     const win = BrowserWindow.fromWebContents(webContents.isDestroyed() ? mainWindow! : webContents.getOwnerBrowserWindow() || mainWindow!);
 
@@ -962,6 +1000,7 @@ function attachDownloadHandler(ses: Electron.Session) {
     });
 
     item.once('done', (_evt, state) => {
+      activeDownloadsMap.delete(downloadId);
       if (win && !win.isDestroyed()) {
         if (state === 'completed') {
           win.webContents.send('download:completed', {

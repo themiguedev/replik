@@ -66,6 +66,13 @@ contextBridge.exposeInMainWorld('braveAPI', {
   getExtensionsUrl: () => {
     return pathToFileURL(path.join(__dirname, 'ui', 'extensions.html')).href;
   },
+  getBookmarksUrl: () => {
+    return pathToFileURL(path.join(__dirname, 'ui', 'bookmarks.html')).href;
+  },
+  getVersionUrl: () => {
+    return pathToFileURL(path.join(__dirname, 'ui', 'version.html')).href;
+  },
+  getVersionInfo: () => ipcRenderer.invoke('browser:get-version-info'),
   getSitePermissions: (domain) => ipcRenderer.invoke('permissions:get', domain),
   setSitePermission: (domain, permission, state) => ipcRenderer.invoke('permissions:set', domain, permission, state),
   showSaveDialog: (options) => ipcRenderer.invoke('browser:save-dialog', options),
@@ -81,6 +88,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
   // Pipeline de Descargas
   openPath: (filePath) => ipcRenderer.invoke('browser:open-path', filePath),
   showItemInFolder: (filePath) => ipcRenderer.invoke('browser:show-item-in-folder', filePath),
+  cancelDownload: (id) => ipcRenderer.invoke('browser:cancel-download', id),
   onDownloadStarted: (callback) => ipcRenderer.on('download:started', (_e, data) => callback(data)),
   onDownloadProgress: (callback) => ipcRenderer.on('download:progress', (_e, data) => callback(data)),
   onDownloadCompleted: (callback) => ipcRenderer.on('download:completed', (_e, data) => callback(data)),
@@ -90,9 +98,10 @@ contextBridge.exposeInMainWorld('braveAPI', {
   onAuthRequired: (callback) => ipcRenderer.on('browser:auth-required', (_e, data) => callback(data)),
   submitAuth: (authId, username, password, cancel) => ipcRenderer.invoke('browser:auth-response', { authId, username, password, cancel }),
 
-  // Ratón y Caída de Pestañas
+  // Ratón, Teclas Multimedia y Caída de Pestañas
   onNavigateBack: (callback) => ipcRenderer.on('browser:navigate-back', () => callback()),
   onNavigateForward: (callback) => ipcRenderer.on('browser:navigate-forward', () => callback()),
+  onMediaKey: (callback) => ipcRenderer.on('browser:media-key', (_e, cmd) => callback(cmd)),
   onTabCrashed: (callback) => ipcRenderer.on('browser:tab-crashed', (_e, data) => callback(data)),
 
   getSessionPartition: () => {

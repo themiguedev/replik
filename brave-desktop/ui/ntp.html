@@ -487,8 +487,20 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    function loadStats() {
-      const adsBlocked = parseInt(localStorage.getItem('brave_total_ads') || '142', 10);
+    async function loadStats() {
+      if (window.braveAPI && window.braveAPI.getShieldsStats) {
+        try {
+          const stats = await window.braveAPI.getShieldsStats();
+          if (stats && typeof stats.totalBlocked === 'number') {
+            document.getElementById('stat-ads').textContent = stats.totalBlocked.toLocaleString();
+            document.getElementById('stat-band').textContent = `${stats.globalBandwidthMB} MB`;
+            document.getElementById('stat-time').textContent = stats.globalTimeSaved;
+            return;
+          }
+        } catch {}
+      }
+
+      const adsBlocked = parseInt(localStorage.getItem('brave_total_ads') || '0', 10);
       document.getElementById('stat-ads').textContent = adsBlocked.toLocaleString();
 
       const mbSaved = localStorage.getItem('brave_mb_saved') || ((adsBlocked * 34.2) / 1024).toFixed(1);
@@ -502,6 +514,7 @@
       }
     }
 
+    window.addEventListener('brave-bridge-ready', loadStats);
     loadStats();
     window.addEventListener('storage', loadStats);
 

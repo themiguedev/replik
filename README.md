@@ -55,12 +55,17 @@ Ambos binarios también se encuentran versionados en la raíz del repositorio co
 * **Control de Zoom Persistente**: Ajuste fino con `Ctrl +`, `Ctrl -`, `Ctrl 0` y `Ctrl + Scroll` de ratón con memoria por dominio e indicador interactivo en el Omnibox.
 
 ### 🛠️ 4. Productividad, Descargas y Autocompletado
-* **Pipeline Nativo de Descargas**: Captura del evento `will-download`, barra inferior no flotante con progreso en vivo, tamaño, porcentaje, botones *"Abrir archivo"* y *"Mostrar en carpeta"*, y registro en `brave://downloads`.
-* **Ergonomía Avanzada de Ratón**: Zoom mediante `Ctrl + Scroll`, botones laterales Mouse 4 y Mouse 5 para Atrás / Adelante, y apertura de enlaces en segundo plano mediante clic central (rueda) sin robar el foco.
+* **Pipeline Nativo de Descargas**: Captura del evento `will-download`, barra inferior no flotante con progreso en vivo, tamaño, porcentaje, botón para cancelar descargas en curso, botones *"Abrir archivo"* y *"Mostrar en carpeta"*, y registro en vivo en `brave://downloads`.
+* **Gestor Visual de Marcadores (`brave://bookmarks`)**: Panel integral para administrar marcadores, crear carpetas, buscar favoritos y función de **Importar y Exportar marcadores en formato HTML estándar**.
+* **Página de Información y Diagnóstico (`brave://version`)**: Vista auténtica estilo Chromium con versiones exactas de Brave Replica, Chromium, Electron, Node.js, V8, User-Agent y rutas de perfiles.
+* **Autocompletado de Formularios y Perfil Personal**: Guarda datos de contacto (Nombre, Email, Teléfono, Dirección postal) en ajustes locales cifrados y autocompleta formularios web con un solo clic.
+* **Sincronización Bidireccional de Páginas Internas**: Conexión directa entre el navegador y las páginas `brave://history`, `brave://downloads`, `brave://settings` y la Nueva Pestaña (NTP con estadísticas reales de Brave Shields).
+* **Controles Multimedia Globales (Media Keys / Windows SMTC)**: Detección de teclas multimedia del teclado para pausar o reanudar audio y video en segundo plano.
+* **Ergonomía Avanzada de Ratón y Omnibox**: Selección automática de texto en el Omnibox al enfocar o hacer clic, zoom mediante `Ctrl + Scroll`, botones laterales Mouse 4 y Mouse 5 para Atrás / Adelante, y apertura de enlaces en segundo plano mediante clic central (rueda) sin robar el foco.
 * **Gestor Local de Contraseñas y Autocompletado**: Detección de envíos de formularios, aviso flotante para guardar credenciales, autocompletado en páginas web y panel de administración en configuración.
 * **Atajos de Búsqueda Rápidos (!bangs y :)**: Búsqueda instantánea desde el Omnibox con `:g` / `!g` (Google), `:yt` / `!yt` (YouTube), `:w` / `!w` (Wikipedia), `:ddg` / `!ddg` (DuckDuckGo), `:gh` / `!gh` (GitHub), `:b` / `!b` (Brave Search), `:r` / `!r` (Reddit) y `:m` / `!m` (Google Maps).
 * **Brave Speedreader Inteligente**: Extracción avanzada con heurísticas Readability para artículos limpios, tiempo estimado de lectura y filtrado de elementos distractores.
-* **Nueva Pestaña (NTP) Personalizable**: Galería de fondos fotográficos rotativos de alta calidad, toggles para reloj y estadísticas, y gestor de accesos directos personalizados.
+* **Nueva Pestaña (NTP) Personalizable**: Galería de fondos fotográficos rotativos de alta calidad, toggles para reloj y estadísticas en vivo, y gestor de accesos directos personalizados.
 * **Captura de Pantalla Web Nativa (Brave Web Capture)**: Herramienta de recorte con atajo `Ctrl + Shift + S`, vista previa flotante, copia directa al portapapeles y guardado como PNG.
 * **Impresión Nativa y Guardar como PDF (`Ctrl + P`)**: Diálogo de impresión de Chromium para impresión física o exportación a PDF vectorial.
 * **Búsqueda Interna en la Página (`Ctrl + F`)**: Barra flotante con contador de coincidencias en tiempo real y navegación anterior/siguiente.
