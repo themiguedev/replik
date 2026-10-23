@@ -920,6 +920,43 @@ ipcMain.handle('browser:write-file', async (_event, filePath: string, base64Data
   }
 });
 
+// Creación de accesos directos y ventanas de aplicación PWA
+ipcMain.handle('browser:create-shortcut', async (_event, { url, title, openAsWindow }: { url: string; title: string; openAsWindow?: boolean }) => {
+  try {
+    const homeDir = os.homedir();
+    const desktopDir = path.join(homeDir, 'Desktop');
+    const sanitizedTitle = (title || 'Brave App').replace(/[\\/:*?"<>|]/g, '_').substring(0, 50).trim() || 'Acceso Directo';
+    const shortcutPath = path.join(desktopDir, `${sanitizedTitle}.url`);
+    const fileContent = `[InternetShortcut]\r\nURL=${url}\r\nIconIndex=0\r\n`;
+    fs.writeFileSync(shortcutPath, fileContent, 'utf-8');
+    return { success: true, path: shortcutPath };
+  } catch (err: any) {
+    return { success: false, error: err?.message || String(err) };
+  }
+});
+
+ipcMain.handle('browser:open-app-window', async (_event, { url, title }: { url: string; title: string }) => {
+  try {
+    const iconPath = path.join(baseDir, 'ui', 'logo.png');
+    const appWin = new BrowserWindow({
+      width: 1100,
+      height: 750,
+      title: title || 'Brave App',
+      icon: fs.existsSync(iconPath) ? iconPath : undefined,
+      autoHideMenuBar: true,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+      },
+    });
+    appWin.loadURL(url);
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || String(err) };
+  }
+});
+
 // ========================================================
 // PIPELINE NATIVO DE DESCARGAS (Download Pipeline)
 // ========================================================

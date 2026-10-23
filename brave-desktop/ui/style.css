@@ -1212,14 +1212,175 @@ input:checked + .slider:before {
   display: block;
 }
 
+/* Speedreader Themes */
+.speedreader-overlay.theme-dark {
+  background-color: #1a1a1e;
+  color: #e2e2e8;
+}
+.speedreader-overlay.theme-dark .speedreader-title {
+  color: #ffffff;
+}
+.speedreader-overlay.theme-dark .speedreader-header {
+  border-bottom: 1px solid #333339;
+}
+.speedreader-overlay.theme-dark .speedreader-meta {
+  color: #9e9ea7;
+}
+
+.speedreader-overlay.theme-sepia {
+  background-color: #fbf0d9;
+  color: #3d3427;
+}
+.speedreader-overlay.theme-sepia .speedreader-title {
+  color: #2b251c;
+}
+.speedreader-overlay.theme-sepia .speedreader-header {
+  border-bottom: 1px solid #e0d0b4;
+}
+.speedreader-overlay.theme-sepia .speedreader-meta {
+  color: #7d705c;
+}
+.speedreader-overlay.theme-sepia .speedreader-theme-group,
+.speedreader-overlay.theme-sepia .speedreader-font-group {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: #d6c6a8;
+}
+.speedreader-overlay.theme-sepia .sr-btn {
+  color: #3d3427;
+}
+
+.speedreader-overlay.theme-light {
+  background-color: #ffffff;
+  color: #202124;
+}
+.speedreader-overlay.theme-light .speedreader-title {
+  color: #1a1a1e;
+}
+.speedreader-overlay.theme-light .speedreader-header {
+  border-bottom: 1px solid #e5e7eb;
+}
+.speedreader-overlay.theme-light .speedreader-meta {
+  color: #5f6368;
+}
+.speedreader-overlay.theme-light .speedreader-theme-group,
+.speedreader-overlay.theme-light .speedreader-font-group {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: #d1d5db;
+}
+.speedreader-overlay.theme-light .sr-btn {
+  color: #202124;
+}
+
+/* Speedreader Fonts */
+.speedreader-overlay.font-serif {
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+}
+.speedreader-overlay.font-sans {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 .speedreader-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #333;
   padding-bottom: 16px;
   margin-bottom: 30px;
   font-family: -apple-system, sans-serif;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.speedreader-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.speedreader-pill {
+  font-size: 11.5px;
+  background: rgba(251, 84, 43, 0.15);
+  color: var(--brave-orange);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.speedreader-pill-words {
+  font-size: 11.5px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.speedreader-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.speedreader-theme-group,
+.speedreader-font-group {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2px 4px;
+  gap: 4px;
+}
+
+.sr-theme-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sr-theme-dark {
+  background: #1a1a1e;
+  color: #fff;
+  border-color: #3e3f48;
+}
+
+.sr-theme-sepia {
+  background: #fbf0d9;
+  color: #3d3427;
+  border-color: #d6c6a8;
+}
+
+.sr-theme-light {
+  background: #ffffff;
+  color: #19191c;
+  border-color: #ccc;
+}
+
+.sr-theme-btn.active {
+  border-color: var(--brave-orange);
+  box-shadow: 0 0 6px rgba(251, 84, 43, 0.5);
+}
+
+.sr-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.sr-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .speedreader-title {
@@ -1227,18 +1388,17 @@ input:checked + .slider:before {
   font-weight: 700;
   line-height: 1.3;
   margin-bottom: 14px;
-  color: #ffffff;
 }
 
 .speedreader-meta {
   font-size: 13px;
-  color: #9e9ea7;
   margin-bottom: 24px;
   font-family: -apple-system, sans-serif;
 }
 
 .speedreader-content {
   font-size: 18px;
+  transition: font-size 0.15s ease;
 }
 
 .speedreader-content p {
@@ -1370,6 +1530,141 @@ input:checked + .slider:before {
   color: #fb542b;
   background: rgba(251, 84, 43, 0.15);
   border-color: rgba(251, 84, 43, 0.4);
+}
+
+/* Master Mute All button in Global Media */
+.btn-global-mute-all {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-global-mute-all:hover {
+  background: rgba(251, 84, 43, 0.15);
+  border-color: var(--brave-orange);
+  color: var(--brave-orange);
+}
+
+/* Battery and Energy Saver Popup */
+.battery-popup {
+  display: none;
+  position: absolute;
+  top: 42px;
+  right: 210px;
+  width: 280px;
+  background-color: var(--bg-popup);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+  padding: 14px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.battery-popup.open {
+  display: flex;
+}
+
+.battery-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.battery-popup-level-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.battery-popup-level {
+  font-size: 26px;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.battery-popup.low .battery-popup-level {
+  color: #fb542b;
+}
+
+.battery-popup-status {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.battery-popup-divider {
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.battery-popup-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.battery-popup-auto-row {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Modo Ahorro Activo global */
+body.energy-saver-active {
+  --brave-transition-speed: 0s;
+}
+
+body.energy-saver-active * {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Modal Dialogs (App Shortcut, etc.) */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 200000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  background: #24252a;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+}
+
+.modal-input {
+  background: #18191c;
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 13.5px;
+  outline: none;
+}
+
+.modal-input:focus {
+  border-color: var(--brave-orange);
 }
 
 /* Custom Context Menus */

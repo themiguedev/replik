@@ -122,6 +122,35 @@
     <!-- Indicador de Batería y Ahorro de Energía -->
     <div class="battery-indicator" id="battery-indicator" title="Estado de batería y modo ahorro">🔋 100%</div>
 
+    <!-- Popup de Estado de Batería y Modo Ahorro -->
+    <div class="battery-popup" id="battery-popup">
+      <div class="battery-popup-header">
+        <span style="font-size: 16px;">⚡</span>
+        <div style="font-weight: 700; font-size: 13.5px;">Batería y Rendimiento</div>
+      </div>
+      <div class="battery-popup-level-row">
+        <div class="battery-popup-level" id="battery-popup-level">100%</div>
+        <div class="battery-popup-status" id="battery-popup-status">Conectado a la corriente</div>
+      </div>
+      <div class="battery-popup-divider"></div>
+      <div class="battery-popup-toggle-row">
+        <div>
+          <div style="font-weight: 600; font-size: 12.5px;">Modo Ahorro de Energía</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Suspende pestañas inactivas y reduce CPU</div>
+        </div>
+        <label class="switch switch-sm">
+          <input type="checkbox" id="battery-saver-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="battery-popup-auto-row">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
+          <input type="checkbox" id="battery-auto-toggle" checked style="accent-color: var(--brave-orange);">
+          <span>Activar automáticamente al llegar al 20%</span>
+        </label>
+      </div>
+    </div>
+
     <!-- Botón Captura de Pantalla Web (Brave Web Capture) -->
     <button class="nav-btn-icon" id="btn-screenshot" title="Captura de pantalla (Ctrl+Shift+S)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -253,10 +282,29 @@
     </div>
 
     <!-- Modo Lectura Speedreader Overlay -->
-    <div class="speedreader-overlay" id="speedreader-overlay">
+    <div class="speedreader-overlay theme-dark font-serif" id="speedreader-overlay">
       <div class="speedreader-header">
-        <span style="font-weight: 700; color: var(--brave-orange);">📖 Brave Speedreader</span>
-        <button class="btn-exit-reader" id="btn-close-speedreader">✕ Salir de Speedreader</button>
+        <div class="speedreader-header-left">
+          <span style="font-weight: 700; color: var(--brave-orange); font-size: 15px;">📖 Brave Speedreader</span>
+          <span class="speedreader-pill" id="speedreader-pill-time">~1 min de lectura</span>
+          <span class="speedreader-pill-words" id="speedreader-pill-words">0 palabras</span>
+        </div>
+        <div class="speedreader-toolbar">
+          <!-- Paleta de Temas de Lectura -->
+          <div class="speedreader-theme-group" title="Tema de fondo y texto">
+            <button class="sr-theme-btn sr-theme-dark active" data-sr-theme="dark" title="Tema Oscuro">A</button>
+            <button class="sr-theme-btn sr-theme-sepia" data-sr-theme="sepia" title="Tema Sepia">A</button>
+            <button class="sr-theme-btn sr-theme-light" data-sr-theme="light" title="Tema Claro">A</button>
+          </div>
+          <!-- Ajuste de Tipografía y Tamaño de Fuente -->
+          <div class="speedreader-font-group" title="Tamaño de texto">
+            <button class="sr-btn" id="sr-btn-font-dec" title="Reducir fuente (A-)">A-</button>
+            <span id="sr-font-size-label" style="font-size:11.5px; min-width:34px; text-align:center; font-weight:600;">100%</span>
+            <button class="sr-btn" id="sr-btn-font-inc" title="Aumentar fuente (A+)">A+</button>
+            <button class="sr-btn" id="sr-btn-font-family" title="Alternar Serif / Sans-Serif">Serif</button>
+          </div>
+          <button class="btn-exit-reader" id="btn-close-speedreader">✕ Salir</button>
+        </div>
       </div>
       <h1 class="speedreader-title" id="speedreader-title">Título del artículo</h1>
       <div class="speedreader-meta" id="speedreader-meta">Lectura limpia sin rastreadores ni anuncios</div>
@@ -391,6 +439,10 @@
         <span>Imprimir...</span>
         <span class="menu-shortcut">Ctrl+P</span>
       </div>
+      <div class="menu-item" id="menu-create-shortcut">
+        <span>Crear acceso directo de app...</span>
+        <span class="menu-shortcut">🚀</span>
+      </div>
       <div class="menu-item" id="menu-sync">
         <span>Sincronización</span>
         <span class="menu-shortcut">🔄</span>
@@ -453,10 +505,15 @@
 
   <!-- Popup Control Global de Multimedia -->
   <div class="global-media-popup" id="global-media-popup">
-    <div style="font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-      <span>🎵</span> Control Multimedia
+    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+      <div style="font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+        <span>🎵</span> Control Multimedia
+      </div>
+      <button class="btn-global-mute-all" id="btn-global-mute-all" title="Silenciar o reactivar audio de todas las pestañas">
+        🔇 Silenciar todo
+      </button>
     </div>
-    <div id="media-cards-container" style="display: flex; flex-direction: column; gap: 8px;">
+    <div id="media-cards-container" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
       <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0;">
         No hay multimedia reproduciéndose en este momento.
       </div>
@@ -849,6 +906,27 @@
       <div class="auth-footer">
         <button class="btn-auth-cancel" id="btn-auth-cancel">Cancelar</button>
         <button class="btn-auth-submit" id="btn-auth-submit">Iniciar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear Acceso Directo de App / PWA -->
+  <div class="modal-overlay" id="shortcut-modal">
+    <div class="modal-card" style="width: 380px;">
+      <div style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+        <span>🚀</span> Crear acceso directo
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+        <label style="color: var(--text-muted);">Nombre de la aplicación:</label>
+        <input type="text" id="shortcut-title-input" class="modal-input" placeholder="Nombre de la app">
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 4px;">
+        <input type="checkbox" id="shortcut-as-window" checked style="accent-color: var(--brave-orange);">
+        <label for="shortcut-as-window" style="cursor: pointer;">Abrir en ventana independiente (PWA)</label>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+        <button class="btn-action" id="btn-cancel-shortcut">Cancelar</button>
+        <button class="btn-action btn-primary" id="btn-confirm-shortcut">Crear</button>
       </div>
     </div>
   </div>

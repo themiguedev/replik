@@ -71,6 +71,8 @@ contextBridge.exposeInMainWorld('braveAPI', {
   setSitePermission: (domain, permission, state) => ipcRenderer.invoke('permissions:set', domain, permission, state),
   showSaveDialog: (options) => ipcRenderer.invoke('browser:save-dialog', options),
   writeFile: (filePath, base64Data) => ipcRenderer.invoke('browser:write-file', filePath, base64Data),
+  createDesktopShortcut: (options) => ipcRenderer.invoke('browser:create-shortcut', options),
+  createAppWindow: (options) => ipcRenderer.invoke('browser:open-app-window', options),
   syncCustomRules: (rulesText) => ipcRenderer.invoke('shields:sync-custom-rules', rulesText),
   loadUnpackedExtension: () => ipcRenderer.invoke('extensions:load-unpacked'),
   listExtensions: () => ipcRenderer.invoke('extensions:list'),

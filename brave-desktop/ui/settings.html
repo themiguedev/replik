@@ -441,8 +441,8 @@
       <span>Privacidad y seguridad</span>
     </div>
     <div class="nav-item" data-section="autofill">
-      <span class="nav-icon">📝</span>
-      <span>Autocompletar y Direcciones</span>
+      <span class="nav-icon">🔑</span>
+      <span>Contraseñas y Autocompletado</span>
     </div>
     <div class="nav-item" data-section="appearance">
       <span class="nav-icon">🎨</span>
@@ -560,18 +560,49 @@
           </label>
         </div>
       </div>
+    </div>
 
-      <!-- Gestor de Contraseñas -->
-      <div class="settings-group" style="margin-top: 24px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+    <!-- SECCIÓN: CONTRASEÑAS Y AUTOCOMPLETADO -->
+    <div id="section-autofill" class="settings-tab" style="display: none;">
+      <div class="section-title">Contraseñas y Autocompletado</div>
+
+      <!-- Gestor Visual de Contraseñas -->
+      <div class="settings-group" style="padding: 20px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
           <div>
-            <div class="setting-name" style="font-size: 15px;">Gestor de Contraseñas</div>
-            <div class="setting-desc">Credenciales guardadas localmente para inicio de sesión seguro.</div>
+            <div class="setting-name" style="font-size: 16px;">🔑 Gestor de Contraseñas</div>
+            <div class="setting-desc">Tus credenciales guardadas localmente y protegidas en este equipo.</div>
           </div>
-          <button class="btn-action-outline" id="btn-clear-all-pw" style="font-size: 12px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">Borrar todas</button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn-sync-action" id="btn-add-pw" style="padding: 6px 12px; font-size: 12.5px;">➕ Añadir credencial</button>
+            <button class="btn-action-outline" id="btn-export-pw" style="padding: 6px 10px; font-size: 12px;">📤 Exportar (CSV)</button>
+            <button class="btn-action-outline" id="btn-import-pw" style="padding: 6px 10px; font-size: 12px;">📥 Importar (CSV)</button>
+            <button class="btn-action-outline" id="btn-clear-all-pw" style="padding: 6px 10px; font-size: 12px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">Borrar todas</button>
+          </div>
         </div>
 
-        <div id="pw-empty-state" style="color: var(--text-muted); font-size: 13px; padding: 14px 0; text-align: center;">
+        <input type="file" id="pw-file-import" accept=".csv" style="display: none;">
+
+        <!-- Buscador de contraseñas -->
+        <div style="margin-bottom: 14px;">
+          <input type="text" id="pw-search-input" class="setting-select" style="width: 100%; max-width: 320px; padding: 7px 12px;" placeholder="🔍 Buscar credenciales guardadas...">
+        </div>
+
+        <!-- Formulario Inline para Añadir Contraseña -->
+        <div id="pw-add-form" style="display: none; background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 10px;">Añadir nueva credencial</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <input type="text" id="new-pw-domain" class="setting-select" placeholder="Sitio web (ej. github.com)">
+            <input type="text" id="new-pw-user" class="setting-select" placeholder="Usuario o correo">
+            <input type="text" id="new-pw-pass" class="setting-select" placeholder="Contraseña">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button class="btn-action-outline" id="btn-cancel-add-pw" style="font-size: 12px;">Cancelar</button>
+            <button class="btn-sync-action" id="btn-save-new-pw" style="padding: 6px 14px; font-size: 12px;">Guardar credencial</button>
+          </div>
+        </div>
+
+        <div id="pw-empty-state" style="color: var(--text-muted); font-size: 13px; padding: 20px 0; text-align: center;">
           No hay contraseñas guardadas en este momento.
         </div>
 
@@ -589,15 +620,10 @@
           </tbody>
         </table>
       </div>
-    </div>
 
-    <!-- SECCIÓN: AUTOCOMPLETAR Y DIRECCIONES -->
-    <div id="section-autofill" class="settings-tab" style="display: none;">
-      <div class="section-title">Autocompletar y Direcciones</div>
-      
       <div class="settings-group">
         <div class="setting-info" style="margin-bottom: 16px;">
-          <div class="setting-name">Perfil de identidad personal</div>
+          <div class="setting-name">Perfil de identidad personal y autocompletado</div>
           <div class="setting-desc">Tus datos se guardan exclusivamente en tu dispositivo de forma cifrada y local para autocompletar formularios en la web con un solo clic.</div>
         </div>
 
@@ -913,16 +939,38 @@
     const pwTableBody = document.getElementById('pw-table-body');
     const pwEmptyState = document.getElementById('pw-empty-state');
     const btnClearAllPw = document.getElementById('btn-clear-all-pw');
+    const pwSearchInput = document.getElementById('pw-search-input');
+    const btnAddPw = document.getElementById('btn-add-pw');
+    const pwAddForm = document.getElementById('pw-add-form');
+    const btnCancelAddPw = document.getElementById('btn-cancel-add-pw');
+    const btnSaveNewPw = document.getElementById('btn-save-new-pw');
+    const newPwDomain = document.getElementById('new-pw-domain');
+    const newPwUser = document.getElementById('new-pw-user');
+    const newPwPass = document.getElementById('new-pw-pass');
+    const btnExportPw = document.getElementById('btn-export-pw');
+    const btnImportPw = document.getElementById('btn-import-pw');
+    const pwFileImport = document.getElementById('pw-file-import');
 
-    function renderPasswords() {
+    function renderPasswords(filter = '') {
       let list = [];
       try {
         list = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
       } catch {}
 
-      if (!list || list.length === 0) {
+      const q = filter.toLowerCase().trim();
+      const filtered = list.filter((p) =>
+        (p.domain || '').toLowerCase().includes(q) ||
+        (p.username || '').toLowerCase().includes(q)
+      );
+
+      if (!filtered || filtered.length === 0) {
         if (pwTable) pwTable.style.display = 'none';
-        if (pwEmptyState) pwEmptyState.style.display = 'block';
+        if (pwEmptyState) {
+          pwEmptyState.style.display = 'block';
+          pwEmptyState.textContent = list.length === 0
+            ? 'No hay contraseñas guardadas en este momento.'
+            : 'No se encontraron contraseñas coincidentes con la búsqueda.';
+        }
         return;
       }
 
@@ -930,17 +978,19 @@
       if (pwTable) pwTable.style.display = 'table';
       if (pwTableBody) {
         pwTableBody.innerHTML = '';
-        list.forEach((pw, idx) => {
+        filtered.forEach((pw) => {
+          const origIdx = list.indexOf(pw);
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${pw.domain}</strong></td>
             <td>${pw.username || '<span style="color:var(--text-muted);">(sin usuario)</span>'}</td>
             <td>
-              <span class="pw-masked" id="pw-mask-${idx}">••••••••</span>
-              <button class="btn-pw-act btn-pw-reveal" data-idx="${idx}" title="Mostrar contraseña">👁️</button>
+              <span class="pw-masked" id="pw-mask-${origIdx}">••••••••</span>
+              <button class="btn-pw-act btn-pw-reveal" data-idx="${origIdx}" title="Mostrar/ocultar contraseña">👁️</button>
+              <button class="btn-pw-act btn-pw-copy" data-idx="${origIdx}" title="Copiar contraseña al portapapeles">📋</button>
             </td>
             <td style="text-align: right;">
-              <button class="btn-pw-act btn-pw-del" data-idx="${idx}" title="Eliminar contraseña">🗑️</button>
+              <button class="btn-pw-act btn-pw-del" data-idx="${origIdx}" title="Eliminar contraseña">🗑️</button>
             </td>
           `;
           pwTableBody.appendChild(tr);
@@ -962,17 +1012,125 @@
           });
         });
 
+        pwTableBody.querySelectorAll('.btn-pw-copy').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const i = parseInt(btn.getAttribute('data-idx'), 10);
+            navigator.clipboard.writeText(list[i].password).then(() => {
+              btn.textContent = '✓';
+              setTimeout(() => { btn.textContent = '📋'; }, 1500);
+            });
+          });
+        });
+
         pwTableBody.querySelectorAll('.btn-pw-del').forEach((btn) => {
           btn.addEventListener('click', () => {
             const i = parseInt(btn.getAttribute('data-idx'), 10);
             if (confirm(`¿Eliminar contraseña para ${list[i].domain}?`)) {
               list.splice(i, 1);
               localStorage.setItem('brave_passwords', JSON.stringify(list));
-              renderPasswords();
+              renderPasswords(pwSearchInput ? pwSearchInput.value : '');
             }
           });
         });
       }
+    }
+
+    if (pwSearchInput) {
+      pwSearchInput.addEventListener('input', (e) => {
+        renderPasswords(e.target.value);
+      });
+    }
+
+    if (btnAddPw && pwAddForm) {
+      btnAddPw.addEventListener('click', () => {
+        pwAddForm.style.display = pwAddForm.style.display === 'none' ? 'block' : 'none';
+        if (newPwDomain) newPwDomain.focus();
+      });
+    }
+
+    if (btnCancelAddPw && pwAddForm) {
+      btnCancelAddPw.addEventListener('click', () => {
+        pwAddForm.style.display = 'none';
+      });
+    }
+
+    if (btnSaveNewPw) {
+      btnSaveNewPw.addEventListener('click', () => {
+        const dom = (newPwDomain ? newPwDomain.value.trim() : '').replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+        const user = newPwUser ? newPwUser.value.trim() : '';
+        const pass = newPwPass ? newPwPass.value : '';
+        if (!dom || !pass) {
+          alert('Por favor introduce el sitio web y la contraseña.');
+          return;
+        }
+        let list = [];
+        try { list = JSON.parse(localStorage.getItem('brave_passwords') || '[]'); } catch {}
+        list.push({ domain: dom, username: user, password: pass });
+        localStorage.setItem('brave_passwords', JSON.stringify(list));
+        if (newPwDomain) newPwDomain.value = '';
+        if (newPwUser) newPwUser.value = '';
+        if (newPwPass) newPwPass.value = '';
+        if (pwAddForm) pwAddForm.style.display = 'none';
+        renderPasswords(pwSearchInput ? pwSearchInput.value : '');
+      });
+    }
+
+    if (btnExportPw) {
+      btnExportPw.addEventListener('click', () => {
+        let list = [];
+        try { list = JSON.parse(localStorage.getItem('brave_passwords') || '[]'); } catch {}
+        if (list.length === 0) {
+          alert('No hay contraseñas guardadas para exportar.');
+          return;
+        }
+        let csv = 'name,url,username,password\n';
+        list.forEach((p) => {
+          csv += `"${p.domain}","https://${p.domain}","${(p.username || '').replace(/"/g, '""')}","${(p.password || '').replace(/"/g, '""')}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `brave_passwords_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+      });
+    }
+
+    if (btnImportPw && pwFileImport) {
+      btnImportPw.addEventListener('click', () => {
+        pwFileImport.click();
+      });
+
+      pwFileImport.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const text = evt.target.result;
+          const lines = text.split(/\r?\n/);
+          let count = 0;
+          let list = [];
+          try { list = JSON.parse(localStorage.getItem('brave_passwords') || '[]'); } catch {}
+
+          lines.forEach((line, idx) => {
+            if (idx === 0 && line.toLowerCase().includes('username')) return;
+            const parts = line.split(',');
+            if (parts.length >= 4) {
+              const dom = parts[0].replace(/"/g, '').trim();
+              const user = parts[2].replace(/"/g, '').trim();
+              const pass = parts[3].replace(/"/g, '').trim();
+              if (dom && pass) {
+                list.push({ domain: dom, username: user, password: pass });
+                count++;
+              }
+            }
+          });
+          localStorage.setItem('brave_passwords', JSON.stringify(list));
+          renderPasswords();
+          alert(`Se importaron ${count} credenciales exitosamente.`);
+        };
+        reader.readAsText(file);
+        pwFileImport.value = '';
+      });
     }
 
     if (btnClearAllPw) {

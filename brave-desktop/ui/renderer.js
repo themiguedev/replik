@@ -220,48 +220,104 @@ const TAB_GROUPS = {
 };
 
 // ==========================================
-// 1. MEDIDOR DE BATERÍA Y MODO AHORRO (Energy Saver)
+// 1. MEDIDOR DE BATERÍA Y MODO AHORRO INTELIGENTE (Smart Energy Saver)
 // ==========================================
 let isEnergySaverActive = false;
+let autoBatterySaverEnabled = localStorage.getItem('brave_battery_auto_saver') !== 'false';
+
+const batteryPopup = document.getElementById('battery-popup');
+const batteryPopupLevel = document.getElementById('battery-popup-level');
+const batteryPopupStatus = document.getElementById('battery-popup-status');
+const batterySaverToggle = document.getElementById('battery-saver-toggle');
+const batteryAutoToggle = document.getElementById('battery-auto-toggle');
 
 function initBatteryMonitoring() {
+  if (batteryAutoToggle) {
+    batteryAutoToggle.checked = autoBatterySaverEnabled;
+    batteryAutoToggle.addEventListener('change', () => {
+      autoBatterySaverEnabled = batteryAutoToggle.checked;
+      localStorage.setItem('brave_battery_auto_saver', String(autoBatterySaverEnabled));
+    });
+  }
+
+  if (batterySaverToggle) {
+    batterySaverToggle.addEventListener('change', () => {
+      activateEnergySaver(batterySaverToggle.checked, false);
+    });
+  }
+
   if ('getBattery' in navigator) {
     navigator.getBattery().then((battery) => {
       function updateBatteryUI() {
         const level = Math.round(battery.level * 100);
         const icon = battery.charging ? '⚡' : '🔋';
-        batteryIndicator.textContent = `${icon} ${level}%`;
+        if (batteryIndicator) batteryIndicator.textContent = `${icon} ${level}%`;
+        if (batteryPopupLevel) batteryPopupLevel.textContent = `${level}%`;
+        if (batteryPopupStatus) {
+          batteryPopupStatus.textContent = battery.charging
+            ? 'Conectado a la corriente (cargando)'
+            : 'En batería';
+        }
+
         if (level <= 20 && !battery.charging) {
-          batteryIndicator.classList.add('low');
-          activateEnergySaver(true);
+          if (batteryIndicator) batteryIndicator.classList.add('low');
+          if (batteryPopup) batteryPopup.classList.add('low');
+          if (autoBatterySaverEnabled && !isEnergySaverActive) {
+            activateEnergySaver(true, true);
+          }
         } else {
-          batteryIndicator.classList.remove('low');
+          if (batteryIndicator) batteryIndicator.classList.remove('low');
+          if (batteryPopup) batteryPopup.classList.remove('low');
         }
       }
       updateBatteryUI();
       battery.addEventListener('levelchange', updateBatteryUI);
       battery.addEventListener('chargingchange', updateBatteryUI);
     }).catch(() => {
-      batteryIndicator.textContent = '🔋 100%';
+      if (batteryIndicator) batteryIndicator.textContent = '🔋 100%';
     });
   }
 }
 
-function activateEnergySaver(enable) {
+function activateEnergySaver(enable, wasAuto = false) {
   isEnergySaverActive = enable;
+  if (batterySaverToggle) batterySaverToggle.checked = enable;
+
   if (isEnergySaverActive) {
-    batteryIndicator.title = 'Modo Ahorro de Energía (Activo) - Suspende pestañas inactivas para extender la batería';
-    batteryIndicator.style.borderColor = 'var(--brave-orange)';
+    document.body.classList.add('energy-saver-active');
+    if (batteryIndicator) {
+      batteryIndicator.title = 'Modo Ahorro de Energía (Activo) - Suspende pestañas inactivas para extender la batería';
+      batteryIndicator.style.borderColor = 'var(--brave-orange)';
+    }
+    // Optimizar y suspender pestañas en segundo plano
+    tabs.forEach((t) => {
+      if (t.id !== activeTabId && t.webviewEl) {
+        t.webviewEl.executeJavaScript(`
+          if (!window.__braveSaverActive) {
+            window.__braveSaverActive = true;
+          }
+        `).catch(() => {});
+      }
+    });
+
+    if (wasAuto) {
+      showGlobalToast('🔋 Modo Ahorro activado automáticamente (<20% batería). Pestañas optimizadas.');
+    }
   } else {
-    batteryIndicator.title = 'Estado de batería y modo ahorro';
-    batteryIndicator.style.borderColor = '';
+    document.body.classList.remove('energy-saver-active');
+    if (batteryIndicator) {
+      batteryIndicator.title = 'Estado de batería y modo ahorro';
+      batteryIndicator.style.borderColor = '';
+    }
   }
 }
 
-batteryIndicator.addEventListener('click', () => {
-  activateEnergySaver(!isEnergySaverActive);
-  alert(`Modo Ahorro de Energía de Brave: ${isEnergySaverActive ? 'Activado (Ahorrando batería y CPU)' : 'Desactivado'}`);
-});
+if (batteryIndicator) {
+  batteryIndicator.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (batteryPopup) batteryPopup.classList.toggle('open');
+  });
+}
 
 initBatteryMonitoring();
 
@@ -1737,9 +1793,37 @@ btnGlobalMedia.addEventListener('click', (e) => {
   updateGlobalMediaMenu();
 });
 
+const btnGlobalMuteAll = document.getElementById('btn-global-mute-all');
+if (btnGlobalMuteAll) {
+  btnGlobalMuteAll.addEventListener('click', () => {
+    const audibleTabs = tabs.filter((t) => t.isAudible || t.isMuted);
+    if (audibleTabs.length === 0) return;
+    const shouldMute = audibleTabs.some((t) => !t.isMuted);
+    audibleTabs.forEach((t) => {
+      t.isMuted = shouldMute;
+      if (t.webviewEl) t.webviewEl.setAudioMuted(shouldMute);
+    });
+    showGlobalToast(shouldMute ? '🔇 Todas las pestañas han sido silenciadas' : '🔊 Sonido reactivado en todas las pestañas');
+    updateGlobalMediaMenu();
+  });
+}
+
 function updateGlobalMediaMenu() {
   if (!globalMediaPopup) return;
   const audibleTabs = tabs.filter((t) => t.isAudible || t.isMuted);
+
+  if (btnGlobalMuteAll) {
+    if (audibleTabs.length === 0) {
+      btnGlobalMuteAll.disabled = true;
+      btnGlobalMuteAll.style.opacity = '0.5';
+      btnGlobalMuteAll.textContent = '🔇 Silenciar todo';
+    } else {
+      btnGlobalMuteAll.disabled = false;
+      btnGlobalMuteAll.style.opacity = '1';
+      const anyUnmuted = audibleTabs.some((t) => !t.isMuted);
+      btnGlobalMuteAll.textContent = anyUnmuted ? '🔇 Silenciar todo' : '🔊 Reactivar todo';
+    }
+  }
 
   if (audibleTabs.length === 0) {
     mediaCardsContainer.innerHTML = `
@@ -1790,8 +1874,81 @@ function updateGlobalMediaMenu() {
 }
 
 // ==========================================
-// 8. MODO LECTURA BRAVE SPEEDREADER
+// 8. MODO LECTURA BRAVE SPEEDREADER Y PERSONALIZACIÓN
 // ==========================================
+let srTheme = localStorage.getItem('brave_sr_theme') || 'dark';
+let srFontSize = parseInt(localStorage.getItem('brave_sr_font_size') || '100', 10);
+let srFontFamily = localStorage.getItem('brave_sr_font_family') || 'serif';
+
+const speedreaderPillTime = document.getElementById('speedreader-pill-time');
+const speedreaderPillWords = document.getElementById('speedreader-pill-words');
+const srFontSizeLabel = document.getElementById('sr-font-size-label');
+const srBtnFontDec = document.getElementById('sr-btn-font-dec');
+const srBtnFontInc = document.getElementById('sr-btn-font-inc');
+const srBtnFontFamily = document.getElementById('sr-btn-font-family');
+const srThemeButtons = document.querySelectorAll('.sr-theme-btn');
+
+function applySpeedreaderPrefs() {
+  if (!speedreaderOverlay) return;
+  speedreaderOverlay.classList.remove('theme-dark', 'theme-sepia', 'theme-light');
+  speedreaderOverlay.classList.add(`theme-${srTheme}`);
+
+  speedreaderOverlay.classList.remove('font-serif', 'font-sans');
+  speedreaderOverlay.classList.add(`font-${srFontFamily}`);
+
+  if (speedreaderContent) {
+    speedreaderContent.style.fontSize = `${18 * (srFontSize / 100)}px`;
+  }
+  if (srFontSizeLabel) {
+    srFontSizeLabel.textContent = `${srFontSize}%`;
+  }
+  if (srBtnFontFamily) {
+    srBtnFontFamily.textContent = srFontFamily === 'serif' ? 'Serif' : 'Sans';
+  }
+
+  srThemeButtons.forEach((btn) => {
+    if (btn.getAttribute('data-sr-theme') === srTheme) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+srThemeButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    srTheme = btn.getAttribute('data-sr-theme');
+    localStorage.setItem('brave_sr_theme', srTheme);
+    applySpeedreaderPrefs();
+  });
+});
+
+if (srBtnFontDec) {
+  srBtnFontDec.addEventListener('click', () => {
+    srFontSize = Math.max(70, srFontSize - 10);
+    localStorage.setItem('brave_sr_font_size', String(srFontSize));
+    applySpeedreaderPrefs();
+  });
+}
+
+if (srBtnFontInc) {
+  srBtnFontInc.addEventListener('click', () => {
+    srFontSize = Math.min(160, srFontSize + 10);
+    localStorage.setItem('brave_sr_font_size', String(srFontSize));
+    applySpeedreaderPrefs();
+  });
+}
+
+if (srBtnFontFamily) {
+  srBtnFontFamily.addEventListener('click', () => {
+    srFontFamily = srFontFamily === 'serif' ? 'sans' : 'serif';
+    localStorage.setItem('brave_sr_font_family', srFontFamily);
+    applySpeedreaderPrefs();
+  });
+}
+
+applySpeedreaderPrefs();
+
 function toggleSpeedreader() {
   const tab = getActiveTab();
   if (!tab) return;
@@ -1879,7 +2036,10 @@ function toggleSpeedreader() {
     const readMin = Math.max(1, Math.round(data.totalWords / 200));
     speedreaderTitle.textContent = data.title || tab.title;
     speedreaderMeta.textContent = `${tab.domain}${data.author ? ' • Por ' + data.author : ''} • ~${readMin} min de lectura • Modo limpio sin anuncios`;
+    if (speedreaderPillTime) speedreaderPillTime.textContent = `~${readMin} min de lectura`;
+    if (speedreaderPillWords) speedreaderPillWords.textContent = `${data.totalWords} palabras`;
     speedreaderContent.innerHTML = data.htmlContent;
+    applySpeedreaderPrefs();
 
     speedreaderOverlay.classList.add('active');
     btnSpeedreader.classList.add('active');
@@ -2718,6 +2878,9 @@ document.addEventListener('click', (e) => {
   if (qrPopupEl && !qrPopupEl.contains(e.target) && e.target !== btnQrEl) {
     qrPopupEl.classList.remove('open');
   }
+  if (batteryPopup && !batteryPopup.contains(e.target) && e.target !== batteryIndicator) {
+    batteryPopup.classList.remove('open');
+  }
   if (taskManagerModal && e.target === taskManagerModal) {
     closeTaskManager();
   }
@@ -2872,6 +3035,53 @@ if (menuPrint) {
   menuPrint.addEventListener('click', () => {
     mainMenu.classList.remove('open');
     printActivePage();
+  });
+}
+
+// Crear acceso directo de aplicación / PWA
+const menuCreateShortcut = document.getElementById('menu-create-shortcut');
+const shortcutModal = document.getElementById('shortcut-modal');
+const shortcutTitleInput = document.getElementById('shortcut-title-input');
+const shortcutAsWindow = document.getElementById('shortcut-as-window');
+const btnCancelShortcut = document.getElementById('btn-cancel-shortcut');
+const btnConfirmShortcut = document.getElementById('btn-confirm-shortcut');
+
+if (menuCreateShortcut && shortcutModal) {
+  menuCreateShortcut.addEventListener('click', () => {
+    mainMenu.classList.remove('open');
+    const tab = getActiveTab();
+    if (!tab) return;
+    if (shortcutTitleInput) shortcutTitleInput.value = tab.title || tab.domain;
+    shortcutModal.classList.add('open');
+    if (shortcutTitleInput) shortcutTitleInput.focus();
+  });
+}
+
+if (btnCancelShortcut && shortcutModal) {
+  btnCancelShortcut.addEventListener('click', () => {
+    shortcutModal.classList.remove('open');
+  });
+}
+
+if (btnConfirmShortcut && shortcutModal) {
+  btnConfirmShortcut.addEventListener('click', async () => {
+    const tab = getActiveTab();
+    if (!tab) return;
+    const title = (shortcutTitleInput ? shortcutTitleInput.value.trim() : '') || tab.title || 'Brave App';
+    const url = tab.url;
+    const asWindow = shortcutAsWindow ? shortcutAsWindow.checked : true;
+
+    shortcutModal.classList.remove('open');
+
+    if (window.braveAPI && window.braveAPI.createDesktopShortcut) {
+      await window.braveAPI.createDesktopShortcut({ url, title, openAsWindow: asWindow });
+    }
+
+    if (asWindow && window.braveAPI && window.braveAPI.createAppWindow) {
+      await window.braveAPI.createAppWindow({ url, title });
+    }
+
+    showGlobalToast(`✓ Acceso directo creado en el Escritorio: ${title}`);
   });
 }
 

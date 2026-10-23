@@ -76,6 +76,42 @@
       font-weight: 600;
     }
 
+    .folder-count {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 10px;
+      color: var(--text-muted);
+    }
+
+    .bm-folder-badge {
+      font-size: 10.5px;
+      background: rgba(251, 84, 43, 0.12);
+      color: var(--brave-orange);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .folder-del-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .folder-item:hover .folder-del-btn {
+      opacity: 1;
+    }
+
+    .folder-del-btn:hover {
+      color: #ef4444;
+    }
+
     /* Contenido Principal */
     .main-view {
       flex: 1;
@@ -316,16 +352,24 @@
     </div>
     <div class="folder-item active" data-folder="all">
       <span>📂</span>
-      <span>Todos los marcadores</span>
+      <span style="flex:1;">Todos los marcadores</span>
+      <span class="folder-count" id="count-all">0</span>
     </div>
     <div class="folder-item" data-folder="bar">
       <span>⭐</span>
-      <span>Barra de marcadores</span>
+      <span style="flex:1;">Barra de marcadores</span>
+      <span class="folder-count" id="count-bar">0</span>
     </div>
     <div class="folder-item" data-folder="other">
       <span>📁</span>
-      <span>Otros marcadores</span>
+      <span style="flex:1;">Otros marcadores</span>
+      <span class="folder-count" id="count-other">0</span>
     </div>
+    <div style="height: 1px; background: var(--border-color); margin: 6px 0;"></div>
+    <div id="custom-folders-container" style="display: flex; flex-direction: column; gap: 4px;"></div>
+    <button class="btn-action" id="btn-new-folder" style="margin-top: 8px; justify-content: center; font-size: 12px;">
+      ➕ Nueva carpeta
+    </button>
   </div>
 
   <div class="main-view">
@@ -362,6 +406,13 @@
         <label>URL:</label>
         <input type="text" id="bm-input-url" placeholder="https://search.brave.com">
       </div>
+      <div class="input-field">
+        <label>Carpeta:</label>
+        <select id="bm-input-folder" style="background:#18191c; border:1px solid var(--border-color); padding:8px 12px; border-radius:6px; color:var(--text-main); font-size:13.5px; outline:none;">
+          <option value="bar">Barra de marcadores</option>
+          <option value="other">Otros marcadores</option>
+        </select>
+      </div>
       <div class="modal-buttons">
         <button class="btn-action" id="btn-cancel-modal">Cancelar</button>
         <button class="btn-action btn-primary" id="btn-save-modal">Guardar</button>
@@ -372,12 +423,108 @@
   <script>
     let bookmarks = [];
     let editIndex = -1;
+    let currentFolder = 'all';
+    let customFolders = [];
+    try {
+      customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+    } catch {
+      customFolders = ["Favoritos", "Trabajo"];
+    }
+
+    function saveCustomFolders() {
+      localStorage.setItem('brave_bookmark_folders', JSON.stringify(customFolders));
+      renderFolders();
+    }
+
+    function renderFolders() {
+      const container = document.getElementById('custom-folders-container');
+      if (container) {
+        container.innerHTML = '';
+        customFolders.forEach((folderName) => {
+          const item = document.createElement('div');
+          item.className = `folder-item ${currentFolder === folderName ? 'active' : ''}`;
+          item.setAttribute('data-folder', folderName);
+          const count = bookmarks.filter(b => b.folder === folderName).length;
+          item.innerHTML = `
+            <span>📁</span>
+            <span style="flex:1;">${escapeHtml(folderName)}</span>
+            <span class="folder-count">${count}</span>
+            <button class="folder-del-btn" title="Eliminar carpeta" data-folder="${escapeHtml(folderName)}">✕</button>
+          `;
+          container.appendChild(item);
+        });
+
+        container.querySelectorAll('.folder-del-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const fName = btn.getAttribute('data-folder');
+            if (confirm(`¿Eliminar la carpeta "${fName}"? Los marcadores se moverán a Otros marcadores.`)) {
+              customFolders = customFolders.filter(f => f !== fName);
+              bookmarks.forEach(b => { if (b.folder === fName) b.folder = 'other'; });
+              saveBookmarks();
+              saveCustomFolders();
+              if (currentFolder === fName) currentFolder = 'all';
+              renderFolders();
+              renderList(document.getElementById('search-input').value);
+            }
+          });
+        });
+      }
+
+      // Conteo de carpetas predeterminadas
+      const countAll = document.getElementById('count-all');
+      const countBar = document.getElementById('count-bar');
+      const countOther = document.getElementById('count-other');
+      if (countAll) countAll.textContent = bookmarks.length;
+      if (countBar) countBar.textContent = bookmarks.filter(b => (!b.folder || b.folder === 'bar')).length;
+      if (countOther) countOther.textContent = bookmarks.filter(b => b.folder === 'other').length;
+
+      // Eventos de selección de carpetas
+      document.querySelectorAll('.folder-item').forEach((item) => {
+        item.onclick = () => {
+          document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
+          item.classList.add('active');
+          currentFolder = item.getAttribute('data-folder');
+          renderList(document.getElementById('search-input').value);
+        };
+      });
+
+      // Actualizar opciones en el selector del modal
+      const folderSelect = document.getElementById('bm-input-folder');
+      if (folderSelect) {
+        folderSelect.innerHTML = `
+          <option value="bar">Barra de marcadores</option>
+          <option value="other">Otros marcadores</option>
+        `;
+        customFolders.forEach((f) => {
+          const opt = document.createElement('option');
+          opt.value = f;
+          opt.textContent = f;
+          folderSelect.appendChild(opt);
+        });
+      }
+    }
+
+    const btnNewFolder = document.getElementById('btn-new-folder');
+    if (btnNewFolder) {
+      btnNewFolder.addEventListener('click', () => {
+        const name = prompt('Nombre de la nueva carpeta:');
+        if (name && name.trim()) {
+          const trimmed = name.trim();
+          if (!customFolders.includes(trimmed)) {
+            customFolders.push(trimmed);
+            saveCustomFolders();
+          }
+        }
+      });
+    }
 
     async function loadBookmarks() {
       if (window.braveAPI && window.braveAPI.getBookmarks) {
         try {
           bookmarks = await window.braveAPI.getBookmarks();
           if (Array.isArray(bookmarks) && bookmarks.length > 0) {
+            renderFolders();
             renderList();
             return;
           }
@@ -392,13 +539,14 @@
 
       if (bookmarks.length === 0) {
         bookmarks = [
-          { title: 'Brave Search', url: 'https://search.brave.com' },
-          { title: 'YouTube', url: 'https://youtube.com' },
-          { title: 'GitHub', url: 'https://github.com' },
-          { title: 'Wikipedia', url: 'https://wikipedia.org' }
+          { title: 'Brave Search', url: 'https://search.brave.com', folder: 'bar' },
+          { title: 'YouTube', url: 'https://youtube.com', folder: 'bar' },
+          { title: 'GitHub', url: 'https://github.com', folder: 'Favoritos' },
+          { title: 'Wikipedia', url: 'https://wikipedia.org', folder: 'other' }
         ];
         saveBookmarks();
       }
+      renderFolders();
       renderList();
     }
 
@@ -409,6 +557,7 @@
           await window.braveAPI.saveBookmarks(bookmarks);
         } catch {}
       }
+      renderFolders();
     }
 
     function renderList(filter = '') {
@@ -416,13 +565,20 @@
       container.innerHTML = '';
 
       const q = filter.toLowerCase().trim();
-      const filtered = bookmarks.filter(b => 
+      let filtered = bookmarks.filter(b => 
         (b.title || '').toLowerCase().includes(q) || 
         (b.url || '').toLowerCase().includes(q)
       );
 
+      if (currentFolder !== 'all') {
+        filtered = filtered.filter(b => {
+          const f = b.folder || 'bar';
+          return f === currentFolder;
+        });
+      }
+
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty-state">No se encontraron marcadores.</div>';
+        container.innerHTML = `<div class="empty-state">${q ? 'No se encontraron marcadores coincidentes.' : 'Esta carpeta está vacía.'}</div>`;
         return;
       }
 
@@ -430,10 +586,14 @@
         const realIdx = bookmarks.indexOf(bm);
         const row = document.createElement('div');
         row.className = 'bookmark-row';
+        const folderLabel = bm.folder === 'bar' ? 'Barra' : (bm.folder === 'other' ? 'Otros' : (bm.folder || 'Barra'));
         row.innerHTML = `
           <div class="bm-icon">🔖</div>
           <a class="bm-info" href="${bm.url}" target="_blank">
-            <span class="bm-title">${escapeHtml(bm.title || bm.url)}</span>
+            <div style="display:flex; align-items:center;">
+              <span class="bm-title">${escapeHtml(bm.title || bm.url)}</span>
+              <span class="bm-folder-badge">${escapeHtml(folderLabel)}</span>
+            </div>
             <span class="bm-url">${escapeHtml(bm.url)}</span>
           </a>
           <div class="bm-actions">
@@ -473,12 +633,16 @@
     const modal = document.getElementById('bm-modal');
     const inputTitle = document.getElementById('bm-input-title');
     const inputUrl = document.getElementById('bm-input-url');
+    const inputFolder = document.getElementById('bm-input-folder');
 
     document.getElementById('btn-add-modal').addEventListener('click', () => {
       editIndex = -1;
       document.getElementById('modal-heading').textContent = 'Añadir marcador';
       inputTitle.value = '';
       inputUrl.value = 'https://';
+      if (inputFolder) {
+        inputFolder.value = (currentFolder !== 'all') ? currentFolder : 'bar';
+      }
       modal.classList.add('open');
       inputTitle.focus();
     });
@@ -487,6 +651,9 @@
       document.getElementById('modal-heading').textContent = 'Editar marcador';
       inputTitle.value = bookmarks[idx].title || '';
       inputUrl.value = bookmarks[idx].url || '';
+      if (inputFolder) {
+        inputFolder.value = bookmarks[idx].folder || 'bar';
+      }
       modal.classList.add('open');
       inputTitle.focus();
     }
@@ -500,11 +667,12 @@
       let url = inputUrl.value.trim();
       if (!url) return;
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      const folder = inputFolder ? inputFolder.value : 'bar';
 
       if (editIndex >= 0) {
-        bookmarks[editIndex] = { title, url };
+        bookmarks[editIndex] = { ...bookmarks[editIndex], title, url, folder };
       } else {
-        bookmarks.unshift({ title, url });
+        bookmarks.unshift({ title, url, folder });
       }
 
       await saveBookmarks();
