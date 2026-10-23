@@ -1328,6 +1328,12 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     switchTab(id);
   } else {
     tabData.webviewEl.classList.add('hidden');
+    tabData.webviewEl.style.visibility = 'hidden';
+    tabData.webviewEl.style.opacity = '0';
+    tabData.webviewEl.style.pointerEvents = 'none';
+    tabData.webviewEl.style.zIndex = '0';
+    tabData.webviewEl.style.top = '-99999px';
+    tabData.webviewEl.style.left = '-99999px';
     throttleBackgroundTab(tabData);
   }
   return tabData;
@@ -1444,10 +1450,24 @@ function switchTab(id) {
         t.tabEl.classList.add('active');
         t.webviewEl.classList.remove('hidden');
         t.webviewEl.style.width = '100%';
+        t.webviewEl.style.height = '100%';
+        t.webviewEl.style.position = 'absolute';
+        t.webviewEl.style.top = '0';
+        t.webviewEl.style.left = '0';
+        t.webviewEl.style.visibility = 'visible';
+        t.webviewEl.style.opacity = '1';
+        t.webviewEl.style.pointerEvents = 'auto';
+        t.webviewEl.style.zIndex = '2';
         resumeTabExecution(t);
       } else {
         t.tabEl.classList.remove('active');
         t.webviewEl.classList.add('hidden');
+        t.webviewEl.style.visibility = 'hidden';
+        t.webviewEl.style.opacity = '0';
+        t.webviewEl.style.pointerEvents = 'none';
+        t.webviewEl.style.zIndex = '0';
+        t.webviewEl.style.top = '-99999px';
+        t.webviewEl.style.left = '-99999px';
         throttleBackgroundTab(t);
       }
     });
@@ -1461,7 +1481,11 @@ function switchTab(id) {
   // Aplicar factor de zoom del dominio de la pestaña seleccionada
   const dom = currentTab.domain || extractDomain(currentTab.url);
   const zf = getStoredDomainZoom(dom);
-  currentTab.webviewEl.setZoomFactor(zf);
+  try {
+    if (typeof currentTab.webviewEl.setZoomFactor === 'function') {
+      currentTab.webviewEl.setZoomFactor(zf);
+    }
+  } catch {}
   currentTab.zoomFactor = zf;
   updateZoomUI(zf);
 }
@@ -3246,19 +3270,41 @@ function updateSplitViewLayout() {
       t.webviewEl.classList.remove('hidden');
       t.webviewEl.classList.add('split-left');
       t.webviewEl.classList.remove('split-right');
+      t.webviewEl.style.position = 'relative';
+      t.webviewEl.style.top = '0';
+      t.webviewEl.style.left = '0';
       t.webviewEl.style.width = `calc(${splitRatio * 100}% - 2.5px)`;
+      t.webviewEl.style.height = '100%';
+      t.webviewEl.style.visibility = 'visible';
+      t.webviewEl.style.opacity = '1';
+      t.webviewEl.style.pointerEvents = 'auto';
+      t.webviewEl.style.zIndex = '2';
       resumeTabExecution(t);
     } else if (t.id === rightTab.id) {
       t.tabEl.classList.remove('active');
       t.webviewEl.classList.remove('hidden');
       t.webviewEl.classList.add('split-right');
       t.webviewEl.classList.remove('split-left');
+      t.webviewEl.style.position = 'relative';
+      t.webviewEl.style.top = '0';
+      t.webviewEl.style.left = '0';
       t.webviewEl.style.width = `calc(${(1 - splitRatio) * 100}% - 2.5px)`;
+      t.webviewEl.style.height = '100%';
+      t.webviewEl.style.visibility = 'visible';
+      t.webviewEl.style.opacity = '1';
+      t.webviewEl.style.pointerEvents = 'auto';
+      t.webviewEl.style.zIndex = '2';
       resumeTabExecution(t);
     } else {
       t.tabEl.classList.remove('active');
       t.webviewEl.classList.add('hidden');
       t.webviewEl.classList.remove('split-left', 'split-right');
+      t.webviewEl.style.visibility = 'hidden';
+      t.webviewEl.style.opacity = '0';
+      t.webviewEl.style.pointerEvents = 'none';
+      t.webviewEl.style.zIndex = '0';
+      t.webviewEl.style.top = '-99999px';
+      t.webviewEl.style.left = '-99999px';
       throttleBackgroundTab(t);
     }
   });
@@ -3278,7 +3324,13 @@ function toggleSplitView(targetSecondTabId) {
     if (resizer) resizer.remove();
     tabs.forEach((t) => {
       t.webviewEl.classList.remove('split-left', 'split-right');
+      t.webviewEl.style.position = 'absolute';
+      t.webviewEl.style.top = '0';
+      t.webviewEl.style.left = '0';
       t.webviewEl.style.width = '100%';
+      t.webviewEl.style.height = '100%';
+      t.webviewEl.style.zIndex = '';
+      t.webviewEl.style.pointerEvents = '';
     });
     switchTab(activeTabId);
   } else {
@@ -4969,4 +5021,6 @@ if (startupMode === 'continue') {
 
 if (!restoredAny) {
   createTab(ntpUrl);
+} else if (tabs.length > 0) {
+  switchTab(tabs[0].id);
 }
