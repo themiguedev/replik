@@ -296,17 +296,23 @@
     let playlist = [];
     let currentIndex = -1;
 
-    function loadPlaylist() {
+    async function loadPlaylist() {
+      if (window.braveAPI && window.braveAPI.getPlaylist) {
+        try {
+          const list = await window.braveAPI.getPlaylist();
+          if (Array.isArray(list)) {
+            playlist = list;
+            renderQueue();
+            if (playlist.length > 0 && currentIndex === -1) {
+              playItem(0);
+            }
+            return;
+          }
+        } catch {}
+      }
       try {
         const raw = localStorage.getItem('brave_playlist_items');
-        playlist = raw ? JSON.parse(raw) : [
-          {
-            title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
-            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-            domain: 'youtube.com',
-            date: new Date().toLocaleDateString()
-          }
-        ];
+        playlist = raw ? JSON.parse(raw) : [];
       } catch {
         playlist = [];
       }
@@ -316,8 +322,11 @@
       }
     }
 
-    function savePlaylist() {
+    async function savePlaylist() {
       localStorage.setItem('brave_playlist_items', JSON.stringify(playlist));
+      if (window.braveAPI && window.braveAPI.savePlaylist) {
+        try { await window.braveAPI.savePlaylist(playlist); } catch {}
+      }
       renderQueue();
     }
 
@@ -435,6 +444,7 @@
       }
     });
 
+    window.addEventListener('brave-bridge-ready', loadPlaylist);
     loadPlaylist();
   </script>
 </body>

@@ -799,10 +799,25 @@
     let activeContextMenuRow = null;
     let activeFolderForCtx = null;
 
-    try {
-      customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
-    } catch {
-      customFolders = ["Favoritos", "Trabajo"];
+    async function loadCustomFolders() {
+      if (window.braveAPI && window.braveAPI.getBookmarkFolders) {
+        try {
+          const list = await window.braveAPI.getBookmarkFolders();
+          if (Array.isArray(list)) {
+            customFolders = list;
+            renderFolders();
+            updateFolderSelectors();
+            return;
+          }
+        } catch {}
+      }
+      try {
+        customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+      } catch {
+        customFolders = ["Favoritos", "Trabajo"];
+      }
+      renderFolders();
+      updateFolderSelectors();
     }
 
     function showToast(msg) {
@@ -814,8 +829,11 @@
       }, 2600);
     }
 
-    function saveCustomFolders() {
+    async function saveCustomFolders() {
       localStorage.setItem('brave_bookmark_folders', JSON.stringify(customFolders));
+      if (window.braveAPI && window.braveAPI.saveBookmarkFolders) {
+        try { await window.braveAPI.saveBookmarkFolders(customFolders); } catch {}
+      }
       renderFolders();
       updateFolderSelectors();
     }
@@ -1496,7 +1514,11 @@
       return div.innerHTML;
     }
 
-    window.addEventListener('brave-bridge-ready', loadBookmarks);
+    window.addEventListener('brave-bridge-ready', () => {
+      loadCustomFolders();
+      loadBookmarks();
+    });
+    loadCustomFolders();
     loadBookmarks();
   </script>
 </body>

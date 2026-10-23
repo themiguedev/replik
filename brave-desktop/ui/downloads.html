@@ -8,11 +8,18 @@
     :root {
       --bg-page: #19191c;
       --bg-card: #212226;
+      --bg-card-hover: #26272d;
+      --bg-progress: #2a2b33;
       --border-color: #2e2f38;
       --brave-orange: #fb542b;
+      --brave-orange-dim: rgba(251, 84, 43, 0.15);
+      --brave-orange-border: rgba(251, 84, 43, 0.4);
       --text-main: #ffffff;
       --text-muted: #9e9ea7;
       --text-sub: #72727d;
+      --green: #4ade80;
+      --red: #f87171;
+      --blue: #60a5fa;
     }
 
     * {
@@ -20,26 +27,29 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      user-select: none;
     }
 
     body {
       background-color: var(--bg-page);
       color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow-y: auto;
-      padding: 36px 60px;
+      min-height: 100vh;
+      padding: 36px 0;
     }
 
-    .header-bar {
+    .page-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Header ── */
+    .page-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 24px;
-      max-width: 860px;
-      width: 100%;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .title-group {
@@ -48,323 +58,981 @@
       gap: 12px;
     }
 
-    .title-icon {
-      font-size: 26px;
+    .title-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
     }
 
     .title-text {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
+      letter-spacing: -0.3px;
     }
 
-    .btn-clear {
-      background: rgba(251, 84, 43, 0.15);
-      border: 1px solid rgba(251, 84, 43, 0.4);
-      color: var(--brave-orange);
-      padding: 8px 16px;
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .btn-header {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 7px 14px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-header:hover {
+      background: rgba(255,255,255,0.12);
+      color: var(--text-main);
+    }
+
+    .btn-clear-all {
+      background: var(--brave-orange-dim);
+      border: 1px solid var(--brave-orange-border);
+      color: var(--brave-orange);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.18s;
+    }
+    .btn-clear-all:hover {
+      background: var(--brave-orange);
+      color: #fff;
     }
 
-    .btn-clear:hover {
-      background: var(--brave-orange);
-      color: #ffffff;
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      gap: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-divider {
+      width: 1px;
+      background: var(--border-color);
+      align-self: stretch;
+    }
+
+    /* ── Search + Filter ── */
+    .search-filter-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
     }
 
     .search-box {
-      width: 100%;
-      max-width: 860px;
+      flex: 1;
+      min-width: 180px;
       display: flex;
       align-items: center;
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 8px 18px;
-      margin-bottom: 28px;
+      border-radius: 10px;
+      padding: 9px 16px;
       gap: 10px;
+      transition: border-color 0.15s;
     }
-
+    .search-box:focus-within {
+      border-color: var(--brave-orange);
+    }
+    .search-icon { font-size: 14px; color: var(--text-sub); }
     .search-box input {
       flex: 1;
       background: none;
       border: none;
       outline: none;
       color: var(--text-main);
-      font-size: 14.5px;
+      font-size: 14px;
     }
+    .search-box input::placeholder { color: var(--text-sub); }
+    .btn-clear-search {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .btn-clear-search:hover { color: var(--text-main); }
 
-    .downloads-list {
-      max-width: 860px;
+    .filter-row {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
+      gap: 6px;
+      align-items: center;
+    }
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover {
+      border-color: var(--brave-orange);
+      color: var(--text-main);
+    }
+    .filter-btn.active {
+      background: var(--brave-orange-dim);
+      border-color: var(--brave-orange-border);
+      color: var(--brave-orange);
+      font-weight: 600;
     }
 
-    .download-card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
+    /* ── Active download progress card ── */
+    .active-download-section {
+      margin-bottom: 24px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-sub);
+      margin-bottom: 10px;
+    }
+    .active-dl-card {
+      background: var(--bg-card);
+      border: 1px solid var(--brave-orange-border);
       border-radius: 12px;
-      padding: 16px 20px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
-      gap: 18px;
-      transition: background 0.15s;
+      gap: 14px;
+    }
+    .active-dl-icon { font-size: 28px; }
+    .active-dl-details { flex: 1; min-width: 0; }
+    .active-dl-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+    .active-dl-progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+    .active-dl-fill {
+      height: 100%;
+      background: var(--brave-orange);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      width: 5%;
+    }
+    .active-dl-meta {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .btn-cancel-active {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: var(--red);
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-cancel-active:hover {
+      background: var(--red);
+      color: #fff;
     }
 
+    /* ── Date group ── */
+    .date-group {
+      margin-bottom: 24px;
+    }
+    .date-group-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+    .downloads-group-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* ── Download card ── */
+    .download-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: background 0.15s, border-color 0.15s;
+      position: relative;
+      cursor: default;
+    }
     .download-card:hover {
-      background-color: rgba(255, 255, 255, 0.04);
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .download-card.interrupted {
+      opacity: 0.7;
     }
 
-    .file-icon {
-      font-size: 32px;
-    }
+    .file-icon { font-size: 28px; flex-shrink: 0; }
 
     .file-details {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       overflow: hidden;
     }
-
     .file-name {
-      font-size: 14.5px;
+      font-size: 13.5px;
       font-weight: 600;
       color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
+      transition: color 0.15s;
     }
-
-    .file-name:hover {
-      color: var(--brave-orange);
-      text-decoration: underline;
-    }
+    .file-name:hover { color: var(--brave-orange); text-decoration: underline; }
+    .file-name.interrupted-name { cursor: default; }
+    .file-name.interrupted-name:hover { color: var(--text-main); text-decoration: none; }
 
     .file-meta {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .file-status {
-      color: #4ade80;
-      font-size: 11.5px;
-      font-weight: 600;
-    }
-
-    .file-status.failed {
-      color: #f87171;
-    }
-
-    .action-buttons {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .file-status.completed { color: var(--green); }
+    .file-status.interrupted { color: var(--red); }
+    .file-status.cancelled { color: var(--text-sub); }
+
+    /* Inline progress (for in-progress downloads shown in history) */
+    .card-progress-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+    .card-progress-fill {
+      height: 100%;
+      background: var(--brave-orange);
+      border-radius: 3px;
+      transition: width 0.3s;
     }
 
-    .btn-folder {
-      background: rgba(255, 255, 255, 0.06);
+    /* ── Actions ── */
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-action {
+      background: rgba(255,255,255,0.06);
       border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 6px 14px;
+      color: var(--text-muted);
+      padding: 5px 11px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 11.5px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-action:hover {
+      background: rgba(255,255,255,0.12);
+      color: var(--text-main);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .btn-action.primary {
+      background: var(--brave-orange-dim);
+      border-color: var(--brave-orange-border);
+      color: var(--brave-orange);
+    }
+    .btn-action.primary:hover {
+      background: var(--brave-orange);
+      color: #fff;
     }
 
-    .btn-folder:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--brave-orange);
-    }
-
-    .btn-del-dl {
+    .btn-more {
       background: none;
       border: none;
       color: var(--text-sub);
       cursor: pointer;
+      padding: 5px 8px;
+      border-radius: 6px;
       font-size: 16px;
-      padding: 6px;
-      border-radius: 4px;
-      transition: color 0.15s;
+      line-height: 1;
+      transition: all 0.15s;
     }
-
-    .btn-del-dl:hover {
+    .btn-more:hover {
+      background: rgba(255,255,255,0.08);
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.08);
     }
 
+    /* ── Context menu ── */
+    .ctx-menu {
+      position: fixed;
+      background: #252628;
+      border: 1px solid #3a3b45;
+      border-radius: 10px;
+      padding: 6px;
+      z-index: 9999;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      min-width: 180px;
+      display: none;
+    }
+    .ctx-menu.visible { display: block; }
+    .ctx-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: background 0.12s;
+      user-select: none;
+    }
+    .ctx-item:hover { background: rgba(255,255,255,0.08); }
+    .ctx-item.danger { color: var(--red); }
+    .ctx-item.danger:hover { background: rgba(248,113,113,0.1); }
+    .ctx-sep {
+      height: 1px;
+      background: var(--border-color);
+      margin: 4px 0;
+    }
+
+    /* ── Empty state ── */
     .empty-state {
-      padding: 40px;
       text-align: center;
+      padding: 64px 24px;
       color: var(--text-muted);
-      font-size: 14px;
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      max-width: 860px;
+    }
+    .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+    .empty-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
+    .empty-sub { font-size: 13px; color: var(--text-sub); }
+
+    /* ── Toast ── */
+    .dl-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #333;
+      color: #fff;
+      padding: 9px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: all 0.25s;
+      pointer-events: none;
+      z-index: 99999;
+      white-space: nowrap;
+    }
+    .dl-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      body { padding: 20px 0; }
+      .page-wrap { padding: 0 12px; }
+      .btn-action { display: none; }
+      .btn-more { display: flex; }
+      .stats-bar { gap: 12px; padding: 12px; }
+      .stat-divider { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="header-bar">
-    <div class="title-group">
-      <img src="logo.png" width="20" height="20" style="vertical-align: middle; margin-right: 8px; object-fit: contain;">
-      <span class="title-text">Descargas</span>
+  <div class="page-wrap">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="title-group">
+        <img src="logo.png" class="title-logo" alt="Brave">
+        <span class="title-text">Descargas</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-header" id="btn-open-folder">📂 Abrir carpeta</button>
+        <button class="btn-clear-all" id="btn-clear-downloads">Borrar historial</button>
+      </div>
     </div>
-    <button class="btn-clear" id="btn-clear-downloads">Borrar historial de descargas</button>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="stats-bar" style="display:none">
+      <div class="stat-item">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-completed">0</div>
+        <div class="stat-label">Completadas</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-size">0 MB</div>
+        <div class="stat-label">Descargado</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-failed">0</div>
+        <div class="stat-label">Fallidas</div>
+      </div>
+    </div>
+
+    <!-- Search + filter -->
+    <div class="search-filter-row">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar en descargas..." autocomplete="off" spellcheck="false">
+        <button class="btn-clear-search" id="btn-clear-search" style="display:none" title="Limpiar búsqueda">✕</button>
+      </div>
+      <div class="filter-row" id="filter-row">
+        <button class="filter-btn active" data-filter="all">Todo</button>
+        <button class="filter-btn" data-filter="exe">Programas</button>
+        <button class="filter-btn" data-filter="zip">Archivos</button>
+        <button class="filter-btn" data-filter="pdf">Documentos</button>
+        <button class="filter-btn" data-filter="image">Imágenes</button>
+        <button class="filter-btn" data-filter="media">Media</button>
+      </div>
+    </div>
+
+    <!-- Active download (live progress) -->
+    <div class="active-download-section" id="active-dl-section" style="display:none">
+      <div class="section-label">En progreso</div>
+      <div class="active-dl-card">
+        <div class="active-dl-icon" id="active-dl-icon">📥</div>
+        <div class="active-dl-details">
+          <div class="active-dl-name" id="active-dl-name">Descargando...</div>
+          <div class="active-dl-progress-bar">
+            <div class="active-dl-fill" id="active-dl-fill"></div>
+          </div>
+          <div class="active-dl-meta" id="active-dl-meta">Iniciando...</div>
+        </div>
+        <button class="btn-cancel-active" id="btn-cancel-active">✕ Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Downloads list -->
+    <div id="downloads-container"></div>
+
   </div>
 
-  <div class="search-box">
-    <span>🔍</span>
-    <input type="text" id="search-input" placeholder="Buscar en las descargas...">
+  <!-- Context menu -->
+  <div class="ctx-menu" id="ctx-menu">
+    <div class="ctx-item" id="ctx-open">📂 Abrir archivo</div>
+    <div class="ctx-item" id="ctx-folder">📁 Mostrar en carpeta</div>
+    <div class="ctx-item" id="ctx-copy-link">🔗 Copiar enlace de descarga</div>
+    <div class="ctx-item" id="ctx-copy-path">📋 Copiar ruta del archivo</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item danger" id="ctx-delete">🗑️ Eliminar de la lista</div>
   </div>
 
-  <div class="downloads-list" id="downloads-container">
-    <!-- Renderizado dinámico -->
-  </div>
+  <!-- Toast -->
+  <div class="dl-toast" id="dl-toast"></div>
 
   <script>
+    // ── State ──────────────────────────────────────────────
     let downloads = [];
+    let activeFilter = 'all';
+    let currentCtxDownload = null;
+    let activeDownloadId = null;
 
+    // ── Helpers ────────────────────────────────────────────
     function formatBytes(bytes) {
-      if (!bytes || isNaN(bytes)) return '0 B';
+      if (!bytes || isNaN(bytes) || bytes <= 0) return '';
       const k = 1024;
       const sizes = ['B', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
       return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
     }
 
     function getFileIcon(name) {
       const ext = (name || '').split('.').pop().toLowerCase();
-      if (['exe', 'msi', 'bat'].includes(ext)) return '📦';
-      if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return '🗜️';
-      if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) return '📄';
-      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) return '🖼️';
-      if (['mp4', 'mkv', 'webm', 'mov'].includes(ext)) return '🎬';
-      if (['mp3', 'wav', 'ogg', 'flac'].includes(ext)) return '🎵';
+      if (['exe', 'msi', 'bat', 'cmd', 'sh', 'dmg', 'pkg', 'deb', 'rpm', 'appimage'].includes(ext)) return '📦';
+      if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'zst'].includes(ext)) return '🗜️';
+      if (['pdf'].includes(ext)) return '📕';
+      if (['doc', 'docx', 'odt'].includes(ext)) return '📝';
+      if (['xls', 'xlsx', 'ods', 'csv'].includes(ext)) return '📊';
+      if (['ppt', 'pptx', 'odp'].includes(ext)) return '📋';
+      if (['txt', 'md', 'log', 'json', 'xml', 'yaml', 'yml'].includes(ext)) return '📄';
+      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'bmp', 'tiff', 'avif'].includes(ext)) return '🖼️';
+      if (['mp4', 'mkv', 'webm', 'mov', 'avi', 'flv', 'm4v', 'ts'].includes(ext)) return '🎬';
+      if (['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'opus'].includes(ext)) return '🎵';
+      if (['js', 'ts', 'py', 'java', 'c', 'cpp', 'cs', 'rb', 'go', 'rs', 'php'].includes(ext)) return '⚙️';
+      if (['apk', 'ipa'].includes(ext)) return '📱';
+      if (['iso', 'img'].includes(ext)) return '💿';
+      if (['ttf', 'otf', 'woff', 'woff2'].includes(ext)) return '🔤';
       return '📥';
     }
 
+    function getFilterType(name) {
+      const ext = (name || '').split('.').pop().toLowerCase();
+      if (['exe', 'msi', 'bat', 'cmd', 'sh', 'dmg', 'pkg', 'deb', 'rpm', 'appimage'].includes(ext)) return 'exe';
+      if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'zst'].includes(ext)) return 'zip';
+      if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'odt', 'csv', 'md'].includes(ext)) return 'pdf';
+      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'bmp', 'avif'].includes(ext)) return 'image';
+      if (['mp4', 'mkv', 'webm', 'mov', 'avi', 'mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'].includes(ext)) return 'media';
+      return 'other';
+    }
+
+    function getDateGroup(dateStr) {
+      if (!dateStr) return 'Antes';
+      const d = new Date(dateStr);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+      const weekAgo = new Date(today); weekAgo.setDate(today.getDate() - 7);
+      const monthAgo = new Date(today); monthAgo.setMonth(today.getMonth() - 1);
+      const itemDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+      if (itemDay >= today) return 'Hoy';
+      if (itemDay >= yesterday) return 'Ayer';
+      if (d >= weekAgo) return 'Esta semana';
+      if (d >= monthAgo) return 'Este mes';
+      return 'Más antiguo';
+    }
+
+    const GROUP_ORDER = ['Hoy', 'Ayer', 'Esta semana', 'Este mes', 'Más antiguo'];
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = String(text || '');
+      return div.innerHTML;
+    }
+    function escapeAttr(text) {
+      return (String(text || '')).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ── Load ────────────────────────────────────────────────
     async function loadDownloads() {
       if (window.braveAPI && window.braveAPI.getDownloads) {
         try {
-          downloads = await window.braveAPI.getDownloads();
-          if (Array.isArray(downloads)) {
-            renderDownloads();
+          const result = await window.braveAPI.getDownloads();
+          if (Array.isArray(result)) {
+            downloads = result;
+            renderAll();
             return;
           }
         } catch {}
       }
-
       try {
         downloads = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
       } catch {
         downloads = [];
       }
-      renderDownloads();
+      renderAll();
     }
 
-    function renderDownloads(filterText = '') {
+    // ── Stats ───────────────────────────────────────────────
+    function updateStats(filtered) {
+      const statsBar = document.getElementById('stats-bar');
+      if (!filtered || filtered.length === 0) {
+        if (statsBar) statsBar.style.display = 'none';
+        return;
+      }
+      if (statsBar) statsBar.style.display = 'flex';
+      const completed = filtered.filter(d => d.state === 'completed' || !d.state).length;
+      const failed = filtered.filter(d => d.state && d.state !== 'completed').length;
+      const totalBytes = filtered.filter(d => d.state === 'completed' || !d.state)
+                                 .reduce((acc, d) => acc + (d.totalBytes || 0), 0);
+      document.getElementById('stat-total').textContent = filtered.length;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-failed').textContent = failed;
+      document.getElementById('stat-size').textContent = formatBytes(totalBytes) || '0 B';
+    }
+
+    // ── Render ──────────────────────────────────────────────
+    function renderAll() {
+      const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+      let filtered = downloads.filter(d => {
+        const name = (d.filename || '').toLowerCase();
+        if (q && !name.includes(q)) return false;
+        if (activeFilter === 'all') return true;
+        return getFilterType(d.filename) === activeFilter;
+      });
+
+      updateStats(filtered);
+
       const container = document.getElementById('downloads-container');
       container.innerHTML = '';
 
-      const q = filterText.toLowerCase().trim();
-      const filtered = downloads.filter(d => 
-        (d.filename || '').toLowerCase().includes(q)
-      );
-
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty-state">No hay descargas registradas.</div>';
+        const hasAny = downloads.length > 0;
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📥</div>
+            <div class="empty-title">${hasAny ? 'Sin resultados' : 'No hay descargas'}</div>
+            <div class="empty-sub">${hasAny ? 'Prueba con otro término de búsqueda o filtro.' : 'Los archivos que descargues aparecerán aquí.'}</div>
+          </div>`;
         return;
       }
 
-      filtered.forEach((d) => {
-        const card = document.createElement('div');
-        card.className = 'download-card';
-
-        const sizeFormatted = d.totalBytes ? formatBytes(d.totalBytes) : 'Tamaño desconocido';
-        const dateFormatted = d.date ? new Date(d.date).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) : 'Reciente';
-        const isCompleted = d.state === 'completed' || !d.state;
-        const icon = getFileIcon(d.filename);
-
-        card.innerHTML = `
-          <span class="file-icon">${icon}</span>
-          <div class="file-details">
-            <div class="file-name" title="Abrir archivo" data-path="${escapeAttr(d.savePath || '')}">${escapeHtml(d.filename || 'Archivo')}</div>
-            <div class="file-meta">${sizeFormatted} • ${dateFormatted}</div>
-            <div class="file-status ${isCompleted ? '' : 'failed'}">${isCompleted ? '✓ Descarga completada' : '✕ Descarga interrumpida o cancelada'}</div>
-          </div>
-          <div class="action-buttons">
-            <button class="btn-folder btn-open" data-path="${escapeAttr(d.savePath || '')}">Abrir</button>
-            <button class="btn-folder btn-folder-view" data-path="${escapeAttr(d.savePath || '')}">Mostrar en carpeta</button>
-            <button class="btn-del-dl" title="Eliminar de la lista" data-id="${escapeAttr(d.id || '')}">✕</button>
-          </div>
-        `;
-        container.appendChild(card);
+      // Group by date
+      const groups = {};
+      filtered.forEach(d => {
+        const g = getDateGroup(d.date);
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(d);
       });
 
-      // Eventos
-      document.querySelectorAll('.file-name, .btn-open').forEach(el => {
-        el.addEventListener('click', (e) => {
-          const p = e.currentTarget.getAttribute('data-path');
-          if (p && window.braveAPI && window.braveAPI.openPath) {
-            window.braveAPI.openPath(p);
-          }
-        });
-      });
+      GROUP_ORDER.forEach(groupName => {
+        if (!groups[groupName]) return;
+        const groupEl = document.createElement('div');
+        groupEl.className = 'date-group';
 
-      document.querySelectorAll('.btn-folder-view').forEach(el => {
-        el.addEventListener('click', (e) => {
-          const p = e.currentTarget.getAttribute('data-path');
-          if (p && window.braveAPI && window.braveAPI.showItemInFolder) {
-            window.braveAPI.showItemInFolder(p);
-          }
-        });
-      });
+        const label = document.createElement('div');
+        label.className = 'date-group-label';
+        label.textContent = groupName;
+        groupEl.appendChild(label);
 
-      document.querySelectorAll('.btn-del-dl').forEach(el => {
-        el.addEventListener('click', async (e) => {
-          const id = e.currentTarget.getAttribute('data-id');
-          if (window.braveAPI && window.braveAPI.deleteDownload) {
-            await window.braveAPI.deleteDownload(id);
-          }
-          downloads = downloads.filter(x => x.id !== id);
-          localStorage.setItem('brave_downloads', JSON.stringify(downloads));
-          renderDownloads(document.getElementById('search-input').value);
+        const list = document.createElement('div');
+        list.className = 'downloads-group-list';
+
+        groups[groupName].forEach(d => {
+          list.appendChild(buildCard(d));
         });
+
+        groupEl.appendChild(list);
+        container.appendChild(groupEl);
       });
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function buildCard(d) {
+      const isOk = d.state === 'completed' || !d.state;
+      const icon = getFileIcon(d.filename);
+      const sizeStr = formatBytes(d.totalBytes);
+      const dateStr = d.date
+        ? new Date(d.date).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })
+        : '';
+
+      const meta = [sizeStr, dateStr].filter(Boolean).join(' • ');
+
+      const statusMap = {
+        completed: { label: '✓ Completada', cls: 'completed' },
+        interrupted: { label: '✕ Interrumpida', cls: 'interrupted' },
+        cancelled: { label: '✕ Cancelada', cls: 'cancelled' },
+      };
+      const statusInfo = statusMap[d.state] || (isOk ? statusMap.completed : statusMap.interrupted);
+
+      const card = document.createElement('div');
+      card.className = 'download-card' + (isOk ? '' : ' interrupted');
+      card.dataset.id = d.id || '';
+
+      card.innerHTML = `
+        <div class="file-icon">${icon}</div>
+        <div class="file-details">
+          <div class="file-name ${isOk ? '' : 'interrupted-name'}" data-path="${escapeAttr(d.savePath)}" title="${escapeAttr(d.filename)}">${escapeHtml(d.filename || 'Archivo')}</div>
+          <div class="file-meta">${escapeHtml(meta)}</div>
+          <div class="file-status ${statusInfo.cls}">${statusInfo.label}</div>
+        </div>
+        <div class="card-actions">
+          ${isOk ? `<button class="btn-action primary btn-open-file" data-path="${escapeAttr(d.savePath)}">Abrir</button>` : ''}
+          ${isOk ? `<button class="btn-action btn-show-folder" data-path="${escapeAttr(d.savePath)}">En carpeta</button>` : ''}
+          <button class="btn-more btn-ctx" title="Más opciones" data-id="${escapeAttr(d.id)}">⋯</button>
+        </div>
+      `;
+
+      // File name click
+      const nameEl = card.querySelector('.file-name');
+      if (isOk && nameEl) {
+        nameEl.addEventListener('click', () => openFile(d.savePath));
+      }
+
+      // Open file
+      const openBtn = card.querySelector('.btn-open-file');
+      if (openBtn) openBtn.addEventListener('click', (e) => { e.stopPropagation(); openFile(d.savePath); });
+
+      // Show in folder
+      const folderBtn = card.querySelector('.btn-show-folder');
+      if (folderBtn) folderBtn.addEventListener('click', (e) => { e.stopPropagation(); showInFolder(d.savePath); });
+
+      // More/context menu
+      const ctxBtn = card.querySelector('.btn-ctx');
+      if (ctxBtn) {
+        ctxBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showCtxMenu(e, d);
+        });
+      }
+
+      return card;
     }
 
-    function escapeAttr(text) {
-      return (text || '').replace(/"/g, '&quot;');
+    // ── Native actions ──────────────────────────────────────
+    function openFile(p) {
+      if (p && window.braveAPI && window.braveAPI.openPath) window.braveAPI.openPath(p);
+    }
+    function showInFolder(p) {
+      if (p && window.braveAPI && window.braveAPI.showItemInFolder) window.braveAPI.showItemInFolder(p);
     }
 
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      renderDownloads(e.target.value);
+    // ── Context menu ────────────────────────────────────────
+    const ctxMenu = document.getElementById('ctx-menu');
+
+    function showCtxMenu(e, d) {
+      currentCtxDownload = d;
+      const isOk = d.state === 'completed' || !d.state;
+
+      document.getElementById('ctx-open').style.display = isOk ? 'flex' : 'none';
+      document.getElementById('ctx-folder').style.display = isOk ? 'flex' : 'none';
+      document.getElementById('ctx-copy-link').style.display = d.url ? 'flex' : 'none';
+      document.getElementById('ctx-copy-path').style.display = isOk ? 'flex' : 'none';
+
+      ctxMenu.classList.add('visible');
+      const x = Math.min(e.clientX, window.innerWidth - 210);
+      const y = Math.min(e.clientY, window.innerHeight - ctxMenu.offsetHeight - 10);
+      ctxMenu.style.left = x + 'px';
+      ctxMenu.style.top = y + 'px';
+    }
+
+    document.addEventListener('click', () => ctxMenu.classList.remove('visible'));
+    document.addEventListener('contextmenu', (e) => {
+      // Only suppress if not on a card
+      if (!e.target.closest('.download-card')) ctxMenu.classList.remove('visible');
     });
 
+    document.getElementById('ctx-open').addEventListener('click', () => {
+      if (currentCtxDownload) openFile(currentCtxDownload.savePath);
+    });
+    document.getElementById('ctx-folder').addEventListener('click', () => {
+      if (currentCtxDownload) showInFolder(currentCtxDownload.savePath);
+    });
+    document.getElementById('ctx-copy-link').addEventListener('click', () => {
+      if (currentCtxDownload && currentCtxDownload.url) {
+        navigator.clipboard.writeText(currentCtxDownload.url).catch(() => {});
+        showToast('🔗 Enlace copiado');
+      }
+    });
+    document.getElementById('ctx-copy-path').addEventListener('click', () => {
+      if (currentCtxDownload && currentCtxDownload.savePath) {
+        navigator.clipboard.writeText(currentCtxDownload.savePath).catch(() => {});
+        showToast('📋 Ruta copiada');
+      }
+    });
+    document.getElementById('ctx-delete').addEventListener('click', async () => {
+      if (!currentCtxDownload) return;
+      await deleteDownload(currentCtxDownload.id);
+    });
+
+    // ── Delete ──────────────────────────────────────────────
+    async function deleteDownload(id) {
+      if (!id) return;
+      if (window.braveAPI && window.braveAPI.deleteDownload) {
+        try { await window.braveAPI.deleteDownload(id); } catch {}
+      }
+      downloads = downloads.filter(d => d.id !== id);
+      try { localStorage.setItem('brave_downloads', JSON.stringify(downloads)); } catch {}
+      renderAll();
+      showToast('Eliminado del historial');
+    }
+
+    // ── Clear all ────────────────────────────────────────────
     document.getElementById('btn-clear-downloads').addEventListener('click', async () => {
-      if (confirm('¿Deseas eliminar todo el historial de descargas? (Los archivos descargados no se borrarán del disco)')) {
+      if (!downloads.length) return;
+      if (confirm('¿Deseas eliminar todo el historial de descargas?\n(Los archivos descargados no se borrarán del disco.)')) {
         if (window.braveAPI && window.braveAPI.clearDownloads) {
-          await window.braveAPI.clearDownloads();
+          try { await window.braveAPI.clearDownloads(); } catch {}
         }
         downloads = [];
-        localStorage.removeItem('brave_downloads');
-        renderDownloads();
+        try { localStorage.removeItem('brave_downloads'); } catch {}
+        renderAll();
+        showToast('Historial de descargas borrado');
       }
     });
 
+    // ── Open downloads folder ────────────────────────────────
+    document.getElementById('btn-open-folder').addEventListener('click', () => {
+      if (window.braveAPI && window.braveAPI.showItemInFolder) {
+        // Try the most recent download's folder, else fallback to generic
+        const latest = downloads.find(d => d.savePath);
+        if (latest) {
+          showInFolder(latest.savePath);
+        } else {
+          showToast('No hay descargas registradas aún');
+        }
+      }
+    });
+
+    // ── Search ──────────────────────────────────────────────
+    const searchInput = document.getElementById('search-input');
+    const btnClearSearch = document.getElementById('btn-clear-search');
+
+    searchInput.addEventListener('input', () => {
+      btnClearSearch.style.display = searchInput.value ? 'block' : 'none';
+      renderAll();
+    });
+    btnClearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      btnClearSearch.style.display = 'none';
+      searchInput.focus();
+      renderAll();
+    });
+
+    // ── Filters ──────────────────────────────────────────────
+    document.getElementById('filter-row').addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderAll();
+    });
+
+    // ── Active download live panel ────────────────────────────
+    const activeDlSection = document.getElementById('active-dl-section');
+    const activeDlName = document.getElementById('active-dl-name');
+    const activeDlFill = document.getElementById('active-dl-fill');
+    const activeDlMeta = document.getElementById('active-dl-meta');
+    const activeDlIcon = document.getElementById('active-dl-icon');
+    const btnCancelActive = document.getElementById('btn-cancel-active');
+
+    btnCancelActive.addEventListener('click', async () => {
+      if (activeDownloadId && window.braveAPI && window.braveAPI.cancelDownload) {
+        try { await window.braveAPI.cancelDownload(activeDownloadId); } catch {}
+        activeDlSection.style.display = 'none';
+        activeDownloadId = null;
+        showToast('✕ Descarga cancelada');
+      }
+    });
+
+    // Listen for real-time events from the main renderer via braveAPI (bridge messages)
+    window.addEventListener('dl:started', (e) => {
+      const data = e.detail || {};
+      activeDownloadId = data.id;
+      activeDlSection.style.display = 'block';
+      activeDlName.textContent = data.filename || 'Descargando...';
+      activeDlFill.style.width = '5%';
+      activeDlMeta.textContent = 'Iniciando descarga...';
+      activeDlIcon.textContent = getFileIcon(data.filename);
+    });
+    window.addEventListener('dl:progress', (e) => {
+      const data = e.detail || {};
+      activeDlSection.style.display = 'block';
+      activeDlName.textContent = data.filename || '';
+      if (data.totalBytes > 0) {
+        const pct = Math.min(100, Math.round((data.receivedBytes / data.totalBytes) * 100));
+        activeDlFill.style.width = pct + '%';
+        const recv = formatBytes(data.receivedBytes);
+        const total = formatBytes(data.totalBytes);
+        activeDlMeta.textContent = `${recv} de ${total} (${pct}%)`;
+      } else {
+        activeDlFill.style.width = '30%';
+        activeDlMeta.textContent = `${formatBytes(data.receivedBytes)} descargados`;
+      }
+    });
+    window.addEventListener('dl:completed', (e) => {
+      const data = e.detail || {};
+      activeDlFill.style.width = '100%';
+      activeDlMeta.textContent = '✓ Descarga completada';
+      setTimeout(() => {
+        activeDlSection.style.display = 'none';
+        activeDownloadId = null;
+        // Refresh list
+        loadDownloads();
+      }, 2000);
+    });
+    window.addEventListener('dl:failed', () => {
+      activeDlSection.style.display = 'none';
+      activeDownloadId = null;
+      loadDownloads();
+    });
+
+    // ── Toast ───────────────────────────────────────────────
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('dl-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ── Keyboard shortcuts ──────────────────────────────────
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+      if (e.key === 'Escape') {
+        if (ctxMenu.classList.contains('visible')) {
+          ctxMenu.classList.remove('visible');
+        } else {
+          searchInput.value = '';
+          btnClearSearch.style.display = 'none';
+          renderAll();
+        }
+      }
+    });
+
+    // ── Boot ────────────────────────────────────────────────
     window.addEventListener('brave-bridge-ready', loadDownloads);
     loadDownloads();
   </script>

@@ -889,27 +889,49 @@
       });
     });
 
-    // Cargar y guardar preferencias en localStorage
+    // Cargar y guardar preferencias en sincronía con la ventana principal
     const optLevel = document.getElementById('opt-shields-level');
     const optFarbling = document.getElementById('opt-farbling');
     const optQueryStrip = document.getElementById('opt-query-strip');
     const optEngine = document.getElementById('opt-search-engine');
 
-    optLevel.value = localStorage.getItem('brave_setting_level') || 'standard';
-    optFarbling.checked = localStorage.getItem('brave_setting_farbling') !== 'false';
-    optQueryStrip.checked = localStorage.getItem('brave_setting_query') !== 'false';
-    optEngine.value = localStorage.getItem('brave_setting_engine') || 'brave';
+    async function initSettingsForm() {
+      let s = {};
+      if (window.braveAPI && window.braveAPI.getSettings) {
+        try { s = await window.braveAPI.getSettings(); } catch {}
+      }
+      if (optLevel) optLevel.value = s.shieldsLevel || localStorage.getItem('brave_setting_level') || 'standard';
+      if (optFarbling) optFarbling.checked = s.farbling !== undefined ? s.farbling : localStorage.getItem('brave_setting_farbling') !== 'false';
+      if (optQueryStrip) optQueryStrip.checked = s.queryStrip !== undefined ? s.queryStrip : localStorage.getItem('brave_setting_query') !== 'false';
+      if (optEngine) optEngine.value = s.searchEngine || localStorage.getItem('brave_setting_engine') || 'brave';
+      if (optTheme) optTheme.value = s.theme || localStorage.getItem('brave_theme') || 'dark';
+      if (optTabSnooze) optTabSnooze.value = s.tabSnooze || localStorage.getItem('brave_tab_snooze') || '30';
+
+      const currentStartup = s.startupMode || localStorage.getItem('brave_startup_mode') || 'continue';
+      document.querySelectorAll('input[name="startup_option"]').forEach((r) => {
+        if (r.value === currentStartup) r.checked = true;
+      });
+    }
 
     optLevel.addEventListener('change', () => {
       localStorage.setItem('brave_setting_level', optLevel.value);
+      if (window.braveAPI && window.braveAPI.updateSetting) {
+        window.braveAPI.updateSetting('brave_setting_level', optLevel.value);
+      }
     });
 
     optFarbling.addEventListener('change', () => {
       localStorage.setItem('brave_setting_farbling', String(optFarbling.checked));
+      if (window.braveAPI && window.braveAPI.updateSetting) {
+        window.braveAPI.updateSetting('brave_setting_farbling', String(optFarbling.checked));
+      }
     });
 
     optQueryStrip.addEventListener('change', () => {
       localStorage.setItem('brave_setting_query', String(optQueryStrip.checked));
+      if (window.braveAPI && window.braveAPI.updateSetting) {
+        window.braveAPI.updateSetting('brave_setting_query', String(optQueryStrip.checked));
+      }
     });
 
     optEngine.addEventListener('change', () => {
@@ -951,14 +973,36 @@
     const btnImportPw = document.getElementById('btn-import-pw');
     const pwFileImport = document.getElementById('pw-file-import');
 
-    function renderPasswords(filter = '') {
-      let list = [];
-      try {
-        list = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
-      } catch {}
+    let passwordsList = [];
 
+    async function loadPasswords() {
+      if (window.braveAPI && window.braveAPI.getPasswords) {
+        try {
+          passwordsList = await window.braveAPI.getPasswords();
+          if (Array.isArray(passwordsList)) {
+            renderPasswords(pwSearchInput ? pwSearchInput.value : '');
+            return;
+          }
+        } catch {}
+      }
+      try {
+        passwordsList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+      } catch {
+        passwordsList = [];
+      }
+      renderPasswords(pwSearchInput ? pwSearchInput.value : '');
+    }
+
+    async function persistPasswords() {
+      localStorage.setItem('brave_passwords', JSON.stringify(passwordsList));
+      if (window.braveAPI && window.braveAPI.savePasswords) {
+        try { await window.braveAPI.savePasswords(passwordsList); } catch {}
+      }
+    }
+
+    function renderPasswords(filter = '') {
       const q = filter.toLowerCase().trim();
-      const filtered = list.filter((p) =>
+      const filtered = passwordsList.filter((p) =>
         (p.domain || '').toLowerCase().includes(q) ||
         (p.username || '').toLowerCase().includes(q)
       );
@@ -967,7 +1011,7 @@
         if (pwTable) pwTable.style.display = 'none';
         if (pwEmptyState) {
           pwEmptyState.style.display = 'block';
-          pwEmptyState.textContent = list.length === 0
+          pwEmptyState.textContent = passwordsList.length === 0
             ? 'No hay contraseñas guardadas en este momento.'
             : 'No se encontraron contraseñas coincidentes con la búsqueda.';
         }
@@ -979,7 +1023,7 @@
       if (pwTableBody) {
         pwTableBody.innerHTML = '';
         filtered.forEach((pw) => {
-          const origIdx = list.indexOf(pw);
+          const origIdx = passwordsList.indexOf(pw);
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${pw.domain}</strong></td>
@@ -1000,9 +1044,9 @@
           btn.addEventListener('click', () => {
             const i = parseInt(btn.getAttribute('data-idx'), 10);
             const mask = document.getElementById(`pw-mask-${i}`);
-            if (mask) {
+            if (mask && passwordsList[i]) {
               if (mask.textContent === '••••••••') {
-                mask.textContent = list[i].password;
+                mask.textContent = passwordsList[i].password;
                 btn.textContent = '🔒';
               } else {
                 mask.textContent = '••••••••';
@@ -1015,7 +1059,8 @@
         pwTableBody.querySelectorAll('.btn-pw-copy').forEach((btn) => {
           btn.addEventListener('click', () => {
             const i = parseInt(btn.getAttribute('data-idx'), 10);
-            navigator.clipboard.writeText(list[i].password).then(() => {
+            if (!passwordsList[i]) return;
+            navigator.clipboard.writeText(passwordsList[i].password).then(() => {
               btn.textContent = '✓';
               setTimeout(() => { btn.textContent = '📋'; }, 1500);
             });
@@ -1023,11 +1068,16 @@
         });
 
         pwTableBody.querySelectorAll('.btn-pw-del').forEach((btn) => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const i = parseInt(btn.getAttribute('data-idx'), 10);
-            if (confirm(`¿Eliminar contraseña para ${list[i].domain}?`)) {
-              list.splice(i, 1);
-              localStorage.setItem('brave_passwords', JSON.stringify(list));
+            if (!passwordsList[i]) return;
+            if (confirm(`¿Eliminar contraseña para ${passwordsList[i].domain}?`)) {
+              const target = passwordsList[i];
+              if (window.braveAPI && window.braveAPI.deletePassword) {
+                try { await window.braveAPI.deletePassword(target.domain, target.username); } catch {}
+              }
+              passwordsList.splice(i, 1);
+              await persistPasswords();
               renderPasswords(pwSearchInput ? pwSearchInput.value : '');
             }
           });
@@ -1055,7 +1105,7 @@
     }
 
     if (btnSaveNewPw) {
-      btnSaveNewPw.addEventListener('click', () => {
+      btnSaveNewPw.addEventListener('click', async () => {
         const dom = (newPwDomain ? newPwDomain.value.trim() : '').replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
         const user = newPwUser ? newPwUser.value.trim() : '';
         const pass = newPwPass ? newPwPass.value : '';
@@ -1063,10 +1113,8 @@
           alert('Por favor introduce el sitio web y la contraseña.');
           return;
         }
-        let list = [];
-        try { list = JSON.parse(localStorage.getItem('brave_passwords') || '[]'); } catch {}
-        list.push({ domain: dom, username: user, password: pass });
-        localStorage.setItem('brave_passwords', JSON.stringify(list));
+        passwordsList.push({ domain: dom, username: user, password: pass });
+        await persistPasswords();
         if (newPwDomain) newPwDomain.value = '';
         if (newPwUser) newPwUser.value = '';
         if (newPwPass) newPwPass.value = '';
@@ -1077,14 +1125,12 @@
 
     if (btnExportPw) {
       btnExportPw.addEventListener('click', () => {
-        let list = [];
-        try { list = JSON.parse(localStorage.getItem('brave_passwords') || '[]'); } catch {}
-        if (list.length === 0) {
+        if (passwordsList.length === 0) {
           alert('No hay contraseñas guardadas para exportar.');
           return;
         }
         let csv = 'name,url,username,password\n';
-        list.forEach((p) => {
+        passwordsList.forEach((p) => {
           csv += `"${p.domain}","https://${p.domain}","${(p.username || '').replace(/"/g, '""')}","${(p.password || '').replace(/"/g, '""')}"\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -1104,12 +1150,10 @@
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (evt) => {
+        reader.onload = async (evt) => {
           const text = evt.target.result;
           const lines = text.split(/\r?\n/);
           let count = 0;
-          let list = [];
-          try { list = JSON.parse(localStorage.getItem('brave_passwords') || '[]'); } catch {}
 
           lines.forEach((line, idx) => {
             if (idx === 0 && line.toLowerCase().includes('username')) return;
@@ -1119,12 +1163,12 @@
               const user = parts[2].replace(/"/g, '').trim();
               const pass = parts[3].replace(/"/g, '').trim();
               if (dom && pass) {
-                list.push({ domain: dom, username: user, password: pass });
+                passwordsList.push({ domain: dom, username: user, password: pass });
                 count++;
               }
             }
           });
-          localStorage.setItem('brave_passwords', JSON.stringify(list));
+          await persistPasswords();
           renderPasswords();
           alert(`Se importaron ${count} credenciales exitosamente.`);
         };
@@ -1134,15 +1178,19 @@
     }
 
     if (btnClearAllPw) {
-      btnClearAllPw.addEventListener('click', () => {
+      btnClearAllPw.addEventListener('click', async () => {
         if (confirm('¿Eliminar todas las contraseñas guardadas en Brave?')) {
+          if (window.braveAPI && window.braveAPI.clearPasswords) {
+            try { await window.braveAPI.clearPasswords(); } catch {}
+          }
+          passwordsList = [];
           localStorage.removeItem('brave_passwords');
           renderPasswords();
         }
       });
     }
 
-    renderPasswords();
+    loadPasswords();
 
     // Selector de tema y color de acento
     const optTheme = document.getElementById('opt-theme');
@@ -1237,9 +1285,20 @@
     startupRadios.forEach((r) => {
       if (r.value === savedStartup) r.checked = true;
       r.addEventListener('change', () => {
-        if (r.checked) localStorage.setItem('brave_startup_mode', r.value);
+        if (r.checked) {
+          localStorage.setItem('brave_startup_mode', r.value);
+          if (window.braveAPI && window.braveAPI.updateSetting) {
+            window.braveAPI.updateSetting('brave_startup_mode', r.value);
+          }
+        }
       });
     });
+
+    window.addEventListener('brave-bridge-ready', () => {
+      initSettingsForm();
+      loadPasswords();
+    });
+    initSettingsForm();
 
     // Lógica de Brave Sync (25 palabras)
     const BIP39_WORDS = [

@@ -243,6 +243,39 @@ function bypassTrackingRedirects(urlStr: string): string | null {
 // Registro de permisos granulares por sitio (Cámara, Micrófono, Notificaciones, etc.)
 const sitePermissionsMap = new Map<string, Record<string, string>>();
 
+function getSitePermissionsFilePath(): string {
+  return path.join(app.getPath('userData'), 'site-permissions.json');
+}
+
+function loadSitePermissionsFromDisk(): void {
+  try {
+    const p = getSitePermissionsFilePath();
+    if (fs.existsSync(p)) {
+      const data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      if (typeof data === 'object' && data !== null) {
+        for (const [dom, perms] of Object.entries(data)) {
+          sitePermissionsMap.set(dom, perms as Record<string, string>);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Brave Permissions] Error al cargar permisos desde disco:', err);
+  }
+}
+
+function saveSitePermissionsToDisk(): void {
+  try {
+    const p = getSitePermissionsFilePath();
+    const obj: Record<string, Record<string, string>> = {};
+    for (const [dom, perms] of sitePermissionsMap.entries()) {
+      obj[dom] = perms;
+    }
+    fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[Brave Permissions] Error al guardar permisos en disco:', err);
+  }
+}
+
 function attachSessionInterception(targetSession: Electron.Session) {
   // Manejador nativo de solicitudes de permisos Web
   targetSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
@@ -900,6 +933,7 @@ ipcMain.handle('permissions:set', (_event, domain: string, permission: string, s
   } else {
     perms[permission] = state;
   }
+  saveSitePermissionsToDisk();
   return perms;
 });
 
@@ -1016,12 +1050,14 @@ function attachDownloadHandler(ses: Electron.Session) {
 
     const win = BrowserWindow.fromWebContents(webContents.isDestroyed() ? mainWindow! : webContents.getOwnerBrowserWindow() || mainWindow!);
 
+    const sourceUrl = item.getURL();
     if (win && !win.isDestroyed()) {
       win.webContents.send('download:started', {
         id: downloadId,
         filename,
         totalBytes,
         savePath,
+        url: sourceUrl,
       });
     }
 
@@ -1046,6 +1082,7 @@ function attachDownloadHandler(ses: Electron.Session) {
             filename,
             savePath,
             totalBytes: item.getTotalBytes(),
+            url: sourceUrl,
           });
         } else {
           win.webContents.send('download:failed', {
@@ -1478,6 +1515,7 @@ ipcMain.handle('extensions:download-from-store', async (_event, inputStr: string
 });
 
 app.whenReady().then(async () => {
+  loadSitePermissionsFromDisk();
   initShieldsRules();
   await initExtensions();
 

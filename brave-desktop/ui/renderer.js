@@ -1134,15 +1134,31 @@ function extractDomain(url) {
   }
 }
 
+function isCurrentWindowPrivate() {
+  if (document.body.classList.contains('private-mode') || document.body.classList.contains('tor-mode')) return true;
+  if (window.braveAPI && ((window.braveAPI.isPrivateMode && window.braveAPI.isPrivateMode()) || (window.braveAPI.isTorMode && window.braveAPI.isTorMode()))) return true;
+  return false;
+}
+
 function recordHistory(url, title) {
   if (!url || url.startsWith('file:') || url.startsWith('about:')) return;
+  // Nunca registrar historial en modo Privado o Tor
+  if (isCurrentWindowPrivate()) return;
   try {
     const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     if (list.length > 0 && list[0].url === url) return;
-    list.unshift({ title: title || url, url, time: timeStr });
-    if (list.length > 200) list.pop();
+    const historyId = `hist_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    list.unshift({
+      id: historyId,
+      title: title || url,
+      url,
+      time: timeStr,
+      date: now.toISOString(),
+      domain: extractDomain(url),
+    });
+    if (list.length > 500) list.pop();
     localStorage.setItem('brave_browser_history', JSON.stringify(list));
   } catch {}
 }
@@ -1509,9 +1525,23 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           window.braveAPI.getShieldsStats = () => window.__brave_call('getSavingsStats');
           window.braveAPI.getVersionInfo = () => window.__brave_call('getVersionInfo');
 
-          // Gestor de Marcadores
+          // Gestor de Marcadores y Carpetas
           window.braveAPI.getBookmarks = () => window.__brave_call('getBookmarks');
           window.braveAPI.saveBookmarks = (list) => window.__brave_call('saveBookmarks', [list]);
+          window.braveAPI.getBookmarkFolders = () => window.__brave_call('getBookmarkFolders');
+          window.braveAPI.saveBookmarkFolders = (folders) => window.__brave_call('saveBookmarkFolders', [folders]);
+
+          // Gestor de Contraseñas
+          window.braveAPI.getPasswords = () => window.__brave_call('getPasswords');
+          window.braveAPI.savePasswords = (list) => window.__brave_call('savePasswords', [list]);
+          window.braveAPI.deletePassword = (domain, username) => window.__brave_call('deletePassword', [domain, username]);
+          window.braveAPI.clearPasswords = () => window.__brave_call('clearPasswords');
+
+          // Brave Playlist
+          window.braveAPI.getPlaylist = () => window.__brave_call('getPlaylist');
+          window.braveAPI.savePlaylist = (items) => window.__brave_call('savePlaylist', [items]);
+          window.braveAPI.deletePlaylistItem = (id) => window.__brave_call('deletePlaylistItem', [id]);
+          window.braveAPI.clearPlaylist = () => window.__brave_call('clearPlaylist');
 
           // Perfil y Autocompletado
           window.braveAPI.getProfile = () => window.__brave_call('getProfile');
@@ -1656,12 +1686,16 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           localStorage.removeItem('brave_browser_history');
           result = true;
         } else if (action === 'deleteHistoryItem') {
-          const idx = args[0];
+          const target = args[0];
           const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
-          if (idx >= 0 && idx < list.length) {
-            list.splice(idx, 1);
-            localStorage.setItem('brave_browser_history', JSON.stringify(list));
+          let filtered = list;
+          if (typeof target === 'string') {
+            filtered = list.filter((item) => item.id !== target && item.url !== target);
+          } else if (typeof target === 'number' && target >= 0 && target < list.length) {
+            list.splice(target, 1);
+            filtered = list;
           }
+          localStorage.setItem('brave_browser_history', JSON.stringify(filtered));
           result = true;
         } else if (action === 'getBookmarks') {
           result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
@@ -1670,6 +1704,42 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
           bookmarks = newList;
           renderBookmarksBar();
+          result = true;
+        } else if (action === 'getBookmarkFolders') {
+          result = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+        } else if (action === 'saveBookmarkFolders') {
+          const folders = args[0] || ['Favoritos', 'Trabajo'];
+          localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
+          result = true;
+        } else if (action === 'getPasswords') {
+          result = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+        } else if (action === 'savePasswords') {
+          const pwList = args[0] || [];
+          localStorage.setItem('brave_passwords', JSON.stringify(pwList));
+          result = true;
+        } else if (action === 'deletePassword') {
+          const [d, u] = args;
+          const pwList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+          const filtered = pwList.filter((p) => !(p.domain === d && p.username === u));
+          localStorage.setItem('brave_passwords', JSON.stringify(filtered));
+          result = true;
+        } else if (action === 'clearPasswords') {
+          localStorage.removeItem('brave_passwords');
+          result = true;
+        } else if (action === 'getPlaylist') {
+          result = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
+        } else if (action === 'savePlaylist') {
+          const pl = args[0] || [];
+          localStorage.setItem('brave_playlist_items', JSON.stringify(pl));
+          result = true;
+        } else if (action === 'deletePlaylistItem') {
+          const plId = args[0];
+          const pl = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
+          const filtered = pl.filter((item) => item.id !== plId && item.url !== plId);
+          localStorage.setItem('brave_playlist_items', JSON.stringify(filtered));
+          result = true;
+        } else if (action === 'clearPlaylist') {
+          localStorage.removeItem('brave_playlist_items');
           result = true;
         } else if (action === 'getProfile') {
           result = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
@@ -1682,11 +1752,15 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             accent: localStorage.getItem('brave_accent') || 'orange',
             searchEngine: localStorage.getItem('brave_setting_engine') || 'brave',
             shieldsLevel: localStorage.getItem('brave_setting_level') || 'standard',
+            farbling: localStorage.getItem('brave_setting_farbling') !== 'false',
+            queryStrip: localStorage.getItem('brave_setting_query') !== 'false',
             tabSnooze: localStorage.getItem('brave_tab_snooze') || '30',
+            startupMode: localStorage.getItem('brave_startup_mode') || 'continue',
+            syncPhrase: localStorage.getItem('brave_sync_phrase') || '',
           };
         } else if (action === 'updateSetting') {
           const [key, val] = args;
-          localStorage.setItem(key, val);
+          localStorage.setItem(key, String(val));
           if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
           if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
           if (key === 'brave_setting_engine') currentSearchEngine = val;
@@ -5172,6 +5246,8 @@ const btnPwSave = document.getElementById('btn-pw-save');
 let pendingPasswordDomain = '';
 
 function promptSavePassword(tab, username, password) {
+  // Nunca solicitar guardar contraseñas en ventana privada o Tor
+  if (isCurrentWindowPrivate()) return;
   if (!tab || !tab.domain || tab.domain === 'nueva pestaña' || tab.domain === 'configuración') return;
   const neverList = JSON.parse(localStorage.getItem('brave_passwords_never') || '[]');
   if (neverList.includes(tab.domain.toLowerCase())) return;
@@ -5485,6 +5561,20 @@ if (btnDownloadAll) {
   });
 });
 
+// Helper: relay download event to any open downloads tab webview
+function relayDownloadEvent(eventName, data) {
+  try {
+    document.querySelectorAll('webview').forEach((wv) => {
+      try {
+        const src = wv.getAttribute('src') || '';
+        if (src.includes('downloads.html')) {
+          wv.executeJavaScript(`window.dispatchEvent(new CustomEvent(${JSON.stringify(eventName)}, { detail: ${JSON.stringify(data)} }))`).catch(() => {});
+        }
+      } catch {}
+    });
+  } catch {}
+}
+
 if (window.braveAPI && window.braveAPI.onDownloadStarted) {
   window.braveAPI.onDownloadStarted((data) => {
     currentDownloadId = data.id;
@@ -5496,6 +5586,7 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
     if (btnDownloadCancel) btnDownloadCancel.style.display = 'inline-block';
     if (btnDownloadOpen) btnDownloadOpen.style.display = 'none';
     if (btnDownloadFolder) btnDownloadFolder.style.display = 'none';
+    relayDownloadEvent('dl:started', data);
   });
 
   window.braveAPI.onDownloadProgress((data) => {
@@ -5513,6 +5604,7 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
       const recMB = (data.receivedBytes / (1024 * 1024)).toFixed(1);
       if (downloadMeta) downloadMeta.textContent = `${recMB} MB descargados`;
     }
+    relayDownloadEvent('dl:progress', data);
   });
 
   window.braveAPI.onDownloadCompleted((data) => {
@@ -5531,17 +5623,36 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
         filename: data.filename,
         savePath: data.savePath,
         totalBytes: data.totalBytes,
+        url: data.url || '',
         date: new Date().toISOString(),
+        state: 'completed',
       });
-      localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 50)));
+      localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
     } catch {}
 
     showGlobalToast(`🦁 Descarga completada: ${data.filename}`);
+    relayDownloadEvent('dl:completed', data);
   });
 
   window.braveAPI.onDownloadFailed((data) => {
     if (btnDownloadCancel) btnDownloadCancel.style.display = 'none';
     if (downloadMeta) downloadMeta.textContent = `Descarga interrumpida (${data.state})`;
+
+    // Registrar descarga fallida en el historial
+    try {
+      const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+      dlList.unshift({
+        id: data.id,
+        filename: data.filename,
+        savePath: '',
+        totalBytes: 0,
+        url: '',
+        date: new Date().toISOString(),
+        state: data.state || 'interrupted',
+      });
+      localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
+    } catch {}
+
     showGlobalToast(`Error en la descarga de ${data.filename}`);
   });
 }
