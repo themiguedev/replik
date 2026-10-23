@@ -18,18 +18,9 @@ contextBridge.exposeInMainWorld('braveAPI', {
   isPrivateMode: () => process.argv.includes('--private-mode') || process.argv.includes('--tor-mode'),
 
   // Controles de Ventana Nativa / Frameless
-  minimizeWindow: () => {
-    try { ipcRenderer.send('window:minimize-sync'); } catch {}
-    return ipcRenderer.invoke('window:minimize');
-  },
-  maximizeWindow: () => {
-    try { ipcRenderer.send('window:maximize-sync'); } catch {}
-    return ipcRenderer.invoke('window:maximize');
-  },
-  closeWindow: () => {
-    try { ipcRenderer.send('window:close-sync'); } catch {}
-    return ipcRenderer.invoke('window:close');
-  },
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+  closeWindow: () => ipcRenderer.invoke('window:close'),
   isMaximized: () => ipcRenderer.invoke('window:is-maximized'),
   onWindowStateChanged: (callback) => {
     ipcRenderer.on('window:state-changed', (_event, data) => callback(data));

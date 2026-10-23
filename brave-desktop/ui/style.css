@@ -110,6 +110,7 @@ body {
   padding: 0 0 0 8px;
   position: relative;
   user-select: none;
+  -webkit-app-region: no-drag;
 }
 
 .tab-bar {
@@ -289,8 +290,9 @@ body {
   align-items: center;
   height: 100%;
   -webkit-app-region: no-drag !important;
-  z-index: 1000;
+  z-index: 99999 !important;
   position: relative;
+  pointer-events: auto !important;
 }
 
 .win-btn {
@@ -309,6 +311,7 @@ body {
   outline: none;
   padding: 0;
   margin: 0;
+  user-select: none;
 }
 
 .win-btn:hover {

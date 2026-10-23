@@ -840,48 +840,48 @@ function getTargetWindow(event?: Electron.IpcMainInvokeEvent | Electron.IpcMainE
 }
 
 // Controles de Ventana (Frameless Titlebar)
-ipcMain.handle('window:minimize', (event) => {
+const handleWindowMinimize = (event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent) => {
   const win = getTargetWindow(event);
-  if (win) win.minimize();
-});
-ipcMain.on('window:minimize-sync', (event) => {
-  const win = getTargetWindow(event);
-  if (win) win.minimize();
-});
+  if (win && !win.isDestroyed()) {
+    win.minimize();
+  }
+};
 
-ipcMain.handle('window:maximize', (event) => {
+const handleWindowMaximize = (event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): boolean => {
   const win = getTargetWindow(event);
-  if (win) {
+  if (win && !win.isDestroyed()) {
     if (win.isMaximized()) {
       win.unmaximize();
     } else {
       win.maximize();
     }
+    return win.isMaximized();
   }
-});
-ipcMain.on('window:maximize-sync', (event) => {
-  const win = getTargetWindow(event);
-  if (win) {
-    if (win.isMaximized()) {
-      win.unmaximize();
-    } else {
-      win.maximize();
-    }
-  }
-});
+  return false;
+};
 
-ipcMain.handle('window:close', (event) => {
+const handleWindowClose = (event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent) => {
   const win = getTargetWindow(event);
-  if (win) win.close();
-});
-ipcMain.on('window:close-sync', (event) => {
-  const win = getTargetWindow(event);
-  if (win) win.close();
-});
+  if (win && !win.isDestroyed()) {
+    win.close();
+  }
+};
+
+ipcMain.handle('window:minimize', handleWindowMinimize);
+ipcMain.on('window:minimize', handleWindowMinimize);
+ipcMain.on('window:minimize-sync', handleWindowMinimize);
+
+ipcMain.handle('window:maximize', handleWindowMaximize);
+ipcMain.on('window:maximize', handleWindowMaximize);
+ipcMain.on('window:maximize-sync', handleWindowMaximize);
+
+ipcMain.handle('window:close', handleWindowClose);
+ipcMain.on('window:close', handleWindowClose);
+ipcMain.on('window:close-sync', handleWindowClose);
 
 ipcMain.handle('window:is-maximized', (event) => {
   const win = getTargetWindow(event);
-  return win ? win.isMaximized() : false;
+  return win && !win.isDestroyed() ? win.isMaximized() : false;
 });
 
 // IPC para Permisos Granulares de Sitio

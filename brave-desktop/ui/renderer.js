@@ -49,6 +49,90 @@ const winIconMaximize = document.getElementById('win-icon-maximize');
 const tabSearchBtn = document.getElementById('tab-search-btn');
 const titlebarDragRegion = document.getElementById('titlebar-drag-region');
 
+function updateMaximizeIcon(isMax) {
+  if (winIconMaximize) {
+    if (isMax) {
+      winIconMaximize.innerHTML = `<path d="M2 0h8v8H8V2H2V0zm-2 2h8v8H0V2zm1 1v6h6V3H1z"/>`;
+      if (winBtnMaximize) winBtnMaximize.title = 'Restaurar';
+    } else {
+      winIconMaximize.innerHTML = `<path d="M1 1h8v8H1V1zm1 1v6h6V2H2z"/>`;
+      if (winBtnMaximize) winBtnMaximize.title = 'Maximizar';
+    }
+  }
+}
+
+function initWindowControls() {
+  const stopDragPropagation = (e) => {
+    e.stopPropagation();
+  };
+
+  [winBtnMinimize, winBtnMaximize, winBtnClose].forEach((btn) => {
+    if (!btn) return;
+    btn.addEventListener('mousedown', stopDragPropagation);
+    btn.addEventListener('pointerdown', stopDragPropagation);
+  });
+
+  if (winBtnMinimize) {
+    winBtnMinimize.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.braveAPI && window.braveAPI.minimizeWindow) {
+        window.braveAPI.minimizeWindow();
+      }
+    });
+  }
+
+  if (winBtnMaximize) {
+    winBtnMaximize.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.braveAPI && window.braveAPI.maximizeWindow) {
+        window.braveAPI.maximizeWindow().then((isMax) => {
+          if (typeof isMax === 'boolean') updateMaximizeIcon(isMax);
+        }).catch(() => {});
+      }
+    });
+  }
+
+  if (winBtnClose) {
+    winBtnClose.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.braveAPI && window.braveAPI.closeWindow) {
+        window.braveAPI.closeWindow();
+      }
+    });
+  }
+
+  if (titlebarDragRegion) {
+    titlebarDragRegion.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      if (window.braveAPI && window.braveAPI.maximizeWindow) {
+        window.braveAPI.maximizeWindow().then((isMax) => {
+          if (typeof isMax === 'boolean') updateMaximizeIcon(isMax);
+        }).catch(() => {});
+      }
+    });
+  }
+
+  if (window.braveAPI) {
+    if (window.braveAPI.onWindowStateChanged) {
+      window.braveAPI.onWindowStateChanged((state) => {
+        if (state && typeof state.isMaximized === 'boolean') {
+          updateMaximizeIcon(state.isMaximized);
+        }
+      });
+    }
+    if (window.braveAPI.isMaximized) {
+      window.braveAPI.isMaximized().then((isMax) => {
+        updateMaximizeIcon(isMax);
+      }).catch(() => {});
+    }
+  }
+}
+
+initWindowControls();
+
 // Ícono SVG del Escudo Brave (Monocromo / Plateado estilo nativo Brave)
 const BRAVE_SHIELD_SVG = `
   <svg class="tab-shield-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -3027,50 +3111,8 @@ if (window.braveAPI && window.braveAPI.onWebviewShortcut) {
 
 // ==========================================
 // 13. CONTROLES DE VENTANA NATIVA (Frameless Titlebar)
+// Nota: Inicializados en initWindowControls() al inicio del archivo para disponibilidad inmediata.
 // ==========================================
-function bindWindowButton(btn, action) {
-  if (!btn) return;
-  let lastTrigger = 0;
-  const trigger = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    const now = Date.now();
-    if (now - lastTrigger < 250) return;
-    lastTrigger = now;
-    action();
-  };
-  btn.addEventListener('click', trigger);
-  btn.addEventListener('pointerup', trigger);
-}
-
-bindWindowButton(winBtnMinimize, () => {
-  if (window.braveAPI && window.braveAPI.minimizeWindow) {
-    window.braveAPI.minimizeWindow();
-  }
-});
-
-bindWindowButton(winBtnMaximize, () => {
-  if (window.braveAPI && window.braveAPI.maximizeWindow) {
-    window.braveAPI.maximizeWindow();
-  }
-});
-
-bindWindowButton(winBtnClose, () => {
-  if (window.braveAPI && window.braveAPI.closeWindow) {
-    window.braveAPI.closeWindow();
-  }
-});
-
-if (titlebarDragRegion) {
-  titlebarDragRegion.addEventListener('dblclick', (e) => {
-    e.preventDefault();
-    if (window.braveAPI && window.braveAPI.maximizeWindow) {
-      window.braveAPI.maximizeWindow();
-    }
-  });
-}
 
 function showGlobalToast(text) {
   const toast = document.getElementById('app-toast');
@@ -3803,23 +3845,7 @@ async function renderExtensionsPopupList() {
   }
 }
 
-if (window.braveAPI && window.braveAPI.onWindowStateChanged) {
-  window.braveAPI.onWindowStateChanged((state) => {
-    if (winIconMaximize) {
-      if (state.isMaximized) {
-        winIconMaximize.innerHTML = `
-          <path d="M2 0h8v8H8V2H2V0zm-2 2h8v8H0V2zm1 1v6h6V3H1z"/>
-        `;
-        if (winBtnMaximize) winBtnMaximize.title = 'Restaurar';
-      } else {
-        winIconMaximize.innerHTML = `
-          <path d="M1 1h8v8H1V1zm1 1v6h6V2H2z"/>
-        `;
-        if (winBtnMaximize) winBtnMaximize.title = 'Maximizar';
-      }
-    }
-  });
-}
+
 
 // ==========================================
 // 22. IMAGEN EN IMAGEN (Picture-in-Picture / PiP)
