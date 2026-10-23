@@ -128,13 +128,9 @@ function initWindowControls() {
 
 initWindowControls();
 
-// Ícono SVG del Escudo Brave (Monocromo / Plateado estilo nativo Brave)
+// Ícono del Escudo Brave con logo oficial
 const BRAVE_SHIELD_SVG = `
-  <svg class="tab-shield-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-    <path d="M9 10l3 2 3-2"/>
-    <path d="M12 12v4.5"/>
-  </svg>
+  <img class="tab-shield-img" src="logo.png" width="16" height="16" alt="Brave" style="vertical-align: middle; object-fit: contain; display: block; pointer-events: none;">
 `;
 
 const RELOAD_SVG = `
@@ -3704,7 +3700,7 @@ function renderTabSearchResults(filterText = '') {
       const item = document.createElement('div');
       item.className = 'tab-search-item' + (t.id === activeTabId ? ' active' : '');
       item.innerHTML = `
-        <span class="tab-search-icon">${t.isPinned ? '📌' : t.isAudible ? '🔊' : '🦁'}</span>
+        <span class="tab-search-icon">${t.isAudible ? '🔊' : '<img src="logo.png" width="14" height="14" style="vertical-align:middle;object-fit:contain;">'}</span>
         <div class="tab-search-details">
           <span class="tab-search-title">${t.title || 'Nueva pestaña'}</span>
           <span class="tab-search-domain">${t.domain || t.url}</span>
@@ -3843,7 +3839,7 @@ function renderTaskManagerRows() {
     tr.innerHTML = `
       <td>
         <div class="task-cell-title">
-          <span>${t.isAudible ? '🔊' : t.isPinned ? '📌' : '🦁'}</span>
+          <span>${t.isAudible ? '🔊' : '<img src="logo.png" width="14" height="14" style="vertical-align:middle;object-fit:contain;">'}</span>
           <span style="font-weight: 600;">${t.title || 'Nueva pestaña'}</span>
           <span style="color: var(--text-muted); font-size: 11px;">(${t.domain || 'Brave'})</span>
         </div>
