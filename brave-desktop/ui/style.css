@@ -668,6 +668,11 @@ body {
   top: 6px;
   right: 48px;
   width: 320px;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
   background-color: var(--bg-popup);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -676,6 +681,23 @@ body {
   padding: 16px;
   display: none;
   animation: fadeIn 0.15s ease-out;
+}
+
+.shields-popup::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shields-popup::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shields-popup::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.shields-popup::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .shields-popup.open {
@@ -876,7 +898,12 @@ input:checked + .slider:before {
   position: absolute;
   top: 6px;
   right: 10px;
-  width: 240px;
+  width: 290px;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
   background-color: var(--bg-popup);
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -887,6 +914,23 @@ input:checked + .slider:before {
   animation: fadeIn 0.12s ease-out;
 }
 
+.main-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.main-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .main-menu.open {
   display: block;
 }
@@ -895,11 +939,12 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  font-size: 13px;
+  padding: 6px 14px;
+  font-size: 12.5px;
   color: #dedee4;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
 }
 
 .menu-item:hover {
@@ -910,12 +955,14 @@ input:checked + .slider:before {
 .menu-shortcut {
   font-size: 11px;
   color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: 12px;
 }
 
 .menu-divider {
   height: 1px;
   background-color: var(--border-color);
-  margin: 5px 0;
+  margin: 4px 0;
 }
 
 /* Pinned Tabs */
@@ -1225,9 +1272,14 @@ input:checked + .slider:before {
 .global-media-popup {
   display: none;
   position: absolute;
-  top: 84px;
+  top: 6px;
   right: 50px;
   width: 310px;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
   background-color: var(--bg-popup);
   border: 1px solid var(--border-color);
   border-radius: 14px;
@@ -1319,8 +1371,26 @@ input:checked + .slider:before {
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.75);
   z-index: 100000;
   min-width: 220px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
   padding: 6px 0;
   flex-direction: column;
+}
+
+.brave-context-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.brave-context-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.brave-context-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
 }
 
 .brave-context-menu.open {
