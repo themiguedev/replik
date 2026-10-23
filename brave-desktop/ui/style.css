@@ -618,6 +618,180 @@ body {
   white-space: nowrap;
 }
 
+.bookmark-chip.dragging {
+  opacity: 0.35;
+  background-color: rgba(251, 84, 43, 0.15);
+  border-color: var(--brave-orange);
+}
+
+.bookmark-chip.drag-over-left {
+  border-left: 2px solid var(--brave-orange) !important;
+}
+
+.bookmark-chip.drag-over-right {
+  border-right: 2px solid var(--brave-orange) !important;
+}
+
+/* Bookmark Star Button in Omnibox */
+.bookmark-star-btn {
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.bookmark-star-btn:hover {
+  color: var(--brave-orange);
+  background-color: rgba(251, 84, 43, 0.12);
+}
+
+.bookmark-star-btn.active {
+  color: var(--brave-orange);
+}
+
+.bookmark-star-btn.active svg {
+  fill: var(--brave-orange);
+  stroke: var(--brave-orange);
+}
+
+/* Bookmark Popover Dialog (Brave Style) */
+.bookmark-edit-popup {
+  display: none;
+  position: absolute;
+  top: 84px;
+  right: 80px;
+  width: 320px;
+  background-color: #24252a;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.bookmark-edit-popup.open {
+  display: flex;
+}
+
+.bm-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.bm-popup-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bm-popup-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bm-popup-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bm-popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bm-popup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bm-popup-field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.bm-popup-field input,
+.bm-popup-field select {
+  background: #141517;
+  border: 1px solid #2e2f38;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.bm-popup-field input:focus,
+.bm-popup-field select:focus {
+  border-color: var(--brave-orange);
+}
+
+.bm-popup-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Bookmark Bar Context Menu */
+.bookmark-bar-context-menu {
+  position: fixed;
+  background-color: #24252a;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  padding: 6px 0;
+  z-index: 2000;
+  display: none;
+  min-width: 200px;
+  animation: fadeIn 0.12s ease-out;
+}
+
+.bookmark-bar-context-menu.open {
+  display: block;
+}
+
+.bm-ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.bm-ctx-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--brave-orange);
+}
+
+.bm-ctx-item.danger:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.bm-ctx-separator {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 4px 0;
+}
+
 .lock-icon {
   font-size: 13px;
   color: #4ade80;

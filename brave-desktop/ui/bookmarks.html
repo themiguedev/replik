@@ -8,12 +8,13 @@
     :root {
       --bg-page: #19191c;
       --bg-card: #212226;
-      --bg-card-hover: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.05);
       --border-color: #2e2f38;
       --brave-orange: #fb542b;
       --text-main: #ffffff;
       --text-muted: #9e9ea7;
       --text-sub: #72727d;
+      --accent-blue: #3b82f6;
     }
 
     * {
@@ -34,13 +35,14 @@
 
     /* Barra Lateral de Carpetas */
     .sidebar {
-      width: 240px;
+      width: 260px;
       background-color: #161619;
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       padding: 24px 16px;
-      gap: 8px;
+      gap: 6px;
+      overflow-y: auto;
     }
 
     .sidebar-title {
@@ -53,16 +55,26 @@
       padding-left: 8px;
     }
 
+    .sidebar-subtitle {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-sub);
+      padding: 8px 10px 4px 10px;
+      font-weight: 700;
+    }
+
     .folder-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border-radius: 8px;
       font-size: 13.5px;
       cursor: pointer;
       color: var(--text-muted);
-      transition: all 0.15s;
+      transition: all 0.15s ease;
+      position: relative;
     }
 
     .folder-item:hover {
@@ -76,40 +88,75 @@
       font-weight: 600;
     }
 
+    .folder-item.drag-over {
+      background-color: rgba(251, 84, 43, 0.25);
+      border: 1px dashed var(--brave-orange);
+      color: #fff;
+    }
+
+    .folder-icon {
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .folder-label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .folder-count {
       font-size: 11px;
       background: rgba(255, 255, 255, 0.08);
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 10px;
       color: var(--text-muted);
     }
 
-    .bm-folder-badge {
-      font-size: 10.5px;
-      background: rgba(251, 84, 43, 0.12);
-      color: var(--brave-orange);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-
-    .folder-del-btn {
+    .folder-more-btn {
       background: none;
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 11px;
+      font-size: 14px;
+      padding: 2px 4px;
+      border-radius: 4px;
       opacity: 0;
-      transition: opacity 0.15s;
+      transition: opacity 0.15s, background 0.15s;
     }
 
-    .folder-item:hover .folder-del-btn {
+    .folder-item:hover .folder-more-btn {
       opacity: 1;
     }
 
-    .folder-del-btn:hover {
-      color: #ef4444;
+    .folder-more-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .btn-new-folder {
+      margin-top: 10px;
+      background-color: transparent;
+      border: 1px dashed var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-new-folder:hover {
+      background-color: var(--bg-card);
+      border-color: var(--brave-orange);
+      color: var(--brave-orange);
     }
 
     /* Contenido Principal */
@@ -117,7 +164,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 32px 48px;
+      padding: 28px 40px;
       overflow-y: auto;
     }
 
@@ -125,14 +172,26 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      max-width: 900px;
+      margin-bottom: 20px;
+      max-width: 960px;
       width: 100%;
     }
 
-    .action-group {
+    .header-title-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .header-actions {
       display: flex;
       gap: 10px;
+      align-items: center;
     }
 
     .btn-action {
@@ -147,6 +206,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      font-weight: 500;
     }
 
     .btn-action:hover {
@@ -165,17 +225,36 @@
       background-color: #e0441d;
     }
 
-    .search-box {
+    .btn-more-options {
+      padding: 8px 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    /* Barra de Búsqueda */
+    .search-bar-row {
+      display: flex;
+      gap: 12px;
+      max-width: 960px;
       width: 100%;
-      max-width: 900px;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
       display: flex;
       align-items: center;
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 20px;
       padding: 8px 18px;
-      margin-bottom: 24px;
       gap: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--brave-orange);
     }
 
     .search-box input {
@@ -184,28 +263,65 @@
       border: none;
       outline: none;
       color: var(--text-main);
-      font-size: 14px;
+      font-size: 13.5px;
     }
 
+    /* Barra de Selección en Lote (Multi-select bar) */
+    .batch-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 960px;
+      width: 100%;
+      background-color: #272830;
+      border: 1px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 8px 16px;
+      margin-bottom: 14px;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .batch-bar.active {
+      display: flex;
+    }
+
+    .batch-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .batch-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Contenedor de Marcadores */
     .bookmarks-container {
       width: 100%;
-      max-width: 900px;
+      max-width: 960px;
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
 
     .bookmark-row {
       display: flex;
       align-items: center;
-      padding: 12px 18px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border-color);
       font-size: 13.5px;
-      gap: 14px;
+      gap: 12px;
       transition: background 0.15s;
+      cursor: pointer;
+      position: relative;
     }
 
     .bookmark-row:last-child {
@@ -216,8 +332,41 @@
       background-color: var(--bg-card-hover);
     }
 
-    .bm-icon {
-      font-size: 18px;
+    .bookmark-row.selected {
+      background-color: rgba(59, 130, 246, 0.15);
+    }
+
+    .bookmark-row.dragging {
+      opacity: 0.35;
+      background-color: rgba(251, 84, 43, 0.1);
+    }
+
+    .bookmark-row.drag-over-top {
+      border-top: 2px solid var(--brave-orange) !important;
+    }
+
+    .bookmark-row.drag-over-bottom {
+      border-bottom: 2px solid var(--brave-orange) !important;
+    }
+
+    .bm-checkbox {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--brave-orange);
+      flex-shrink: 0;
+    }
+
+    .bm-favicon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      border-radius: 3px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
     }
 
     .bm-info {
@@ -230,19 +379,36 @@
       overflow: hidden;
     }
 
+    .bm-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .bm-title {
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: var(--text-main);
     }
 
     .bm-title:hover {
       color: var(--brave-orange);
     }
 
+    .bm-folder-badge {
+      font-size: 10.5px;
+      background: rgba(251, 84, 43, 0.12);
+      color: var(--brave-orange);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
     .bm-url {
-      font-size: 11.5px;
+      font-size: 12px;
       color: var(--text-sub);
       white-space: nowrap;
       overflow: hidden;
@@ -251,12 +417,14 @@
 
     .bm-actions {
       display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: 6px;
       opacity: 0;
       transition: opacity 0.15s;
     }
 
-    .bookmark-row:hover .bm-actions {
+    .bookmark-row:hover .bm-actions,
+    .bookmark-row.menu-open .bm-actions {
       opacity: 1;
     }
 
@@ -265,9 +433,10 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 14px;
-      padding: 4px 6px;
-      border-radius: 4px;
+      font-size: 15px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      transition: all 0.15s;
     }
 
     .bm-btn-icon:hover {
@@ -276,13 +445,62 @@
     }
 
     .empty-state {
-      padding: 40px;
+      padding: 48px;
       text-align: center;
       color: var(--text-muted);
       font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
 
-    /* Modal para añadir/editar */
+    /* Menú Contextual Flotante */
+    .context-menu {
+      position: fixed;
+      background-color: #24252a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      padding: 6px 0;
+      z-index: 1000;
+      display: none;
+      min-width: 190px;
+      animation: fadeIn 0.12s ease-out;
+    }
+
+    .context-menu.open {
+      display: block;
+    }
+
+    .context-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .context-menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: var(--brave-orange);
+    }
+
+    .context-menu-item.danger:hover {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .context-menu-separator {
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 4px 0;
+    }
+
+    /* Modales */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -291,7 +509,8 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 2000;
+      animation: fadeIn 0.15s ease-out;
     }
 
     .modal-overlay.open {
@@ -302,16 +521,21 @@
       background: #24252a;
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      width: 440px;
+      width: 460px;
+      max-width: 90vw;
       padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
     }
 
     .modal-title {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .input-field {
@@ -322,17 +546,20 @@
       color: var(--text-muted);
     }
 
-    .input-field input {
+    .input-field input,
+    .input-field select {
       background: #18191c;
       border: 1px solid var(--border-color);
-      padding: 8px 12px;
+      padding: 9px 12px;
       border-radius: 6px;
       color: var(--text-main);
       font-size: 13.5px;
       outline: none;
+      transition: border-color 0.2s;
     }
 
-    .input-field input:focus {
+    .input-field input:focus,
+    .input-field select:focus {
       border-color: var(--brave-orange);
     }
 
@@ -342,73 +569,144 @@
       gap: 10px;
       margin-top: 8px;
     }
+
+    /* Notificación Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #212226;
+      border: 1px solid var(--brave-orange);
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+      z-index: 3000;
+    }
+
+    .toast.show {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
+  <!-- Barra Lateral de Carpetas -->
   <div class="sidebar">
     <div class="sidebar-title">
-      <img src="logo.png" width="18" height="18" style="vertical-align: middle; margin-right: 6px; object-fit: contain;">
+      <img src="logo.png" width="22" height="22" alt="Brave" style="vertical-align: middle; object-fit: contain;">
       <span>Marcadores</span>
     </div>
+
+    <div class="sidebar-subtitle">Organización</div>
+
     <div class="folder-item active" data-folder="all">
-      <span>📂</span>
-      <span style="flex:1;">Todos los marcadores</span>
+      <span class="folder-icon">📂</span>
+      <span class="folder-label">Todos los marcadores</span>
       <span class="folder-count" id="count-all">0</span>
     </div>
     <div class="folder-item" data-folder="bar">
-      <span>⭐</span>
-      <span style="flex:1;">Barra de marcadores</span>
+      <span class="folder-icon">⭐</span>
+      <span class="folder-label">Barra de marcadores</span>
       <span class="folder-count" id="count-bar">0</span>
     </div>
     <div class="folder-item" data-folder="other">
-      <span>📁</span>
-      <span style="flex:1;">Otros marcadores</span>
+      <span class="folder-icon">📁</span>
+      <span class="folder-label">Otros marcadores</span>
       <span class="folder-count" id="count-other">0</span>
     </div>
-    <div style="height: 1px; background: var(--border-color); margin: 6px 0;"></div>
+
+    <div style="height: 1px; background: var(--border-color); margin: 8px 0;"></div>
+    <div class="sidebar-subtitle">Mis Carpetas</div>
+
     <div id="custom-folders-container" style="display: flex; flex-direction: column; gap: 4px;"></div>
-    <button class="btn-action" id="btn-new-folder" style="margin-top: 8px; justify-content: center; font-size: 12px;">
-      ➕ Nueva carpeta
+
+    <button class="btn-new-folder" id="btn-sidebar-new-folder">
+      <span>➕</span>
+      <span>Nueva carpeta</span>
     </button>
   </div>
 
+  <!-- Vista Principal -->
   <div class="main-view">
     <div class="header-bar">
-      <h1 style="font-size: 22px;">Gestor de Marcadores</h1>
-      <div class="action-group">
-        <button class="btn-action btn-primary" id="btn-add-modal">➕ Añadir marcador</button>
-        <button class="btn-action" id="btn-import">📥 Importar (HTML)</button>
-        <button class="btn-action" id="btn-export">📤 Exportar (HTML)</button>
+      <div class="header-title-container">
+        <h1 class="header-title" id="current-folder-title">Barra de marcadores</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn-action btn-primary" id="btn-add-modal">
+          <span>➕</span>
+          <span>Añadir marcador</span>
+        </button>
+        <button class="btn-action" id="btn-new-folder-top">
+          <span>📁</span>
+          <span>Añadir carpeta</span>
+        </button>
+        <button class="btn-action btn-more-options" id="btn-header-more" title="Más opciones">⋮</button>
       </div>
     </div>
 
-    <div class="search-box">
-      <span>🔍</span>
-      <input type="text" id="search-input" placeholder="Buscar en los marcadores...">
+    <!-- Barra de Búsqueda -->
+    <div class="search-bar-row">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar en los marcadores (título o dirección URL)...">
+      </div>
     </div>
 
+    <!-- Barra de Acciones por Lote (Multi-select) -->
+    <div class="batch-bar" id="batch-bar">
+      <div class="batch-info">
+        <input type="checkbox" id="batch-select-all" class="bm-checkbox" title="Seleccionar todos">
+        <span id="batch-count-text">0 marcadores seleccionados</span>
+      </div>
+      <div class="batch-actions">
+        <select id="batch-move-folder" style="background:#18191c; border:1px solid var(--border-color); padding:5px 10px; border-radius:6px; color:var(--text-main); font-size:12.5px; outline:none;">
+          <option value="" disabled selected>Mover a carpeta...</option>
+          <option value="bar">Barra de marcadores</option>
+          <option value="other">Otros marcadores</option>
+        </select>
+        <button class="btn-action" id="btn-batch-delete" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+          <span>🗑️</span>
+          <span>Eliminar</span>
+        </button>
+        <button class="btn-action" id="btn-batch-cancel">✕ Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Lista de Marcadores -->
     <div class="bookmarks-container" id="bookmarks-list">
-      <!-- Elementos renderizados dinámicamente -->
+      <!-- Los elementos se renderizan dinámicamente -->
     </div>
   </div>
 
   <input type="file" id="file-import" accept=".html,.htm" style="display:none">
 
-  <!-- Modal Añadir / Editar -->
+  <!-- Modal Añadir / Editar Marcador -->
   <div class="modal-overlay" id="bm-modal">
     <div class="modal-card">
-      <div class="modal-title" id="modal-heading">Añadir marcador</div>
+      <div class="modal-title" id="modal-heading">
+        <span>✏️</span>
+        <span id="modal-heading-text">Editar marcador</span>
+      </div>
       <div class="input-field">
         <label>Nombre:</label>
-        <input type="text" id="bm-input-title" placeholder="ej. Brave Search">
+        <input type="text" id="bm-input-title" placeholder="ej. Brave Search" autocomplete="off">
       </div>
       <div class="input-field">
         <label>URL:</label>
-        <input type="text" id="bm-input-url" placeholder="https://search.brave.com">
+        <input type="text" id="bm-input-url" placeholder="https://search.brave.com" autocomplete="off">
       </div>
       <div class="input-field">
-        <label>Carpeta:</label>
-        <select id="bm-input-folder" style="background:#18191c; border:1px solid var(--border-color); padding:8px 12px; border-radius:6px; color:var(--text-main); font-size:13.5px; outline:none;">
+        <label>Carpeta de destino:</label>
+        <select id="bm-input-folder">
           <option value="bar">Barra de marcadores</option>
           <option value="other">Otros marcadores</option>
         </select>
@@ -420,20 +718,123 @@
     </div>
   </div>
 
+  <!-- Modal Crear / Renombrar Carpeta -->
+  <div class="modal-overlay" id="folder-modal">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>📁</span>
+        <span id="folder-modal-heading">Nueva carpeta</span>
+      </div>
+      <div class="input-field">
+        <label>Nombre de la carpeta:</label>
+        <input type="text" id="folder-input-name" placeholder="ej. Proyectos" autocomplete="off">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-action" id="btn-cancel-folder-modal">Cancelar</button>
+        <button class="btn-action btn-primary" id="btn-save-folder-modal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menú Contextual Flotante de Marcador -->
+  <div class="context-menu" id="bm-context-menu">
+    <div class="context-menu-item" id="ctx-open-newtab">
+      <span>↗️</span>
+      <span>Abrir en nueva pestaña</span>
+    </div>
+    <div class="context-menu-item" id="ctx-copy-url">
+      <span>📋</span>
+      <span>Copiar dirección de enlace</span>
+    </div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" id="ctx-edit">
+      <span>✏️</span>
+      <span>Editar...</span>
+    </div>
+    <div class="context-menu-item danger" id="ctx-delete">
+      <span>🗑️</span>
+      <span>Eliminar</span>
+    </div>
+  </div>
+
+  <!-- Menú Contextual de Carpeta -->
+  <div class="context-menu" id="folder-context-menu">
+    <div class="context-menu-item" id="folder-ctx-rename">
+      <span>✏️</span>
+      <span>Cambiar nombre...</span>
+    </div>
+    <div class="context-menu-item danger" id="folder-ctx-delete">
+      <span>🗑️</span>
+      <span>Eliminar carpeta</span>
+    </div>
+  </div>
+
+  <!-- Menú de Opciones del Header -->
+  <div class="context-menu" id="header-context-menu">
+    <div class="context-menu-item" id="header-ctx-sort-title">
+      <span>🔤</span>
+      <span>Ordenar por título (A-Z)</span>
+    </div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" id="header-ctx-import">
+      <span>📥</span>
+      <span>Importar marcadores (HTML)...</span>
+    </div>
+    <div class="context-menu-item" id="header-ctx-export">
+      <span>📤</span>
+      <span>Exportar marcadores (HTML)...</span>
+    </div>
+  </div>
+
+  <!-- Notificación Toast -->
+  <div class="toast" id="global-toast">Mensaje</div>
+
   <script>
     let bookmarks = [];
     let editIndex = -1;
     let currentFolder = 'all';
     let customFolders = [];
+    let selectedBookmarks = new Set();
+    let draggedIndex = -1;
+    let activeContextMenuRow = null;
+    let activeFolderForCtx = null;
+
     try {
       customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
     } catch {
       customFolders = ["Favoritos", "Trabajo"];
     }
 
+    function showToast(msg) {
+      const toast = document.getElementById('global-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2600);
+    }
+
     function saveCustomFolders() {
       localStorage.setItem('brave_bookmark_folders', JSON.stringify(customFolders));
       renderFolders();
+      updateFolderSelectors();
+    }
+
+    function updateFolderSelectors() {
+      const folderSelect = document.getElementById('bm-input-folder');
+      const batchSelect = document.getElementById('batch-move-folder');
+      const optionsHtml = `
+        <option value="bar">Barra de marcadores</option>
+        <option value="other">Otros marcadores</option>
+        ${customFolders.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('')}
+      `;
+      if (folderSelect) folderSelect.innerHTML = optionsHtml;
+      if (batchSelect) {
+        batchSelect.innerHTML = `
+          <option value="" disabled selected>Mover a carpeta...</option>
+          ${optionsHtml}
+        `;
+      }
     }
 
     function renderFolders() {
@@ -446,30 +847,72 @@
           item.setAttribute('data-folder', folderName);
           const count = bookmarks.filter(b => b.folder === folderName).length;
           item.innerHTML = `
-            <span>📁</span>
-            <span style="flex:1;">${escapeHtml(folderName)}</span>
+            <span class="folder-icon">📁</span>
+            <span class="folder-label">${escapeHtml(folderName)}</span>
             <span class="folder-count">${count}</span>
-            <button class="folder-del-btn" title="Eliminar carpeta" data-folder="${escapeHtml(folderName)}">✕</button>
+            <button class="folder-more-btn" title="Opciones de carpeta" data-folder="${escapeHtml(folderName)}">⋮</button>
           `;
-          container.appendChild(item);
-        });
 
-        container.querySelectorAll('.folder-del-btn').forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const fName = btn.getAttribute('data-folder');
-            if (confirm(`¿Eliminar la carpeta "${fName}"? Los marcadores se moverán a Otros marcadores.`)) {
-              customFolders = customFolders.filter(f => f !== fName);
-              bookmarks.forEach(b => { if (b.folder === fName) b.folder = 'other'; });
+          // Drop target para mover marcadores al arrastrarlos sobre la carpeta
+          item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            item.classList.add('drag-over');
+          });
+          item.addEventListener('dragleave', () => {
+            item.classList.remove('drag-over');
+          });
+          item.addEventListener('drop', (e) => {
+            e.preventDefault();
+            item.classList.remove('drag-over');
+            if (draggedIndex >= 0 && draggedIndex < bookmarks.length) {
+              const movedBm = bookmarks[draggedIndex];
+              movedBm.folder = folderName;
               saveBookmarks();
-              saveCustomFolders();
-              if (currentFolder === fName) currentFolder = 'all';
-              renderFolders();
+              showToast(`✓ Movido "${movedBm.title}" a "${folderName}"`);
               renderList(document.getElementById('search-input').value);
             }
           });
+
+          // Menú contextual de la carpeta
+          const moreBtn = item.querySelector('.folder-more-btn');
+          moreBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openFolderContextMenu(folderName, e.clientX, e.clientY);
+          });
+          item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openFolderContextMenu(folderName, e.clientX, e.clientY);
+          });
+
+          container.appendChild(item);
         });
       }
+
+      // Carpetas fijas como Drop targets también
+      ['bar', 'other'].forEach(fKey => {
+        const fixedItem = document.querySelector(`.folder-item[data-folder="${fKey}"]`);
+        if (fixedItem) {
+          fixedItem.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fixedItem.classList.add('drag-over');
+          });
+          fixedItem.addEventListener('dragleave', () => {
+            fixedItem.classList.remove('drag-over');
+          });
+          fixedItem.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fixedItem.classList.remove('drag-over');
+            if (draggedIndex >= 0 && draggedIndex < bookmarks.length) {
+              const movedBm = bookmarks[draggedIndex];
+              movedBm.folder = fKey;
+              saveBookmarks();
+              const fTitle = fKey === 'bar' ? 'Barra de marcadores' : 'Otros marcadores';
+              showToast(`✓ Movido "${movedBm.title}" a "${fTitle}"`);
+              renderList(document.getElementById('search-input').value);
+            }
+          });
+        }
+      });
 
       // Conteo de carpetas predeterminadas
       const countAll = document.getElementById('count-all');
@@ -485,45 +928,31 @@
           document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
           item.classList.add('active');
           currentFolder = item.getAttribute('data-folder');
+          updateCurrentFolderTitle();
+          selectedBookmarks.clear();
+          updateBatchBar();
           renderList(document.getElementById('search-input').value);
         };
       });
 
-      // Actualizar opciones en el selector del modal
-      const folderSelect = document.getElementById('bm-input-folder');
-      if (folderSelect) {
-        folderSelect.innerHTML = `
-          <option value="bar">Barra de marcadores</option>
-          <option value="other">Otros marcadores</option>
-        `;
-        customFolders.forEach((f) => {
-          const opt = document.createElement('option');
-          opt.value = f;
-          opt.textContent = f;
-          folderSelect.appendChild(opt);
-        });
-      }
+      updateFolderSelectors();
     }
 
-    const btnNewFolder = document.getElementById('btn-new-folder');
-    if (btnNewFolder) {
-      btnNewFolder.addEventListener('click', () => {
-        const name = prompt('Nombre de la nueva carpeta:');
-        if (name && name.trim()) {
-          const trimmed = name.trim();
-          if (!customFolders.includes(trimmed)) {
-            customFolders.push(trimmed);
-            saveCustomFolders();
-          }
-        }
-      });
+    function updateCurrentFolderTitle() {
+      const heading = document.getElementById('current-folder-title');
+      if (!heading) return;
+      if (currentFolder === 'all') heading.textContent = 'Todos los marcadores';
+      else if (currentFolder === 'bar') heading.textContent = 'Barra de marcadores';
+      else if (currentFolder === 'other') heading.textContent = 'Otros marcadores';
+      else heading.textContent = currentFolder;
     }
 
     async function loadBookmarks() {
       if (window.braveAPI && window.braveAPI.getBookmarks) {
         try {
-          bookmarks = await window.braveAPI.getBookmarks();
-          if (Array.isArray(bookmarks) && bookmarks.length > 0) {
+          const list = await window.braveAPI.getBookmarks();
+          if (Array.isArray(list) && list.length > 0) {
+            bookmarks = list;
             renderFolders();
             renderList();
             return;
@@ -560,6 +989,15 @@
       renderFolders();
     }
 
+    function getFaviconUrl(url) {
+      try {
+        const u = new URL(url);
+        return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32`;
+      } catch {
+        return null;
+      }
+    }
+
     function renderList(filter = '') {
       const container = document.getElementById('bookmarks-list');
       container.innerHTML = '';
@@ -578,88 +1016,345 @@
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state">${q ? 'No se encontraron marcadores coincidentes.' : 'Esta carpeta está vacía.'}</div>`;
+        container.innerHTML = `
+          <div class="empty-state">
+            <span style="font-size: 32px;">🔖</span>
+            <span>${q ? 'No se encontraron marcadores coincidentes.' : 'Esta carpeta está vacía.'}</span>
+            <button class="btn-action btn-primary" onclick="openAddModal()" style="margin-top: 8px;">➕ Añadir marcador</button>
+          </div>
+        `;
         return;
       }
 
       filtered.forEach((bm) => {
         const realIdx = bookmarks.indexOf(bm);
         const row = document.createElement('div');
-        row.className = 'bookmark-row';
+        row.className = `bookmark-row ${selectedBookmarks.has(realIdx) ? 'selected' : ''}`;
+        row.draggable = true;
+        row.setAttribute('data-idx', realIdx);
+
         const folderLabel = bm.folder === 'bar' ? 'Barra' : (bm.folder === 'other' ? 'Otros' : (bm.folder || 'Barra'));
+        const favSrc = getFaviconUrl(bm.url);
+
         row.innerHTML = `
-          <div class="bm-icon">🔖</div>
-          <a class="bm-info" href="${bm.url}" target="_blank">
-            <div style="display:flex; align-items:center;">
-              <span class="bm-title">${escapeHtml(bm.title || bm.url)}</span>
+          <input type="checkbox" class="bm-checkbox" ${selectedBookmarks.has(realIdx) ? 'checked' : ''} data-idx="${realIdx}">
+          <div class="bm-favicon">
+            ${favSrc ? `<img src="${favSrc}" width="16" height="16" onerror="this.outerHTML='🔖'">` : '🔖'}
+          </div>
+          <div class="bm-info">
+            <div class="bm-title-row">
+              <span class="bm-title" title="${escapeHtml(bm.title)}">${escapeHtml(bm.title || bm.url)}</span>
               <span class="bm-folder-badge">${escapeHtml(folderLabel)}</span>
             </div>
-            <span class="bm-url">${escapeHtml(bm.url)}</span>
-          </a>
+            <span class="bm-url" title="${escapeHtml(bm.url)}">${escapeHtml(bm.url)}</span>
+          </div>
           <div class="bm-actions">
-            <button class="bm-btn-icon btn-edit" title="Editar" data-idx="${realIdx}">✏️</button>
-            <button class="bm-btn-icon btn-del" title="Eliminar" data-idx="${realIdx}">🗑️</button>
+            <button class="bm-btn-icon btn-edit-row" title="Editar marcador" data-idx="${realIdx}">✏️</button>
+            <button class="bm-btn-icon btn-more-row" title="Más opciones" data-idx="${realIdx}">⋮</button>
           </div>
         `;
+
+        // Checkbox individual
+        const chk = row.querySelector('.bm-checkbox');
+        chk.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (chk.checked) selectedBookmarks.add(realIdx);
+          else selectedBookmarks.delete(realIdx);
+          row.classList.toggle('selected', chk.checked);
+          updateBatchBar();
+        });
+
+        // Clic en fila abre la URL
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.bm-actions') || e.target.classList.contains('bm-checkbox')) return;
+          window.open(bm.url, '_blank');
+        });
+
+        // Doble clic abre edición rápida
+        row.addEventListener('dblclick', (e) => {
+          if (e.target.closest('.bm-actions') || e.target.classList.contains('bm-checkbox')) return;
+          openEditModal(realIdx);
+        });
+
+        // Botón editar directo
+        row.querySelector('.btn-edit-row').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEditModal(realIdx);
+        });
+
+        // Botón más opciones (tres puntos)
+        row.querySelector('.btn-more-row').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openRowContextMenu(realIdx, e.clientX, e.clientY);
+        });
+
+        // Clic derecho en la fila
+        row.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          openRowContextMenu(realIdx, e.clientX, e.clientY);
+        });
+
+        // Drag & Drop para reordenamiento
+        row.addEventListener('dragstart', (e) => {
+          draggedIndex = realIdx;
+          row.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', realIdx);
+        });
+
+        row.addEventListener('dragend', () => {
+          row.classList.remove('dragging');
+          document.querySelectorAll('.bookmark-row').forEach(r => {
+            r.classList.remove('drag-over-top', 'drag-over-bottom');
+          });
+        });
+
+        row.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (draggedIndex === realIdx) return;
+          const rect = row.getBoundingClientRect();
+          const midY = rect.top + rect.height / 2;
+          row.classList.remove('drag-over-top', 'drag-over-bottom');
+          if (e.clientY < midY) row.classList.add('drag-over-top');
+          else row.classList.add('drag-over-bottom');
+        });
+
+        row.addEventListener('dragleave', () => {
+          row.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+
+        row.addEventListener('drop', (e) => {
+          e.preventDefault();
+          row.classList.remove('drag-over-top', 'drag-over-bottom');
+          if (draggedIndex < 0 || draggedIndex === realIdx) return;
+
+          const rect = row.getBoundingClientRect();
+          const insertBefore = e.clientY < (rect.top + rect.height / 2);
+
+          const itemToMove = bookmarks.splice(draggedIndex, 1)[0];
+          let targetIdx = bookmarks.indexOf(bm);
+          if (!insertBefore) targetIdx++;
+
+          bookmarks.splice(targetIdx, 0, itemToMove);
+          saveBookmarks();
+          renderList(document.getElementById('search-input').value);
+          showToast('✓ Marcadores reordenados');
+        });
+
         container.appendChild(row);
       });
-
-      document.querySelectorAll('.btn-edit').forEach(b => {
-        b.addEventListener('click', (e) => {
-          editIndex = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
-          openEditModal(editIndex);
-        });
-      });
-
-      document.querySelectorAll('.btn-del').forEach(b => {
-        b.addEventListener('click', async (e) => {
-          const idx = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
-          if (confirm(`¿Eliminar marcador "${bookmarks[idx].title}"?`)) {
-            bookmarks.splice(idx, 1);
-            await saveBookmarks();
-            renderList(document.getElementById('search-input').value);
-          }
-        });
-      });
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function updateBatchBar() {
+      const batchBar = document.getElementById('batch-bar');
+      const countText = document.getElementById('batch-count-text');
+      const selectAll = document.getElementById('batch-select-all');
+
+      if (selectedBookmarks.size > 0) {
+        batchBar.classList.add('active');
+        countText.textContent = `${selectedBookmarks.size} marcador${selectedBookmarks.size > 1 ? 'es' : ''} seleccionado${selectedBookmarks.size > 1 ? 's' : ''}`;
+        selectAll.checked = selectedBookmarks.size === bookmarks.length && bookmarks.length > 0;
+      } else {
+        batchBar.classList.remove('active');
+        selectAll.checked = false;
+      }
     }
 
-    // Modal
-    const modal = document.getElementById('bm-modal');
+    // Seleccionar todos en batch
+    document.getElementById('batch-select-all').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        bookmarks.forEach((_, idx) => selectedBookmarks.add(idx));
+      } else {
+        selectedBookmarks.clear();
+      }
+      renderList(document.getElementById('search-input').value);
+      updateBatchBar();
+    });
+
+    // Cancelar selección batch
+    document.getElementById('btn-batch-cancel').addEventListener('click', () => {
+      selectedBookmarks.clear();
+      renderList(document.getElementById('search-input').value);
+      updateBatchBar();
+    });
+
+    // Mover selección batch a carpeta
+    document.getElementById('batch-move-folder').addEventListener('change', async (e) => {
+      const targetFolder = e.target.value;
+      if (!targetFolder || selectedBookmarks.size === 0) return;
+
+      selectedBookmarks.forEach(idx => {
+        if (bookmarks[idx]) bookmarks[idx].folder = targetFolder;
+      });
+
+      await saveBookmarks();
+      showToast(`✓ Se movieron ${selectedBookmarks.size} marcadores a "${targetFolder}"`);
+      selectedBookmarks.clear();
+      e.target.value = '';
+      updateBatchBar();
+      renderList(document.getElementById('search-input').value);
+    });
+
+    // Eliminar selección batch
+    document.getElementById('btn-batch-delete').addEventListener('click', async () => {
+      if (selectedBookmarks.size === 0) return;
+      if (confirm(`¿Eliminar los ${selectedBookmarks.size} marcadores seleccionados?`)) {
+        bookmarks = bookmarks.filter((_, idx) => !selectedBookmarks.has(idx));
+        selectedBookmarks.clear();
+        await saveBookmarks();
+        showToast('✓ Marcadores eliminados');
+        updateBatchBar();
+        renderList(document.getElementById('search-input').value);
+      }
+    });
+
+    // Menús Contextuales
+    const bmContextMenu = document.getElementById('bm-context-menu');
+    const folderContextMenu = document.getElementById('folder-context-menu');
+    const headerContextMenu = document.getElementById('header-context-menu');
+
+    function closeAllContextMenus() {
+      bmContextMenu.classList.remove('open');
+      folderContextMenu.classList.remove('open');
+      headerContextMenu.classList.remove('open');
+      document.querySelectorAll('.bookmark-row').forEach(r => r.classList.remove('menu-open'));
+    }
+
+    document.addEventListener('click', closeAllContextMenus);
+
+    function positionMenu(menu, x, y) {
+      menu.style.display = 'block';
+      const rect = menu.getBoundingClientRect();
+      let left = x;
+      let top = y;
+      if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 8;
+      if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 8;
+      menu.style.left = `${Math.max(8, left)}px`;
+      menu.style.top = `${Math.max(8, top)}px`;
+      menu.classList.add('open');
+    }
+
+    function openRowContextMenu(idx, x, y) {
+      closeAllContextMenus();
+      activeContextMenuRow = idx;
+      const row = document.querySelector(`.bookmark-row[data-idx="${idx}"]`);
+      if (row) row.classList.add('menu-open');
+      positionMenu(bmContextMenu, x, y);
+    }
+
+    function openFolderContextMenu(fName, x, y) {
+      closeAllContextMenus();
+      activeFolderForCtx = fName;
+      positionMenu(folderContextMenu, x, y);
+    }
+
+    // Acciones del Menú Contextual de Fila
+    document.getElementById('ctx-open-newtab').addEventListener('click', () => {
+      if (activeContextMenuRow !== null && bookmarks[activeContextMenuRow]) {
+        window.open(bookmarks[activeContextMenuRow].url, '_blank');
+      }
+    });
+
+    document.getElementById('ctx-copy-url').addEventListener('click', () => {
+      if (activeContextMenuRow !== null && bookmarks[activeContextMenuRow]) {
+        navigator.clipboard.writeText(bookmarks[activeContextMenuRow].url);
+        showToast('✓ Dirección copiada al portapapeles');
+      }
+    });
+
+    document.getElementById('ctx-edit').addEventListener('click', () => {
+      if (activeContextMenuRow !== null) {
+        openEditModal(activeContextMenuRow);
+      }
+    });
+
+    document.getElementById('ctx-delete').addEventListener('click', async () => {
+      if (activeContextMenuRow !== null && bookmarks[activeContextMenuRow]) {
+        const title = bookmarks[activeContextMenuRow].title;
+        bookmarks.splice(activeContextMenuRow, 1);
+        await saveBookmarks();
+        showToast(`✓ Marcador "${title}" eliminado`);
+        renderList(document.getElementById('search-input').value);
+      }
+    });
+
+    // Acciones del Menú de Carpeta
+    document.getElementById('folder-ctx-rename').addEventListener('click', () => {
+      if (!activeFolderForCtx) return;
+      openRenameFolderModal(activeFolderForCtx);
+    });
+
+    document.getElementById('folder-ctx-delete').addEventListener('click', async () => {
+      if (!activeFolderForCtx) return;
+      const fName = activeFolderForCtx;
+      if (confirm(`¿Eliminar la carpeta "${fName}"? Los marcadores se moverán a Otros marcadores.`)) {
+        customFolders = customFolders.filter(f => f !== fName);
+        bookmarks.forEach(b => { if (b.folder === fName) b.folder = 'other'; });
+        await saveBookmarks();
+        saveCustomFolders();
+        if (currentFolder === fName) currentFolder = 'all';
+        showToast(`✓ Carpeta "${fName}" eliminada`);
+        renderFolders();
+        renderList(document.getElementById('search-input').value);
+      }
+    });
+
+    // Menú Header Más Opciones
+    document.getElementById('btn-header-more').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeAllContextMenus();
+      positionMenu(headerContextMenu, e.clientX - 160, e.clientY + 12);
+    });
+
+    document.getElementById('header-ctx-sort-title').addEventListener('click', async () => {
+      bookmarks.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      await saveBookmarks();
+      showToast('✓ Marcadores ordenados alfabéticamente (A-Z)');
+      renderList(document.getElementById('search-input').value);
+    });
+
+    document.getElementById('header-ctx-import').addEventListener('click', () => {
+      document.getElementById('file-import').click();
+    });
+
+    document.getElementById('header-ctx-export').addEventListener('click', () => {
+      exportBookmarksHtml();
+    });
+
+    // Modal Añadir / Editar Marcador
+    const bmModal = document.getElementById('bm-modal');
     const inputTitle = document.getElementById('bm-input-title');
     const inputUrl = document.getElementById('bm-input-url');
     const inputFolder = document.getElementById('bm-input-folder');
 
-    document.getElementById('btn-add-modal').addEventListener('click', () => {
+    function openAddModal() {
       editIndex = -1;
-      document.getElementById('modal-heading').textContent = 'Añadir marcador';
+      document.getElementById('modal-heading-text').textContent = 'Añadir marcador';
       inputTitle.value = '';
       inputUrl.value = 'https://';
       if (inputFolder) {
         inputFolder.value = (currentFolder !== 'all') ? currentFolder : 'bar';
       }
-      modal.classList.add('open');
+      bmModal.classList.add('open');
       inputTitle.focus();
-    });
+    }
 
     function openEditModal(idx) {
-      document.getElementById('modal-heading').textContent = 'Editar marcador';
+      editIndex = idx;
+      document.getElementById('modal-heading-text').textContent = 'Editar marcador';
       inputTitle.value = bookmarks[idx].title || '';
       inputUrl.value = bookmarks[idx].url || '';
       if (inputFolder) {
         inputFolder.value = bookmarks[idx].folder || 'bar';
       }
-      modal.classList.add('open');
+      bmModal.classList.add('open');
       inputTitle.focus();
     }
 
+    document.getElementById('btn-add-modal').addEventListener('click', openAddModal);
+
     document.getElementById('btn-cancel-modal').addEventListener('click', () => {
-      modal.classList.remove('open');
+      bmModal.classList.remove('open');
     });
 
     document.getElementById('btn-save-modal').addEventListener('click', async () => {
@@ -669,14 +1364,76 @@
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
       const folder = inputFolder ? inputFolder.value : 'bar';
 
-      if (editIndex >= 0) {
+      if (editIndex >= 0 && editIndex < bookmarks.length) {
         bookmarks[editIndex] = { ...bookmarks[editIndex], title, url, folder };
+        showToast('✓ Marcador actualizado con éxito');
       } else {
         bookmarks.unshift({ title, url, folder });
+        showToast('✓ Nuevo marcador añadido');
       }
 
       await saveBookmarks();
-      modal.classList.remove('open');
+      bmModal.classList.remove('open');
+      renderList(document.getElementById('search-input').value);
+    });
+
+    // Modal Carpeta (Crear / Renombrar)
+    const folderModal = document.getElementById('folder-modal');
+    const folderInputName = document.getElementById('folder-input-name');
+    let folderToRename = null;
+
+    function openNewFolderModal() {
+      folderToRename = null;
+      document.getElementById('folder-modal-heading').textContent = 'Nueva carpeta';
+      folderInputName.value = '';
+      folderModal.classList.add('open');
+      folderInputName.focus();
+    }
+
+    function openRenameFolderModal(oldName) {
+      folderToRename = oldName;
+      document.getElementById('folder-modal-heading').textContent = 'Cambiar nombre de carpeta';
+      folderInputName.value = oldName;
+      folderModal.classList.add('open');
+      folderInputName.focus();
+    }
+
+    document.getElementById('btn-sidebar-new-folder').addEventListener('click', openNewFolderModal);
+    document.getElementById('btn-new-folder-top').addEventListener('click', openNewFolderModal);
+
+    document.getElementById('btn-cancel-folder-modal').addEventListener('click', () => {
+      folderModal.classList.remove('open');
+    });
+
+    document.getElementById('btn-save-folder-modal').addEventListener('click', async () => {
+      const newName = folderInputName.value.trim();
+      if (!newName) return;
+
+      if (folderToRename) {
+        // Renombrar carpeta
+        if (newName !== folderToRename && !customFolders.includes(newName)) {
+          const idx = customFolders.indexOf(folderToRename);
+          if (idx !== -1) customFolders[idx] = newName;
+          bookmarks.forEach(b => {
+            if (b.folder === folderToRename) b.folder = newName;
+          });
+          if (currentFolder === folderToRename) currentFolder = newName;
+          await saveBookmarks();
+          saveCustomFolders();
+          showToast(`✓ Carpeta renombrada a "${newName}"`);
+        }
+      } else {
+        // Crear nueva carpeta
+        if (!customFolders.includes(newName)) {
+          customFolders.push(newName);
+          saveCustomFolders();
+          showToast(`✓ Carpeta "${newName}" creada`);
+        }
+      }
+
+      folderModal.classList.remove('open');
+      renderFolders();
+      updateCurrentFolderTitle();
       renderList(document.getElementById('search-input').value);
     });
 
@@ -686,7 +1443,7 @@
     });
 
     // Exportar HTML (Formato Netscape Bookmarks estándar)
-    document.getElementById('btn-export').addEventListener('click', () => {
+    function exportBookmarksHtml() {
       let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<!-- This is an automatically generated file. -->\n<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n<TITLE>Bookmarks</TITLE>\n<H1>Marcadores de Brave</H1>\n<DL><p>\n`;
       bookmarks.forEach(b => {
         html += `    <DT><A HREF="${escapeHtml(b.url)}">${escapeHtml(b.title)}</A>\n`;
@@ -698,14 +1455,11 @@
       a.href = URL.createObjectURL(blob);
       a.download = `brave_marcadores_${new Date().toISOString().slice(0, 10)}.html`;
       a.click();
-    });
+      showToast('✓ Marcadores exportados a HTML');
+    }
 
     // Importar HTML
     const fileImport = document.getElementById('file-import');
-    document.getElementById('btn-import').addEventListener('click', () => {
-      fileImport.click();
-    });
-
     fileImport.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -721,18 +1475,26 @@
           const title = link.textContent.trim() || href;
           if (href && /^https?:\/\//i.test(href)) {
             if (!bookmarks.some(b => b.url === href)) {
-              bookmarks.push({ title, url: href });
+              bookmarks.push({ title, url: href, folder: 'bar' });
               addedCount++;
             }
           }
         });
         await saveBookmarks();
+        renderFolders();
         renderList();
-        alert(`Se importaron ${addedCount} marcadores exitosamente.`);
+        showToast(`✓ Se importaron ${addedCount} marcadores exitosamente.`);
       };
       reader.readAsText(file);
       fileImport.value = '';
     });
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
     window.addEventListener('brave-bridge-ready', loadBookmarks);
     loadBookmarks();
