@@ -382,6 +382,14 @@
         <span>Filtros Adblock</span>
         <span class="menu-shortcut">🛡️</span>
       </div>
+      <div class="menu-item" id="menu-element-picker">
+        <span>Bloquear elemento en esta página</span>
+        <span class="menu-shortcut">Ctrl+Shift+E</span>
+      </div>
+      <div class="menu-item" id="menu-clear-data">
+        <span>Borrar datos de navegación...</span>
+        <span class="menu-shortcut">Ctrl+Shift+Supr</span>
+      </div>
       <div class="menu-divider"></div>
       <div class="menu-item" id="menu-settings">
         <span>Configuración</span>
@@ -655,6 +663,115 @@
     <div class="capture-popup-footer">
       <button class="btn-capture-act" id="btn-capture-copy">📋 Copiar al portapapeles</button>
       <button class="btn-capture-act btn-capture-save" id="btn-capture-save">💾 Guardar imagen PNG</button>
+    </div>
+  </div>
+
+  <!-- Barra Flotante de Modo Selector de Elementos (Element Picker) -->
+  <div class="element-picker-bar" id="element-picker-bar">
+    <div class="element-picker-info">
+      <span class="picker-icon">🎯</span>
+      <span><strong>Selector de Elementos:</strong> Haz clic sobre cualquier elemento de la página para bloquearlo permanentemente. Presiona <strong>Esc</strong> para cancelar.</span>
+    </div>
+    <button class="btn-cancel-picker" id="btn-cancel-picker">✕ Cancelar</button>
+  </div>
+
+  <!-- Modal Limpiador Avanzado de Datos de Navegación (Ctrl + Shift + Supr) -->
+  <div class="clear-data-modal" id="clear-data-modal">
+    <div class="clear-data-dialog">
+      <div class="clear-data-header">
+        <div class="clear-data-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brave-orange)" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+          <span>Borrar datos de navegación</span>
+        </div>
+        <button class="clear-data-close" id="btn-close-clear-data">✕</button>
+      </div>
+
+      <div class="clear-data-body">
+        <div class="clear-data-row">
+          <label class="clear-data-label" for="clear-timerange">Intervalo de tiempo:</label>
+          <select class="clear-data-select" id="clear-timerange">
+            <option value="1h">Última hora</option>
+            <option value="24h" selected>Últimas 24 horas</option>
+            <option value="7d">Últimos 7 días</option>
+            <option value="4w">Últimas 4 semanas</option>
+            <option value="all">Desde siempre</option>
+          </select>
+        </div>
+
+        <div class="clear-data-options">
+          <label class="clear-option-item">
+            <input type="checkbox" id="chk-clear-history" checked>
+            <div class="clear-option-text">
+              <span class="clear-option-name">Historial de navegación</span>
+              <span class="clear-option-desc">Limpia las URLs visitadas y el historial de búsquedas.</span>
+            </div>
+          </label>
+
+          <label class="clear-option-item">
+            <input type="checkbox" id="chk-clear-cookies" checked>
+            <div class="clear-option-text">
+              <span class="clear-option-name">Cookies y otros datos de sitios</span>
+              <span class="clear-option-desc">Cierra tu sesión en la mayoría de los sitios web.</span>
+            </div>
+          </label>
+
+          <label class="clear-option-item">
+            <input type="checkbox" id="chk-clear-cache" checked>
+            <div class="clear-option-text">
+              <span class="clear-option-name">Archivos e imágenes en caché</span>
+              <span class="clear-option-desc">Libera memoria y espacio en disco local.</span>
+            </div>
+          </label>
+
+          <label class="clear-option-item">
+            <input type="checkbox" id="chk-clear-perms">
+            <div class="clear-option-text">
+              <span class="clear-option-name">Permisos y configuraciones de sitios</span>
+              <span class="clear-option-desc">Restablece permisos de cámara, micrófono y ubicación.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="clear-data-footer">
+        <button class="btn-clear-cancel" id="btn-clear-cancel">Cancelar</button>
+        <button class="btn-clear-confirm" id="btn-clear-confirm">Borrar datos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Flotante Gestor de Contraseñas (Save Password Prompt) -->
+  <div class="password-save-popup" id="password-save-popup">
+    <div class="pw-popup-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="pw-icon">🔑</span>
+        <span style="font-weight: 700; font-size: 13.5px;">¿Guardar contraseña?</span>
+      </div>
+      <button class="pw-popup-close" id="btn-close-pw-popup">✕</button>
+    </div>
+    <div class="pw-popup-domain" id="pw-popup-domain">sitio.com</div>
+    <div class="pw-popup-fields">
+      <div class="pw-field-row">
+        <label>Usuario</label>
+        <input type="text" id="pw-input-username" placeholder="Usuario o correo" autocomplete="off">
+      </div>
+      <div class="pw-field-row">
+        <label>Contraseña</label>
+        <div class="pw-input-container">
+          <input type="password" id="pw-input-password" autocomplete="off">
+          <button type="button" class="pw-toggle-vis" id="btn-pw-toggle-vis" title="Mostrar contraseña">👁️</button>
+        </div>
+      </div>
+    </div>
+    <div class="pw-popup-actions">
+      <button class="btn-pw-never" id="btn-pw-never">Nunca</button>
+      <button class="btn-pw-notnow" id="btn-pw-notnow">Ahora no</button>
+      <button class="btn-pw-save" id="btn-pw-save">Guardar</button>
     </div>
   </div>
 

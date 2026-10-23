@@ -456,15 +456,77 @@ function updateOmniboxSuggestions(query) {
     }
   } catch {}
 
-  // 4. Sugerencia Principal de Brave Search
-  results.unshift({
-    type: 'search',
-    title: `Buscar "${query}" en la web`,
-    url: `https://search.brave.com/search?q=${encodeURIComponent(query)}`,
-    icon: '🔍',
-    badge: 'Brave Search',
-    actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(query)}`,
-  });
+  // 4. Sugerencia Principal de Brave Search o Atajos !bangs
+  if (q.startsWith(':g ') || q.startsWith('!g ')) {
+    const text = query.replace(/^[:!]g\s+/i, '');
+    results.unshift({
+      type: 'search',
+      title: `Buscar en Google: "${text}"`,
+      url: `https://www.google.com/search?q=${encodeURIComponent(text)}`,
+      icon: '🔍',
+      badge: '!g (Google)',
+      actionUrl: `https://www.google.com/search?q=${encodeURIComponent(text)}`,
+    });
+  } else if (q.startsWith(':yt ') || q.startsWith('!yt ')) {
+    const text = query.replace(/^[:!]yt\s+/i, '');
+    results.unshift({
+      type: 'search',
+      title: `Buscar en YouTube: "${text}"`,
+      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`,
+      icon: '▶️',
+      badge: '!yt (YouTube)',
+      actionUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`,
+    });
+  } else if (q.startsWith(':w ') || q.startsWith('!w ')) {
+    const text = query.replace(/^[:!]w\s+/i, '');
+    results.unshift({
+      type: 'search',
+      title: `Buscar en Wikipedia: "${text}"`,
+      url: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(text)}`,
+      icon: '📖',
+      badge: '!w (Wikipedia)',
+      actionUrl: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(text)}`,
+    });
+  } else if (q.startsWith(':gh ') || q.startsWith('!gh ')) {
+    const text = query.replace(/^[:!]gh\s+/i, '');
+    results.unshift({
+      type: 'search',
+      title: `Buscar en GitHub: "${text}"`,
+      url: `https://github.com/search?q=${encodeURIComponent(text)}`,
+      icon: '🐙',
+      badge: '!gh (GitHub)',
+      actionUrl: `https://github.com/search?q=${encodeURIComponent(text)}`,
+    });
+  } else if (q.startsWith(':ddg ') || q.startsWith('!ddg ') || q.startsWith(':d ') || q.startsWith('!d ')) {
+    const text = query.replace(/^[:!](ddg|d)\s+/i, '');
+    results.unshift({
+      type: 'search',
+      title: `Buscar en DuckDuckGo: "${text}"`,
+      url: `https://duckduckgo.com/?q=${encodeURIComponent(text)}`,
+      icon: '🦆',
+      badge: '!ddg (DuckDuckGo)',
+      actionUrl: `https://duckduckgo.com/?q=${encodeURIComponent(text)}`,
+    });
+  } else if (q.startsWith(':b ') || q.startsWith('!b ')) {
+    const text = query.replace(/^[:!]b\s+/i, '');
+    results.unshift({
+      type: 'search',
+      title: `Buscar en Brave Search: "${text}"`,
+      url: `https://search.brave.com/search?q=${encodeURIComponent(text)}`,
+      icon: '🦁',
+      badge: '!b (Brave)',
+      actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(text)}`,
+    });
+  } else {
+    results.unshift({
+      type: 'search',
+      title: `Buscar "${query}" en la web`,
+      url: `https://search.brave.com/search?q=${encodeURIComponent(query)}`,
+      icon: '🔍',
+      badge: 'Brave Search',
+      actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(query)}`,
+    });
+  }
 
   // 5. Sugerencias Complementarias
   if (!q.includes('.') && !q.startsWith('brave://') && !q.startsWith('http')) {
@@ -809,6 +871,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     // Captura de miniatura visual para la tarjeta flotante (Hover Card Thumbnail)
     setTimeout(() => {
       updateTabThumbnail(tabData);
+      if (typeof saveCurrentSession === 'function') saveCurrentSession();
     }, 600);
   });
 
@@ -948,10 +1011,66 @@ function createTab(initialUrl = ntpUrl, options = {}) {
         })();
       `;
       webviewEl.executeJavaScript(bridgeScript).catch(() => {});
+    } else if (!curUrl.startsWith('file://')) {
+      // Inyección de interceptor de formularios de contraseña
+      const pwDetectorScript = `
+        (function() {
+          if (window.__brave_pw_injected) return;
+          window.__brave_pw_injected = true;
+          document.addEventListener('submit', function(e) {
+            try {
+              const form = e.target;
+              const pwInput = form.querySelector('input[type="password"]');
+              if (!pwInput || !pwInput.value) return;
+              const userInput = form.querySelector('input[type="email"], input[type="text"], input[name*="user" i], input[name*="email" i], input[name*="login" i]');
+              const username = userInput ? userInput.value : '';
+              const password = pwInput.value;
+              console.log('__BRAVE_PW_SUBMIT__:' + JSON.stringify({ username, password }));
+            } catch(err) {}
+          }, true);
+        })();
+      `;
+      webviewEl.executeJavaScript(pwDetectorScript).catch(() => {});
+
+      // Autofill de credenciales guardadas para el dominio actual
+      try {
+        const savedPwList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+        const curDomain = tabData.domain ? tabData.domain.toLowerCase() : '';
+        const match = savedPwList.find((p) => p.domain && curDomain && p.domain.toLowerCase() === curDomain);
+        if (match) {
+          const autofillScript = `
+            (function() {
+              const pwInput = document.querySelector('input[type="password"]');
+              if (!pwInput) return;
+              const form = pwInput.form || pwInput.closest('form') || document;
+              const userInput = form.querySelector('input[type="email"], input[type="text"], input[name*="user" i], input[name*="email" i], input[name*="login" i]');
+              if (userInput && !userInput.value) {
+                userInput.value = ${JSON.stringify(match.username)};
+                userInput.dispatchEvent(new Event('input', { bubbles: true }));
+                userInput.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+              if (pwInput && !pwInput.value) {
+                pwInput.value = ${JSON.stringify(match.password)};
+                pwInput.dispatchEvent(new Event('input', { bubbles: true }));
+                pwInput.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            })();
+          `;
+          webviewEl.executeJavaScript(autofillScript).catch(() => {});
+        }
+      } catch {}
     }
   });
 
   webviewEl.addEventListener('console-message', async (e) => {
+    if (e.message && e.message.startsWith('__BRAVE_PW_SUBMIT__:')) {
+      try {
+        const data = JSON.parse(e.message.slice(20));
+        promptSavePassword(tabData, data.username, data.password);
+      } catch {}
+      return;
+    }
+
     if (e.message && e.message.startsWith('__BRAVE_RPC__:')) {
       try {
         const payload = JSON.parse(e.message.slice(14));
@@ -1152,6 +1271,7 @@ function closeTab(id) {
     const nextTab = tabs[Math.max(0, index - 1)];
     switchTab(nextTab.id);
   }
+  if (typeof saveCurrentSession === 'function') saveCurrentSession();
 }
 
 // Doble clic en espacio vacío de la barra para crear nueva pestaña
@@ -1600,107 +1720,129 @@ if (ctxSplitTab) {
   });
 }
 
-// Element Zapper (Brave Shields Selector de Elementos)
+// ==========================================
+// SELECTOR VISUAL DE ELEMENTOS (Element Picker)
+// ==========================================
+function activateElementPicker() {
+  const tab = getActiveTab();
+  if (!tab || !tab.webviewEl) return;
+  const pickerBar = document.getElementById('element-picker-bar');
+  if (pickerBar) pickerBar.classList.add('active');
+
+  tab.webviewEl.executeJavaScript(`
+    (() => {
+      if (window.__braveZapperActive) return;
+      window.__braveZapperActive = true;
+
+      const overlay = document.createElement('div');
+      overlay.id = '__brave_zapper_highlight';
+      overlay.style.cssText = 'position: absolute; pointer-events: none; z-index: 2147483647; border: 2.5px dashed var(--brave-orange, #fb542b); background: rgba(251, 84, 43, 0.22); transition: all 0.05s ease; box-shadow: 0 0 16px rgba(251, 84, 43, 0.55); border-radius: 4px;';
+      document.documentElement.appendChild(overlay);
+
+      let currentEl = null;
+
+      function updatePos(e) {
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        if (!target || target === overlay || target === document.documentElement || target === document.body) return;
+        currentEl = target;
+        const r = target.getBoundingClientRect();
+        overlay.style.top = (r.top + window.scrollY) + 'px';
+        overlay.style.left = (r.left + window.scrollX) + 'px';
+        overlay.style.width = r.width + 'px';
+        overlay.style.height = r.height + 'px';
+      }
+
+      function getSelector(el) {
+        if (el.id) return '#' + CSS.escape(el.id);
+        let path = el.tagName.toLowerCase();
+        if (el.className && typeof el.className === 'string') {
+          const classes = el.className.trim().split(/\\s+/).filter(c => !c.startsWith('__brave'));
+          if (classes.length > 0) {
+            path += '.' + classes.slice(0, 2).map(c => CSS.escape(c)).join('.');
+          }
+        }
+        return path;
+      }
+
+      return new Promise((resolve) => {
+        function cleanup() {
+          window.__braveZapperActive = false;
+          document.removeEventListener('mousemove', updatePos, true);
+          document.removeEventListener('click', onClick, true);
+          document.removeEventListener('keydown', onKey, true);
+          overlay.remove();
+        }
+
+        function onClick(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (currentEl) {
+            const sel = getSelector(currentEl);
+            currentEl.style.setProperty('display', 'none', 'important');
+            cleanup();
+            resolve(sel);
+            return;
+          }
+          cleanup();
+          resolve(null);
+        }
+
+        function onKey(e) {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            cleanup();
+            resolve(null);
+          }
+        }
+
+        document.addEventListener('mousemove', updatePos, true);
+        document.addEventListener('click', onClick, true);
+        document.addEventListener('keydown', onKey, true);
+      });
+    })()
+  `).then((selector) => {
+    if (pickerBar) pickerBar.classList.remove('active');
+    if (selector && typeof selector === 'string') {
+      const domain = tab.domain || 'sitio';
+      const rule = `\n${domain}##${selector}`;
+      const currentRules = localStorage.getItem('brave_custom_adblock_rules') || '';
+      const updatedRules = currentRules + rule;
+      localStorage.setItem('brave_custom_adblock_rules', updatedRules);
+      if (window.braveAPI && window.braveAPI.syncCustomRules) {
+        window.braveAPI.syncCustomRules(updatedRules);
+      }
+      tab.webviewEl.insertCSS(`${selector} { display: none !important; }`).catch(() => {});
+      showGlobalToast(`🦁 Elemento bloqueado permanentemente (${selector})`);
+      console.log('[Element Zapper] Regla cosmética persistente guardada y sincronizada:', rule);
+    }
+  }).catch(() => {
+    if (pickerBar) pickerBar.classList.remove('active');
+  });
+}
+
+const btnCancelPicker = document.getElementById('btn-cancel-picker');
+if (btnCancelPicker) {
+  btnCancelPicker.addEventListener('click', () => {
+    const pickerBar = document.getElementById('element-picker-bar');
+    if (pickerBar) pickerBar.classList.remove('active');
+    const tab = getActiveTab();
+    if (tab && tab.webviewEl) {
+      tab.webviewEl.executeJavaScript(`
+        if (window.__braveZapperActive) {
+          const el = document.getElementById('__brave_zapper_highlight');
+          if (el) el.remove();
+          window.__braveZapperActive = false;
+        }
+      `).catch(() => {});
+    }
+  });
+}
+
 const ctxBlockElement = document.getElementById('ctx-block-element');
 if (ctxBlockElement) {
   ctxBlockElement.addEventListener('click', () => {
     customContextMenu.classList.remove('open');
-    const tab = getActiveTab();
-    if (!tab || !tab.webviewEl) return;
-
-    tab.webviewEl.executeJavaScript(`
-      (() => {
-        if (window.__braveZapperActive) return;
-        window.__braveZapperActive = true;
-
-        const overlay = document.createElement('div');
-        overlay.id = '__brave_zapper_highlight';
-        overlay.style.cssText = 'position: absolute; pointer-events: none; z-index: 2147483647; border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.25); transition: all 0.05s ease; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); border-radius: 4px;';
-        document.documentElement.appendChild(overlay);
-
-        const tooltip = document.createElement('div');
-        tooltip.id = '__brave_zapper_tooltip';
-        tooltip.style.cssText = 'position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #191a1e; color: #fff; border: 1px solid #ef4444; padding: 10px 18px; border-radius: 8px; font-family: sans-serif; font-size: 13px; z-index: 2147483647; box-shadow: 0 6px 24px rgba(0,0,0,0.7); pointer-events: none;';
-        tooltip.textContent = '🦁 Brave Element Zapper: Haz clic en el elemento para bloquearlo | Presiona Esc para salir';
-        document.documentElement.appendChild(tooltip);
-
-        let currentEl = null;
-
-        function updatePos(e) {
-          const target = document.elementFromPoint(e.clientX, e.clientY);
-          if (!target || target === overlay || target === tooltip || target === document.documentElement || target === document.body) return;
-          currentEl = target;
-          const r = target.getBoundingClientRect();
-          overlay.style.top = (r.top + window.scrollY) + 'px';
-          overlay.style.left = (r.left + window.scrollX) + 'px';
-          overlay.style.width = r.width + 'px';
-          overlay.style.height = r.height + 'px';
-        }
-
-        function getSelector(el) {
-          if (el.id) return '#' + CSS.escape(el.id);
-          let path = el.tagName.toLowerCase();
-          if (el.className && typeof el.className === 'string') {
-            const classes = el.className.trim().split(/\\s+/).filter(c => !c.startsWith('__brave'));
-            if (classes.length > 0) {
-              path += '.' + classes.slice(0, 2).map(c => CSS.escape(c)).join('.');
-            }
-          }
-          return path;
-        }
-
-        return new Promise((resolve) => {
-          function cleanup() {
-            window.__braveZapperActive = false;
-            document.removeEventListener('mousemove', updatePos, true);
-            document.removeEventListener('click', onClick, true);
-            document.removeEventListener('keydown', onKey, true);
-            overlay.remove();
-            tooltip.remove();
-          }
-
-          function onClick(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (currentEl) {
-              const sel = getSelector(currentEl);
-              currentEl.style.setProperty('display', 'none', 'important');
-              cleanup();
-              resolve(sel);
-              return;
-            }
-            cleanup();
-            resolve(null);
-          }
-
-          function onKey(e) {
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              cleanup();
-              resolve(null);
-            }
-          }
-
-          document.addEventListener('mousemove', updatePos, true);
-          document.addEventListener('click', onClick, true);
-          document.addEventListener('keydown', onKey, true);
-        });
-      })()
-    `).then((selector) => {
-      if (selector && typeof selector === 'string') {
-        const domain = tab.domain || 'sitio';
-        const rule = `\n${domain}##${selector}`;
-        const currentRules = localStorage.getItem('brave_custom_adblock_rules') || '';
-        const updatedRules = currentRules + rule;
-        localStorage.setItem('brave_custom_adblock_rules', updatedRules);
-        if (window.braveAPI && window.braveAPI.syncCustomRules) {
-          window.braveAPI.syncCustomRules(updatedRules);
-        }
-        tab.webviewEl.insertCSS(`${selector} { display: none !important; }`).catch(() => {});
-        showGlobalToast(`🦁 Elemento bloqueado con éxito`);
-        console.log('[Element Zapper] Regla cosmética persistente guardada y sincronizada:', rule);
-      }
-    }).catch(() => {});
+    activateElementPicker();
   });
 }
 
@@ -1836,19 +1978,23 @@ function navigateTo(raw) {
 
   const lower = target.toLowerCase();
 
-  // Búsquedas con Prefijos Rápidos (Bangs)
-  if (lower.startsWith(':yt ')) {
-    target = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(target.substring(4).trim());
-  } else if (lower.startsWith(':w ')) {
-    target = 'https://es.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(target.substring(3).trim());
-  } else if (lower.startsWith(':g ')) {
-    target = 'https://www.google.com/search?q=' + encodeURIComponent(target.substring(3).trim());
-  } else if (lower.startsWith(':gh ')) {
-    target = 'https://github.com/search?q=' + encodeURIComponent(target.substring(4).trim());
-  } else if (lower.startsWith(':d ')) {
-    target = 'https://duckduckgo.com/?q=' + encodeURIComponent(target.substring(3).trim());
-  } else if (lower.startsWith(':b ')) {
-    target = 'https://search.brave.com/search?q=' + encodeURIComponent(target.substring(3).trim());
+  // Búsquedas con Prefijos Rápidos (!bangs y :)
+  if (lower.startsWith(':yt ') || lower.startsWith('!yt ')) {
+    target = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(target.replace(/^[:!]yt\s+/i, '').trim());
+  } else if (lower.startsWith(':w ') || lower.startsWith('!w ')) {
+    target = 'https://es.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(target.replace(/^[:!]w\s+/i, '').trim());
+  } else if (lower.startsWith(':g ') || lower.startsWith('!g ')) {
+    target = 'https://www.google.com/search?q=' + encodeURIComponent(target.replace(/^[:!]g\s+/i, '').trim());
+  } else if (lower.startsWith(':gh ') || lower.startsWith('!gh ')) {
+    target = 'https://github.com/search?q=' + encodeURIComponent(target.replace(/^[:!]gh\s+/i, '').trim());
+  } else if (lower.startsWith(':ddg ') || lower.startsWith('!ddg ') || lower.startsWith(':d ') || lower.startsWith('!d ')) {
+    target = 'https://duckduckgo.com/?q=' + encodeURIComponent(target.replace(/^[:!](ddg|d)\s+/i, '').trim());
+  } else if (lower.startsWith(':b ') || lower.startsWith('!b ')) {
+    target = 'https://search.brave.com/search?q=' + encodeURIComponent(target.replace(/^[:!]b\s+/i, '').trim());
+  } else if (lower.startsWith(':r ') || lower.startsWith('!r ')) {
+    target = 'https://www.reddit.com/search/?q=' + encodeURIComponent(target.replace(/^[:!]r\s+/i, '').trim());
+  } else if (lower.startsWith(':m ') || lower.startsWith('!m ')) {
+    target = 'https://www.google.com/maps/search/' + encodeURIComponent(target.replace(/^[:!]m\s+/i, '').trim());
   }
   // Enrutamiento de URLs internas de Brave
   else if (lower === 'brave://settings' || lower === 'about:settings' || lower === 'chrome://settings') {
@@ -2335,6 +2481,8 @@ function handleBrowserShortcut(e) {
   const isF12 = code === 'F12' || e.key === 'F12' || key === 'f12';
   const isComma = code === 'Comma' || key === ',';
   const isF = code === 'KeyF' || key === 'f';
+  const isE = code === 'KeyE' || key === 'e';
+  const isDelete = code === 'Delete' || code === 'Backspace' || key === 'delete' || key === 'backspace';
 
   // Ctrl + F: Buscar en la página
   if (isCtrl && !isShift && isF) {
@@ -2552,6 +2700,20 @@ function handleBrowserShortcut(e) {
     return;
   }
 
+  // Ctrl + Shift + E: Selector de Elementos (Element Picker)
+  if (isCtrl && isShift && isE) {
+    prevent();
+    activateElementPicker();
+    return;
+  }
+
+  // Ctrl + Shift + Supr / Backspace: Borrar datos de navegación
+  if (isCtrl && isShift && isDelete) {
+    prevent();
+    openClearDataModal();
+    return;
+  }
+
   // Alt + S: Pantalla Dividida (Split View)
   if (isAlt && !isCtrl && isS) {
     prevent();
@@ -2575,6 +2737,14 @@ function handleBrowserShortcut(e) {
     if (extPopup) extPopup.classList.remove('open');
     const qrPopup = document.getElementById('qr-popup');
     if (qrPopup) qrPopup.classList.remove('open');
+    const siteInfoPop = document.getElementById('site-info-popup');
+    if (siteInfoPop) siteInfoPop.classList.remove('open');
+    const clearDataPop = document.getElementById('clear-data-modal');
+    if (clearDataPop) clearDataPop.classList.remove('open');
+    const pwPop = document.getElementById('password-save-popup');
+    if (pwPop) pwPop.classList.remove('open');
+    const pickerBar = document.getElementById('element-picker-bar');
+    if (pickerBar) pickerBar.classList.remove('active');
     if (siteInfoPopup) siteInfoPopup.classList.remove('open');
     if (capturePopup) capturePopup.classList.remove('open');
     closeFindInPage();
@@ -2699,6 +2869,13 @@ function ensureSplitResizer() {
     resizer.id = 'split-resizer';
     resizer.className = 'split-resizer';
     browserContent.appendChild(resizer);
+
+    // Doble clic para restablecer la proporción al 50% / 50%
+    resizer.addEventListener('dblclick', () => {
+      splitRatio = 0.5;
+      updateSplitViewLayout();
+      showGlobalToast('🦁 Pantalla dividida restablecida al 50%');
+    });
 
     let isDragging = false;
     resizer.addEventListener('mousedown', (e) => {
@@ -3992,5 +4169,255 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Inicializar primera pestaña al abrir
-createTab(ntpUrl);
+// ==========================================
+// 31. RESTAURACIÓN DE SESIÓN ("Continuar donde lo dejaste")
+// ==========================================
+function saveCurrentSession() {
+  try {
+    const sessionList = tabs.map((t) => ({
+      url: t.url || ntpUrl,
+      title: t.title || 'Nueva Pestaña',
+      isPinned: !!t.isPinned,
+    }));
+    localStorage.setItem('brave_last_session', JSON.stringify(sessionList));
+  } catch {}
+}
+
+window.addEventListener('beforeunload', () => {
+  saveCurrentSession();
+});
+
+window.addEventListener('pagehide', () => {
+  saveCurrentSession();
+});
+
+// ==========================================
+// 32. GESTOR DE CONTRASEÑAS Y AUTOCOMPLETADO
+// ==========================================
+const passwordSavePopup = document.getElementById('password-save-popup');
+const pwPopupDomain = document.getElementById('pw-popup-domain');
+const pwInputUsername = document.getElementById('pw-input-username');
+const pwInputPassword = document.getElementById('pw-input-password');
+const btnClosePwPopup = document.getElementById('btn-close-pw-popup');
+const btnPwToggleVis = document.getElementById('btn-pw-toggle-vis');
+const btnPwNever = document.getElementById('btn-pw-never');
+const btnPwNotNow = document.getElementById('btn-pw-notnow');
+const btnPwSave = document.getElementById('btn-pw-save');
+
+let pendingPasswordDomain = '';
+
+function promptSavePassword(tab, username, password) {
+  if (!tab || !tab.domain || tab.domain === 'nueva pestaña' || tab.domain === 'configuración') return;
+  const neverList = JSON.parse(localStorage.getItem('brave_passwords_never') || '[]');
+  if (neverList.includes(tab.domain.toLowerCase())) return;
+
+  pendingPasswordDomain = tab.domain.toLowerCase();
+  if (pwPopupDomain) pwPopupDomain.textContent = tab.domain;
+  if (pwInputUsername) pwInputUsername.value = username || '';
+  if (pwInputPassword) {
+    pwInputPassword.value = password || '';
+    pwInputPassword.type = 'password';
+  }
+  if (passwordSavePopup) passwordSavePopup.classList.add('open');
+}
+
+if (btnClosePwPopup) {
+  btnClosePwPopup.addEventListener('click', () => {
+    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+  });
+}
+if (btnPwNotNow) {
+  btnPwNotNow.addEventListener('click', () => {
+    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+  });
+}
+if (btnPwToggleVis && pwInputPassword) {
+  btnPwToggleVis.addEventListener('click', () => {
+    if (pwInputPassword.type === 'password') {
+      pwInputPassword.type = 'text';
+      btnPwToggleVis.textContent = '🔒';
+    } else {
+      pwInputPassword.type = 'password';
+      btnPwToggleVis.textContent = '👁️';
+    }
+  });
+}
+if (btnPwNever) {
+  btnPwNever.addEventListener('click', () => {
+    if (pendingPasswordDomain) {
+      const neverList = JSON.parse(localStorage.getItem('brave_passwords_never') || '[]');
+      if (!neverList.includes(pendingPasswordDomain)) {
+        neverList.push(pendingPasswordDomain);
+        localStorage.setItem('brave_passwords_never', JSON.stringify(neverList));
+      }
+    }
+    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+    showGlobalToast('No se volverá a preguntar en este sitio.');
+  });
+}
+if (btnPwSave) {
+  btnPwSave.addEventListener('click', () => {
+    const userVal = pwInputUsername ? pwInputUsername.value.trim() : '';
+    const passVal = pwInputPassword ? pwInputPassword.value : '';
+    if (!passVal) return;
+
+    try {
+      const savedList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+      const filtered = savedList.filter(
+        (p) => !(p.domain === pendingPasswordDomain && p.username === userVal)
+      );
+      filtered.push({
+        id: Date.now().toString(),
+        domain: pendingPasswordDomain,
+        username: userVal,
+        password: passVal,
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem('brave_passwords', JSON.stringify(filtered));
+      showGlobalToast(`🦁 Contraseña guardada para ${pendingPasswordDomain}`);
+    } catch {}
+    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+  });
+}
+
+// ==========================================
+// 33. LIMPIADOR AVANZADO DE DATOS (Clear Data Modal)
+// ==========================================
+const clearDataModal = document.getElementById('clear-data-modal');
+const btnCloseClearData = document.getElementById('btn-close-clear-data');
+const btnClearCancel = document.getElementById('btn-clear-cancel');
+const btnClearConfirm = document.getElementById('btn-clear-confirm');
+const clearTimeRange = document.getElementById('clear-timerange');
+const chkClearHistory = document.getElementById('chk-clear-history');
+const chkClearCookies = document.getElementById('chk-clear-cookies');
+const chkClearCache = document.getElementById('chk-clear-cache');
+const chkClearPerms = document.getElementById('chk-clear-perms');
+
+function openClearDataModal() {
+  if (mainMenu) mainMenu.classList.remove('open');
+  if (clearDataModal) clearDataModal.classList.add('open');
+}
+
+function closeClearDataModal() {
+  if (clearDataModal) clearDataModal.classList.remove('open');
+}
+
+if (btnCloseClearData) btnCloseClearData.addEventListener('click', closeClearDataModal);
+if (btnClearCancel) btnClearCancel.addEventListener('click', closeClearDataModal);
+
+if (btnClearConfirm) {
+  btnClearConfirm.addEventListener('click', async () => {
+    const timeRange = clearTimeRange ? clearTimeRange.value : '24h';
+    const dataTypes = [];
+    if (chkClearCookies && chkClearCookies.checked) dataTypes.push('cookies', 'storage');
+    if (chkClearCache && chkClearCache.checked) dataTypes.push('cache');
+    if (chkClearHistory && chkClearHistory.checked) {
+      dataTypes.push('history');
+      localStorage.removeItem('brave_browser_history');
+    }
+    if (chkClearPerms && chkClearPerms.checked) {
+      localStorage.removeItem('brave_site_permissions');
+    }
+
+    btnClearConfirm.disabled = true;
+    btnClearConfirm.textContent = 'Borrando...';
+
+    if (window.braveAPI && window.braveAPI.clearBrowsingData) {
+      try {
+        await window.braveAPI.clearBrowsingData({ timeRange, dataTypes });
+        showGlobalToast('🦁 Datos de navegación borrados con éxito');
+      } catch {
+        showGlobalToast('Error al borrar los datos');
+      } finally {
+        btnClearConfirm.disabled = false;
+        btnClearConfirm.textContent = 'Borrar datos';
+        closeClearDataModal();
+      }
+    } else {
+      btnClearConfirm.disabled = false;
+      btnClearConfirm.textContent = 'Borrar datos';
+      closeClearDataModal();
+      showGlobalToast('🦁 Datos de navegación locales borrados');
+    }
+  });
+}
+
+// Menú principal: Borrar datos y Selector de elementos
+const menuClearData = document.getElementById('menu-clear-data');
+if (menuClearData) {
+  menuClearData.addEventListener('click', () => {
+    openClearDataModal();
+  });
+}
+
+const menuElementPicker = document.getElementById('menu-element-picker');
+if (menuElementPicker) {
+  menuElementPicker.addEventListener('click', () => {
+    mainMenu.classList.remove('open');
+    activateElementPicker();
+  });
+}
+
+// ==========================================
+// 34. PERSONALIZACIÓN VISUAL (Tema y Color de Acento)
+// ==========================================
+function applyThemeAndAccent() {
+  const theme = localStorage.getItem('brave_theme') || 'dark';
+  const accent = localStorage.getItem('brave_accent') || 'orange';
+
+  // Tema Claro / Oscuro / Sistema
+  if (theme === 'light') {
+    document.body.classList.add('light-theme');
+  } else if (theme === 'system') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add('light-theme');
+    }
+  } else {
+    document.body.classList.remove('light-theme');
+  }
+
+  // Color de acento
+  document.body.setAttribute('data-accent', accent);
+}
+
+applyThemeAndAccent();
+
+// Escuchar cambios de sistema operativo o entre ventanas/configuración
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (localStorage.getItem('brave_theme') === 'system') {
+    applyThemeAndAccent();
+  }
+});
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'brave_theme' || e.key === 'brave_accent') {
+    applyThemeAndAccent();
+  }
+});
+
+// ==========================================
+// 35. RESTAURACIÓN Y PUESTA EN MARCHA (Startup)
+// ==========================================
+const startupMode = localStorage.getItem('brave_startup_mode') || 'continue';
+let restoredAny = false;
+
+if (startupMode === 'continue') {
+  try {
+    const lastSession = JSON.parse(localStorage.getItem('brave_last_session') || '[]');
+    if (Array.isArray(lastSession) && lastSession.length > 0) {
+      lastSession.forEach((savedTab) => {
+        if (savedTab.url && !savedTab.url.includes('ntp.html')) {
+          createTab(savedTab.url, { pinned: savedTab.isPinned });
+          restoredAny = true;
+        }
+      });
+    }
+  } catch {}
+}
+
+if (!restoredAny) {
+  createTab(ntpUrl);
+}

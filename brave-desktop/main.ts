@@ -568,10 +568,12 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
     const isF = code === 'KeyF' || keyLower === 'f';
     const isZoom = code === 'Equal' || code === 'Minus' || code === 'NumpadAdd' || code === 'NumpadSubtract' || keyLower === '+' || keyLower === '-' || keyLower === '=';
     const isPage = code === 'PageDown' || code === 'PageUp' || keyLower === 'pagedown' || keyLower === 'pageup';
+    const isDelete = code === 'Delete' || code === 'Backspace' || keyLower === 'delete' || keyLower === 'backspace';
+    const isE = code === 'KeyE' || keyLower === 'e';
 
     if (
       (isCtrl && (isT || isW || isR || isL || isH || isJ || isD || isB || isN || isA || isF || isP || isTab || isF4 || isDigit || isComma || isZoom || is0 || isPage)) ||
-      (isCtrl && isShift && (isT || isS || isN || isB)) ||
+      (isCtrl && isShift && (isT || isS || isN || isB || isDelete || isE)) ||
       (isAlt && (isD || isS || isR || (isShift && isN))) ||
       (isShift && isEsc) ||
       isEsc ||
@@ -691,6 +693,40 @@ ipcMain.handle('shields:clear-domain-data', async (_event, domain: string) => {
     return { success: true };
   } catch (err: any) {
     console.warn(`[Brave Forgetful] Error limpiando datos de ${clean}:`, err);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('browser:clear-data', async (_event, options: { timeRange?: string; dataTypes?: string[] }) => {
+  const { timeRange = 'all', dataTypes = ['cache', 'cookies', 'storage', 'history'] } = options || {};
+  let since = 0;
+  const now = Date.now();
+  if (timeRange === '1h') since = now - 60 * 60 * 1000;
+  else if (timeRange === '24h') since = now - 24 * 60 * 60 * 1000;
+  else if (timeRange === '7d') since = now - 7 * 24 * 60 * 60 * 1000;
+  else if (timeRange === '4w') since = now - 28 * 24 * 60 * 60 * 1000;
+
+  try {
+    const partitions = [session.defaultSession, session.fromPartition('persist:brave_default')];
+    for (const s of partitions) {
+      if (dataTypes.includes('cache')) {
+        await s.clearCache().catch(() => {});
+      }
+      const storagesToClear: any[] = [];
+      if (dataTypes.includes('cookies')) storagesToClear.push('cookies');
+      if (dataTypes.includes('storage')) {
+        storagesToClear.push('localstorage', 'indexdb', 'websql', 'serviceworkers', 'cachestorage');
+      }
+      if (storagesToClear.length > 0) {
+        const filter: any = { storages: storagesToClear };
+        if (since > 0) filter.since = since;
+        await s.clearStorageData(filter).catch(() => {});
+      }
+    }
+    console.log(`[Brave Privacy] Datos de navegación limpiados: rango=${timeRange}, tipos=${dataTypes.join(',')}`);
+    return { success: true };
+  } catch (err: any) {
+    console.warn('[Brave Privacy] Error en browser:clear-data:', err);
     return { success: false, error: err.message };
   }
 });

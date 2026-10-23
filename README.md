@@ -8,19 +8,23 @@
 
 ---
 
-## 🚀 Descarga Rápida (Portable)
+## 🚀 Descargas Disponibles
 
-No requiere instalación ni dependencias externas. Descarga y ejecuta directamente:
+Elige la versión que mejor se adapte a tu uso:
 
-* 📦 **[Descargar Brave-Replica-Portable.exe (GitHub Releases)](https://github.com/themiguedev/replik/releases/latest)**
-* 💾 **Binario en el repositorio**: [`Brave-Replica-Portable.exe`](Brave-Replica-Portable.exe) (~104 MB)
+* 📦 **[Descargar Brave-Replica-Portable.exe (Portable)](https://github.com/themiguedev/replik/releases/latest)** (~104 MB): Ejecutable autónomo sin instalación previa.
+* 💿 **[Descargar Brave-Replica-Setup.exe (Instalador)](https://github.com/themiguedev/replik/releases/latest)** (~104 MB): Instalador guiado NSIS con accesos directos al Menú Inicio y Escritorio.
+
+Ambos binarios también se encuentran versionados en la raíz del repositorio con soporte de **Git LFS**.
 
 ---
 
 ## ✨ Características Principales
 
-### 🛡️ 1. Privacidad y Seguridad Avanzada (Brave Shields)
+### 🛡️ 1. Seguridad y Control de Datos
 * **Motor de Bloqueo de Anuncios y Rastreadores**: Reglas de EasyList + uBlock Origin integradas de alta velocidad.
+* **Selector Visual de Bloqueo de Elementos (`Ctrl + Shift + E`)**: Modo de inspección visual interactivo para seleccionar cualquier elemento de una página, bloquearlo al instante y generar reglas cosméticas permanentes.
+* **Limpiador Avanzado de Datos de Navegación (`Ctrl + Shift + Supr`)**: Diálogo completo con selección de rango temporal (1h, 24h, 7d, 4w, todo) y control granular de caché, cookies, almacenamiento local, permisos e historial.
 * **Bloqueo de Scripts por Defecto**: Desactiva la ejecución de JavaScript en sitios no esenciales con interruptor dinámico por dominio.
 * **Navegación Olvidadiza (Forgetful Browsing)**: Limpieza automática de cookies, almacenamiento local y caché al cerrar la última pestaña de un dominio.
 * **Protección contra Escaneo de Red Local**: Bloqueo de peticiones no autorizadas desde páginas web hacia `localhost`, `127.0.0.1` o redes privadas (LAN).
@@ -29,13 +33,17 @@ No requiere instalación ni dependencias externas. Descarga y ejecuta directamen
 * **Des-Rastreo y Salto Directo de Redirecciones (De-AMP & Direct URL Bypass)**: Salto automático de enlaces de rastreo intermedios.
 * **Gestor de Permisos de Sitio en el Candado**: Panel interactivo con interruptores para Cámara, Micrófono, Notificaciones, Ubicación, Portapapeles y JavaScript.
 
-### 🎨 2. Diseño Visual 1:1 Oficial (Brave Desktop Theme)
+### 🎨 2. Personalización Visual y Diseño 1:1 Oficial
+* **Selector de Tema Dinámico**: Alterna fluidamente entre modo **Oscuro** (predeterminado carbón `#1f1f23`), modo **Claro** (`#ffffff` / `#f1f3f4`) y modo **Automático** sincronizado con Windows.
+* **Paletas de Color de Acento**: Elige entre Naranja Brave (`#fb542b`), Morado Eléctrico (`#7d34fe`), Azul Océano (`#1a73e8`), Verde Esmeralda (`#00b894`) y Rojo Carmesí (`#ea4335`).
 * **Barra de Título Frameless con Controles Nativos**: Minimizar (`—`), Maximizar (`▢`) y Cerrar (`✕`) estilo Windows 11 con detección de arrastre y doble clic.
-* **Pestañas y Toolbar Unificadas**: Continuidad visual fluida en gris carbón (`#1f1f23` y `#2b2d31`) sin bordes ni separaciones toscas.
+* **Pestañas y Toolbar Unificadas**: Continuidad visual fluida en gris carbón sin bordes ni separaciones toscas.
 * **Iconos Vectoriales SVG Profesionales**: Flechas de navegación, recarga/detención dinámica, candado de seguridad, pieza de puzzle de extensiones, perfil y menú de opciones.
 * **Página de Nueva Pestaña (NTP)**: Panel superior de 3 métricas de ahorro (*Rastreadores bloqueados*, *Banda ancha ahorrada* y *Tiempo ganado*), reloj estético, buscador Brave y accesos directos.
 
-### 📑 3. Gestión Eficiente de Pestañas y Rendimiento
+### ⚡ 3. Resiliencia de Sesión y Multitarea
+* **Restauración Completa de Sesión ("Continuar donde lo dejaste")**: Guarda el estado de todas las pestañas abiertas y fijadas, restaurándolas al reiniciar el navegador de manera automática (configurable en Ajustes).
+* **Divisor Arrastrable en Pantalla Dividida (Split View Resizer)**: Separador interactivo entre pestañas paralelas con ajuste fino y doble clic para restablecer la proporción al 50%/50%.
 * **Ahorro de Memoria (Memory Saver / Sleeping Tabs)**: Suspensión automática de pestañas en segundo plano y reactivación instantánea al seleccionarlas.
 * **Tarjetas Flotantes (Tab Hover Cards)**: Previsualización de miniaturas y consumo estimado de memoria RAM al pasar el cursor sobre las pestañas.
 * **Caché Instantáneo Atrás / Adelante (BFCache)**: Navegación inmediata preservando el estado DOM y posición de scroll.
@@ -44,7 +52,9 @@ No requiere instalación ni dependencias externas. Descarga y ejecuta directamen
 * **Reabrir Pestañas Cerradas (`Ctrl + Shift + T`)**: Pila de recuperación de pestañas cerradas recientemente con su historial.
 * **Control de Zoom Persistente**: Ajuste fino con `Ctrl +`, `Ctrl -`, `Ctrl 0` con memoria por dominio e indicador interactivo en el Omnibox.
 
-### 🛠️ 4. Productividad y Utilidades Integradas
+### 🛠️ 4. Productividad y Autocompletado
+* **Gestor Local de Contraseñas y Autocompletado**: Detección de envíos de formularios, aviso flotante para guardar credenciales, autocompletado en páginas web y panel de administración en configuración.
+* **Atajos de Búsqueda Rápidos (!bangs y :)**: Búsqueda instantánea desde el Omnibox con `:g` / `!g` (Google), `:yt` / `!yt` (YouTube), `:w` / `!w` (Wikipedia), `:ddg` / `!ddg` (DuckDuckGo), `:gh` / `!gh` (GitHub), `:b` / `!b` (Brave Search), `:r` / `!r` (Reddit) y `:m` / `!m` (Google Maps).
 * **Captura de Pantalla Web Nativa (Brave Web Capture)**: Herramienta de recorte con atajo `Ctrl + Shift + S`, vista previa flotante, copia directa al portapapeles y guardado como PNG.
 * **Impresión Nativa y Guardar como PDF (`Ctrl + P`)**: Diálogo de impresión de Chromium para impresión física o exportación a PDF vectorial.
 * **Búsqueda Interna en la Página (`Ctrl + F`)**: Barra flotante con contador de coincidencias en tiempo real y navegación anterior/siguiente.
@@ -70,6 +80,8 @@ No requiere instalación ni dependencias externas. Descarga y ejecuta directamen
 | `Ctrl + L` / `Alt + D` | Enfocar la barra de direcciones (Omnibox) |
 | `Ctrl + R` / `F5` | Recargar página (`Ctrl + Shift + R` sin caché) |
 | `Ctrl + F` | Buscar en la página web |
+| `Ctrl + Shift + E` | Selector visual de bloqueo de elementos (Element Picker) |
+| `Ctrl + Shift + Supr` | Borrar datos de navegación (Caché, cookies, historial) |
 | `Ctrl + Shift + S` | Captura de pantalla web (Web Capture) |
 | `Ctrl + P` | Imprimir / Guardar como PDF |
 | `Ctrl + +` / `Ctrl + -` / `Ctrl + 0` | Aumentar, reducir o restablecer zoom |

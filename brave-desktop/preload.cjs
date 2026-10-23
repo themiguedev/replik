@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
   toggleAggressive: (domain) => ipcRenderer.invoke('shields:toggle-aggressive', domain),
   toggleForgetful: (domain) => ipcRenderer.invoke('shields:toggle-forgetful', domain),
   clearDomainData: (domain) => ipcRenderer.invoke('shields:clear-domain-data', domain),
+  clearBrowsingData: (options) => ipcRenderer.invoke('browser:clear-data', options),
   getShieldsStatus: (domain) => ipcRenderer.invoke('shields:get-status', domain),
   getSavingsStats: () => ipcRenderer.invoke('shields:get-savings-stats'),
   openPrivateWindow: () => ipcRenderer.invoke('browser:open-private-window'),

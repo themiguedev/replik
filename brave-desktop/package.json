@@ -23,11 +23,21 @@
       "package.json"
     ],
     "win": {
-      "target": "portable",
+      "target": [
+        "portable",
+        "nsis"
+      ],
       "icon": "ui/icon.ico"
     },
     "portable": {
       "artifactName": "Brave-Replica-Portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Brave Browser",
+      "artifactName": "Brave-Replica-Setup.exe"
     }
   }
 }

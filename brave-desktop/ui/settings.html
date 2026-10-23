@@ -233,6 +233,101 @@
       border-color: var(--brave-orange);
     }
 
+    /* Accent Swatches */
+    .accent-swatches {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .accent-swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .accent-swatch:hover {
+      transform: scale(1.15);
+    }
+    .accent-swatch.active {
+      border-color: #fff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      transform: scale(1.18);
+    }
+
+    /* Password Manager Table */
+    .pw-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .pw-table th, .pw-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .pw-table th {
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-pw-act {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+    .btn-pw-act:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .btn-pw-del:hover {
+      color: #ef4444;
+    }
+
+    /* Action buttons & Radio group */
+    .btn-action-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .btn-action-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--brave-orange);
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 8px 0;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13.5px;
+    }
+    .radio-item input[type="radio"] {
+      accent-color: var(--brave-orange);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
     /* Version Badge */
     .version-card {
       max-width: 720px;
@@ -348,6 +443,10 @@
       <span class="nav-icon">🎨</span>
       <span>Aspecto</span>
     </div>
+    <div class="nav-item" data-section="startup">
+      <span class="nav-icon">⚡</span>
+      <span>Al iniciar</span>
+    </div>
     <div class="nav-item" data-section="search">
       <span class="nav-icon">🔍</span>
       <span>Motor de búsqueda</span>
@@ -428,6 +527,14 @@
       <div class="settings-group">
         <div class="setting-row">
           <div class="setting-info">
+            <div class="setting-name">Borrar datos de navegación</div>
+            <div class="setting-desc">Elimina el historial, cookies, archivos temporales en caché y permisos almacenados.</div>
+          </div>
+          <button class="btn-action-outline" id="btn-settings-clear-data">Borrar datos ahora</button>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
             <div class="setting-name">Sustitución de recursos (Surrogate Redirection)</div>
             <div class="setting-desc">Redirige rastreadores de analítica a scripts neutros (1x1.gif, noop.js) para evitar que los sitios web se rompan.</div>
           </div>
@@ -448,6 +555,35 @@
           </label>
         </div>
       </div>
+
+      <!-- Gestor de Contraseñas -->
+      <div class="settings-group" style="margin-top: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div>
+            <div class="setting-name" style="font-size: 15px;">Gestor de Contraseñas</div>
+            <div class="setting-desc">Credenciales guardadas localmente para inicio de sesión seguro.</div>
+          </div>
+          <button class="btn-action-outline" id="btn-clear-all-pw" style="font-size: 12px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">Borrar todas</button>
+        </div>
+
+        <div id="pw-empty-state" style="color: var(--text-muted); font-size: 13px; padding: 14px 0; text-align: center;">
+          No hay contraseñas guardadas en este momento.
+        </div>
+
+        <table class="pw-table" id="pw-table" style="display: none;">
+          <thead>
+            <tr>
+              <th>Sitio Web</th>
+              <th>Usuario</th>
+              <th>Contraseña</th>
+              <th style="text-align: right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="pw-table-body">
+            <!-- Rellenado dinámico -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- SECCIÓN 3: ASPECTO -->
@@ -462,8 +598,23 @@
           </div>
           <select class="setting-select" id="opt-theme">
             <option value="dark">Oscuro (Predeterminado de Brave)</option>
+            <option value="light">Claro</option>
             <option value="system">Seguir el sistema operativo</option>
           </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Color de acento de Brave</div>
+            <div class="setting-desc">Elige el color para resaltar pestañas activas, botones y estados de protección.</div>
+          </div>
+          <div class="accent-swatches" id="accent-swatches">
+            <div class="accent-swatch active" data-accent="orange" style="background: #fb542b;" title="Naranja Brave"></div>
+            <div class="accent-swatch" data-accent="purple" style="background: #7d34fe;" title="Morado Eléctrico"></div>
+            <div class="accent-swatch" data-accent="blue" style="background: #1a73e8;" title="Azul Océano"></div>
+            <div class="accent-swatch" data-accent="green" style="background: #00b894;" title="Verde Esmeralda"></div>
+            <div class="accent-swatch" data-accent="red" style="background: #ea4335;" title="Rojo Carmesí"></div>
+          </div>
         </div>
 
         <div class="setting-row">
@@ -474,6 +625,36 @@
           <label class="switch">
             <input type="checkbox" checked disabled>
             <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: AL INICIAR -->
+    <div id="section-startup" class="settings-tab" style="display: none;">
+      <div class="section-title">Al iniciar</div>
+      
+      <div class="settings-group">
+        <div class="setting-info" style="margin-bottom: 12px;">
+          <div class="setting-name">Puesta en marcha del navegador</div>
+          <div class="setting-desc">Determina qué páginas se abren cuando inicias Brave.</div>
+        </div>
+
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="startup_option" id="startup-continue" value="continue" checked>
+            <div>
+              <strong>Continuar donde lo dejaste</strong>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Restaura automáticamente todas las pestañas de tu sesión anterior (Recomendado).</div>
+            </div>
+          </label>
+
+          <label class="radio-item">
+            <input type="radio" name="startup_option" id="startup-newtab" value="newtab">
+            <div>
+              <strong>Abrir la página de Nueva Pestaña</strong>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Inicia con una sola pestaña en blanco con widgets y fondos dinámicos.</div>
+            </div>
           </label>
         </div>
       </div>
@@ -637,6 +818,134 @@
 
     optEngine.addEventListener('change', () => {
       localStorage.setItem('brave_setting_engine', optEngine.value);
+    });
+
+    // Borrar datos de navegación
+    const btnSettingsClearData = document.getElementById('btn-settings-clear-data');
+    if (btnSettingsClearData) {
+      btnSettingsClearData.addEventListener('click', async () => {
+        if (confirm('¿Deseas borrar los datos de navegación almacenados (cookies, caché e historial)?')) {
+          localStorage.removeItem('brave_browser_history');
+          localStorage.removeItem('brave_site_permissions');
+          if (window.braveAPI && window.braveAPI.clearBrowsingData) {
+            await window.braveAPI.clearBrowsingData({ timeRange: 'all', dataTypes: ['cookies', 'storage', 'cache', 'history'] });
+          }
+          alert('Datos de navegación borrados.');
+        }
+      });
+    }
+
+    // Gestor de Contraseñas
+    const pwTable = document.getElementById('pw-table');
+    const pwTableBody = document.getElementById('pw-table-body');
+    const pwEmptyState = document.getElementById('pw-empty-state');
+    const btnClearAllPw = document.getElementById('btn-clear-all-pw');
+
+    function renderPasswords() {
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+      } catch {}
+
+      if (!list || list.length === 0) {
+        if (pwTable) pwTable.style.display = 'none';
+        if (pwEmptyState) pwEmptyState.style.display = 'block';
+        return;
+      }
+
+      if (pwEmptyState) pwEmptyState.style.display = 'none';
+      if (pwTable) pwTable.style.display = 'table';
+      if (pwTableBody) {
+        pwTableBody.innerHTML = '';
+        list.forEach((pw, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${pw.domain}</strong></td>
+            <td>${pw.username || '<span style="color:var(--text-muted);">(sin usuario)</span>'}</td>
+            <td>
+              <span class="pw-masked" id="pw-mask-${idx}">••••••••</span>
+              <button class="btn-pw-act btn-pw-reveal" data-idx="${idx}" title="Mostrar contraseña">👁️</button>
+            </td>
+            <td style="text-align: right;">
+              <button class="btn-pw-act btn-pw-del" data-idx="${idx}" title="Eliminar contraseña">🗑️</button>
+            </td>
+          `;
+          pwTableBody.appendChild(tr);
+        });
+
+        pwTableBody.querySelectorAll('.btn-pw-reveal').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const i = parseInt(btn.getAttribute('data-idx'), 10);
+            const mask = document.getElementById(`pw-mask-${i}`);
+            if (mask) {
+              if (mask.textContent === '••••••••') {
+                mask.textContent = list[i].password;
+                btn.textContent = '🔒';
+              } else {
+                mask.textContent = '••••••••';
+                btn.textContent = '👁️';
+              }
+            }
+          });
+        });
+
+        pwTableBody.querySelectorAll('.btn-pw-del').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const i = parseInt(btn.getAttribute('data-idx'), 10);
+            if (confirm(`¿Eliminar contraseña para ${list[i].domain}?`)) {
+              list.splice(i, 1);
+              localStorage.setItem('brave_passwords', JSON.stringify(list));
+              renderPasswords();
+            }
+          });
+        });
+      }
+    }
+
+    if (btnClearAllPw) {
+      btnClearAllPw.addEventListener('click', () => {
+        if (confirm('¿Eliminar todas las contraseñas guardadas en Brave?')) {
+          localStorage.removeItem('brave_passwords');
+          renderPasswords();
+        }
+      });
+    }
+
+    renderPasswords();
+
+    // Selector de tema y color de acento
+    const optTheme = document.getElementById('opt-theme');
+    if (optTheme) {
+      optTheme.value = localStorage.getItem('brave_theme') || 'dark';
+      optTheme.addEventListener('change', () => {
+        localStorage.setItem('brave_theme', optTheme.value);
+      });
+    }
+
+    const accentSwatches = document.querySelectorAll('.accent-swatch');
+    const savedAccent = localStorage.getItem('brave_accent') || 'orange';
+    accentSwatches.forEach((swatch) => {
+      if (swatch.getAttribute('data-accent') === savedAccent) {
+        swatch.classList.add('active');
+      } else {
+        swatch.classList.remove('active');
+      }
+      swatch.addEventListener('click', () => {
+        accentSwatches.forEach((s) => s.classList.remove('active'));
+        swatch.classList.add('active');
+        const acc = swatch.getAttribute('data-accent');
+        localStorage.setItem('brave_accent', acc);
+      });
+    });
+
+    // Puesta en marcha / Al iniciar
+    const startupRadios = document.querySelectorAll('input[name="startup_option"]');
+    const savedStartup = localStorage.getItem('brave_startup_mode') || 'continue';
+    startupRadios.forEach((r) => {
+      if (r.value === savedStartup) r.checked = true;
+      r.addEventListener('change', () => {
+        if (r.checked) localStorage.setItem('brave_startup_mode', r.value);
+      });
     });
 
     // Lógica de Brave Sync (25 palabras)
