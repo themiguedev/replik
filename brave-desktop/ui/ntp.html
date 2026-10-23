@@ -567,6 +567,24 @@
     loadStats();
     window.addEventListener('storage', loadStats);
 
+    function getSearchUrl(query) {
+      let engine = localStorage.getItem('brave_setting_engine') || 'brave';
+      const q = encodeURIComponent(query);
+      switch (engine) {
+        case 'google':
+          return `https://www.google.com/search?q=${q}`;
+        case 'duckduckgo':
+          return `https://duckduckgo.com/?q=${q}`;
+        case 'bing':
+          return `https://www.bing.com/search?q=${q}`;
+        case 'qwant':
+          return `https://www.qwant.com/?q=${q}`;
+        case 'brave':
+        default:
+          return `https://search.brave.com/search?q=${q}`;
+      }
+    }
+
     document.getElementById('search-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const query = document.getElementById('search-input').value.trim();
@@ -575,7 +593,7 @@
       if (/^https?:\/\//i.test(query) || (query.includes('.') && !query.includes(' '))) {
         window.location.href = query.startsWith('http') ? query : 'https://' + query;
       } else {
-        window.location.href = 'https://search.brave.com/search?q=' + encodeURIComponent(query);
+        window.location.href = getSearchUrl(query);
       }
     });
 

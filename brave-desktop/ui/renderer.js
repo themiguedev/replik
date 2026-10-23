@@ -1937,6 +1937,18 @@ function switchTab(id) {
     });
   }
 
+  // Cerrar barras o paneles contextuales de la pestaña anterior
+  if (speedreaderOverlay && speedreaderOverlay.classList.contains('active')) {
+    speedreaderOverlay.classList.remove('active');
+    if (btnSpeedreader) btnSpeedreader.classList.remove('active');
+  }
+  if (typeof closeFindInPage === 'function' && findInPageBar && findInPageBar.classList.contains('open')) {
+    closeFindInPage();
+  }
+  if (translateBar && translateBar.classList.contains('active')) {
+    translateBar.classList.remove('active');
+  }
+
   updateOmniboxForUrl(currentTab.url);
   updateNavControls();
   document.title = `${currentTab.title} - Brave Browser`;
@@ -1966,10 +1978,13 @@ function closeTab(id) {
   }
 
   if (tabToRemove && tabToRemove.url && !tabToRemove.url.includes('ntp.html')) {
-    closedTabsStack.push({
-      url: tabToRemove.url,
-      title: tabToRemove.title,
-    });
+    if (!isCurrentWindowPrivate()) {
+      closedTabsStack.push({
+        url: tabToRemove.url,
+        title: tabToRemove.title,
+      });
+      if (closedTabsStack.length > 50) closedTabsStack.shift();
+    }
   }
 
   tabToRemove.tabEl.remove();
@@ -2550,8 +2565,12 @@ function openPageContextMenu(x, y, params) {
     searchItem.textContent = `Buscar "${params.selectionText.substring(0, 18)}..." en Brave Search`;
   }
 
-  customContextMenu.style.left = `${Math.min(x, window.innerWidth - 240)}px`;
-  customContextMenu.style.top = `${Math.min(y, window.innerHeight - 340)}px`;
+  const contentRect = browserContent ? browserContent.getBoundingClientRect() : { left: 0, top: 0 };
+  const actualX = x + (contentRect.left || 0);
+  const actualY = y + (contentRect.top || 0);
+
+  customContextMenu.style.left = `${Math.max(10, Math.min(actualX, window.innerWidth - 240))}px`;
+  customContextMenu.style.top = `${Math.max(10, Math.min(actualY, window.innerHeight - 340))}px`;
   customContextMenu.classList.add('open');
   tabContextMenu.classList.remove('open');
 }
@@ -2902,9 +2921,21 @@ document.getElementById('tab-ctx-mute').addEventListener('click', () => {
     tab.webviewEl.setAudioMuted(tab.isMuted);
     const audioBtn = tab.tabEl.querySelector('.tab-audio-icon');
     if (audioBtn) {
-      audioBtn.style.display = tab.isMuted ? 'inline-flex' : 'none';
-      audioBtn.textContent = '🔇';
+      if (tab.isMuted) {
+        audioBtn.style.display = 'inline-flex';
+        audioBtn.textContent = '🔇';
+        audioBtn.classList.add('muted');
+        audioBtn.title = 'Reactivar sonido de la pestaña';
+      } else if (tab.isAudible) {
+        audioBtn.style.display = 'inline-flex';
+        audioBtn.textContent = '🔊';
+        audioBtn.classList.remove('muted');
+        audioBtn.title = 'Silenciar pestaña';
+      } else {
+        audioBtn.style.display = 'none';
+      }
     }
+    updateGlobalMediaMenu();
   }
   tabContextMenu.classList.remove('open');
 });
@@ -4850,16 +4881,8 @@ if (btnQrCopy) {
 }
 
 // ==========================================
-// 26. RESTAURACIÓN DE PESTAÑAS FIJADAS (Startup)
+// 26. GESTIÓN DE PESTAÑAS FIJADAS (Startup en sección 35)
 // ==========================================
-try {
-  const savedPinned = JSON.parse(localStorage.getItem('brave_pinned_tabs') || '[]');
-  if (savedPinned && savedPinned.length > 0) {
-    savedPinned.forEach((p) => {
-      createTab(p.url, { pinned: true });
-    });
-  }
-} catch {}
 
 // ==========================================
 // 27. CONTROL DE ZOOM PERSISTENTE POR DOMINIO
@@ -5065,6 +5088,11 @@ if (siteInfoBtnReset) {
     if (!tab) return;
     const domain = tab.domain || extractDomain(tab.url);
     localStorage.removeItem(`brave_perms_${domain}`);
+    PERMISSION_CONFIGS.forEach((p) => {
+      if (window.braveAPI && window.braveAPI.setSitePermission) {
+        window.braveAPI.setSitePermission(domain, p.key, 'reset');
+      }
+    });
     renderSitePermissions(domain, tab.url);
     showGlobalToast(`Permisos restablecidos para ${domain}`);
   });
@@ -5212,6 +5240,8 @@ document.addEventListener('click', (e) => {
 // 31. RESTAURACIÓN DE SESIÓN ("Continuar donde lo dejaste")
 // ==========================================
 function saveCurrentSession() {
+  // Nunca guardar la sesión si la ventana es Privada o Tor
+  if (isCurrentWindowPrivate()) return;
   try {
     const sessionList = tabs.map((t) => ({
       url: t.url || ntpUrl,
@@ -5453,7 +5483,7 @@ window.addEventListener(
       const current = tab.zoomFactor || 1.0;
       const step = e.deltaY < 0 ? 0.1 : -0.1;
       const nextZoom = Math.min(3.0, Math.max(0.25, Math.round((current + step) * 10) / 10));
-      applyZoom(tab, nextZoom);
+      applyCurrentTabZoom(nextZoom, true);
     }
   },
   { passive: false }
@@ -5768,24 +5798,43 @@ if (window.braveAPI && window.braveAPI.onTabCrashed) {
 // 35. RESTAURACIÓN Y PUESTA EN MARCHA (Startup)
 // ==========================================
 const startupMode = localStorage.getItem('brave_startup_mode') || 'continue';
-let restoredAny = false;
+const restoredUrls = new Set();
 
+// 1. Restaurar pestañas fijadas persistentes (sin duplicados)
+try {
+  const savedPinned = JSON.parse(localStorage.getItem('brave_pinned_tabs') || '[]');
+  if (Array.isArray(savedPinned)) {
+    savedPinned.forEach((p) => {
+      if (p.url && !restoredUrls.has(p.url)) {
+        createTab(p.url, { pinned: true });
+        restoredUrls.add(p.url);
+      }
+    });
+  }
+} catch {}
+
+// 2. Restaurar sesión previa si el modo es "continue"
 if (startupMode === 'continue') {
   try {
     const lastSession = JSON.parse(localStorage.getItem('brave_last_session') || '[]');
-    if (Array.isArray(lastSession) && lastSession.length > 0) {
+    if (Array.isArray(lastSession)) {
       lastSession.forEach((savedTab) => {
         if (savedTab.url && !savedTab.url.includes('ntp.html')) {
-          createTab(savedTab.url, { pinned: savedTab.isPinned });
-          restoredAny = true;
+          if (!restoredUrls.has(savedTab.url)) {
+            createTab(savedTab.url, { pinned: !!savedTab.isPinned });
+            restoredUrls.add(savedTab.url);
+          }
         }
       });
     }
   } catch {}
 }
 
-if (!restoredAny) {
+// 3. Si no hay pestañas abiertas, abrir la Nueva Pestaña (NTP)
+if (tabs.length === 0) {
   createTab(ntpUrl);
-} else if (tabs.length > 0) {
-  switchTab(tabs[0].id);
+} else {
+  // Enfocar la primera pestaña no fijada o la primera disponible
+  const firstNonPinned = tabs.find((t) => !t.isPinned) || tabs[0];
+  switchTab(firstNonPinned.id);
 }

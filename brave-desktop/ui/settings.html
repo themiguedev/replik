@@ -1383,12 +1383,16 @@
 
     renderSyncState();
 
-    // Activar pestaña según hash en URL si existe
-    if (window.location.hash) {
-      const sec = window.location.hash.replace('#', '');
-      const targetNav = document.querySelector(`.nav-item[data-section="${sec}"]`);
-      if (targetNav) targetNav.click();
+    // Activar pestaña según hash en URL si existe o al cambiar el hash dinámicamente
+    function applyHashSection() {
+      if (window.location.hash) {
+        const sec = window.location.hash.replace('#', '');
+        const targetNav = document.querySelector(`.nav-item[data-section="${sec}"]`);
+        if (targetNav) targetNav.click();
+      }
     }
+    applyHashSection();
+    window.addEventListener('hashchange', applyHashSection);
   </script>
 </body>
 </html>
