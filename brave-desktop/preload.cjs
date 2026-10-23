@@ -1,6 +1,27 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const path = require('path');
-const { pathToFileURL } = require('url');
+
+let pathMod = null;
+let urlMod = null;
+try {
+  pathMod = require('path');
+} catch {}
+try {
+  urlMod = require('url');
+} catch {}
+
+function getLocalFileUrl(filename) {
+  if (urlMod && pathMod && typeof __dirname === 'string') {
+    try {
+      return urlMod.pathToFileURL(pathMod.join(__dirname, 'ui', filename)).href;
+    } catch {}
+  }
+  if (typeof window !== 'undefined' && window.location && window.location.href) {
+    try {
+      return new URL(filename, window.location.href).href;
+    } catch {}
+  }
+  return `ui/${filename}`;
+}
 
 contextBridge.exposeInMainWorld('braveAPI', {
   toggleShields: (domain) => ipcRenderer.invoke('shields:toggle', domain),
@@ -36,33 +57,15 @@ contextBridge.exposeInMainWorld('braveAPI', {
     ipcRenderer.on('browser:context-menu', (_event, data) => callback(data));
   },
 
-  getNtpUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'ntp.html')).href;
-  },
-  getSettingsUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'settings.html')).href;
-  },
-  getHistoryUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'history.html')).href;
-  },
-  getDownloadsUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'downloads.html')).href;
-  },
-  getAdblockUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'adblock.html')).href;
-  },
-  getPlaylistUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'playlist.html')).href;
-  },
-  getExtensionsUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'extensions.html')).href;
-  },
-  getBookmarksUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'bookmarks.html')).href;
-  },
-  getVersionUrl: () => {
-    return pathToFileURL(path.join(__dirname, 'ui', 'version.html')).href;
-  },
+  getNtpUrl: () => getLocalFileUrl('ntp.html'),
+  getSettingsUrl: () => getLocalFileUrl('settings.html'),
+  getHistoryUrl: () => getLocalFileUrl('history.html'),
+  getDownloadsUrl: () => getLocalFileUrl('downloads.html'),
+  getAdblockUrl: () => getLocalFileUrl('adblock.html'),
+  getPlaylistUrl: () => getLocalFileUrl('playlist.html'),
+  getExtensionsUrl: () => getLocalFileUrl('extensions.html'),
+  getBookmarksUrl: () => getLocalFileUrl('bookmarks.html'),
+  getVersionUrl: () => getLocalFileUrl('version.html'),
   getVersionInfo: () => ipcRenderer.invoke('browser:get-version-info'),
   getSitePermissions: (domain) => ipcRenderer.invoke('permissions:get', domain),
   setSitePermission: (domain, permission, state) => ipcRenderer.invoke('permissions:set', domain, permission, state),

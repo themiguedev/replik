@@ -62,47 +62,42 @@ function updateMaximizeIcon(isMax) {
 }
 
 function initWindowControls() {
-  const stopDragPropagation = (e) => {
-    e.stopPropagation();
-  };
-
-  [winBtnMinimize, winBtnMaximize, winBtnClose].forEach((btn) => {
+  function bindWindowAction(btn, action) {
     if (!btn) return;
-    btn.addEventListener('mousedown', stopDragPropagation);
-    btn.addEventListener('pointerdown', stopDragPropagation);
+    let lastTime = 0;
+    const trigger = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const now = Date.now();
+      if (now - lastTime < 150) return;
+      lastTime = now;
+      action();
+    };
+    btn.addEventListener('click', trigger);
+    btn.addEventListener('mouseup', trigger);
+  }
+
+  bindWindowAction(winBtnMinimize, () => {
+    if (window.braveAPI && window.braveAPI.minimizeWindow) {
+      window.braveAPI.minimizeWindow();
+    }
   });
 
-  if (winBtnMinimize) {
-    winBtnMinimize.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (window.braveAPI && window.braveAPI.minimizeWindow) {
-        window.braveAPI.minimizeWindow();
-      }
-    });
-  }
+  bindWindowAction(winBtnMaximize, () => {
+    if (window.braveAPI && window.braveAPI.maximizeWindow) {
+      window.braveAPI.maximizeWindow().then((isMax) => {
+        if (typeof isMax === 'boolean') updateMaximizeIcon(isMax);
+      }).catch(() => {});
+    }
+  });
 
-  if (winBtnMaximize) {
-    winBtnMaximize.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (window.braveAPI && window.braveAPI.maximizeWindow) {
-        window.braveAPI.maximizeWindow().then((isMax) => {
-          if (typeof isMax === 'boolean') updateMaximizeIcon(isMax);
-        }).catch(() => {});
-      }
-    });
-  }
-
-  if (winBtnClose) {
-    winBtnClose.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (window.braveAPI && window.braveAPI.closeWindow) {
-        window.braveAPI.closeWindow();
-      }
-    });
-  }
+  bindWindowAction(winBtnClose, () => {
+    if (window.braveAPI && window.braveAPI.closeWindow) {
+      window.braveAPI.closeWindow();
+    }
+  });
 
   if (titlebarDragRegion) {
     titlebarDragRegion.addEventListener('dblclick', (e) => {
@@ -1372,7 +1367,7 @@ function reorderTabBarElements() {
 // CACHÉ INSTANTÁNEO ATRÁS / ADELANTE (BFCache)
 // ==========================================
 function saveCurrentTabScrollState(tabData) {
-  if (!tabData || !tabData.webviewEl || !tabData.url || tabData.url.startsWith('file:') || tabData.url.startsWith('about:')) return;
+  if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function' || !tabData.url || tabData.url.startsWith('file:') || tabData.url.startsWith('about:')) return;
   tabData.webviewEl.executeJavaScript('({ x: window.scrollX || 0, y: window.scrollY || 0 })').then((pos) => {
     if (pos && typeof pos.x === 'number') {
       tabData.bfCache.set(tabData.url, {
@@ -1397,7 +1392,9 @@ function restoreTabBFCache(tabData, targetUrl) {
   }
 
   setTimeout(() => {
-    tabData.webviewEl.executeJavaScript(`window.scrollTo(${cached.scrollX}, ${cached.scrollY});`).catch(() => {});
+    if (tabData && tabData.webviewEl && typeof tabData.webviewEl.executeJavaScript === 'function') {
+      tabData.webviewEl.executeJavaScript(`window.scrollTo(${cached.scrollX}, ${cached.scrollY});`).catch(() => {});
+    }
   }, 80);
 }
 
@@ -1405,7 +1402,7 @@ function restoreTabBFCache(tabData, targetUrl) {
 // SUPRESIÓN Y REPOSO EN SEGUNDO PLANO (Background Throttling)
 // ==========================================
 function throttleBackgroundTab(tabData) {
-  if (!tabData || !tabData.webviewEl || tabData.isAudible) return;
+  if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function' || tabData.isAudible) return;
   tabData.webviewEl.executeJavaScript(`
     if (!window.__brave_throttled__) {
       window.__brave_throttled__ = true;
@@ -1415,7 +1412,7 @@ function throttleBackgroundTab(tabData) {
 }
 
 function resumeTabExecution(tabData) {
-  if (!tabData || !tabData.webviewEl) return;
+  if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function') return;
   tabData.webviewEl.executeJavaScript(`
     if (window.__brave_throttled__) {
       window.__brave_throttled__ = false;
@@ -1549,9 +1546,11 @@ function getActiveTab() {
 
 function updateNavControls() {
   const tab = getActiveTab();
-  if (!tab) return;
-  btnBack.disabled = !tab.webviewEl.canGoBack();
-  btnForward.disabled = !tab.webviewEl.canGoForward();
+  if (!tab || !tab.webviewEl) return;
+  const canBack = typeof tab.webviewEl.canGoBack === 'function' ? tab.webviewEl.canGoBack() : false;
+  const canFwd = typeof tab.webviewEl.canGoForward === 'function' ? tab.webviewEl.canGoForward() : false;
+  btnBack.disabled = !canBack;
+  btnForward.disabled = !canFwd;
 }
 
 function updateOmniboxForUrl(url) {

@@ -504,6 +504,7 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
       webviewTag: true,
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
       additionalArguments: [modeArg],
     },
   });
@@ -830,9 +831,9 @@ function getTargetWindow(event?: Electron.IpcMainInvokeEvent | Electron.IpcMainE
     const fromSender = BrowserWindow.fromWebContents(event.sender);
     if (fromSender && !fromSender.isDestroyed()) return fromSender;
   }
+  if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
   const focused = BrowserWindow.getFocusedWindow();
   if (focused && !focused.isDestroyed()) return focused;
-  if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
   for (const win of openWindows) {
     if (!win.isDestroyed()) return win;
   }
