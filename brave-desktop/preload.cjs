@@ -92,6 +92,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
   // Pipeline de Descargas
   openPath: (filePath) => ipcRenderer.invoke('browser:open-path', filePath),
   showItemInFolder: (filePath) => ipcRenderer.invoke('browser:show-item-in-folder', filePath),
+  openDownloadsFolder: () => ipcRenderer.invoke('browser:open-downloads-folder'),
   cancelDownload: (id) => ipcRenderer.invoke('browser:cancel-download', id),
   onDownloadStarted: (callback) => ipcRenderer.on('download:started', (_e, data) => callback(data)),
   onDownloadProgress: (callback) => ipcRenderer.on('download:progress', (_e, data) => callback(data)),

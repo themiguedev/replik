@@ -1035,6 +1035,16 @@ ipcMain.handle('browser:show-item-in-folder', (_event, filePath: string) => {
   return { success: true };
 });
 
+ipcMain.handle('browser:open-downloads-folder', async () => {
+  try {
+    const dlPath = app.getPath('downloads');
+    const err = await shell.openPath(dlPath);
+    return { success: !err, error: err };
+  } catch (e: any) {
+    return { success: false, error: e?.message || String(e) };
+  }
+});
+
 const activeDownloadsMap = new Map<string, Electron.DownloadItem>();
 
 ipcMain.handle('browser:cancel-download', (_event, downloadId: string) => {

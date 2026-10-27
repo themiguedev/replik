@@ -909,8 +909,9 @@
 
     // ── Open downloads folder ────────────────────────────────
     document.getElementById('btn-open-folder').addEventListener('click', () => {
-      if (window.braveAPI && window.braveAPI.showItemInFolder) {
-        // Try the most recent download's folder, else fallback to generic
+      if (window.braveAPI && window.braveAPI.openDownloadsFolder) {
+        window.braveAPI.openDownloadsFolder();
+      } else if (window.braveAPI && window.braveAPI.showItemInFolder) {
         const latest = downloads.find(d => d.savePath);
         if (latest) {
           showInFolder(latest.savePath);

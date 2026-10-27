@@ -563,9 +563,31 @@
       }
     }
 
-    window.addEventListener('brave-bridge-ready', loadStats);
+    function updateSearchPlaceholder() {
+      const searchInput = document.getElementById('search-input');
+      if (!searchInput) return;
+      const engine = localStorage.getItem('brave_setting_engine') || 'brave';
+      const names = {
+        google: 'Google',
+        duckduckgo: 'DuckDuckGo',
+        bing: 'Bing',
+        qwant: 'Qwant',
+        brave: 'Brave',
+      };
+      const name = names[engine] || 'Brave';
+      searchInput.placeholder = `Buscar en la web con ${name}...`;
+    }
+
+    window.addEventListener('brave-bridge-ready', () => {
+      loadStats();
+      updateSearchPlaceholder();
+    });
     loadStats();
-    window.addEventListener('storage', loadStats);
+    updateSearchPlaceholder();
+    window.addEventListener('storage', () => {
+      loadStats();
+      updateSearchPlaceholder();
+    });
 
     function getSearchUrl(query) {
       let engine = localStorage.getItem('brave_setting_engine') || 'brave';

@@ -973,7 +973,7 @@ function updateOmniboxSuggestions(query) {
     }
   } catch {}
 
-  // 4. Sugerencia Principal de Brave Search o Atajos !bangs
+  // 4. Sugerencia Principal según Motor Configurado o Atajos !bangs
   if (q.startsWith(':g ') || q.startsWith('!g ')) {
     const text = query.replace(/^[:!]g\s+/i, '');
     results.unshift({
@@ -983,6 +983,7 @@ function updateOmniboxSuggestions(query) {
       icon: '🔍',
       badge: '!g (Google)',
       actionUrl: `https://www.google.com/search?q=${encodeURIComponent(text)}`,
+      searchTerm: text,
     });
   } else if (q.startsWith(':yt ') || q.startsWith('!yt ')) {
     const text = query.replace(/^[:!]yt\s+/i, '');
@@ -993,6 +994,7 @@ function updateOmniboxSuggestions(query) {
       icon: '▶️',
       badge: '!yt (YouTube)',
       actionUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`,
+      searchTerm: text,
     });
   } else if (q.startsWith(':w ') || q.startsWith('!w ')) {
     const text = query.replace(/^[:!]w\s+/i, '');
@@ -1003,6 +1005,7 @@ function updateOmniboxSuggestions(query) {
       icon: '📖',
       badge: '!w (Wikipedia)',
       actionUrl: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(text)}`,
+      searchTerm: text,
     });
   } else if (q.startsWith(':gh ') || q.startsWith('!gh ')) {
     const text = query.replace(/^[:!]gh\s+/i, '');
@@ -1013,6 +1016,7 @@ function updateOmniboxSuggestions(query) {
       icon: '🐙',
       badge: '!gh (GitHub)',
       actionUrl: `https://github.com/search?q=${encodeURIComponent(text)}`,
+      searchTerm: text,
     });
   } else if (q.startsWith(':ddg ') || q.startsWith('!ddg ') || q.startsWith(':d ') || q.startsWith('!d ')) {
     const text = query.replace(/^[:!](ddg|d)\s+/i, '');
@@ -1023,6 +1027,7 @@ function updateOmniboxSuggestions(query) {
       icon: '🦆',
       badge: '!ddg (DuckDuckGo)',
       actionUrl: `https://duckduckgo.com/?q=${encodeURIComponent(text)}`,
+      searchTerm: text,
     });
   } else if (q.startsWith(':b ') || q.startsWith('!b ')) {
     const text = query.replace(/^[:!]b\s+/i, '');
@@ -1033,15 +1038,19 @@ function updateOmniboxSuggestions(query) {
       icon: '🦁',
       badge: '!b (Brave)',
       actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(text)}`,
+      searchTerm: text,
     });
   } else {
+    const curEngineName = getSearchEngineName();
+    const curEngineUrl = getSearchEngineQueryUrl(query);
     results.unshift({
       type: 'search',
-      title: `Buscar "${query}" en la web`,
-      url: `https://search.brave.com/search?q=${encodeURIComponent(query)}`,
+      title: `Buscar "${query}" en ${curEngineName}`,
+      url: curEngineUrl,
       icon: '🔍',
-      badge: 'Brave Search',
-      actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(query)}`,
+      badge: curEngineName,
+      actionUrl: curEngineUrl,
+      searchTerm: query,
     });
   }
 
@@ -1050,18 +1059,20 @@ function updateOmniboxSuggestions(query) {
     results.push({
       type: 'search',
       title: `${query} en Wikipedia`,
-      url: `https://search.brave.com/search?q=${encodeURIComponent(query + ' wikipedia')}`,
+      url: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`,
       icon: '📖',
       badge: 'Wikipedia',
-      actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(query + ' wikipedia')}`,
+      actionUrl: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`,
+      searchTerm: `${query} wikipedia`,
     });
     results.push({
       type: 'search',
       title: `${query} en YouTube`,
-      url: `https://search.brave.com/search?q=${encodeURIComponent(query + ' youtube')}`,
+      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
       icon: '▶️',
       badge: 'YouTube',
-      actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(query + ' youtube')}`,
+      actionUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+      searchTerm: `${query} youtube`,
     });
   }
 
@@ -1121,8 +1132,10 @@ function selectSuggestion(index, updateInput = true) {
         const item = currentSuggestions[idx];
         if (item.type === 'internal' || item.type === 'bookmark' || item.type === 'history') {
           urlInput.value = item.url;
+        } else if (item.searchTerm) {
+          urlInput.value = item.searchTerm;
         } else {
-          urlInput.value = item.title.replace(/^Buscar "|".*$/g, '');
+          urlInput.value = item.title.replace(/^Buscar (?:en [^:]+:\s*)?"|"[^"]*$/g, '').trim() || item.url;
         }
       }
     } else {
@@ -1489,6 +1502,15 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   });
 
   webviewEl.addEventListener('did-navigate', (e) => {
+    // Si la pestaña está hibernada (Memory Saver), no sobreescribir la URL real con about:blank
+    if (tabData.isSleeping && (e.url === 'about:blank' || !e.url)) {
+      return;
+    }
+
+    // Restablecer estado de audio de la página anterior
+    tabData.isAudible = false;
+    updateTabAudioUI();
+
     tabData.url = e.url;
     tabData.savedUrl = e.url;
     tabData.domain = extractDomain(e.url);
@@ -1507,6 +1529,12 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     if (activeTabId === id) {
       updateOmniboxForUrl(e.url);
       queryShieldsStatus(tabData.domain);
+      // Detección de errores HTTP 404/500 para rescate con Wayback Machine
+      if (e.httpResponseCode && [404, 408, 410, 451, 500, 502, 503, 504].includes(e.httpResponseCode)) {
+        showWaybackBar(e.url);
+      } else {
+        hideWaybackBar();
+      }
     }
 
     setTimeout(() => {
@@ -1568,6 +1596,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           window.braveAPI.deleteDownload = (id) => window.__brave_call('deleteDownload', [id]);
           window.braveAPI.openPath = (path) => window.__brave_call('openPath', [path]);
           window.braveAPI.showItemInFolder = (path) => window.__brave_call('showItemInFolder', [path]);
+          window.braveAPI.openDownloadsFolder = () => window.__brave_call('openDownloadsFolder');
           window.braveAPI.cancelDownload = (id) => window.__brave_call('cancelDownload', [id]);
 
           // Historial de Navegación
@@ -2019,6 +2048,9 @@ function switchTab(id) {
   if (translateBar && translateBar.classList.contains('active')) {
     translateBar.classList.remove('active');
   }
+  if (typeof hideWaybackBar === 'function') {
+    hideWaybackBar();
+  }
 
   updateOmniboxForUrl(currentTab.url);
   updateNavControls();
@@ -2080,7 +2112,8 @@ function closeTab(id) {
   if (tabs.length === 0) {
     createTab(ntpUrl);
   } else if (activeTabId === id) {
-    const nextTab = tabs[Math.max(0, index - 1)];
+    const nextIndex = index < tabs.length ? index : tabs.length - 1;
+    const nextTab = tabs[nextIndex];
     switchTab(nextTab.id);
   }
   if (typeof saveCurrentSession === 'function') saveCurrentSession();
@@ -2801,8 +2834,11 @@ function activateElementPicker() {
       function getSelector(el) {
         if (el.id) return '#' + CSS.escape(el.id);
         let path = el.tagName.toLowerCase();
-        if (el.className && typeof el.className === 'string') {
-          const classes = el.className.trim().split(/\\s+/).filter(c => !c.startsWith('__brave'));
+        const rawClass = typeof el.className === 'string'
+          ? el.className
+          : (el.className && typeof el.className.baseVal === 'string' ? el.className.baseVal : '');
+        if (rawClass) {
+          const classes = rawClass.trim().split(/\\s+/).filter(c => c && !c.startsWith('__brave'));
           if (classes.length > 0) {
             path += '.' + classes.slice(0, 2).map(c => CSS.escape(c)).join('.');
           }
@@ -5053,7 +5089,11 @@ function applyCurrentTabZoom(newFactor, persist = true) {
   const tab = getActiveTab();
   if (!tab || !tab.webviewEl) return;
   const factor = Math.min(3.0, Math.max(0.3, Math.round(newFactor * 10) / 10));
-  tab.webviewEl.setZoomFactor(factor);
+  try {
+    if (typeof tab.webviewEl.setZoomFactor === 'function') {
+      tab.webviewEl.setZoomFactor(factor);
+    }
+  } catch {}
   tab.zoomFactor = factor;
   updateZoomUI(factor);
   const dom = tab.domain || extractDomain(tab.url);
