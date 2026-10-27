@@ -23,6 +23,8 @@ function getLocalFileUrl(filename) {
   return `ui/${filename}`;
 }
 
+let cachedPrivatePartition = null;
+
 contextBridge.exposeInMainWorld('braveAPI', {
   toggleShields: (domain) => ipcRenderer.invoke('shields:toggle', domain),
   toggleScripts: (domain) => ipcRenderer.invoke('shields:toggle-scripts', domain),
@@ -32,8 +34,14 @@ contextBridge.exposeInMainWorld('braveAPI', {
   clearBrowsingData: (options) => ipcRenderer.invoke('browser:clear-data', options),
   getShieldsStatus: (domain) => ipcRenderer.invoke('shields:get-status', domain),
   getSavingsStats: () => ipcRenderer.invoke('shields:get-savings-stats'),
-  openPrivateWindow: () => ipcRenderer.invoke('browser:open-private-window'),
-  openTorWindow: () => ipcRenderer.invoke('browser:open-tor-window'),
+  openWindow: (url) => ipcRenderer.invoke('browser:open-window', url),
+  openPrivateWindow: (url) => ipcRenderer.invoke('browser:open-private-window', url),
+  openTorWindow: (url) => ipcRenderer.invoke('browser:open-tor-window', url),
+  getInitialUrl: () => {
+    const prefix = '--initial-url=';
+    const found = process.argv.find((a) => a.startsWith(prefix));
+    return found ? found.slice(prefix.length) : null;
+  },
   toggleFullScreen: () => ipcRenderer.invoke('browser:toggle-fullscreen'),
   isTorMode: () => process.argv.includes('--tor-mode'),
   isPrivateMode: () => process.argv.includes('--private-mode') || process.argv.includes('--tor-mode'),
@@ -103,7 +111,10 @@ contextBridge.exposeInMainWorld('braveAPI', {
   getSessionPartition: () => {
     const isPrivate = process.argv.includes('--private-mode') || process.argv.includes('--tor-mode');
     if (isPrivate) {
-      return `temp_private_${process.pid}_${Math.random().toString(36).substring(2)}`;
+      if (!cachedPrivatePartition) {
+        cachedPrivatePartition = `temp_private_${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+      }
+      return cachedPrivatePartition;
     }
     return 'persist:brave_default';
   },

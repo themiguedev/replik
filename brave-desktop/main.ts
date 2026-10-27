@@ -503,7 +503,7 @@ function notifyShieldsUpdate(domain: string) {
   }
 }
 
-function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } = {}) {
+function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; initialUrl?: string } = {}) {
   const isPrivate = options.isPrivate ?? false;
   const isTor = options.isTor ?? false;
 
@@ -519,6 +519,11 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
     title = 'Brave (Ventana Privada)';
     backgroundColor = '#181124';
     modeArg = '--private-mode';
+  }
+
+  const additionalArgs = [modeArg];
+  if (options.initialUrl) {
+    additionalArgs.push(`--initial-url=${options.initialUrl}`);
   }
 
   const win = new BrowserWindow({
@@ -538,7 +543,7 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: false,
-      additionalArguments: [modeArg],
+      additionalArguments: additionalArgs,
     },
   });
 
@@ -605,10 +610,12 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean } =
     const isPage = code === 'PageDown' || code === 'PageUp' || keyLower === 'pagedown' || keyLower === 'pageup';
     const isDelete = code === 'Delete' || code === 'Backspace' || keyLower === 'delete' || keyLower === 'backspace';
     const isE = code === 'KeyE' || keyLower === 'e';
+    const isO = code === 'KeyO' || keyLower === 'o';
+    const isI = code === 'KeyI' || keyLower === 'i';
 
     if (
       (isCtrl && (isT || isW || isR || isL || isH || isJ || isD || isB || isN || isA || isF || isP || isTab || isF4 || isDigit || isComma || isZoom || is0 || isPage)) ||
-      (isCtrl && isShift && (isT || isS || isN || isB || isDelete || isE)) ||
+      (isCtrl && isShift && (isT || isS || isN || isB || isDelete || isE || isO || isI)) ||
       (isAlt && (isD || isS || isR || (isShift && isN))) ||
       (isShift && isEsc) ||
       isEsc ||
@@ -746,7 +753,7 @@ ipcMain.handle('shields:clear-domain-data', async (_event, domain: string) => {
   try {
     const filter = {
       origin: `https://${clean}`,
-      storages: ['cookies', 'localstorage', 'sessionstorage', 'cachestorage', 'websql', 'indexdb', 'serviceworkers'],
+      storages: ['cookies', 'localstorage', 'sessionstorage', 'cachestorage', 'websql', 'indexeddb', 'serviceworkers'],
     };
     await session.defaultSession.clearStorageData(filter as any);
     const persistSession = session.fromPartition('persist:brave_default');
@@ -777,7 +784,7 @@ ipcMain.handle('browser:clear-data', async (_event, options: { timeRange?: strin
       const storagesToClear: any[] = [];
       if (dataTypes.includes('cookies')) storagesToClear.push('cookies');
       if (dataTypes.includes('storage')) {
-        storagesToClear.push('localstorage', 'indexdb', 'websql', 'serviceworkers', 'cachestorage');
+        storagesToClear.push('localstorage', 'indexeddb', 'websql', 'serviceworkers', 'cachestorage');
       }
       if (storagesToClear.length > 0) {
         const filter: any = { storages: storagesToClear };
@@ -844,12 +851,16 @@ ipcMain.handle('shields:toggle-aggressive', (_event, domain: string) => {
   };
 });
 
-ipcMain.handle('browser:open-private-window', () => {
-  createBrowserWindow({ isPrivate: true });
+ipcMain.handle('browser:open-window', (_event, initialUrl?: string) => {
+  createBrowserWindow({ initialUrl });
 });
 
-ipcMain.handle('browser:open-tor-window', () => {
-  createBrowserWindow({ isPrivate: true, isTor: true });
+ipcMain.handle('browser:open-private-window', (_event, initialUrl?: string) => {
+  createBrowserWindow({ isPrivate: true, initialUrl });
+});
+
+ipcMain.handle('browser:open-tor-window', (_event, initialUrl?: string) => {
+  createBrowserWindow({ isPrivate: true, isTor: true, initialUrl });
 });
 
 ipcMain.handle('browser:toggle-fullscreen', (event) => {
@@ -858,6 +869,20 @@ ipcMain.handle('browser:toggle-fullscreen', (event) => {
     win.setFullScreen(!win.isFullScreen());
   }
 });
+
+function getWindowFromWebContents(wc: Electron.WebContents | null | undefined): BrowserWindow | null {
+  if (!wc || wc.isDestroyed()) return mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  const direct = BrowserWindow.fromWebContents(wc);
+  if (direct && !direct.isDestroyed()) return direct;
+  try {
+    const host = (wc as any).hostWebContents;
+    if (host && !host.isDestroyed()) {
+      const fromHost = BrowserWindow.fromWebContents(host);
+      if (fromHost && !fromHost.isDestroyed()) return fromHost;
+    }
+  } catch {}
+  return mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+}
 
 function getTargetWindow(event?: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): BrowserWindow | null {
   if (event && event.sender) {
@@ -1048,7 +1073,7 @@ function attachDownloadHandler(ses: Electron.Session) {
     item.setSavePath(savePath);
     activeDownloadsMap.set(downloadId, item);
 
-    const win = BrowserWindow.fromWebContents(webContents.isDestroyed() ? mainWindow! : webContents.getOwnerBrowserWindow() || mainWindow!);
+    const win = getWindowFromWebContents(webContents);
 
     const sourceUrl = item.getURL();
     if (win && !win.isDestroyed()) {
@@ -1106,7 +1131,7 @@ app.on('login', (event, webContents, request, authInfo, callback) => {
   const authId = `auth_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   pendingAuthCallbacks.set(authId, callback);
 
-  const win = BrowserWindow.fromWebContents(webContents.isDestroyed() ? mainWindow! : webContents.getOwnerBrowserWindow() || mainWindow!);
+  const win = getWindowFromWebContents(webContents);
   if (win && !win.isDestroyed()) {
     win.webContents.send('browser:auth-required', {
       authId,

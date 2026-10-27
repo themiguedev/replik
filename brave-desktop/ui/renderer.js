@@ -197,6 +197,39 @@ if (window.braveAPI) {
   }
 }
 
+let currentSearchEngine = localStorage.getItem('brave_setting_engine') || 'brave';
+
+function getSearchEngineQueryUrl(query) {
+  const engine = currentSearchEngine || localStorage.getItem('brave_setting_engine') || 'brave';
+  const q = encodeURIComponent(query);
+  switch (engine) {
+    case 'google':
+      return `https://www.google.com/search?q=${q}`;
+    case 'duckduckgo':
+      return `https://duckduckgo.com/?q=${q}`;
+    case 'bing':
+      return `https://www.bing.com/search?q=${q}`;
+    case 'qwant':
+      return `https://www.qwant.com/?q=${q}`;
+    case 'brave':
+    default:
+      return `https://search.brave.com/search?q=${q}`;
+  }
+}
+
+function getSearchEngineName() {
+  const engine = currentSearchEngine || localStorage.getItem('brave_setting_engine') || 'brave';
+  switch (engine) {
+    case 'google': return 'Google';
+    case 'duckduckgo': return 'DuckDuckGo';
+    case 'bing': return 'Bing';
+    case 'qwant': return 'Qwant';
+    case 'brave':
+    default:
+      return 'Brave Search';
+  }
+}
+
 let tabs = [];
 let activeTabId = null;
 let tabCounter = 0;
@@ -548,7 +581,12 @@ if (ctxOpenWindow) {
   ctxOpenWindow.addEventListener('click', () => {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
-      window.open(list[activeBarBookmarkIndex].url, '_blank');
+      const u = list[activeBarBookmarkIndex].url;
+      if (window.braveAPI && window.braveAPI.openWindow) {
+        window.braveAPI.openWindow(u);
+      } else {
+        createTab(u);
+      }
     }
   });
 }
@@ -558,7 +596,10 @@ if (ctxOpenPrivate) {
   ctxOpenPrivate.addEventListener('click', () => {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
-      createTab(list[activeBarBookmarkIndex].url, { incognito: true });
+      const u = list[activeBarBookmarkIndex].url;
+      if (window.braveAPI && window.braveAPI.openPrivateWindow) {
+        window.braveAPI.openPrivateWindow(u);
+      }
     }
   });
 }
@@ -1163,6 +1204,18 @@ function recordHistory(url, title) {
   } catch {}
 }
 
+function updateHistoryTitle(url, title) {
+  if (!url || !title || title === 'Nueva pestaña' || isCurrentWindowPrivate()) return;
+  try {
+    const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+    const item = list.find((h) => h.url === url);
+    if (item && item.title !== title) {
+      item.title = title;
+      localStorage.setItem('brave_browser_history', JSON.stringify(list));
+    }
+  } catch {}
+}
+
 function createTab(initialUrl = ntpUrl, options = {}) {
   tabCounter++;
   const id = `tab-${tabCounter}`;
@@ -1382,6 +1435,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
       t = 'Nueva pestaña';
     }
     tabData.title = t;
+    updateHistoryTitle(tabData.url, t);
     const titleEl = tabEl.querySelector('.tab-title');
     if (titleEl) {
       titleEl.textContent = tabData.isSleeping ? `🌙 ${tabData.title}` : tabData.title;
@@ -1550,6 +1604,9 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           // Configuración en Vivo
           window.braveAPI.getSettings = () => window.__brave_call('getSettings');
           window.braveAPI.updateSetting = (key, val) => window.__brave_call('updateSetting', [key, val]);
+          window.braveAPI.clearBrowsingData = (opts) => window.__brave_call('clearBrowsingData', [opts]);
+          window.braveAPI.openWindow = (url) => window.__brave_call('openWindow', [url]);
+          window.braveAPI.openPrivateWindow = (url) => window.__brave_call('openPrivateWindow', [url]);
 
           window.dispatchEvent(new CustomEvent('brave-bridge-ready'));
           if (typeof loadExtensions === 'function') {
@@ -1765,6 +1822,20 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
           if (key === 'brave_setting_engine') currentSearchEngine = val;
           result = true;
+        } else if (action === 'clearBrowsingData') {
+          const opts = args[0] || {};
+          const dTypes = opts.dataTypes || [];
+          if (dTypes.includes('history')) {
+            localStorage.removeItem('brave_browser_history');
+          }
+          if (dTypes.includes('storage') || dTypes.includes('cookies')) {
+            localStorage.removeItem('brave_site_permissions');
+          }
+          if (window.braveAPI && window.braveAPI.clearBrowsingData) {
+            result = await window.braveAPI.clearBrowsingData(opts);
+          } else {
+            result = { success: true };
+          }
         } else if (window.braveAPI && typeof window.braveAPI[action] === 'function') {
           result = await window.braveAPI[action](...args);
         } else {
@@ -2562,7 +2633,7 @@ function openPageContextMenu(x, y, params) {
   textDivider.style.display = hasText ? 'block' : 'none';
 
   if (hasText) {
-    searchItem.textContent = `Buscar "${params.selectionText.substring(0, 18)}..." en Brave Search`;
+    searchItem.textContent = `Buscar "${params.selectionText.substring(0, 18)}..." en ${getSearchEngineName()}`;
   }
 
   const contentRect = browserContent ? browserContent.getBoundingClientRect() : { left: 0, top: 0 };
@@ -2604,12 +2675,18 @@ document.getElementById('ctx-open-new-tab').addEventListener('click', () => {
 });
 
 document.getElementById('ctx-open-private-tab').addEventListener('click', () => {
-  if (window.braveAPI) window.braveAPI.openPrivateWindow();
+  const targetUrl = contextMenuTargetData && contextMenuTargetData.linkURL;
+  if (window.braveAPI && window.braveAPI.openPrivateWindow) {
+    window.braveAPI.openPrivateWindow(targetUrl);
+  }
   customContextMenu.classList.remove('open');
 });
 
 document.getElementById('ctx-open-tor-tab').addEventListener('click', () => {
-  if (window.braveAPI) window.braveAPI.openTorWindow();
+  const targetUrl = contextMenuTargetData && contextMenuTargetData.linkURL;
+  if (window.braveAPI && window.braveAPI.openTorWindow) {
+    window.braveAPI.openTorWindow(targetUrl);
+  }
   customContextMenu.classList.remove('open');
 });
 
@@ -2622,7 +2699,7 @@ document.getElementById('ctx-copy-link').addEventListener('click', () => {
 
 document.getElementById('ctx-search-selection').addEventListener('click', () => {
   if (contextMenuTargetData && contextMenuTargetData.selectionText) {
-    createTab(`https://search.brave.com/search?q=${encodeURIComponent(contextMenuTargetData.selectionText)}`);
+    createTab(getSearchEngineQueryUrl(contextMenuTargetData.selectionText));
   }
   customContextMenu.classList.remove('open');
 });
@@ -3039,6 +3116,18 @@ function navigateTo(raw) {
     target = 'http://' + target;
   } else if (lower === 'brave://sync') {
     target = settingsUrl + '#sync';
+  } else if (lower === 'brave://shields') {
+    target = settingsUrl + '#shields';
+  } else if (lower === 'brave://privacy') {
+    target = settingsUrl + '#privacy';
+  } else if (lower === 'brave://autofill' || lower === 'brave://passwords') {
+    target = settingsUrl + '#autofill';
+  } else if (lower === 'brave://appearance') {
+    target = settingsUrl + '#appearance';
+  } else if (lower === 'brave://startup') {
+    target = settingsUrl + '#startup';
+  } else if (lower === 'brave://search') {
+    target = settingsUrl + '#search';
   } else if (lower === 'brave://newtab' || lower === 'about:newtab' || lower === 'ntp.html' || lower === 'about:blank') {
     target = ntpUrl;
   } else if (lower.startsWith('ipfs://')) {
@@ -3051,7 +3140,7 @@ function navigateTo(raw) {
     if (target.includes('.') && !target.includes(' ')) {
       target = 'https://' + target;
     } else {
-      target = 'https://search.brave.com/search?q=' + encodeURIComponent(target);
+      target = getSearchEngineQueryUrl(target);
     }
   }
 
@@ -3342,6 +3431,18 @@ document.getElementById('menu-new-tab').addEventListener('click', () => {
   mainMenu.classList.remove('open');
 });
 
+const menuNewWindow = document.getElementById('menu-new-window');
+if (menuNewWindow) {
+  menuNewWindow.addEventListener('click', () => {
+    if (window.braveAPI && window.braveAPI.openWindow) {
+      window.braveAPI.openWindow();
+    } else {
+      createTab(ntpUrl);
+    }
+    mainMenu.classList.remove('open');
+  });
+}
+
 document.getElementById('menu-new-private').addEventListener('click', () => {
   if (window.braveAPI) window.braveAPI.openPrivateWindow();
   mainMenu.classList.remove('open');
@@ -3564,6 +3665,8 @@ function handleBrowserShortcut(e) {
   const isComma = code === 'Comma' || key === ',';
   const isF = code === 'KeyF' || key === 'f';
   const isE = code === 'KeyE' || key === 'e';
+  const isO = code === 'KeyO' || key === 'o';
+  const isI = code === 'KeyI' || key === 'i';
   const isDelete = code === 'Delete' || code === 'Backspace' || key === 'delete' || key === 'backspace';
 
   // Ctrl + F: Buscar en la página
@@ -3619,6 +3722,24 @@ function handleBrowserShortcut(e) {
   if (isCtrl && !isShift && isT) {
     prevent();
     createTab(ntpUrl);
+    return;
+  }
+
+  // Ctrl + N: Nueva ventana
+  if (isCtrl && !isShift && !isAlt && isN) {
+    prevent();
+    if (window.braveAPI && window.braveAPI.openWindow) {
+      window.braveAPI.openWindow();
+    } else {
+      createTab(ntpUrl);
+    }
+    return;
+  }
+
+  // Ctrl + Shift + O: Gestor de marcadores
+  if (isCtrl && isShift && isO) {
+    prevent();
+    createTab(bookmarksUrl);
     return;
   }
 
@@ -3760,8 +3881,8 @@ function handleBrowserShortcut(e) {
     return;
   }
 
-  // F12: Abrir DevTools
-  if (isF12) {
+  // F12 o Ctrl + Shift + I: Abrir DevTools
+  if (isF12 || (isCtrl && isShift && isI)) {
     prevent();
     const t = getActiveTab();
     if (t) t.webviewEl.openDevTools();
@@ -5583,7 +5704,7 @@ if (btnDownloadAll) {
     if (raw && raw.trim() && !draggedTabId) {
       let url = raw.trim();
       if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://')) {
-        url = 'https://search.brave.com/search?q=' + encodeURIComponent(url);
+        url = getSearchEngineQueryUrl(url);
       }
       createTab(url);
       showGlobalToast('Enlace abierto en nueva pestaña');
@@ -5797,44 +5918,51 @@ if (window.braveAPI && window.braveAPI.onTabCrashed) {
 // ==========================================
 // 35. RESTAURACIÓN Y PUESTA EN MARCHA (Startup)
 // ==========================================
+// 39. INICIALIZACIÓN DE SESIÓN Y PESTAÑAS (Startup Session)
+// ==========================================
 const startupMode = localStorage.getItem('brave_startup_mode') || 'continue';
 const restoredUrls = new Set();
+const initialArgUrl = window.braveAPI && window.braveAPI.getInitialUrl ? window.braveAPI.getInitialUrl() : null;
 
-// 1. Restaurar pestañas fijadas persistentes (sin duplicados)
-try {
-  const savedPinned = JSON.parse(localStorage.getItem('brave_pinned_tabs') || '[]');
-  if (Array.isArray(savedPinned)) {
-    savedPinned.forEach((p) => {
-      if (p.url && !restoredUrls.has(p.url)) {
-        createTab(p.url, { pinned: true });
-        restoredUrls.add(p.url);
-      }
-    });
-  }
-} catch {}
-
-// 2. Restaurar sesión previa si el modo es "continue"
-if (startupMode === 'continue') {
+if (initialArgUrl) {
+  createTab(initialArgUrl);
+} else {
+  // 1. Restaurar pestañas fijadas persistentes (sin duplicados)
   try {
-    const lastSession = JSON.parse(localStorage.getItem('brave_last_session') || '[]');
-    if (Array.isArray(lastSession)) {
-      lastSession.forEach((savedTab) => {
-        if (savedTab.url && !savedTab.url.includes('ntp.html')) {
-          if (!restoredUrls.has(savedTab.url)) {
-            createTab(savedTab.url, { pinned: !!savedTab.isPinned });
-            restoredUrls.add(savedTab.url);
-          }
+    const savedPinned = JSON.parse(localStorage.getItem('brave_pinned_tabs') || '[]');
+    if (Array.isArray(savedPinned)) {
+      savedPinned.forEach((p) => {
+        if (p.url && !restoredUrls.has(p.url)) {
+          createTab(p.url, { pinned: true });
+          restoredUrls.add(p.url);
         }
       });
     }
   } catch {}
-}
 
-// 3. Si no hay pestañas abiertas, abrir la Nueva Pestaña (NTP)
-if (tabs.length === 0) {
-  createTab(ntpUrl);
-} else {
-  // Enfocar la primera pestaña no fijada o la primera disponible
-  const firstNonPinned = tabs.find((t) => !t.isPinned) || tabs[0];
-  switchTab(firstNonPinned.id);
+  // 2. Restaurar sesión previa si el modo es "continue"
+  if (startupMode === 'continue' && !isCurrentWindowPrivate()) {
+    try {
+      const lastSession = JSON.parse(localStorage.getItem('brave_last_session') || '[]');
+      if (Array.isArray(lastSession)) {
+        lastSession.forEach((savedTab) => {
+          if (savedTab.url && !savedTab.url.includes('ntp.html')) {
+            if (!restoredUrls.has(savedTab.url)) {
+              createTab(savedTab.url, { pinned: !!savedTab.isPinned });
+              restoredUrls.add(savedTab.url);
+            }
+          }
+        });
+      }
+    } catch {}
+  }
+
+  // 3. Si no hay pestañas abiertas, abrir la Nueva Pestaña (NTP)
+  if (tabs.length === 0) {
+    createTab(ntpUrl);
+  } else {
+    // Enfocar la primera pestaña no fijada o la primera disponible
+    const firstNonPinned = tabs.find((t) => !t.isPinned) || tabs[0];
+    switchTab(firstNonPinned.id);
+  }
 }

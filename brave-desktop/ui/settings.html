@@ -894,6 +894,8 @@
     const optFarbling = document.getElementById('opt-farbling');
     const optQueryStrip = document.getElementById('opt-query-strip');
     const optEngine = document.getElementById('opt-search-engine');
+    const optTheme = document.getElementById('opt-theme');
+    const optTabSnooze = document.getElementById('opt-tab-snooze');
 
     async function initSettingsForm() {
       let s = {};
@@ -948,8 +950,11 @@
         if (confirm('¿Deseas borrar los datos de navegación almacenados (cookies, caché e historial)?')) {
           localStorage.removeItem('brave_browser_history');
           localStorage.removeItem('brave_site_permissions');
+          if (window.braveAPI && window.braveAPI.clearHistory) {
+            try { await window.braveAPI.clearHistory(); } catch {}
+          }
           if (window.braveAPI && window.braveAPI.clearBrowsingData) {
-            await window.braveAPI.clearBrowsingData({ timeRange: 'all', dataTypes: ['cookies', 'storage', 'cache', 'history'] });
+            try { await window.braveAPI.clearBrowsingData({ timeRange: 'all', dataTypes: ['cookies', 'storage', 'cache', 'history'] }); } catch {}
           }
           alert('Datos de navegación borrados.');
         }
@@ -1193,7 +1198,6 @@
     loadPasswords();
 
     // Selector de tema y color de acento
-    const optTheme = document.getElementById('opt-theme');
     if (optTheme) {
       optTheme.value = localStorage.getItem('brave_theme') || 'dark';
       optTheme.addEventListener('change', () => {
@@ -1223,7 +1227,6 @@
       });
     });
 
-    const optTabSnooze = document.getElementById('opt-tab-snooze');
     if (optTabSnooze) {
       optTabSnooze.value = localStorage.getItem('brave_tab_snooze') || '30';
       optTabSnooze.addEventListener('change', () => {
