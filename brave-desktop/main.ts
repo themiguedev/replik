@@ -71,6 +71,8 @@ let totalGlobalBlocked = 0;
 
 // Leer script de Farbling
 let farblingScript = '';
+let isFarblingGloballyEnabled = true;
+let isQueryStripGloballyEnabled = true;
 try {
   farblingScript = fs.readFileSync(path.join(baseDir, 'farbling.js'), 'utf-8');
 } catch {
@@ -372,25 +374,27 @@ function attachSessionInterception(targetSession: Electron.Session) {
     // 1. Des-Rastreo de URLs y Query Stripping: SOLO para la navegación principal (mainFrame)
     // Redirigir sub-recursos (XHR/Fetch/Media) corrompe llamadas SPA y genera errores "Sin conexión" en YouTube
     if (details.resourceType === 'mainFrame') {
-      const bypassedUrl = bypassTrackingRedirects(reqUrl);
-      if (bypassedUrl && bypassedUrl !== reqUrl) {
-        console.log(`[Brave De-AMP] Salto directo activado: ${reqUrl} -> ${bypassedUrl}`);
-        const current = domainBlockedCounts.get(docDomain) || 0;
-        domainBlockedCounts.set(docDomain, current + 1);
-        totalGlobalBlocked++;
-        notifyShieldsUpdate(docDomain);
-        callback({ redirectURL: bypassedUrl });
-        return;
-      }
+      if (isQueryStripGloballyEnabled) {
+        const bypassedUrl = bypassTrackingRedirects(reqUrl);
+        if (bypassedUrl && bypassedUrl !== reqUrl) {
+          console.log(`[Brave De-AMP] Salto directo activado: ${reqUrl} -> ${bypassedUrl}`);
+          const current = domainBlockedCounts.get(docDomain) || 0;
+          domainBlockedCounts.set(docDomain, current + 1);
+          totalGlobalBlocked++;
+          notifyShieldsUpdate(docDomain);
+          callback({ redirectURL: bypassedUrl });
+          return;
+        }
 
-      const cleaned = shieldsEngine.cleanUrl(reqUrl);
-      if (cleaned.cleanUrl !== reqUrl) {
-        const current = domainBlockedCounts.get(docDomain) || 0;
-        domainBlockedCounts.set(docDomain, current + cleaned.strippedParams.length);
-        totalGlobalBlocked += cleaned.strippedParams.length;
-        notifyShieldsUpdate(docDomain);
-        callback({ redirectURL: cleaned.cleanUrl });
-        return;
+        const cleaned = shieldsEngine.cleanUrl(reqUrl);
+        if (cleaned.cleanUrl !== reqUrl) {
+          const current = domainBlockedCounts.get(docDomain) || 0;
+          domainBlockedCounts.set(docDomain, current + cleaned.strippedParams.length);
+          totalGlobalBlocked += cleaned.strippedParams.length;
+          notifyShieldsUpdate(docDomain);
+          callback({ redirectURL: cleaned.cleanUrl });
+          return;
+        }
       }
 
       callback({ cancel: false });
@@ -670,7 +674,7 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
 
     webContents.on('dom-ready', () => {
       // 1. Farbling Anti-Fingerprinting
-      if (farblingScript) {
+      if (farblingScript && isFarblingGloballyEnabled) {
         webContents.executeJavaScript(farblingScript).catch(() => {});
       }
 
@@ -705,7 +709,8 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
   win.on('closed', () => {
     openWindows.delete(win);
     if (mainWindow === win) {
-      mainWindow = null;
+      const nextWin = openWindows.values().next().value;
+      mainWindow = nextWin || null;
     }
   });
 
@@ -871,7 +876,15 @@ ipcMain.handle('browser:toggle-fullscreen', (event) => {
 });
 
 function getWindowFromWebContents(wc: Electron.WebContents | null | undefined): BrowserWindow | null {
-  if (!wc || wc.isDestroyed()) return mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  if (!wc || wc.isDestroyed()) {
+    if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
+    const focused = BrowserWindow.getFocusedWindow();
+    if (focused && !focused.isDestroyed()) return focused;
+    for (const win of openWindows) {
+      if (!win.isDestroyed()) return win;
+    }
+    return null;
+  }
   const direct = BrowserWindow.fromWebContents(wc);
   if (direct && !direct.isDestroyed()) return direct;
   try {
@@ -881,7 +894,13 @@ function getWindowFromWebContents(wc: Electron.WebContents | null | undefined): 
       if (fromHost && !fromHost.isDestroyed()) return fromHost;
     }
   } catch {}
-  return mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
+  const focused = BrowserWindow.getFocusedWindow();
+  if (focused && !focused.isDestroyed()) return focused;
+  for (const win of openWindows) {
+    if (!win.isDestroyed()) return win;
+  }
+  return null;
 }
 
 function getTargetWindow(event?: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): BrowserWindow | null {
@@ -960,6 +979,16 @@ ipcMain.handle('permissions:set', (_event, domain: string, permission: string, s
   }
   saveSitePermissionsToDisk();
   return perms;
+});
+
+// Sincronización de Configuración de Red / Escudos desde el Renderizador
+ipcMain.handle('settings:update', (_event, key: string, value: any) => {
+  if (key === 'brave_setting_farbling') {
+    isFarblingGloballyEnabled = value !== 'false' && value !== false;
+  } else if (key === 'brave_setting_query') {
+    isQueryStripGloballyEnabled = value !== 'false' && value !== false;
+  }
+  return { success: true };
 });
 
 // Diálogos nativos y guardado de archivos (Captura y PDF)

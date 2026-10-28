@@ -1272,6 +1272,8 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     isPinned: options.pinned || false,
     isSleeping: false,
     groupId: options.groupId || null,
+    hasCrashed: false,
+    crashReason: null,
     estimatedMemoryMB: Math.floor(28 + Math.random() * 26),
     lastActiveTime: Date.now(),
     thumbnailUrl: null,
@@ -1284,6 +1286,10 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
   if (tabData.isPinned) {
     applyTabPinnedState(tabData, true);
+  }
+  if (tabData.groupId) {
+    const col = String(tabData.groupId).replace('group-', '');
+    tabEl.classList.add(`in-group-${col}`);
   }
 
   // --- Hover Card (Tarjeta Flotante de Uso de RAM) ---
@@ -1405,6 +1411,13 @@ function createTab(initialUrl = ntpUrl, options = {}) {
       e.preventDefault();
       e.stopPropagation();
       closeTab(id);
+    }
+  });
+
+  // Detección de foco e interacción en Vista Dividida (Split View)
+  webviewEl.addEventListener('focus', () => {
+    if (isSplitViewActive && activeTabId !== id && typeof switchSplitFocus === 'function') {
+      switchSplitFocus(id);
     }
   });
 
@@ -1850,6 +1863,9 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
           if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
           if (key === 'brave_setting_engine') currentSearchEngine = val;
+          if (window.braveAPI && window.braveAPI.updateBackendSetting) {
+            window.braveAPI.updateBackendSetting(key, val);
+          }
           result = true;
         } else if (action === 'clearBrowsingData') {
           const opts = args[0] || {};
@@ -1858,7 +1874,13 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             localStorage.removeItem('brave_browser_history');
           }
           if (dTypes.includes('storage') || dTypes.includes('cookies')) {
-            localStorage.removeItem('brave_site_permissions');
+            try {
+              Object.keys(localStorage).forEach((k) => {
+                if (k.startsWith('brave_perms_')) {
+                  localStorage.removeItem(k);
+                }
+              });
+            } catch {}
           }
           if (window.braveAPI && window.braveAPI.clearBrowsingData) {
             result = await window.braveAPI.clearBrowsingData(opts);
@@ -1911,10 +1933,12 @@ function applyTabPinnedState(tabData, isPinned) {
     tabData.tabEl.title = '';
   }
   reorderTabBarElements();
-  try {
-    const pinnedList = tabs.filter((t) => t.isPinned).map((t) => ({ url: t.url, title: t.title }));
-    localStorage.setItem('brave_pinned_tabs', JSON.stringify(pinnedList));
-  } catch {}
+  if (!isCurrentWindowPrivate()) {
+    try {
+      const pinnedList = tabs.filter((t) => t.isPinned).map((t) => ({ url: t.url, title: t.title }));
+      localStorage.setItem('brave_pinned_tabs', JSON.stringify(pinnedList));
+    } catch {}
+  }
 }
 
 function reorderTabBarElements() {
@@ -2050,6 +2074,14 @@ function switchTab(id) {
   }
   if (typeof hideWaybackBar === 'function') {
     hideWaybackBar();
+  }
+  if (currentTab.hasCrashed) {
+    if (crashBannerText) {
+      crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${currentTab.crashReason || 'cierre inesperado'}).`;
+    }
+    if (tabCrashBanner) tabCrashBanner.classList.add('active');
+  } else {
+    if (tabCrashBanner) tabCrashBanner.classList.remove('active');
   }
 
   updateOmniboxForUrl(currentTab.url);
@@ -3388,9 +3420,15 @@ function updateShieldsUI(enabled, count, statusData = {}) {
 
 if (window.braveAPI) {
   window.braveAPI.onShieldsUpdate((data) => {
+    // Sincronizar contador de bloqueo en todas las pestañas abiertas de este dominio
+    tabs.forEach((t) => {
+      if (t.domain === data.domain) {
+        t.blockedCount = data.blockedCount;
+      }
+    });
+
     const tab = getActiveTab();
     if (tab && tab.domain === data.domain) {
-      tab.blockedCount = data.blockedCount;
       updateShieldsUI(data.enabled, data.blockedCount, data);
       if (data.scriptsBlocked !== undefined) {
         scriptsToggle.checked = !!data.scriptsBlocked;
@@ -4223,6 +4261,23 @@ function toggleSplitView(targetSecondTabId) {
 
 if (btnSplitView) {
   btnSplitView.addEventListener('click', () => toggleSplitView());
+}
+
+function switchSplitFocus(targetId) {
+  if (!isSplitViewActive || activeTabId === targetId) return;
+  activeTabId = targetId;
+  const currentTab = tabs.find((t) => t.id === targetId);
+  if (!currentTab) return;
+  tabs.forEach((t) => {
+    if (t.id === targetId) t.tabEl.classList.add('active');
+    else if (t.id === splitSecondTabId || t.id !== targetId) t.tabEl.classList.remove('active');
+  });
+  updateOmniboxForUrl(currentTab.url);
+  updateNavControls();
+  document.title = `${currentTab.title} - Brave Browser`;
+  queryShieldsStatus(currentTab.domain);
+  const dom = currentTab.domain || extractDomain(currentTab.url);
+  updateZoomUI(getStoredDomainZoom(dom));
 }
 
 // ==========================================
@@ -5061,7 +5116,7 @@ function getStoredDomainZoom(domain) {
 }
 
 function saveDomainZoom(domain, factor) {
-  if (!domain) return;
+  if (!domain || isCurrentWindowPrivate()) return;
   try {
     const raw = localStorage.getItem('brave_domain_zoom');
     const map = raw ? JSON.parse(raw) : {};
@@ -5408,6 +5463,7 @@ function saveCurrentSession() {
       url: t.url || ntpUrl,
       title: t.title || 'Nueva Pestaña',
       isPinned: !!t.isPinned,
+      groupId: t.groupId || null,
     }));
     localStorage.setItem('brave_last_session', JSON.stringify(sessionList));
   } catch {}
@@ -5806,20 +5862,22 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
     if (btnDownloadOpen) btnDownloadOpen.style.display = 'inline-block';
     if (btnDownloadFolder) btnDownloadFolder.style.display = 'inline-block';
 
-    // Registrar en brave_downloads para brave://downloads
-    try {
-      const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-      dlList.unshift({
-        id: data.id,
-        filename: data.filename,
-        savePath: data.savePath,
-        totalBytes: data.totalBytes,
-        url: data.url || '',
-        date: new Date().toISOString(),
-        state: 'completed',
-      });
-      localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
-    } catch {}
+    // Registrar en brave_downloads para brave://downloads (solo en ventanas normales)
+    if (!isCurrentWindowPrivate()) {
+      try {
+        const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+        dlList.unshift({
+          id: data.id,
+          filename: data.filename,
+          savePath: data.savePath,
+          totalBytes: data.totalBytes,
+          url: data.url || '',
+          date: new Date().toISOString(),
+          state: 'completed',
+        });
+        localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
+      } catch {}
+    }
 
     showGlobalToast(`🦁 Descarga completada: ${data.filename}`);
     relayDownloadEvent('dl:completed', data);
@@ -5829,20 +5887,22 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
     if (btnDownloadCancel) btnDownloadCancel.style.display = 'none';
     if (downloadMeta) downloadMeta.textContent = `Descarga interrumpida (${data.state})`;
 
-    // Registrar descarga fallida en el historial
-    try {
-      const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-      dlList.unshift({
-        id: data.id,
-        filename: data.filename,
-        savePath: '',
-        totalBytes: 0,
-        url: '',
-        date: new Date().toISOString(),
-        state: data.state || 'interrupted',
-      });
-      localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
-    } catch {}
+    // Registrar descarga fallida en el historial (solo en ventanas normales)
+    if (!isCurrentWindowPrivate()) {
+      try {
+        const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+        dlList.unshift({
+          id: data.id,
+          filename: data.filename,
+          savePath: '',
+          totalBytes: 0,
+          url: '',
+          date: new Date().toISOString(),
+          state: data.state || 'interrupted',
+        });
+        localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
+      } catch {}
+    }
 
     showGlobalToast(`Error en la descarga de ${data.filename}`);
   });
@@ -5942,16 +6002,35 @@ if (btnCrashReload) {
   btnCrashReload.addEventListener('click', () => {
     if (tabCrashBanner) tabCrashBanner.classList.remove('active');
     const tab = getActiveTab();
-    if (tab && tab.webviewEl) tab.webviewEl.reload();
+    if (tab) {
+      tab.hasCrashed = false;
+      if (tab.webviewEl) tab.webviewEl.reload();
+    }
   });
 }
 
 if (window.braveAPI && window.braveAPI.onTabCrashed) {
   window.braveAPI.onTabCrashed((data) => {
-    if (crashBannerText) {
-      crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${data.reason || 'cierre inesperado'}).`;
+    const crashedTab = tabs.find((t) => {
+      try {
+        return typeof t.webviewEl.getWebContentsId === 'function' && t.webviewEl.getWebContentsId() === data.webContentsId;
+      } catch {
+        return false;
+      }
+    });
+
+    if (crashedTab) {
+      crashedTab.hasCrashed = true;
+      crashedTab.crashReason = data.reason || 'cierre inesperado';
     }
-    if (tabCrashBanner) tabCrashBanner.classList.add('active');
+
+    const currentTab = getActiveTab();
+    if (currentTab && currentTab.hasCrashed) {
+      if (crashBannerText) {
+        crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${currentTab.crashReason || 'cierre inesperado'}).`;
+      }
+      if (tabCrashBanner) tabCrashBanner.classList.add('active');
+    }
   });
 }
 
@@ -5988,7 +6067,7 @@ if (initialArgUrl) {
         lastSession.forEach((savedTab) => {
           if (savedTab.url && !savedTab.url.includes('ntp.html')) {
             if (!restoredUrls.has(savedTab.url)) {
-              createTab(savedTab.url, { pinned: !!savedTab.isPinned });
+              createTab(savedTab.url, { pinned: !!savedTab.isPinned, groupId: savedTab.groupId || null });
               restoredUrls.add(savedTab.url);
             }
           }

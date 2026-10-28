@@ -644,6 +644,7 @@
     function getDateGroup(dateStr) {
       if (!dateStr) return 'Antes';
       const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return 'Antes';
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
@@ -658,7 +659,7 @@
       return 'Más antiguo';
     }
 
-    const GROUP_ORDER = ['Hoy', 'Ayer', 'Esta semana', 'Este mes', 'Más antiguo'];
+    const GROUP_ORDER = ['Hoy', 'Ayer', 'Esta semana', 'Este mes', 'Más antiguo', 'Antes'];
 
     function escapeHtml(text) {
       const div = document.createElement('div');
@@ -1035,6 +1036,9 @@
 
     // ── Boot ────────────────────────────────────────────────
     window.addEventListener('brave-bridge-ready', loadDownloads);
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'brave_downloads') loadDownloads();
+    });
     loadDownloads();
   </script>
 </body>

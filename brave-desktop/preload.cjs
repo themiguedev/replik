@@ -75,6 +75,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
   getBookmarksUrl: () => getLocalFileUrl('bookmarks.html'),
   getVersionUrl: () => getLocalFileUrl('version.html'),
   getVersionInfo: () => ipcRenderer.invoke('browser:get-version-info'),
+  updateBackendSetting: (key, value) => ipcRenderer.invoke('settings:update', key, value),
   getSitePermissions: (domain) => ipcRenderer.invoke('permissions:get', domain),
   setSitePermission: (domain, permission, state) => ipcRenderer.invoke('permissions:set', domain, permission, state),
   showSaveDialog: (options) => ipcRenderer.invoke('browser:save-dialog', options),

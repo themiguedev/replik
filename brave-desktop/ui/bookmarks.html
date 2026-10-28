@@ -1519,6 +1519,12 @@
       loadCustomFolders();
       loadBookmarks();
     });
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'brave_bookmarks' || e.key === 'brave_bookmark_folders') {
+        loadCustomFolders();
+        loadBookmarks();
+      }
+    });
     loadCustomFolders();
     loadBookmarks();
   </script>

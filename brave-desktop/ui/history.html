@@ -557,6 +557,9 @@
     });
 
     window.addEventListener('brave-bridge-ready', loadHistory);
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'brave_browser_history') loadHistory();
+    });
     loadHistory();
   </script>
 </body>
