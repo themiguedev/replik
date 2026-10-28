@@ -485,7 +485,10 @@ function calculateSavings(blocked: number) {
   };
 }
 
-function notifyShieldsUpdate(domain: string) {
+let shieldsThrottleTimer: NodeJS.Timeout | null = null;
+const pendingShieldsDomains = new Set<string>();
+
+function dispatchShieldsUpdate(domain: string) {
   const count = domainBlockedCounts.get(domain) || 0;
   const isEnabled = !shieldsDisabledDomains.has(domain);
   const siteSavings = calculateSavings(count);
@@ -509,6 +512,23 @@ function notifyShieldsUpdate(domain: string) {
     if (!win.isDestroyed()) {
       win.webContents.send('shields:update', data);
     }
+  }
+}
+
+function notifyShieldsUpdate(domain: string, immediate = false) {
+  if (immediate) {
+    dispatchShieldsUpdate(domain);
+    return;
+  }
+  pendingShieldsDomains.add(domain);
+  if (!shieldsThrottleTimer) {
+    shieldsThrottleTimer = setTimeout(() => {
+      shieldsThrottleTimer = null;
+      for (const dom of pendingShieldsDomains) {
+        dispatchShieldsUpdate(dom);
+      }
+      pendingShieldsDomains.clear();
+    }, 60);
   }
 }
 
@@ -677,13 +697,13 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
       }
     });
 
-    webContents.on('dom-ready', () => {
+    const applyCosmeticsAndFarbling = () => {
       // 1. Farbling Anti-Fingerprinting
       if (farblingScript && isFarblingGloballyEnabled) {
         webContents.executeJavaScript(farblingScript).catch(() => {});
       }
 
-      // 2. Ocultación Cosmética CSS
+      // 2. Ocultación Cosmética CSS (Inyección temprana para prevenir Flash de Anuncios)
       const pageUrl = webContents.getURL();
       const domain = getDomain(pageUrl);
       if (!domain || shieldsDisabledDomains.has(domain)) return;
@@ -692,7 +712,10 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
       if (css) {
         webContents.insertCSS(css).catch(() => {});
       }
-    });
+    };
+
+    webContents.on('did-navigate', applyCosmeticsAndFarbling);
+    webContents.on('dom-ready', applyCosmeticsAndFarbling);
   });
 
   // Botones laterales del ratón (Mouse 4 = Atrás, Mouse 5 = Adelante) y Controles Multimedia
@@ -751,7 +774,7 @@ ipcMain.handle('shields:toggle-forgetful', (_event, domain: string) => {
   } else {
     forgetfulDomains.add(cleanDomain);
   }
-  notifyShieldsUpdate(cleanDomain);
+  notifyShieldsUpdate(cleanDomain, true);
   return {
     forgetful: forgetfulDomains.has(cleanDomain),
   };
@@ -826,7 +849,7 @@ ipcMain.handle('shields:toggle', (_event, domain: string) => {
   } else {
     shieldsDisabledDomains.add(cleanDomain);
   }
-  notifyShieldsUpdate(cleanDomain);
+  notifyShieldsUpdate(cleanDomain, true);
   return {
     enabled: !shieldsDisabledDomains.has(cleanDomain),
   };
@@ -842,7 +865,7 @@ ipcMain.handle('shields:toggle-scripts', (_event, domain: string) => {
     scriptBlockedDomains.add(cleanDomain);
     scriptAllowedDomains.delete(cleanDomain);
   }
-  notifyShieldsUpdate(cleanDomain);
+  notifyShieldsUpdate(cleanDomain, true);
   return {
     scriptsBlocked: isDomainScriptBlocked(cleanDomain),
   };
@@ -855,7 +878,7 @@ ipcMain.handle('shields:toggle-aggressive', (_event, domain: string) => {
   } else {
     aggressiveModeDomains.add(cleanDomain);
   }
-  notifyShieldsUpdate(cleanDomain);
+  notifyShieldsUpdate(cleanDomain, true);
   return {
     aggressive: aggressiveModeDomains.has(cleanDomain),
   };

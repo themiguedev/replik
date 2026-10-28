@@ -1258,12 +1258,15 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     ? window.braveAPI.getSessionPartition()
     : 'persist:brave_default';
 
+  const isLazy = !!options.lazy;
+  const initialTitle = options.title || 'Nueva pestaña';
+
   const webviewEl = document.createElement('webview');
   webviewEl.className = 'webview-instance';
   webviewEl.id = `webview-${id}`;
   webviewEl.setAttribute('allowpopups', '');
   webviewEl.setAttribute('partition', sessionPartition);
-  webviewEl.src = initialUrl;
+  webviewEl.src = isLazy ? 'about:blank' : initialUrl;
 
   const tabData = {
     id,
@@ -1272,13 +1275,13 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     url: initialUrl,
     savedUrl: initialUrl,
     domain: extractDomain(initialUrl),
-    title: 'Nueva pestaña',
+    title: initialTitle,
     blockedCount: 0,
     darkCssKey: null,
     isAudible: false,
     isMuted: false,
     isPinned: options.pinned || false,
-    isSleeping: false,
+    isSleeping: isLazy,
     groupId: options.groupId || null,
     hasCrashed: false,
     crashReason: null,
@@ -1287,6 +1290,14 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     thumbnailUrl: null,
     bfCache: new Map(),
   };
+
+  if (isLazy) {
+    tabEl.classList.add('sleeping');
+    const titleEl = tabEl.querySelector('.tab-title');
+    if (titleEl) {
+      titleEl.innerHTML = `<span class="tab-sleep-badge">🌙</span> ` + escapeHtml(initialTitle);
+    }
+  }
 
   tabs.push(tabData);
   tabBar.appendChild(tabEl);
@@ -1366,6 +1377,9 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   const audioBtn = tabEl.querySelector('.tab-audio-icon');
 
   function updateTabAudioUI() {
+    const hasAudio = !!(tabData.isMuted || tabData.isAudible);
+    tabEl.classList.toggle('has-audio', hasAudio);
+
     if (tabData.isMuted) {
       audioBtn.style.display = 'inline-flex';
       audioBtn.textContent = '🔇';
@@ -2133,7 +2147,19 @@ function closeTab(id) {
         title: tabToRemove.title,
       });
       if (closedTabsStack.length > 50) closedTabsStack.shift();
+      if (typeof updateRecentTabsMenu === 'function') updateRecentTabsMenu();
     }
+  }
+
+  // Liberación total de recursos y corte inmediato de hilos de red/multimedia
+  if (tabToRemove.webviewEl) {
+    try {
+      if (typeof tabToRemove.webviewEl.stop === 'function') tabToRemove.webviewEl.stop();
+      tabToRemove.webviewEl.src = 'about:blank';
+    } catch {}
+  }
+  if (tabToRemove.bfCache && typeof tabToRemove.bfCache.clear === 'function') {
+    tabToRemove.bfCache.clear();
   }
 
   tabToRemove.tabEl.remove();
@@ -2650,11 +2676,18 @@ function injectCookieBannersAutoDismiss(webview) {
         '#onetrust-banner-sdk', '#onetrust-consent-sdk',
         '.cookie-banner', '#cookie-banner', '#cookie-notice',
         '.qc-cmp2-container', '.didomi-popup-container',
-        '#cmpbox', '.cookie-law-info-bar', '.cc-banner'
+        '#cmpbox', '.cookie-law-info-bar', '.cc-banner',
+        '.onetrust-pc-dark-filter', '.modal-backdrop',
+        '.fc-dialog-overlay', '.didomi-popup-backdrop'
       ];
       selectors.forEach(sel => {
         document.querySelectorAll(sel).forEach(el => el.remove());
       });
+      // Restaurar scroll bloqueado por diálogos de consentimiento
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      document.documentElement.classList.remove('modal-open', 'cookie-modal-open');
+      document.body.classList.remove('modal-open', 'cookie-modal-open');
     })()
   `).catch(() => {});
 }
@@ -3475,11 +3508,45 @@ if (window.braveAPI) {
   });
 }
 
+function updateRecentTabsMenu() {
+  const container = document.getElementById('menu-recent-tabs-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!closedTabsStack || closedTabsStack.length === 0) {
+    container.innerHTML = '<div class="submenu-empty">No hay pestañas cerradas recientemente</div>';
+    return;
+  }
+
+  // Mostrar hasta las últimas 8 pestañas cerradas (de más reciente a más antigua)
+  const recentItems = closedTabsStack.slice(-8).reverse();
+  recentItems.forEach((tab) => {
+    const item = document.createElement('div');
+    item.className = 'submenu-item';
+    item.title = `${tab.title} (${tab.url})`;
+    item.innerHTML = `
+      <span class="submenu-item-icon">🌐</span>
+      <span class="submenu-item-title">${escapeHtml(tab.title || tab.url)}</span>
+    `;
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      createTab(tab.url);
+      mainMenu.classList.remove('open');
+      // Remover de la pila
+      const idx = closedTabsStack.findIndex((c) => c.url === tab.url);
+      if (idx !== -1) closedTabsStack.splice(idx, 1);
+      updateRecentTabsMenu();
+    });
+    container.appendChild(item);
+  });
+}
+
 btnMenu.addEventListener('click', (e) => {
   e.stopPropagation();
   shieldsPopup.classList.remove('open');
   closeSuggestions();
   globalMediaPopup.classList.remove('open');
+  updateRecentTabsMenu();
   mainMenu.classList.toggle('open');
 });
 
@@ -6097,7 +6164,14 @@ if (initialArgUrl) {
         lastSession.forEach((savedTab) => {
           if (savedTab.url && !savedTab.url.includes('ntp.html')) {
             if (!restoredUrls.has(savedTab.url)) {
-              createTab(savedTab.url, { pinned: !!savedTab.isPinned, groupId: savedTab.groupId || null });
+              // Lazy-load: la primera pestaña se carga activa; las demás inician hibernadas para arranque ultrarrápido
+              const isFirstTab = restoredUrls.size === 0;
+              createTab(savedTab.url, {
+                pinned: !!savedTab.isPinned,
+                groupId: savedTab.groupId || null,
+                lazy: !isFirstTab && !savedTab.isPinned,
+                title: savedTab.title || 'Pestaña',
+              });
               restoredUrls.add(savedTab.url);
             }
           }
