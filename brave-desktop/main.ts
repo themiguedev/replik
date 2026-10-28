@@ -19,6 +19,11 @@ let mainWindow: BrowserWindow | null = null;
 const openWindows = new Set<BrowserWindow>();
 const shieldsEngine = new BraveShieldsEngine();
 
+// Optimización Gráfica y Aceleración por Hardware (GPU & Zero-Copy Compositor)
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+
 // Shields per-domain configuration: Bloqueo de scripts activo por defecto
 const shieldsDisabledDomains = new Set<string>();
 const scriptAllowedDomains = new Set<string>([

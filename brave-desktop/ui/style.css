@@ -239,6 +239,14 @@ body {
   color: #fb542b;
 }
 
+.tab.has-audio .tab-audio-icon {
+  display: flex;
+}
+
+.tab.has-audio:not(:hover) .tab-close {
+  display: none;
+}
+
 .tab-close {
   opacity: 0.6;
   margin-left: 6px;
@@ -851,11 +859,21 @@ body {
   filter: grayscale(1) opacity(0.5);
 }
 
+@keyframes shield-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 84, 43, 0.7); }
+  50% { transform: scale(1.08); box-shadow: 0 0 10px 3px rgba(251, 84, 43, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 84, 43, 0); }
+}
+
+.shields-btn.pulse {
+  animation: shield-pulse 0.4s ease-out;
+}
+
 /* Webview Container */
 .browser-content {
   flex: 1;
   position: relative;
-  background-color: var(--bg-main);
+  background-color: var(--bg-main, #19191c);
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -868,6 +886,7 @@ body {
   width: 100%;
   height: 100%;
   border: none;
+  background-color: var(--bg-main, #19191c);
   visibility: visible;
   opacity: 1;
   z-index: 2;

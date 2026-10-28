@@ -433,7 +433,9 @@ function renderBookmarks() {
 
     // Si tiene favicon real o ícono predeterminado
     let iconHtml = `<span class="bookmark-chip-icon">${b.icon || '🌐'}</span>`;
-    if (b.url && b.url.startsWith('http')) {
+    if (b.favicon) {
+      iconHtml = `<img class="bookmark-chip-icon" src="${escapeHtml(b.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span class=\\'bookmark-chip-icon\\'>🌐</span>'">`;
+    } else if (b.url && b.url.startsWith('http')) {
       try {
         const u = new URL(b.url);
         iconHtml = `<img class="bookmark-chip-icon" src="https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span class=\\'bookmark-chip-icon\\'>🌐</span>'">`;
@@ -764,6 +766,7 @@ if (btnStar) {
         title: tab.title || 'Nueva página',
         url: tab.url,
         folder: 'bar',
+        favicon: tab.favicon || null,
       };
       list.push(newBm);
       saveBookmarks(list);
@@ -804,8 +807,9 @@ if (btnBmPopupDone) {
       if (existing) {
         existing.title = newTitle;
         existing.folder = newFolder;
+        if (tab.favicon && !existing.favicon) existing.favicon = tab.favicon;
       } else {
-        list.push({ title: newTitle, url: tab.url, folder: newFolder });
+        list.push({ title: newTitle, url: tab.url, folder: newFolder, favicon: tab.favicon || null });
       }
       saveBookmarks(list);
       showGlobalToast(`✓ Marcador actualizado en "${newFolder === 'bar' ? 'Barra de marcadores' : newFolder}"`);
@@ -837,7 +841,7 @@ function addCurrentPageToBookmarks() {
     return;
   }
 
-  list.push({ title, url, folder: 'bar' });
+  list.push({ title, url, folder: 'bar', favicon: tab.favicon || null });
   saveBookmarks(list);
   showGlobalToast(`★ Marcador guardado en la barra: ${title}`);
   openBookmarkPopup(true);
@@ -1144,8 +1148,12 @@ function selectSuggestion(index, updateInput = true) {
   });
 }
 
+let omniboxDebounceTimer = null;
 urlInput.addEventListener('input', () => {
-  updateOmniboxSuggestions(urlInput.value);
+  clearTimeout(omniboxDebounceTimer);
+  omniboxDebounceTimer = setTimeout(() => {
+    updateOmniboxSuggestions(urlInput.value);
+  }, 40);
 });
 
 urlInput.addEventListener('focus', () => {
@@ -1476,6 +1484,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     if (!iconContainer) return;
 
     if (e.favicons && e.favicons.length > 0 && !tabData.url.includes('ntp.html')) {
+      tabData.favicon = e.favicons[0];
       const img = document.createElement('img');
       img.src = e.favicons[0];
       img.width = 16;
@@ -1967,6 +1976,11 @@ function saveCurrentTabScrollState(tabData) {
         title: tabData.title,
         timestamp: Date.now()
       });
+      // Limitar a máximo 20 entradas en memoria por pestaña (LRU básico)
+      if (tabData.bfCache.size > 20) {
+        const oldestKey = tabData.bfCache.keys().next().value;
+        if (oldestKey) tabData.bfCache.delete(oldestKey);
+      }
     }
   }).catch(() => {});
 }
@@ -2158,6 +2172,14 @@ tabBar.addEventListener('dblclick', (e) => {
   }
 });
 
+// Desplazamiento horizontal fluido con la rueda del ratón en la barra de pestañas
+tabBar.addEventListener('wheel', (e) => {
+  if (e.deltaY !== 0) {
+    e.preventDefault();
+    tabBar.scrollLeft += e.deltaY;
+  }
+}, { passive: false });
+
 function getActiveTab() {
   return tabs.find((t) => t.id === activeTabId);
 }
@@ -2292,7 +2314,8 @@ function updateTabThumbnail(tabData) {
     if (typeof tabData.webviewEl.capturePage === 'function') {
       tabData.webviewEl.capturePage().then((image) => {
         if (image && !image.isEmpty()) {
-          tabData.thumbnailUrl = image.toDataURL();
+          const resized = typeof image.resize === 'function' ? image.resize({ width: 280, quality: 'good' }) : image;
+          tabData.thumbnailUrl = resized.toDataURL();
         }
       }).catch(() => {});
     }
@@ -3389,6 +3412,7 @@ function queryShieldsStatus(domain) {
 }
 
 function updateShieldsUI(enabled, count, statusData = {}) {
+  const prevCount = parseInt(shieldsCounter.textContent, 10) || 0;
   shieldsCounter.textContent = count;
   popupBlockedCount.textContent = count;
   shieldsToggle.checked = enabled;
@@ -3412,6 +3436,12 @@ function updateShieldsUI(enabled, count, statusData = {}) {
   if (enabled) {
     shieldsBtn.classList.remove('disabled');
     shieldsCounter.style.display = count > 0 ? 'inline-block' : 'none';
+    if (count > prevCount && count > 0) {
+      shieldsBtn.classList.remove('pulse');
+      void shieldsBtn.offsetWidth;
+      shieldsBtn.classList.add('pulse');
+      setTimeout(() => shieldsBtn.classList.remove('pulse'), 600);
+    }
   } else {
     shieldsBtn.classList.add('disabled');
     shieldsCounter.style.display = 'none';

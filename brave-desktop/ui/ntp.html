@@ -166,11 +166,42 @@
       cursor: pointer;
       text-decoration: none;
       color: #ffffff;
+      position: relative;
       transition: transform 0.2s ease;
     }
 
     .site-card:hover {
       transform: translateY(-4px);
+    }
+
+    .site-card-remove {
+      position: absolute;
+      top: -4px;
+      right: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(20, 21, 26, 0.85);
+      color: #e8eaed;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      z-index: 5;
+    }
+
+    .site-card:hover .site-card-remove {
+      display: flex;
+    }
+
+    .site-card-remove:hover {
+      background: #fb542b;
+      border-color: #fb542b;
+      color: #fff;
+      transform: scale(1.15);
     }
 
     .site-icon {
@@ -648,16 +679,25 @@
         a.className = 'site-card';
         a.href = s.url;
         a.innerHTML = `
+          <button class="site-card-remove" title="Eliminar acceso directo">✕</button>
           <div class="site-icon">${s.icon || '🌐'}</div>
           <div class="site-name">${s.name}</div>
         `;
-        a.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          if (confirm(`¿Eliminar acceso directo a "${s.name}"?`)) {
+        const removeBtn = a.querySelector('.site-card-remove');
+        if (removeBtn) {
+          removeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             list.splice(idx, 1);
             localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
             renderTopSites();
-          }
+          });
+        }
+        a.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          list.splice(idx, 1);
+          localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
+          renderTopSites();
         });
         container.appendChild(a);
       });
