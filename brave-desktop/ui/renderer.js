@@ -540,15 +540,48 @@ const bmBarEditName = document.getElementById('bm-bar-edit-name');
 const bmBarEditUrl = document.getElementById('bm-bar-edit-url');
 
 function closeBarContextMenu() {
-  if (bmBarCtxMenu) bmBarCtxMenu.classList.remove('open');
+  if (bmBarCtxMenu) {
+    bmBarCtxMenu.classList.remove('open');
+    bmBarCtxMenu.style.display = 'none';
+  }
 }
 
-document.addEventListener('click', closeBarContextMenu);
+document.addEventListener('click', (e) => {
+  if (bmBarCtxMenu && !bmBarCtxMenu.contains(e.target)) {
+    closeBarContextMenu();
+  }
+});
 
 function openBarContextMenu(idx, x, y) {
   if (!bmBarCtxMenu) return;
   activeBarBookmarkIndex = idx;
+  const list = getStoredBookmarks();
+  const isBookmarkItem = idx >= 0 && !!list[idx];
+
+  // Alternar visibilidad de opciones específicas del marcador vs opciones generales de la barra
+  const specificItems = bmBarCtxMenu.querySelectorAll('.bm-specific');
+  specificItems.forEach((el) => {
+    if (isBookmarkItem) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
+  const addLabel = document.getElementById('bm-ctx-add-label');
+  if (addLabel) {
+    addLabel.textContent = isBookmarkItem ? 'Añadir marcador...' : 'Añadir nuevo marcador a la barra...';
+  }
+
+  const toggleBarLabel = document.getElementById('bm-ctx-toggle-bar-label');
+  if (toggleBarLabel) {
+    const isHidden = bookmarksBar && bookmarksBar.classList.contains('hidden');
+    toggleBarLabel.textContent = isHidden ? 'Mostrar barra de marcadores' : 'Ocultar barra de marcadores';
+  }
+
   bmBarCtxMenu.style.display = 'block';
+  bmBarCtxMenu.classList.add('open');
+
   const rect = bmBarCtxMenu.getBoundingClientRect();
   let left = x;
   let top = y;
@@ -556,7 +589,6 @@ function openBarContextMenu(idx, x, y) {
   if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 8;
   bmBarCtxMenu.style.left = `${Math.max(8, left)}px`;
   bmBarCtxMenu.style.top = `${Math.max(8, top)}px`;
-  bmBarCtxMenu.classList.add('open');
 }
 
 // Clic derecho en espacio vacío de la barra de marcadores
@@ -575,7 +607,9 @@ if (ctxOpenNewTab) {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
       createTab(list[activeBarBookmarkIndex].url);
+      showGlobalToast(`Pestaña abierta: ${list[activeBarBookmarkIndex].title}`);
     }
+    closeBarContextMenu();
   });
 }
 
@@ -591,6 +625,7 @@ if (ctxOpenWindow) {
         createTab(u);
       }
     }
+    closeBarContextMenu();
   });
 }
 
@@ -604,6 +639,7 @@ if (ctxOpenPrivate) {
         window.braveAPI.openPrivateWindow(u);
       }
     }
+    closeBarContextMenu();
   });
 }
 
@@ -613,11 +649,16 @@ if (ctxEdit) {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex] && bmBarEditModal) {
       const b = list[activeBarBookmarkIndex];
+      const modalIcon = document.getElementById('bm-bar-modal-icon');
+      const modalTitle = document.getElementById('bm-bar-modal-title');
+      if (modalIcon) modalIcon.textContent = '✏️';
+      if (modalTitle) modalTitle.textContent = 'Editar marcador';
       bmBarEditName.value = b.title || '';
       bmBarEditUrl.value = b.url || '';
       bmBarEditModal.classList.add('open');
       bmBarEditName.focus();
     }
+    closeBarContextMenu();
   });
 }
 
@@ -632,15 +673,25 @@ const btnSaveBarEdit = document.getElementById('btn-save-bar-edit');
 if (btnSaveBarEdit) {
   btnSaveBarEdit.addEventListener('click', () => {
     const list = getStoredBookmarks();
+    const newTitle = bmBarEditName.value.trim() || 'Marcador';
+    let newUrl = bmBarEditUrl.value.trim();
+    if (!newUrl) {
+      showGlobalToast('Por favor escribe una URL válida');
+      return;
+    }
+    if (!/^https?:\/\//i.test(newUrl) && !newUrl.startsWith('brave://') && !newUrl.startsWith('file://')) {
+      newUrl = 'https://' + newUrl;
+    }
+
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
-      const newTitle = bmBarEditName.value.trim() || 'Marcador';
-      let newUrl = bmBarEditUrl.value.trim();
-      if (!newUrl) return;
-      if (!/^https?:\/\//i.test(newUrl) && !newUrl.startsWith('brave://')) newUrl = 'https://' + newUrl;
       list[activeBarBookmarkIndex].title = newTitle;
       list[activeBarBookmarkIndex].url = newUrl;
       saveBookmarks(list);
       showGlobalToast('✓ Marcador editado correctamente');
+    } else {
+      list.push({ title: newTitle, url: newUrl, folder: 'bar' });
+      saveBookmarks(list);
+      showGlobalToast(`✓ Marcador "${newTitle}" añadido a la barra`);
     }
     if (bmBarEditModal) bmBarEditModal.classList.remove('open');
   });
@@ -656,20 +707,49 @@ if (ctxDelete) {
       saveBookmarks(list);
       showGlobalToast(`✓ Marcador "${title}" eliminado`);
     }
+    closeBarContextMenu();
   });
 }
 
 const ctxAddPage = document.getElementById('bm-ctx-add-page');
 if (ctxAddPage) {
   ctxAddPage.addEventListener('click', () => {
-    addCurrentPageToBookmarks();
+    closeBarContextMenu();
+    if (bmBarEditModal) {
+      const modalIcon = document.getElementById('bm-bar-modal-icon');
+      const modalTitle = document.getElementById('bm-bar-modal-title');
+      if (modalIcon) modalIcon.textContent = '➕';
+      if (modalTitle) modalTitle.textContent = 'Añadir marcador a la barra';
+
+      const tab = getActiveTab();
+      const hasValidTab = tab && tab.url && !tab.url.includes('ntp.html') && !tab.url.startsWith('about:');
+      bmBarEditName.value = hasValidTab ? (tab.title || '') : '';
+      bmBarEditUrl.value = hasValidTab ? tab.url : 'https://';
+
+      activeBarBookmarkIndex = -1;
+      bmBarEditModal.classList.add('open');
+      if (bmBarEditName.value) {
+        bmBarEditUrl.focus();
+      } else {
+        bmBarEditName.focus();
+      }
+    }
   });
 }
 
 const ctxManager = document.getElementById('bm-ctx-manager');
 if (ctxManager) {
   ctxManager.addEventListener('click', () => {
-    navigateTo(bookmarksUrl);
+    closeBarContextMenu();
+    createTab(bookmarksUrl);
+  });
+}
+
+const ctxToggleBar = document.getElementById('bm-ctx-toggle-bar');
+if (ctxToggleBar) {
+  ctxToggleBar.addEventListener('click', () => {
+    closeBarContextMenu();
+    toggleBookmarksBar();
   });
 }
 
@@ -1527,6 +1607,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
   // Detección de foco e interacción en Vista Dividida (Split View)
   webviewEl.addEventListener('focus', () => {
+    closeBarContextMenu();
     if (isSplitViewActive && activeTabId !== id && typeof switchSplitFocus === 'function') {
       switchSplitFocus(id);
     }
@@ -3715,6 +3796,7 @@ document.addEventListener('click', (e) => {
   }
   if (customContextMenu) customContextMenu.classList.remove('open');
   if (tabContextMenu) tabContextMenu.classList.remove('open');
+  closeBarContextMenu();
   if (tabSearchPopup && !tabSearchPopup.contains(e.target) && e.target !== tabSearchBtn) {
     tabSearchPopup.classList.remove('open');
   }
@@ -4266,7 +4348,7 @@ function handleBrowserShortcut(e) {
     const qrPopup = document.getElementById('qr-popup');
     if (qrPopup) qrPopup.classList.remove('open');
     if (bmPopup) bmPopup.classList.remove('open');
-    if (bmBarCtxMenu) bmBarCtxMenu.classList.remove('open');
+    closeBarContextMenu();
     if (bmBarEditModal) bmBarEditModal.classList.remove('open');
     const siteInfoPop = document.getElementById('site-info-popup');
     if (siteInfoPop) siteInfoPop.classList.remove('open');

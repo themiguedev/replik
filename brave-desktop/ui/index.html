@@ -754,44 +754,49 @@
 
   <!-- Menú Contextual de la Barra de Marcadores -->
   <div class="bookmark-bar-context-menu" id="bm-bar-context-menu">
-    <div class="bm-ctx-item" id="bm-ctx-open-newtab">
+    <div class="bm-ctx-item bm-specific" id="bm-ctx-open-newtab">
       <span>↗️</span>
       <span>Abrir en nueva pestaña</span>
     </div>
-    <div class="bm-ctx-item" id="bm-ctx-open-window">
+    <div class="bm-ctx-item bm-specific" id="bm-ctx-open-window">
       <span>🪟</span>
       <span>Abrir en nueva ventana</span>
     </div>
-    <div class="bm-ctx-item" id="bm-ctx-open-private">
+    <div class="bm-ctx-item bm-specific" id="bm-ctx-open-private">
       <span>🕶️</span>
       <span>Abrir en ventana privada</span>
     </div>
-    <div class="bm-ctx-separator"></div>
-    <div class="bm-ctx-item" id="bm-ctx-edit">
+    <div class="bm-ctx-separator bm-specific" id="bm-ctx-sep-1"></div>
+    <div class="bm-ctx-item bm-specific" id="bm-ctx-edit">
       <span>✏️</span>
       <span>Editar...</span>
     </div>
-    <div class="bm-ctx-item danger" id="bm-ctx-delete">
+    <div class="bm-ctx-item danger bm-specific" id="bm-ctx-delete">
       <span>🗑️</span>
       <span>Eliminar</span>
     </div>
-    <div class="bm-ctx-separator"></div>
+    <div class="bm-ctx-separator bm-specific" id="bm-ctx-sep-2"></div>
     <div class="bm-ctx-item" id="bm-ctx-add-page">
       <span>➕</span>
-      <span>Añadir página a marcadores...</span>
+      <span id="bm-ctx-add-label">Añadir página a marcadores...</span>
     </div>
     <div class="bm-ctx-item" id="bm-ctx-manager">
       <span>🔖</span>
       <span>Administrador de marcadores</span>
+    </div>
+    <div class="bm-ctx-separator"></div>
+    <div class="bm-ctx-item" id="bm-ctx-toggle-bar">
+      <span>👁️</span>
+      <span id="bm-ctx-toggle-bar-label">Ocultar barra de marcadores</span>
     </div>
   </div>
 
   <!-- Modal de Edición de Marcador en la Barra -->
   <div class="modal-overlay" id="bm-bar-edit-modal">
     <div class="modal-card" style="width: 420px; background: #24252a; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-      <div class="modal-title" style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">
-        <span>✏️</span>
-        <span>Editar marcador</span>
+      <div class="modal-title" style="font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span id="bm-bar-modal-icon">✏️</span>
+        <span id="bm-bar-modal-title">Editar marcador</span>
       </div>
       <div class="input-field" style="display:flex; flex-direction:column; gap:6px; margin-bottom: 12px;">
         <label style="font-size:12px; color:var(--text-muted);">Nombre:</label>
