@@ -548,7 +548,9 @@
     <div class="context-menu-item" id="ctx-copy-link">Copiar dirección del enlace</div>
     <div class="context-menu-divider" id="ctx-link-divider"></div>
     <div class="context-menu-item" id="ctx-open-image-tab" style="display: none;">Abrir imagen en pestaña nueva</div>
+    <div class="context-menu-item" id="ctx-save-image" style="display: none;">Guardar imagen como...</div>
     <div class="context-menu-item" id="ctx-copy-image-link" style="display: none;">Copiar dirección de la imagen</div>
+    <div class="context-menu-item" id="ctx-search-image" style="display: none;">Buscar imagen en la web</div>
     <div class="context-menu-divider" id="ctx-image-divider" style="display: none;"></div>
     <div class="context-menu-item" id="ctx-search-selection">Buscar con Brave Search</div>
     <div class="context-menu-item" id="ctx-copy-selection">Copiar</div>
@@ -699,6 +701,15 @@
     <div class="extensions-popup-footer">
       <button class="btn-webstore-link" id="btn-popup-webstore">🛍️ Abrir Chrome Web Store</button>
     </div>
+  </div>
+
+  <!-- Popup Flotante de Acción de Extensión (Action Default Popup) -->
+  <div class="extension-action-popup" id="extension-action-popup">
+    <div class="ext-popup-header">
+      <div class="ext-popup-title" id="ext-popup-title">Extensión</div>
+      <button class="ext-popup-close" id="ext-popup-close">✕</button>
+    </div>
+    <iframe class="ext-popup-frame" id="ext-popup-frame" src="about:blank"></iframe>
   </div>
 
   <!-- Popup Generador de Códigos QR para compartir -->

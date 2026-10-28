@@ -1532,6 +1532,21 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     }
   });
 
+  // Soporte de pellizcar para zoom (Trackpad Pinch-to-zoom) y Ctrl + Rueda del ratón
+  webviewEl.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const curZoom = tabData.zoomFactor || 1.0;
+      let targetZoom = curZoom;
+      if (e.deltaY < 0) {
+        targetZoom = Math.min(3.0, curZoom + 0.05);
+      } else if (e.deltaY > 0) {
+        targetZoom = Math.max(0.3, curZoom - 0.05);
+      }
+      applyCurrentTabZoom(targetZoom, true);
+    }
+  }, { passive: false });
+
   // Eventos de estado de navegación del Webview
   webviewEl.addEventListener('did-start-loading', () => {
     if (activeTabId === id) {
@@ -2838,8 +2853,13 @@ function openPageContextMenu(x, y, params) {
   copyLinkItem.style.display = hasLink ? 'block' : 'none';
   linkDivider.style.display = hasLink ? 'block' : 'none';
 
+  const saveImageItem = document.getElementById('ctx-save-image');
+  const searchImageItem = document.getElementById('ctx-search-image');
+
   if (openImageItem) openImageItem.style.display = hasImage ? 'block' : 'none';
+  if (saveImageItem) saveImageItem.style.display = hasImage ? 'block' : 'none';
   if (copyImageItem) copyImageItem.style.display = hasImage ? 'block' : 'none';
+  if (searchImageItem) searchImageItem.style.display = hasImage ? 'block' : 'none';
   if (imageDivider) imageDivider.style.display = hasImage ? 'block' : 'none';
 
   searchItem.style.display = hasText ? 'block' : 'none';
@@ -2877,6 +2897,32 @@ if (ctxCopyImageLink) {
     if (contextMenuTargetData && contextMenuTargetData.srcURL) {
       navigator.clipboard.writeText(contextMenuTargetData.srcURL);
       showGlobalToast('Dirección de la imagen copiada');
+    }
+    customContextMenu.classList.remove('open');
+  });
+}
+
+const ctxSaveImage = document.getElementById('ctx-save-image');
+if (ctxSaveImage) {
+  ctxSaveImage.addEventListener('click', () => {
+    if (contextMenuTargetData && contextMenuTargetData.srcURL) {
+      const a = document.createElement('a');
+      a.href = contextMenuTargetData.srcURL;
+      a.download = contextMenuTargetData.srcURL.split('/').pop()?.split('?')[0] || 'imagen.jpg';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showGlobalToast('🦁 Guardando imagen...');
+    }
+    customContextMenu.classList.remove('open');
+  });
+}
+
+const ctxSearchImage = document.getElementById('ctx-search-image');
+if (ctxSearchImage) {
+  ctxSearchImage.addEventListener('click', () => {
+    if (contextMenuTargetData && contextMenuTargetData.srcURL) {
+      createTab('https://lens.google.com/uploadbyurl?url=' + encodeURIComponent(contextMenuTargetData.srcURL));
     }
     customContextMenu.classList.remove('open');
   });
@@ -3680,6 +3726,9 @@ document.addEventListener('click', (e) => {
   if (extPopupEl && !extPopupEl.contains(e.target) && e.target !== btnExtensionsEl) {
     extPopupEl.classList.remove('open');
   }
+  if (extActionPopup && !extActionPopup.contains(e.target) && !e.target.closest('.ext-action-btn')) {
+    extActionPopup.classList.remove('open');
+  }
   const btnQrEl = document.getElementById('btn-qr-code');
   const qrPopupEl = document.getElementById('qr-popup');
   if (qrPopupEl && !qrPopupEl.contains(e.target) && e.target !== btnQrEl) {
@@ -4213,6 +4262,7 @@ function handleBrowserShortcut(e) {
     if (translateBar) translateBar.classList.remove('active');
     const extPopup = document.getElementById('extensions-popup');
     if (extPopup) extPopup.classList.remove('open');
+    if (extActionPopup) extActionPopup.classList.remove('open');
     const qrPopup = document.getElementById('qr-popup');
     if (qrPopup) qrPopup.classList.remove('open');
     if (bmPopup) bmPopup.classList.remove('open');
@@ -4812,6 +4862,11 @@ function setProfile(profileKey, showNotification = true) {
     if (window.braveAPI && window.braveAPI.openPrivateWindow) {
       window.braveAPI.openPrivateWindow();
     }
+  } else if (profileKey === 'work' && showNotification) {
+    if (window.braveAPI && window.braveAPI.openProfileWindow) {
+      window.braveAPI.openProfileWindow('work');
+    }
+    showGlobalToast('💼 Abriendo ventana con Perfil de Trabajo (sesión aislada)');
   }
 }
 initProfileSelector();
@@ -5025,6 +5080,18 @@ async function renderExtensionsPopupList() {
   }
 }
 
+const extActionPopup = document.getElementById('extension-action-popup');
+const extPopupTitle = document.getElementById('ext-popup-title');
+const extPopupFrame = document.getElementById('ext-popup-frame');
+const extPopupClose = document.getElementById('ext-popup-close');
+
+if (extPopupClose && extActionPopup) {
+  extPopupClose.addEventListener('click', () => {
+    extActionPopup.classList.remove('open');
+    if (extPopupFrame) extPopupFrame.src = 'about:blank';
+  });
+}
+
 async function renderExtensionActions() {
   const container = document.getElementById('extensions-toolbar-strip');
   if (!container || !window.braveAPI || !window.braveAPI.listExtensions) return;
@@ -5048,7 +5115,16 @@ async function renderExtensionActions() {
       btn.innerHTML = iconHtml;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        showGlobalToast(`🧩 ${ext.name}: extensión activa`);
+        if (ext.popupUrl && extActionPopup && extPopupFrame) {
+          const rect = btn.getBoundingClientRect();
+          extActionPopup.style.top = `${rect.bottom + 6}px`;
+          extActionPopup.style.right = `${Math.max(10, window.innerWidth - rect.right - 10)}px`;
+          if (extPopupTitle) extPopupTitle.textContent = ext.name;
+          extPopupFrame.src = ext.popupUrl;
+          extActionPopup.classList.toggle('open');
+        } else {
+          showGlobalToast(`🧩 ${ext.name}: extensión activa en Brave`);
+        }
       });
       container.appendChild(btn);
     });

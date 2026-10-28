@@ -859,6 +859,63 @@ body {
   line-height: 10px;
 }
 
+.extension-action-popup {
+  position: absolute;
+  top: 42px;
+  right: 56px;
+  width: 360px;
+  height: 480px;
+  background-color: var(--bg-popup, #24252a);
+  border: 1px solid var(--border-color, #383940);
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+  z-index: 1005;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeIn 0.12s ease-out;
+}
+
+.extension-action-popup.open {
+  display: flex;
+}
+
+.ext-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--border-color, #383940);
+}
+
+.ext-popup-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dedee4;
+}
+
+.ext-popup-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.ext-popup-close:hover {
+  color: #ffffff;
+}
+
+.ext-popup-frame {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+}
+
 /* Brave Shields Lion Button in Omnibox */
 .shields-btn {
   display: flex;

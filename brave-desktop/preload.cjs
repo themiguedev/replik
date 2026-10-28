@@ -111,6 +111,8 @@ contextBridge.exposeInMainWorld('braveAPI', {
   onMediaKey: (callback) => ipcRenderer.on('browser:media-key', (_e, cmd) => callback(cmd)),
   onTabCrashed: (callback) => ipcRenderer.on('browser:tab-crashed', (_e, data) => callback(data)),
 
+  openProfileWindow: (profileId, initialUrl) => ipcRenderer.invoke('browser:open-profile-window', profileId, initialUrl),
+
   getSessionPartition: () => {
     const isPrivate = process.argv.includes('--private-mode') || process.argv.includes('--tor-mode');
     if (isPrivate) {
@@ -118,6 +120,11 @@ contextBridge.exposeInMainWorld('braveAPI', {
         cachedPrivatePartition = `temp_private_${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
       }
       return cachedPrivatePartition;
+    }
+    const profileArg = process.argv.find((a) => a.startsWith('--profile='));
+    if (profileArg) {
+      const p = profileArg.split('=')[1];
+      if (p && p !== 'personal') return `persist:brave_profile_${p}`;
     }
     return 'persist:brave_default';
   },

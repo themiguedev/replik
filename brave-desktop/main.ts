@@ -532,9 +532,10 @@ function notifyShieldsUpdate(domain: string, immediate = false) {
   }
 }
 
-function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; initialUrl?: string } = {}) {
+function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; initialUrl?: string; profile?: string } = {}) {
   const isPrivate = options.isPrivate ?? false;
   const isTor = options.isTor ?? false;
+  const profile = options.profile || null;
 
   let title = 'Brave Browser';
   let backgroundColor = '#19191c';
@@ -548,11 +549,16 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
     title = 'Brave (Ventana Privada)';
     backgroundColor = '#181124';
     modeArg = '--private-mode';
+  } else if (profile && profile !== 'personal') {
+    title = `Brave (Perfil: ${profile.charAt(0).toUpperCase() + profile.slice(1)})`;
   }
 
   const additionalArgs = [modeArg];
   if (options.initialUrl) {
     additionalArgs.push(`--initial-url=${options.initialUrl}`);
+  }
+  if (profile) {
+    additionalArgs.push(`--profile=${profile}`);
   }
 
   const win = new BrowserWindow({
@@ -896,6 +902,10 @@ ipcMain.handle('browser:open-tor-window', (_event, initialUrl?: string) => {
   createBrowserWindow({ isPrivate: true, isTor: true, initialUrl });
 });
 
+ipcMain.handle('browser:open-profile-window', (_event, profileId: string, initialUrl?: string) => {
+  createBrowserWindow({ profile: profileId, initialUrl });
+});
+
 ipcMain.handle('browser:toggle-fullscreen', (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (win) {
@@ -1235,6 +1245,7 @@ interface ExtensionMeta {
   path: string;
   icon?: string;
   homepage?: string;
+  popupUrl?: string;
 }
 
 const PRESET_EXTENSIONS: Record<string, { name: string; desc: string; icon: string; url: string; crxId: string }> = {
@@ -1283,7 +1294,36 @@ function loadInstalledExtensionsList(): ExtensionMeta[] {
   try {
     const f = getExtensionsFilePath();
     if (fs.existsSync(f)) {
-      return JSON.parse(fs.readFileSync(f, 'utf-8'));
+      const list: ExtensionMeta[] = JSON.parse(fs.readFileSync(f, 'utf-8'));
+      // Enriquecer automáticamente con popupUrl e icono si existen en disco
+      list.forEach((ext) => {
+        if (!ext.popupUrl && ext.path && fs.existsSync(ext.path)) {
+          try {
+            const mPath = path.join(ext.path, 'manifest.json');
+            if (fs.existsSync(mPath)) {
+              const m = JSON.parse(fs.readFileSync(mPath, 'utf-8'));
+              const pop = m.action?.default_popup || m.browser_action?.default_popup;
+              if (pop) {
+                const fullPop = path.join(ext.path, pop);
+                if (fs.existsSync(fullPop)) {
+                  ext.popupUrl = `file://${fullPop.replace(/\\/g, '/')}`;
+                }
+              }
+              const icons = m.icons || m.action?.default_icon || m.browser_action?.default_icon;
+              if (icons && typeof icons === 'object') {
+                const iconRel = icons['128'] || icons['48'] || icons['32'] || icons['16'] || Object.values(icons)[0];
+                if (iconRel && typeof iconRel === 'string') {
+                  const fullIcon = path.join(ext.path, iconRel);
+                  if (fs.existsSync(fullIcon)) {
+                    ext.icon = `file://${fullIcon.replace(/\\/g, '/')}`;
+                  }
+                }
+              }
+            }
+          } catch {}
+        }
+      });
+      return list;
     }
   } catch {}
   return [];
