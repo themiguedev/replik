@@ -187,6 +187,7 @@ const playlistUrl = window.braveAPI && window.braveAPI.getPlaylistUrl ? window.b
 const extensionsUrl = window.braveAPI && window.braveAPI.getExtensionsUrl ? window.braveAPI.getExtensionsUrl() : resolveInternalUrl('extensions.html');
 const bookmarksUrl = window.braveAPI && window.braveAPI.getBookmarksUrl ? window.braveAPI.getBookmarksUrl() : resolveInternalUrl('bookmarks.html');
 const versionUrl = window.braveAPI && window.braveAPI.getVersionUrl ? window.braveAPI.getVersionUrl() : resolveInternalUrl('version.html');
+const componentsUrl = window.braveAPI && window.braveAPI.getComponentsUrl ? window.braveAPI.getComponentsUrl() : resolveInternalUrl('components.html');
 
 // Detección de modo Tor o Privado en la ventana
 if (window.braveAPI) {
@@ -868,6 +869,7 @@ const INTERNAL_PAGES = [
   { title: 'Brave Playlist', url: 'brave://playlist', icon: '📑', badge: 'Brave' },
   { title: 'Extensiones de Brave', url: 'brave://extensions', icon: '🧩', badge: 'Brave' },
   { title: 'Versión del Sistema y Diagnóstico', url: 'brave://version', icon: '🦁', badge: 'Brave' },
+  { title: 'Componentes y Módulos de Protección', url: 'brave://components', icon: '🧩', badge: 'Brave' },
   { title: 'Nueva Pestaña', url: 'brave://newtab', icon: '🦁', badge: 'Brave' },
 ];
 
@@ -899,6 +901,92 @@ function updateOmniboxSuggestions(query) {
   }
 
   const results = [];
+
+  // Atajos de Búsqueda Avanzada de Brave (@history, @bookmarks, @settings, @components)
+  if (q.startsWith('@h') || q.startsWith('@hist') || q.startsWith('@b') || q.startsWith('@m') || q.startsWith('@s') || q.startsWith('@c')) {
+    if (q.startsWith('@history') || q.startsWith('@historial')) {
+      const term = q.replace(/^@(history|historial)\s*/i, '').trim();
+      const list = getHistoryList();
+      const matched = list.filter(h => !term || (h.title && h.title.toLowerCase().includes(term)) || (h.url && h.url.toLowerCase().includes(term))).slice(0, 7);
+      matched.forEach(h => {
+        results.push({
+          type: 'history',
+          title: h.title || h.url,
+          url: h.url,
+          icon: '🕒',
+          badge: 'Historial',
+          actionUrl: h.url,
+        });
+      });
+      if (results.length > 0) {
+        currentSuggestions = results;
+        renderSuggestionsList(query);
+        return;
+      }
+    } else if (q.startsWith('@bookmarks') || q.startsWith('@marcadores')) {
+      const term = q.replace(/^@(bookmarks|marcadores)\s*/i, '').trim();
+      const list = getStoredBookmarks();
+      const matched = list.filter(b => !term || (b.title && b.title.toLowerCase().includes(term)) || (b.url && b.url.toLowerCase().includes(term))).slice(0, 7);
+      matched.forEach(b => {
+        results.push({
+          type: 'bookmark',
+          title: b.title,
+          url: b.url,
+          icon: b.icon || '🔖',
+          badge: 'Marcador',
+          actionUrl: b.url,
+        });
+      });
+      if (results.length > 0) {
+        currentSuggestions = results;
+        renderSuggestionsList(query);
+        return;
+      }
+    } else if (q.startsWith('@settings') || q.startsWith('@configuracion')) {
+      results.push({
+        type: 'internal',
+        title: 'Abrir Configuración de Brave',
+        url: 'brave://settings',
+        icon: '🛡️',
+        badge: 'Brave',
+        actionUrl: 'brave://settings',
+      });
+      currentSuggestions = results;
+      renderSuggestionsList(query);
+      return;
+    } else if (q.startsWith('@components')) {
+      results.push({
+        type: 'internal',
+        title: 'Componentes y Módulos de Protección',
+        url: 'brave://components',
+        icon: '🧩',
+        badge: 'Brave',
+        actionUrl: 'brave://components',
+      });
+      currentSuggestions = results;
+      renderSuggestionsList(query);
+      return;
+    }
+  }
+
+  // Detección nativa de "Tab to Search" para motores de búsqueda comunes
+  if (q === 'youtube.com' || q === 'wikipedia.org' || q === 'github.com' || q === 'google.com' || q === 'duckduckgo.com') {
+    let service = 'YouTube';
+    let bang = ':yt ';
+    if (q.includes('wikipedia')) { service = 'Wikipedia'; bang = ':w '; }
+    if (q.includes('github')) { service = 'GitHub'; bang = ':gh '; }
+    if (q.includes('google')) { service = 'Google'; bang = ':g '; }
+    if (q.includes('duckduckgo')) { service = 'DuckDuckGo'; bang = ':ddg '; }
+
+    results.push({
+      type: 'tab-search',
+      title: `Buscar en ${service} [Presiona Tab]`,
+      url: `Escribe Tab para buscar en ${service}`,
+      icon: '🔍',
+      badge: 'Tab to Search',
+      actionUrl: bang,
+    });
+  }
 
   // Soporte de prefijos de búsqueda rápida (Custom Search Bangs)
   if (q.startsWith(':yt ') || q.startsWith(':w ') || q.startsWith(':g ') || q.startsWith(':gh ') || q.startsWith(':d ')) {
@@ -1188,6 +1276,7 @@ function extractDomain(url) {
       if (url.includes('adblock.html')) return 'Adblock';
       if (url.includes('playlist.html')) return 'Playlist';
       if (url.includes('extensions.html')) return 'Extensiones';
+      if (url.includes('components.html')) return 'Componentes';
       return 'Nueva Pestaña';
     }
     return u.hostname.toLowerCase();
@@ -2254,6 +2343,10 @@ function updateOmniboxForUrl(url) {
     urlInput.value = 'brave://extensions';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
     lockIcon.title = 'Extensiones de Brave';
+  } else if (url.includes('components.html') || url === 'brave://components') {
+    urlInput.value = 'brave://components';
+    lockIcon.innerHTML = LOCK_SVG_BRAVE;
+    lockIcon.title = 'Componentes y Módulos de Protección de Brave';
   } else if (url.includes('settings.html') || url === 'brave://settings' || url === 'brave://sync') {
     urlInput.value = url.includes('#sync') ? 'brave://sync' : 'brave://settings';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
@@ -3236,6 +3329,8 @@ function navigateTo(raw) {
     target = playlistUrl;
   } else if (lower === 'brave://extensions' || lower === 'about:extensions' || lower === 'chrome://extensions') {
     target = extensionsUrl;
+  } else if (lower === 'brave://components' || lower === 'about:components' || lower === 'chrome://components') {
+    target = componentsUrl;
   } else if (lower.startsWith('localhost') || lower.startsWith('127.0.0.1') || lower.startsWith('[::1]')) {
     target = 'http://' + target;
   } else if (lower === 'brave://sync') {
@@ -3293,6 +3388,15 @@ function navigateTo(raw) {
 }
 
 urlInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    if (currentSuggestions.length > 0 && currentSuggestions[0].type === 'tab-search') {
+      e.preventDefault();
+      urlInput.value = currentSuggestions[0].actionUrl;
+      updateOmniboxSuggestions(urlInput.value);
+      return;
+    }
+  }
+
   if (e.key === 'ArrowDown') {
     if (currentSuggestions.length > 0) {
       e.preventDefault();
@@ -4911,12 +5015,45 @@ async function renderExtensionsPopupList() {
         const checked = e.target.checked;
         await window.braveAPI.toggleExtension(ext.id, checked);
         showGlobalToast(`Extensión "${ext.name}" ${checked ? 'activada' : 'desactivada'}`);
+        renderExtensionActions();
       });
 
       extensionsPopupList.appendChild(item);
     });
   } catch (err) {
     console.error('Error renderizando popup de extensiones:', err);
+  }
+}
+
+async function renderExtensionActions() {
+  const container = document.getElementById('extensions-toolbar-strip');
+  if (!container || !window.braveAPI || !window.braveAPI.listExtensions) return;
+  container.innerHTML = '';
+
+  try {
+    const data = await window.braveAPI.listExtensions();
+    const installed = data.installed || [];
+
+    installed.filter((ext) => ext.enabled).forEach((ext) => {
+      const btn = document.createElement('button');
+      btn.className = 'ext-action-btn';
+      btn.title = `${ext.name} (Extensión de Brave)`;
+
+      let iconHtml = '🧩';
+      if (ext.icon && (ext.icon.startsWith('http') || ext.icon.startsWith('data:') || ext.icon.startsWith('file:'))) {
+        iconHtml = `<img class="ext-action-icon" src="${escapeHtml(ext.icon)}" alt="${escapeHtml(ext.name)}">`;
+      } else if (ext.icon) {
+        iconHtml = `<span style="font-size:14px;">${escapeHtml(ext.icon)}</span>`;
+      }
+      btn.innerHTML = iconHtml;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showGlobalToast(`🧩 ${ext.name}: extensión activa`);
+      });
+      container.appendChild(btn);
+    });
+  } catch (err) {
+    console.error('Error renderizando acciones de extensiones:', err);
   }
 }
 
@@ -6189,3 +6326,6 @@ if (initialArgUrl) {
     switchTab(firstNonPinned.id);
   }
 }
+
+// Cargar barra de acciones de extensiones activas
+renderExtensionActions();

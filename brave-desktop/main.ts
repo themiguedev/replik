@@ -1618,9 +1618,31 @@ app.whenReady().then(async () => {
     .replace(/brave-replica\/[0-9.]+\s?/gi, '')
     .trim();
 
+  // Configuración de DNS sobre HTTPS seguro (DoH)
+  try {
+    if (typeof (app as any).configureHostResolver === 'function') {
+      (app as any).configureHostResolver({
+        secureDnsMode: 'automatic',
+        secureDnsServers: [
+          'https://cloudflare-dns.com/dns-query',
+          'https://dns.google/dns-query'
+        ],
+      });
+      console.log('[Brave DNS] DoH (DNS sobre HTTPS) configurado exitosamente.');
+    }
+  } catch (e) {
+    console.warn('[Brave DNS] No se pudo activar HostResolver DoH:', e);
+  }
+
   session.defaultSession.setUserAgent(cleanUA);
   const persistSession = session.fromPartition('persist:brave_default');
   persistSession.setUserAgent(cleanUA);
+
+  // Protección contra fugas de IP local en WebRTC (WebRTC IP Handling Policy)
+  try {
+    session.defaultSession.setWebRTCIPHandlingPolicy('default_public_interface_only');
+    persistSession.setWebRTCIPHandlingPolicy('default_public_interface_only');
+  } catch {}
 
   attachSessionInterception(session.defaultSession);
   attachSessionInterception(persistSession);
@@ -1630,6 +1652,9 @@ app.whenReady().then(async () => {
   // Interceptar automáticamente cualquier nueva sesión (incluyendo privadas en RAM) y cargar extensiones activas
   app.on('session-created', async (newSession) => {
     newSession.setUserAgent(cleanUA);
+    try {
+      newSession.setWebRTCIPHandlingPolicy('default_public_interface_only');
+    } catch {}
     attachSessionInterception(newSession);
     attachDownloadHandler(newSession);
 

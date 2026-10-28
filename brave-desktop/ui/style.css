@@ -815,6 +815,50 @@ body {
   font-size: 13.5px;
 }
 
+.extensions-toolbar-strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ext-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+
+.ext-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ext-action-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  object-fit: contain;
+}
+
+.ext-action-badge {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  font-size: 8.5px;
+  font-weight: 700;
+  background: var(--brave-orange, #fb542b);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 2px;
+  line-height: 10px;
+}
+
 /* Brave Shields Lion Button in Omnibox */
 .shields-btn {
   display: flex;

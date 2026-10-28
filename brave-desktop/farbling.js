@@ -152,7 +152,21 @@
       }
     } catch (e) {}
 
-    console.log('[Brave Shields] Farbling Avanzado de Audio, Canvas y WebGL activo para:', domain);
+    // 5. DEFUSER DE DETECCIÓN ANTI-ADBLOCK Y SCRIPTLETS ESENCIALES (Brave Sugarcoat & Defuser)
+    try {
+      window.canRunAds = true;
+      window.isAdBlockActive = false;
+      window.hasAdBlocker = false;
+      window.adBlockerDetected = false;
+      if (typeof window.adsbygoogle === 'undefined') {
+        const dummyAdsByGoogle = [];
+        dummyAdsByGoogle.push = function() { return 0; };
+        dummyAdsByGoogle.loaded = true;
+        window.adsbygoogle = dummyAdsByGoogle;
+      }
+    } catch (e) {}
+
+    console.log('[Brave Shields] Farbling Avanzado y Sugarcoat Anti-Adblock activo para:', domain);
   } catch (err) {
     // Protección a prueba de fallos: nunca romper la ejecución del sitio web
   }
