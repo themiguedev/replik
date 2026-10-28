@@ -6,6 +6,8 @@
 
 > **Replik** es una réplica educativa integral de **Brave Browser** para Windows x64. Implementa el diseño visual oficial de Brave Desktop (Chromium Dark Theme) junto a su motor de protección de privacidad **Brave Shields**, bloqueo de rastreadores y anuncios, navegación con Tor, protocolos descentralizados IPFS/IPNS y utilidades avanzadas de productividad en un único binario 100% portable.
 
+📖 **Documento de Contexto y Arquitectura Técnica**: Consulta [CONTEXTO_PROYECTO.md](CONTEXTO_PROYECTO.md) para el desglose exhaustivo del proceso de ingeniería inversa con REA, deconstrucción de `brave-core`, mitigación de fingerprinting y diseño del motor Shields.
+
 ---
 
 ## 🚀 Descargas Disponibles
