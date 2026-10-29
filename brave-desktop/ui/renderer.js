@@ -461,7 +461,11 @@ function renderBookmarks() {
 
     chip.addEventListener('click', (e) => {
       e.preventDefault();
-      navigateTo(b.url);
+      if (e.ctrlKey || e.metaKey) {
+        createTab(b.url);
+      } else {
+        navigateTo(b.url);
+      }
     });
 
     chip.addEventListener('auxclick', (e) => {
@@ -2934,19 +2938,95 @@ function injectCookieBannersAutoDismiss(webview) {
 // ==========================================
 // 10. MENÚS CONTEXTUALES PERSONALIZADOS
 // ==========================================
-function openTabContextMenu(x, y, tabId) {
+function openTabContextMenu(x, y, tabId = null) {
   contextMenuTargetTabId = tabId;
-  const targetTab = tabs.find((t) => t.id === tabId);
-  if (!targetTab) return;
+  const targetTab = tabId ? tabs.find((t) => t.id === tabId) : null;
 
+  const reloadItem = document.getElementById('tab-ctx-reload');
+  const dupItem = document.getElementById('tab-ctx-duplicate');
+  const newRightItem = document.getElementById('tab-ctx-new-right');
   const pinItem = document.getElementById('tab-ctx-pin');
-  pinItem.textContent = targetTab.isPinned ? 'Desfijar pestaña' : 'Fijar pestaña';
-
   const muteItem = document.getElementById('tab-ctx-mute');
-  muteItem.textContent = targetTab.isMuted ? 'Activar sonido de pestaña' : 'Silenciar pestaña';
+  const groupOrange = document.getElementById('tab-ctx-group-orange');
+  const groupPurple = document.getElementById('tab-ctx-group-purple');
+  const groupBlue = document.getElementById('tab-ctx-group-blue');
+  const groupRemove = document.getElementById('tab-ctx-remove-group');
+  const sleepItem = document.getElementById('tab-ctx-sleep');
+  const reopenItem = document.getElementById('tab-ctx-reopen');
+  const bookmarkAllItem = document.getElementById('tab-ctx-bookmark-all');
+  const closeItem = document.getElementById('tab-ctx-close');
+  const closeRightItem = document.getElementById('tab-ctx-close-right');
+  const closeOthersItem = document.getElementById('tab-ctx-close-others');
+
+  const divGroups = document.getElementById('tab-ctx-divider-groups');
+  const divSleep = document.getElementById('tab-ctx-divider-sleep');
+  const divActions = document.getElementById('tab-ctx-divider-actions');
+  const divClose = document.getElementById('tab-ctx-divider-close');
+
+  if (targetTab) {
+    if (reloadItem) reloadItem.style.display = 'flex';
+    if (dupItem) dupItem.style.display = 'flex';
+    if (newRightItem) {
+      newRightItem.style.display = 'flex';
+      newRightItem.textContent = 'Nueva pestaña a la derecha';
+    }
+    if (pinItem) {
+      pinItem.style.display = 'flex';
+      pinItem.textContent = targetTab.isPinned ? 'Desfijar pestaña' : 'Fijar pestaña';
+    }
+    if (muteItem) {
+      muteItem.style.display = 'flex';
+      muteItem.textContent = targetTab.isMuted ? 'Activar sonido de pestaña' : 'Silenciar pestaña';
+    }
+    if (groupOrange) groupOrange.style.display = 'flex';
+    if (groupPurple) groupPurple.style.display = 'flex';
+    if (groupBlue) groupBlue.style.display = 'flex';
+    if (groupRemove) groupRemove.style.display = targetTab.groupId ? 'flex' : 'none';
+    if (divGroups) divGroups.style.display = 'block';
+    if (sleepItem) sleepItem.style.display = 'flex';
+    if (divSleep) divSleep.style.display = 'block';
+    if (closeItem) closeItem.style.display = 'flex';
+    if (closeRightItem) closeRightItem.style.display = 'flex';
+    if (closeOthersItem) closeOthersItem.style.display = 'flex';
+    if (divClose) divClose.style.display = 'block';
+  } else {
+    if (reloadItem) reloadItem.style.display = 'none';
+    if (dupItem) dupItem.style.display = 'none';
+    if (newRightItem) {
+      newRightItem.style.display = 'flex';
+      newRightItem.textContent = 'Nueva pestaña';
+    }
+    if (pinItem) pinItem.style.display = 'none';
+    if (muteItem) muteItem.style.display = 'none';
+    if (groupOrange) groupOrange.style.display = 'none';
+    if (groupPurple) groupPurple.style.display = 'none';
+    if (groupBlue) groupBlue.style.display = 'none';
+    if (groupRemove) groupRemove.style.display = 'none';
+    if (divGroups) divGroups.style.display = 'none';
+    if (sleepItem) sleepItem.style.display = 'none';
+    if (divSleep) divSleep.style.display = 'none';
+    if (closeItem) closeItem.style.display = 'none';
+    if (closeRightItem) closeRightItem.style.display = 'none';
+    if (closeOthersItem) closeOthersItem.style.display = 'none';
+    if (divClose) divClose.style.display = 'none';
+  }
+
+  if (reopenItem) {
+    if (closedTabsStack.length > 0) {
+      reopenItem.style.display = 'flex';
+      reopenItem.style.opacity = '1';
+      reopenItem.style.pointerEvents = 'auto';
+    } else {
+      reopenItem.style.display = 'flex';
+      reopenItem.style.opacity = '0.4';
+      reopenItem.style.pointerEvents = 'none';
+    }
+  }
+  if (bookmarkAllItem) bookmarkAllItem.style.display = 'flex';
+  if (divActions) divActions.style.display = 'block';
 
   tabContextMenu.style.left = `${Math.min(x, window.innerWidth - 240)}px`;
-  tabContextMenu.style.top = `${Math.min(y, window.innerHeight - 300)}px`;
+  tabContextMenu.style.top = `${Math.min(y, window.innerHeight - 340)}px`;
   tabContextMenu.classList.add('open');
   customContextMenu.classList.remove('open');
 }
@@ -3459,6 +3539,73 @@ document.getElementById('tab-ctx-close-others').addEventListener('click', () => 
   toClose.forEach((t) => closeTab(t.id));
   tabContextMenu.classList.remove('open');
 });
+
+const tabCtxReopen = document.getElementById('tab-ctx-reopen');
+if (tabCtxReopen) {
+  tabCtxReopen.addEventListener('click', () => {
+    if (closedTabsStack.length > 0) {
+      const restored = closedTabsStack.pop();
+      createTab(restored.url);
+    }
+    tabContextMenu.classList.remove('open');
+  });
+}
+
+const tabCtxBookmarkAll = document.getElementById('tab-ctx-bookmark-all');
+if (tabCtxBookmarkAll) {
+  tabCtxBookmarkAll.addEventListener('click', () => {
+    bookmarkAllTabs();
+    tabContextMenu.classList.remove('open');
+  });
+}
+
+// Menú contextual en el espacio vacío de la barra de pestañas y región superior
+if (tabBar) {
+  tabBar.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.tab') || e.target.closest('.tab-new')) return;
+    e.preventDefault();
+    openTabContextMenu(e.clientX, e.clientY, null);
+  });
+}
+const dragRegion = document.querySelector('.titlebar-drag-region');
+if (dragRegion) {
+  dragRegion.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    openTabContextMenu(e.clientX, e.clientY, null);
+  });
+}
+
+function bookmarkAllTabs() {
+  const currentBookmarks = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  const folderName = `Pestañas (${dateStr})`;
+  let addedCount = 0;
+  tabs.forEach((t) => {
+    if (t.url && !t.url.startsWith('file://') && !t.url.includes('ntp.html')) {
+      currentBookmarks.push({
+        title: t.title || 'Página Web',
+        url: t.url,
+        folder: folderName,
+        dateAdded: Date.now(),
+      });
+      addedCount++;
+    }
+  });
+  if (addedCount > 0) {
+    const folders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+    if (!folders.includes(folderName)) {
+      folders.push(folderName);
+      localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
+    }
+    localStorage.setItem('brave_bookmarks', JSON.stringify(currentBookmarks));
+    renderBookmarks();
+    updateBookmarkStarState();
+    showGlobalToast(`✓ ${addedCount} pestañas guardadas en "${folderName}"`);
+  } else {
+    showGlobalToast('No hay páginas abiertas para guardar');
+  }
+}
 
 // ==========================================
 // 11. NAVEGACIÓN Y PREFIJOS RÁPIDOS (Bangs)
@@ -4275,6 +4422,13 @@ function handleBrowserShortcut(e) {
   if (isCtrl && !isShift && isD) {
     prevent();
     addCurrentPageToBookmarks();
+    return;
+  }
+
+  // Ctrl + Shift + D: Añadir todas las pestañas a marcadores
+  if (isCtrl && isShift && isD) {
+    prevent();
+    bookmarkAllTabs();
     return;
   }
 
