@@ -37,6 +37,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
   openWindow: (url) => ipcRenderer.invoke('browser:open-window', url),
   openPrivateWindow: (url) => ipcRenderer.invoke('browser:open-private-window', url),
   openTorWindow: (url) => ipcRenderer.invoke('browser:open-tor-window', url),
+  createTab: (url) => window.dispatchEvent(new CustomEvent('brave:create-tab', { detail: { url } })),
   getInitialUrl: () => {
     const prefix = '--initial-url=';
     const found = process.argv.find((a) => a.startsWith(prefix));

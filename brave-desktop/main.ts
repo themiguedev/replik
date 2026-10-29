@@ -19,10 +19,14 @@ let mainWindow: BrowserWindow | null = null;
 const openWindows = new Set<BrowserWindow>();
 const shieldsEngine = new BraveShieldsEngine();
 
-// Optimización Gráfica y Aceleración por Hardware (GPU & Zero-Copy Compositor)
+// Optimización Gráfica y Aceleración por Hardware (GPU, Rasterización y Zero-Copy)
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('enable-zero-copy');
 app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('enable-features', 'OverlayScrollbar,CanvasOopRasterization,ParallelDownloading');
+app.commandLine.appendSwitch('high-dpi-support', '1');
+app.commandLine.appendSwitch('enable-accelerated-video-decode');
+app.commandLine.appendSwitch('enable-accelerated-2d-canvas');
 
 // Shields per-domain configuration: Bloqueo de scripts activo por defecto
 const shieldsDisabledDomains = new Set<string>();

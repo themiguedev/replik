@@ -448,10 +448,31 @@
             updateBatchButton();
           });
 
-          // Click on item opens url
+          // Click on item opens url (Ctrl/Cmd click opens new tab)
           row.addEventListener('click', (e) => {
             if (e.target.closest('.item-delete') || e.target.closest('.item-checkbox')) return;
-            window.location.href = it.url;
+            if (e.ctrlKey || e.metaKey) {
+              if (window.braveAPI && window.braveAPI.createTab) {
+                window.braveAPI.createTab(it.url);
+              } else {
+                window.open(it.url, '_blank');
+              }
+            } else {
+              window.location.href = it.url;
+            }
+          });
+
+          // Middle click opens in new tab
+          row.addEventListener('auxclick', (e) => {
+            if (e.button === 1) {
+              e.preventDefault();
+              if (e.target.closest('.item-delete') || e.target.closest('.item-checkbox')) return;
+              if (window.braveAPI && window.braveAPI.createTab) {
+                window.braveAPI.createTab(it.url);
+              } else {
+                window.open(it.url, '_blank');
+              }
+            }
           });
 
           // Delete single item

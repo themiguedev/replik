@@ -524,7 +524,11 @@
     });
 
     btnOpenWebstore.addEventListener('click', () => {
-      window.open('https://chromewebstore.google.com', '_blank');
+      if (window.braveAPI && window.braveAPI.createTab) {
+        window.braveAPI.createTab('https://chromewebstore.google.com');
+      } else {
+        window.open('https://chromewebstore.google.com', '_blank');
+      }
     });
 
     btnDownloadStore.addEventListener('click', async () => {

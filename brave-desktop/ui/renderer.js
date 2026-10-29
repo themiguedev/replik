@@ -1406,6 +1406,29 @@ function updateHistoryTitle(url, title) {
   } catch {}
 }
 
+function resolveBraveUrl(url) {
+  if (!url) return ntpUrl;
+  const lower = String(url).trim().toLowerCase();
+  if (lower === 'brave://bookmarks' || lower === 'about:bookmarks' || lower === 'chrome://bookmarks') return bookmarksUrl;
+  if (lower === 'brave://history' || lower === 'about:history' || lower === 'chrome://history') return historyUrl;
+  if (lower === 'brave://settings' || lower === 'about:settings' || lower === 'chrome://settings') return settingsUrl;
+  if (lower === 'brave://downloads' || lower === 'about:downloads' || lower === 'chrome://downloads') return downloadsUrl;
+  if (lower === 'brave://extensions' || lower === 'about:extensions' || lower === 'chrome://extensions') return extensionsUrl;
+  if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') return versionUrl;
+  if (lower === 'brave://adblock') return adblockUrl;
+  if (lower === 'brave://playlist' || lower === 'about:playlist') return playlistUrl;
+  if (lower === 'brave://components' || lower === 'about:components') return componentsUrl;
+  if (lower === 'brave://newtab' || lower === 'about:newtab' || lower === 'about:blank') return ntpUrl;
+  if (lower === 'brave://sync') return settingsUrl + '#sync';
+  if (lower === 'brave://shields') return settingsUrl + '#shields';
+  if (lower === 'brave://privacy') return settingsUrl + '#privacy';
+  if (lower === 'brave://autofill' || lower === 'brave://passwords') return settingsUrl + '#autofill';
+  if (lower === 'brave://appearance') return settingsUrl + '#appearance';
+  if (lower === 'brave://startup') return settingsUrl + '#startup';
+  if (lower === 'brave://search') return settingsUrl + '#search';
+  return url;
+}
+
 function createTab(initialUrl = ntpUrl, options = {}) {
   tabCounter++;
   const id = `tab-${tabCounter}`;
@@ -1429,20 +1452,21 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
   const isLazy = !!options.lazy;
   const initialTitle = options.title || 'Nueva pestaña';
+  const targetInitialUrl = resolveBraveUrl(initialUrl);
 
   const webviewEl = document.createElement('webview');
   webviewEl.className = 'webview-instance';
   webviewEl.id = `webview-${id}`;
   webviewEl.setAttribute('allowpopups', '');
   webviewEl.setAttribute('partition', sessionPartition);
-  webviewEl.src = isLazy ? 'about:blank' : initialUrl;
+  webviewEl.src = isLazy ? 'about:blank' : targetInitialUrl;
 
   const tabData = {
     id,
     tabEl,
     webviewEl,
-    url: initialUrl,
-    savedUrl: initialUrl,
+    url: targetInitialUrl,
+    savedUrl: targetInitialUrl,
     domain: extractDomain(initialUrl),
     title: initialTitle,
     blockedCount: 0,
@@ -1857,6 +1881,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           window.braveAPI.clearBrowsingData = (opts) => window.__brave_call('clearBrowsingData', [opts]);
           window.braveAPI.openWindow = (url) => window.__brave_call('openWindow', [url]);
           window.braveAPI.openPrivateWindow = (url) => window.__brave_call('openPrivateWindow', [url]);
+          window.braveAPI.createTab = (url) => window.__brave_call('createTab', [url]);
 
           window.dispatchEvent(new CustomEvent('brave-bridge-ready'));
           if (typeof loadExtensions === 'function') {
@@ -2004,13 +2029,33 @@ function createTab(initialUrl = ntpUrl, options = {}) {
           }
           localStorage.setItem('brave_browser_history', JSON.stringify(filtered));
           result = true;
+        } else if (action === 'createTab') {
+          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
+          createTab(targetUrl);
+          result = true;
+        } else if (action === 'openWindow') {
+          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
+          if (window.braveAPI && window.braveAPI.openWindow) {
+            window.braveAPI.openWindow(targetUrl);
+          } else {
+            createTab(targetUrl);
+          }
+          result = true;
+        } else if (action === 'openPrivateWindow') {
+          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
+          if (window.braveAPI && window.braveAPI.openPrivateWindow) {
+            window.braveAPI.openPrivateWindow(targetUrl);
+          } else {
+            createTab(targetUrl);
+          }
+          result = true;
         } else if (action === 'getBookmarks') {
           result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
         } else if (action === 'saveBookmarks') {
           const newList = args[0] || [];
           localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
-          bookmarks = newList;
-          renderBookmarksBar();
+          renderBookmarks();
+          updateBookmarkStarState();
           result = true;
         } else if (action === 'getBookmarkFolders') {
           result = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
@@ -2130,6 +2175,11 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   }
   return tabData;
 }
+
+window.addEventListener('brave:create-tab', (e) => {
+  const targetUrl = e.detail && e.detail.url ? resolveBraveUrl(e.detail.url) : ntpUrl;
+  createTab(targetUrl);
+});
 
 function applyTabPinnedState(tabData, isPinned) {
   tabData.isPinned = isPinned;

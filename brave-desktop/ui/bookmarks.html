@@ -1083,10 +1083,27 @@
           updateBatchBar();
         });
 
-        // Clic en fila abre la URL
+        // Clic en fila abre la URL en nueva pestaña
         row.addEventListener('click', (e) => {
           if (e.target.closest('.bm-actions') || e.target.classList.contains('bm-checkbox')) return;
-          window.open(bm.url, '_blank');
+          if (window.braveAPI && window.braveAPI.createTab) {
+            window.braveAPI.createTab(bm.url);
+          } else {
+            window.open(bm.url, '_blank');
+          }
+        });
+
+        // Clic central de ratón abre en nueva pestaña
+        row.addEventListener('auxclick', (e) => {
+          if (e.button === 1) {
+            e.preventDefault();
+            if (e.target.closest('.bm-actions') || e.target.classList.contains('bm-checkbox')) return;
+            if (window.braveAPI && window.braveAPI.createTab) {
+              window.braveAPI.createTab(bm.url);
+            } else {
+              window.open(bm.url, '_blank');
+            }
+          }
         });
 
         // Doble clic abre edición rápida
@@ -1270,7 +1287,12 @@
     // Acciones del Menú Contextual de Fila
     document.getElementById('ctx-open-newtab').addEventListener('click', () => {
       if (activeContextMenuRow !== null && bookmarks[activeContextMenuRow]) {
-        window.open(bookmarks[activeContextMenuRow].url, '_blank');
+        const u = bookmarks[activeContextMenuRow].url;
+        if (window.braveAPI && window.braveAPI.createTab) {
+          window.braveAPI.createTab(u);
+        } else {
+          window.open(u, '_blank');
+        }
       }
     });
 
