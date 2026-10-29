@@ -244,6 +244,29 @@
         <circle cx="12" cy="19" r="2"></circle>
       </svg>
     </button>
+
+    <!-- Línea Indicadora de Carga de Página (Page Load Progress Bar) -->
+    <div class="page-loading-bar" id="page-loading-bar"></div>
+  </div>
+
+  <!-- Dropdown de Carpeta de Marcadores en Barra -->
+  <div class="bookmark-folder-dropdown" id="bookmark-folder-dropdown">
+    <div class="folder-dropdown-items" id="folder-dropdown-items"></div>
+    <div class="folder-dropdown-divider"></div>
+    <div class="folder-dropdown-action" id="folder-dropdown-open-all">
+      <span>📂</span>
+      <span>Abrir todos en pestañas nuevas</span>
+    </div>
+  </div>
+
+  <!-- Menú Contextual de Historial Rápido (Atrás / Adelante) -->
+  <div class="nav-history-popup" id="nav-history-popup">
+    <div class="nav-history-items" id="nav-history-items"></div>
+    <div class="nav-history-divider"></div>
+    <div class="nav-history-footer" id="nav-history-full">
+      <span>🕒</span>
+      <span>Mostrar el historial completo (Ctrl+H)</span>
+    </div>
   </div>
 
   <!-- Barra Visual de Marcadores (Ctrl + Shift + B) -->
@@ -755,41 +778,24 @@
     </div>
   </div>
 
-  <!-- Menú Contextual de la Barra de Marcadores -->
-  <div class="bookmark-bar-context-menu" id="bm-bar-context-menu">
-    <div class="bm-ctx-item bm-specific" id="bm-ctx-open-newtab">
-      <span>↗️</span>
-      <span>Abrir en nueva pestaña</span>
-    </div>
-    <div class="bm-ctx-item bm-specific" id="bm-ctx-open-window">
-      <span>🪟</span>
-      <span>Abrir en nueva ventana</span>
-    </div>
-    <div class="bm-ctx-item bm-specific" id="bm-ctx-open-private">
-      <span>🕶️</span>
-      <span>Abrir en ventana privada</span>
-    </div>
-    <div class="bm-ctx-separator bm-specific" id="bm-ctx-sep-1"></div>
-    <div class="bm-ctx-item bm-specific" id="bm-ctx-edit">
-      <span>✏️</span>
-      <span>Editar...</span>
-    </div>
-    <div class="bm-ctx-item danger bm-specific" id="bm-ctx-delete">
-      <span>🗑️</span>
-      <span>Eliminar</span>
-    </div>
-    <div class="bm-ctx-separator bm-specific" id="bm-ctx-sep-2"></div>
-    <div class="bm-ctx-item" id="bm-ctx-add-page">
-      <span>➕</span>
+  <!-- Menú Contextual de la Barra de Marcadores (Estilo Nativo Chromium/Brave) -->
+  <div class="brave-context-menu bookmark-bar-context-menu" id="bm-bar-context-menu">
+    <div class="context-menu-item bm-specific" id="bm-ctx-open-newtab">Abrir en nueva pestaña</div>
+    <div class="context-menu-item bm-specific" id="bm-ctx-open-window">Abrir en nueva ventana</div>
+    <div class="context-menu-item bm-specific" id="bm-ctx-open-private">Abrir en ventana privada</div>
+    <div class="context-menu-divider bm-specific" id="bm-ctx-sep-1"></div>
+    <div class="context-menu-item bm-specific" id="bm-ctx-edit">Editar...</div>
+    <div class="context-menu-item bm-specific danger" id="bm-ctx-delete">Eliminar</div>
+    <div class="context-menu-divider bm-specific" id="bm-ctx-sep-2"></div>
+    <div class="context-menu-item" id="bm-ctx-add-page">
       <span id="bm-ctx-add-label">Añadir página a marcadores...</span>
     </div>
-    <div class="bm-ctx-item" id="bm-ctx-manager">
-      <span>🔖</span>
-      <span>Administrador de marcadores</span>
+    <div class="context-menu-item" id="bm-ctx-add-folder">
+      <span>Añadir carpeta...</span>
     </div>
-    <div class="bm-ctx-separator"></div>
-    <div class="bm-ctx-item" id="bm-ctx-toggle-bar">
-      <span>👁️</span>
+    <div class="context-menu-item" id="bm-ctx-manager">Administrador de marcadores</div>
+    <div class="context-menu-divider" id="bm-ctx-sep-3"></div>
+    <div class="context-menu-item" id="bm-ctx-toggle-bar">
       <span id="bm-ctx-toggle-bar-label">Ocultar barra de marcadores</span>
     </div>
   </div>

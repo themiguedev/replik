@@ -184,6 +184,52 @@ body {
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.25);
 }
 
+/* Separadores de pestañas nativos estilo Brave / Chromium */
+.tab:not(.active):not(:hover):not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.12);
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+.tab:hover + .tab::after,
+.tab.active + .tab::after {
+  opacity: 0;
+}
+
+/* Indicador de carga giratorio (Tab Throbber Spinner) */
+.tab-throbber {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 7px;
+  flex-shrink: 0;
+  animation: tabThrobberSpin 0.75s linear infinite;
+}
+
+.tab.loading .tab-icon {
+  display: none !important;
+}
+
+.tab.loading .tab-throbber {
+  display: inline-flex !important;
+}
+
+@keyframes tabThrobberSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .tab-icon {
   margin-right: 7px;
   display: flex;
@@ -383,6 +429,7 @@ body {
 
 /* Navigation Toolbar */
 .toolbar {
+  position: relative;
   display: flex;
   align-items: center;
   background-color: var(--bg-toolbar);
@@ -391,8 +438,176 @@ body {
   border-bottom: 1px solid var(--border-color);
   min-width: 0;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   flex-wrap: nowrap;
+}
+
+/* Línea de Progreso de Carga de Página (Page Load Progress Bar) */
+.page-loading-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2.5px;
+  width: 0%;
+  background: linear-gradient(90deg, #fb542b, #ff7a59);
+  box-shadow: 0 0 8px rgba(251, 84, 43, 0.7);
+  z-index: 99999;
+  transition: width 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.page-loading-bar.loading {
+  opacity: 1;
+  width: 70%;
+}
+.page-loading-bar.finishing {
+  opacity: 1;
+  width: 100%;
+}
+
+/* Dropdown de Carpeta de Marcadores en Barra */
+.bookmark-folder-dropdown {
+  display: none;
+  position: absolute;
+  background-color: #202127;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.4);
+  padding: 6px 0;
+  z-index: 100000;
+  min-width: 220px;
+  max-width: 320px;
+  max-height: 420px;
+  overflow-y: auto;
+  animation: ctxMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  user-select: none;
+}
+.bookmark-folder-dropdown.open {
+  display: block;
+}
+.folder-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: #f1f3f5;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  text-decoration: none;
+  overflow: hidden;
+}
+.folder-dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.folder-dropdown-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.folder-dropdown-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
+.folder-dropdown-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  color: var(--brave-orange);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  font-weight: 500;
+}
+.folder-dropdown-action:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Menú Contextual de Historial Rápido (Atrás / Adelante) */
+.nav-history-popup {
+  display: none;
+  position: absolute;
+  background-color: #202127;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.4);
+  padding: 6px 0;
+  z-index: 100000;
+  min-width: 240px;
+  max-width: 340px;
+  animation: ctxMenuFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  user-select: none;
+}
+.nav-history-popup.open {
+  display: block;
+}
+.nav-history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: #f1f3f5;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-history-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.nav-history-item.current {
+  font-weight: 600;
+  color: var(--brave-orange);
+}
+.nav-history-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-history-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-history-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
+.nav-history-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+.nav-history-footer:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .nav-btn {

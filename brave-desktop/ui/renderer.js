@@ -413,6 +413,241 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+// ==========================================
+// CONTROL UNIVERSAL DE POINTER-EVENTS EN WEBVIEWS
+// Permite que menús contextuales, popups y modales reciban clics sin que los webviews los capturen
+// ==========================================
+function setWebviewsInteractive(interactive) {
+  const val = interactive ? 'auto' : 'none';
+  document.querySelectorAll('.webview-instance').forEach((w) => {
+    if (!w.classList.contains('hidden')) {
+      w.style.pointerEvents = val;
+    }
+  });
+}
+
+// ==========================================
+// BARRA DE PROGRESO DE CARGA DE PÁGINA (Chromium Orange Line)
+// ==========================================
+const pageLoadingBar = document.getElementById('page-loading-bar');
+let loadingBarFinishTimer = null;
+
+function showPageLoadingBar() {
+  if (!pageLoadingBar) return;
+  if (loadingBarFinishTimer) {
+    clearTimeout(loadingBarFinishTimer);
+    loadingBarFinishTimer = null;
+  }
+  pageLoadingBar.classList.remove('finishing');
+  pageLoadingBar.style.width = '0%';
+  pageLoadingBar.style.opacity = '1';
+  void pageLoadingBar.offsetWidth;
+  pageLoadingBar.classList.add('loading');
+}
+
+function finishPageLoadingBar() {
+  if (!pageLoadingBar) return;
+  pageLoadingBar.classList.remove('loading');
+  pageLoadingBar.classList.add('finishing');
+  if (loadingBarFinishTimer) clearTimeout(loadingBarFinishTimer);
+  loadingBarFinishTimer = setTimeout(() => {
+    pageLoadingBar.style.opacity = '0';
+    setTimeout(() => {
+      pageLoadingBar.classList.remove('finishing');
+      pageLoadingBar.style.width = '0%';
+    }, 250);
+  }, 220);
+}
+
+function hidePageLoadingBar() {
+  if (!pageLoadingBar) return;
+  if (loadingBarFinishTimer) clearTimeout(loadingBarFinishTimer);
+  pageLoadingBar.classList.remove('loading', 'finishing');
+  pageLoadingBar.style.opacity = '0';
+  pageLoadingBar.style.width = '0%';
+}
+
+// ==========================================
+// DROPDOWN DE CARPETA DE MARCADORES
+// ==========================================
+const bookmarkFolderDropdown = document.getElementById('bookmark-folder-dropdown');
+const folderDropdownItems = document.getElementById('folder-dropdown-items');
+const folderDropdownOpenAll = document.getElementById('folder-dropdown-open-all');
+let activeDropdownFolderName = '';
+
+function closeBookmarkFolderDropdown() {
+  if (bookmarkFolderDropdown) {
+    bookmarkFolderDropdown.classList.remove('open');
+    bookmarkFolderDropdown.style.display = 'none';
+  }
+  setWebviewsInteractive(true);
+}
+
+function openBookmarkFolderDropdown(folderName, chipEl) {
+  if (!bookmarkFolderDropdown || !folderDropdownItems) return;
+  activeDropdownFolderName = folderName;
+  const list = getStoredBookmarks();
+  const folderBookmarks = list.filter((b) => b.folder === folderName);
+
+  folderDropdownItems.innerHTML = '';
+  if (folderBookmarks.length === 0) {
+    const emptyEl = document.createElement('div');
+    emptyEl.style.cssText = 'padding: 8px 16px; font-size: 12px; color: var(--text-muted); font-style: italic;';
+    emptyEl.textContent = '(Carpeta vacía)';
+    folderDropdownItems.appendChild(emptyEl);
+  } else {
+    folderBookmarks.forEach((b) => {
+      const item = document.createElement('div');
+      item.className = 'folder-dropdown-item';
+      let iconHtml = `<span style="font-size: 13px;">${b.icon || '🌐'}</span>`;
+      if (b.favicon) {
+        iconHtml = `<img src="${escapeHtml(b.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
+      } else if (b.url && b.url.startsWith('http')) {
+        try {
+          const u = new URL(b.url);
+          iconHtml = `<img src="https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
+        } catch {}
+      }
+
+      item.innerHTML = `
+        ${iconHtml}
+        <span class="folder-dropdown-title">${escapeHtml(b.title)}</span>
+      `;
+
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeBookmarkFolderDropdown();
+        if (e.ctrlKey || e.metaKey) {
+          createTab(b.url);
+        } else {
+          navigateTo(b.url);
+        }
+      });
+
+      folderDropdownItems.appendChild(item);
+    });
+  }
+
+  const rect = chipEl.getBoundingClientRect();
+  bookmarkFolderDropdown.style.left = `${Math.max(8, rect.left)}px`;
+  bookmarkFolderDropdown.style.top = `${rect.bottom + 4}px`;
+  bookmarkFolderDropdown.style.display = 'block';
+  bookmarkFolderDropdown.classList.add('open');
+  setWebviewsInteractive(false);
+}
+
+if (folderDropdownOpenAll) {
+  folderDropdownOpenAll.addEventListener('click', () => {
+    if (!activeDropdownFolderName) return;
+    const list = getStoredBookmarks();
+    const folderBookmarks = list.filter((b) => b.folder === activeDropdownFolderName);
+    if (folderBookmarks.length > 0) {
+      folderBookmarks.forEach((b) => createTab(b.url));
+      showGlobalToast(`✓ ${folderBookmarks.length} pestañas abiertas de "${activeDropdownFolderName}"`);
+    }
+    closeBookmarkFolderDropdown();
+  });
+}
+
+// ==========================================
+// POPUP DE HISTORIAL DE SESIÓN (Atrás / Adelante)
+// ==========================================
+const navHistoryPopup = document.getElementById('nav-history-popup');
+const navHistoryItems = document.getElementById('nav-history-items');
+const navHistoryFull = document.getElementById('nav-history-full');
+
+function closeNavHistoryPopup() {
+  if (navHistoryPopup) {
+    navHistoryPopup.classList.remove('open');
+    navHistoryPopup.style.display = 'none';
+  }
+  setWebviewsInteractive(true);
+}
+
+function openNavHistoryPopup(btnEl) {
+  if (!navHistoryPopup || !navHistoryItems) return;
+  const tab = getActiveTab();
+  if (!tab) return;
+
+  const history = tab.navHistory && tab.navHistory.length > 0
+    ? tab.navHistory
+    : [{ url: tab.url || ntpUrl, title: tab.title || 'Nueva pestaña' }];
+
+  const curIdx = tab.navHistoryIndex !== undefined ? tab.navHistoryIndex : history.length - 1;
+  navHistoryItems.innerHTML = '';
+
+  history.slice().reverse().forEach((item, revIdx) => {
+    const realIdx = history.length - 1 - revIdx;
+    const isCurrent = realIdx === curIdx;
+    const itemEl = document.createElement('div');
+    itemEl.className = 'nav-history-item' + (isCurrent ? ' nav-history-item-current' : '');
+
+    let iconHtml = `<span style="font-size: 13px;">🌐</span>`;
+    if (item.favicon) {
+      iconHtml = `<img src="${escapeHtml(item.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
+    }
+
+    itemEl.innerHTML = `
+      ${iconHtml}
+      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 300px;">${escapeHtml(item.title || item.url)}</span>
+    `;
+
+    itemEl.addEventListener('click', () => {
+      closeNavHistoryPopup();
+      if (!isCurrent) {
+        navigateTo(item.url);
+      }
+    });
+
+    navHistoryItems.appendChild(itemEl);
+  });
+
+  const rect = btnEl.getBoundingClientRect();
+  navHistoryPopup.style.left = `${Math.max(8, rect.left)}px`;
+  navHistoryPopup.style.top = `${rect.bottom + 6}px`;
+  navHistoryPopup.style.display = 'block';
+  navHistoryPopup.classList.add('open');
+  setWebviewsInteractive(false);
+}
+
+function attachNavHistoryEvents(btn) {
+  if (!btn) return;
+  let pressTimer = null;
+
+  btn.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    openNavHistoryPopup(btn);
+  });
+
+  btn.addEventListener('mousedown', (e) => {
+    if (e.button === 0) {
+      pressTimer = setTimeout(() => {
+        openNavHistoryPopup(btn);
+      }, 350);
+    }
+  });
+
+  const clearTimer = () => {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  };
+
+  btn.addEventListener('mouseup', clearTimer);
+  btn.addEventListener('mouseleave', clearTimer);
+}
+
+attachNavHistoryEvents(btnBack);
+attachNavHistoryEvents(btnForward);
+
+if (navHistoryFull) {
+  navHistoryFull.addEventListener('click', () => {
+    closeNavHistoryPopup();
+    createTab(historyUrl);
+  });
+}
+
 let activeBarBookmarkIndex = -1;
 let draggedBarBookmarkIndex = -1;
 
@@ -421,7 +656,49 @@ function renderBookmarks() {
   bookmarksList.innerHTML = '';
   const list = getStoredBookmarks();
 
-  // Filtrar marcadores que pertenecen a la barra (o sin carpeta asignada)
+  // 1. Renderizar Carpetas en la Barra de Marcadores
+  let customFolders = [];
+  try {
+    customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+  } catch {
+    customFolders = ['Favoritos', 'Trabajo'];
+  }
+
+  customFolders.forEach((folderName) => {
+    const folderBookmarks = list.filter((b) => b.folder === folderName);
+    const chip = document.createElement('div');
+    chip.className = 'bookmark-chip bookmark-folder-chip';
+    chip.title = `Carpeta: ${folderName} (${folderBookmarks.length} marcadores)\nClic: desplegar • Rueda: abrir todos`;
+    chip.innerHTML = `
+      <span class="bookmark-chip-icon" style="font-size: 13px;">📁</span>
+      <span class="bookmark-chip-title">${escapeHtml(folderName)}</span>
+      <span style="font-size: 9px; opacity: 0.6; margin-left: 2px;">▾</span>
+    `;
+
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openBookmarkFolderDropdown(folderName, chip);
+    });
+
+    chip.addEventListener('auxclick', (e) => {
+      if (e.button === 1) {
+        e.preventDefault();
+        folderBookmarks.forEach((b) => createTab(b.url));
+        showGlobalToast(`✓ ${folderBookmarks.length} pestañas abiertas de "${folderName}"`);
+      }
+    });
+
+    chip.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openBarContextMenu(-1, e.clientX, e.clientY);
+    });
+
+    bookmarksList.appendChild(chip);
+  });
+
+  // 2. Renderizar Marcadores de la Barra
   const barBookmarks = list.filter((b) => !b.folder || b.folder === 'bar');
 
   barBookmarks.forEach((b) => {
@@ -548,11 +825,18 @@ function closeBarContextMenu() {
     bmBarCtxMenu.classList.remove('open');
     bmBarCtxMenu.style.display = 'none';
   }
+  setWebviewsInteractive(true);
 }
 
 document.addEventListener('click', (e) => {
   if (bmBarCtxMenu && !bmBarCtxMenu.contains(e.target)) {
     closeBarContextMenu();
+  }
+  if (bookmarkFolderDropdown && !bookmarkFolderDropdown.contains(e.target) && !e.target.closest('.bookmark-folder-chip')) {
+    closeBookmarkFolderDropdown();
+  }
+  if (navHistoryPopup && !navHistoryPopup.contains(e.target) && e.target !== btnBack && e.target !== btnForward && !btnBack.contains(e.target) && !btnForward.contains(e.target)) {
+    closeNavHistoryPopup();
   }
 });
 
@@ -567,8 +851,10 @@ function openBarContextMenu(idx, x, y) {
   specificItems.forEach((el) => {
     if (isBookmarkItem) {
       el.classList.remove('hidden');
+      el.style.display = '';
     } else {
       el.classList.add('hidden');
+      el.style.display = 'none';
     }
   });
 
@@ -593,6 +879,7 @@ function openBarContextMenu(idx, x, y) {
   if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 8;
   bmBarCtxMenu.style.left = `${Math.max(8, left)}px`;
   bmBarCtxMenu.style.top = `${Math.max(8, top)}px`;
+  setWebviewsInteractive(false);
 }
 
 // Clic derecho en espacio vacío de la barra de marcadores
@@ -660,6 +947,7 @@ if (ctxEdit) {
       bmBarEditName.value = b.title || '';
       bmBarEditUrl.value = b.url || '';
       bmBarEditModal.classList.add('open');
+      setWebviewsInteractive(false);
       bmBarEditName.focus();
     }
     closeBarContextMenu();
@@ -670,6 +958,7 @@ const btnCancelBarEdit = document.getElementById('btn-cancel-bar-edit');
 if (btnCancelBarEdit) {
   btnCancelBarEdit.addEventListener('click', () => {
     if (bmBarEditModal) bmBarEditModal.classList.remove('open');
+    setWebviewsInteractive(true);
   });
 }
 
@@ -698,6 +987,7 @@ if (btnSaveBarEdit) {
       showGlobalToast(`✓ Marcador "${newTitle}" añadido a la barra`);
     }
     if (bmBarEditModal) bmBarEditModal.classList.remove('open');
+    setWebviewsInteractive(true);
   });
 }
 
@@ -732,10 +1022,33 @@ if (ctxAddPage) {
 
       activeBarBookmarkIndex = -1;
       bmBarEditModal.classList.add('open');
+      setWebviewsInteractive(false);
       if (bmBarEditName.value) {
         bmBarEditUrl.focus();
       } else {
         bmBarEditName.focus();
+      }
+    }
+  });
+}
+
+const ctxAddFolder = document.getElementById('bm-ctx-add-folder');
+if (ctxAddFolder) {
+  ctxAddFolder.addEventListener('click', () => {
+    closeBarContextMenu();
+    const folderName = prompt('Nombre de la nueva carpeta de marcadores:', 'Nueva carpeta');
+    if (folderName && folderName.trim()) {
+      let folders = [];
+      try {
+        folders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+      } catch {
+        folders = ['Favoritos', 'Trabajo'];
+      }
+      if (!folders.includes(folderName.trim())) {
+        folders.push(folderName.trim());
+        localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
+        renderBookmarks();
+        showGlobalToast(`✓ Carpeta "${folderName.trim()}" creada en la barra`);
       }
     }
   });
@@ -1444,6 +1757,12 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   tabEl.draggable = true;
   tabEl.innerHTML = `
     <span class="tab-icon">${BRAVE_SHIELD_SVG}</span>
+    <span class="tab-throbber" title="Cargando...">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" stroke-width="2.5"/>
+        <path d="M12 3a9 9 0 0 1 9 9" stroke="#fb542b" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </span>
     <span class="tab-title">Nueva pestaña</span>
     <span class="tab-audio-icon" title="Silenciar pestaña">🔊</span>
     <span class="tab-close" title="Cerrar pestaña (Ctrl+W)">✕</span>
@@ -1658,18 +1977,24 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
   // Eventos de estado de navegación del Webview
   webviewEl.addEventListener('did-start-loading', () => {
+    tabData.isLoading = true;
+    tabEl.classList.add('loading');
     if (activeTabId === id) {
       btnReload.innerHTML = STOP_SVG;
       btnReload.title = 'Detener carga (Esc)';
       hideWaybackBar();
+      showPageLoadingBar();
     }
   });
 
   webviewEl.addEventListener('did-stop-loading', () => {
+    tabData.isLoading = false;
+    tabEl.classList.remove('loading');
     if (activeTabId === id) {
       btnReload.innerHTML = RELOAD_SVG;
       btnReload.title = 'Recargar (Ctrl+R)';
       updateNavControls();
+      finishPageLoadingBar();
     }
     // Aplicación del zoom persistente por dominio
     const dom = tabData.domain || extractDomain(tabData.url);
@@ -1696,6 +2021,9 @@ function createTab(initialUrl = ntpUrl, options = {}) {
       t = 'Nueva pestaña';
     }
     tabData.title = t;
+    if (tabData.navHistory && tabData.navHistoryIndex >= 0 && tabData.navHistory[tabData.navHistoryIndex]) {
+      tabData.navHistory[tabData.navHistoryIndex].title = t;
+    }
     updateHistoryTitle(tabData.url, t);
     const titleEl = tabEl.querySelector('.tab-title');
     if (titleEl) {
@@ -1712,6 +2040,9 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
     if (e.favicons && e.favicons.length > 0 && !tabData.url.includes('ntp.html')) {
       tabData.favicon = e.favicons[0];
+      if (tabData.navHistory && tabData.navHistoryIndex >= 0 && tabData.navHistory[tabData.navHistoryIndex]) {
+        tabData.navHistory[tabData.navHistoryIndex].favicon = e.favicons[0];
+      }
       const img = document.createElement('img');
       img.src = e.favicons[0];
       img.width = 16;
@@ -1728,6 +2059,12 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   });
 
   webviewEl.addEventListener('did-fail-load', (e) => {
+    tabData.isLoading = false;
+    tabEl.classList.remove('loading');
+    if (activeTabId === id) {
+      btnReload.innerHTML = RELOAD_SVG;
+      finishPageLoadingBar();
+    }
     if (e.errorCode !== -3 && initialUrl.includes('ntp.html') && webviewEl.src !== ntpUrl) {
       console.warn('[Brave-Replica] Webview falló, recargando con ntpUrl absoluto:', ntpUrl);
       webviewEl.src = ntpUrl;
@@ -1764,6 +2101,24 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     tabData.savedUrl = e.url;
     tabData.domain = extractDomain(e.url);
     tabData.lastActiveTime = Date.now();
+
+    // Registro de Historial de Sesión para menú desplegable Atrás/Adelante
+    if (!tabData.navHistory) {
+      tabData.navHistory = [];
+      tabData.navHistoryIndex = -1;
+    }
+    const lastEntry = tabData.navHistory[tabData.navHistoryIndex];
+    if (!lastEntry || lastEntry.url !== e.url) {
+      if (tabData.navHistoryIndex >= 0 && tabData.navHistoryIndex < tabData.navHistory.length - 1) {
+        tabData.navHistory = tabData.navHistory.slice(0, tabData.navHistoryIndex + 1);
+      }
+      tabData.navHistory.push({
+        url: e.url,
+        title: tabData.title || (e.url.includes('ntp.html') ? 'Nueva pestaña' : e.url),
+        favicon: tabData.favicon || ''
+      });
+      tabData.navHistoryIndex = tabData.navHistory.length - 1;
+    }
 
     recordHistory(e.url, tabData.title);
 
@@ -2355,6 +2710,17 @@ function switchTab(id) {
   updateNavControls();
   document.title = `${currentTab.title} - Brave Browser`;
   queryShieldsStatus(currentTab.domain);
+
+  // Sincronizar barra de carga y botón recargar/detener con el estado de la pestaña
+  if (currentTab.isLoading) {
+    showPageLoadingBar();
+    btnReload.innerHTML = STOP_SVG;
+    btnReload.title = 'Detener carga (Esc)';
+  } else {
+    hidePageLoadingBar();
+    btnReload.innerHTML = RELOAD_SVG;
+    btnReload.title = 'Recargar (Ctrl+R)';
+  }
 
   // Aplicar factor de zoom del dominio de la pestaña seleccionada
   const dom = currentTab.domain || extractDomain(currentTab.url);
@@ -4813,6 +5179,17 @@ function switchSplitFocus(targetId) {
   updateNavControls();
   document.title = `${currentTab.title} - Brave Browser`;
   queryShieldsStatus(currentTab.domain);
+
+  // Sincronizar barra de carga y botón recargar/detener con el estado de la pestaña
+  if (currentTab.isLoading) {
+    showPageLoadingBar();
+    btnReload.innerHTML = STOP_SVG;
+    btnReload.title = 'Detener carga (Esc)';
+  } else {
+    hidePageLoadingBar();
+    btnReload.innerHTML = RELOAD_SVG;
+    btnReload.title = 'Recargar (Ctrl+R)';
+  }
   const dom = currentTab.domain || extractDomain(currentTab.url);
   updateZoomUI(getStoredDomainZoom(dom));
 }
