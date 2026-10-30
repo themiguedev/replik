@@ -4388,3 +4388,520 @@ body.energy-saver-active * {
 
 
 
+
+/* ========================================================
+   REPLICACIÓN EXACTA DE BRAVE (VIDEO DE GRABACIÓN)
+   ======================================================== */
+
+/* 1. Botón Brave Rewards con Badge '2' */
+.rewards-btn {
+  position: relative;
+}
+.rewards-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 700;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #1e1f24;
+}
+
+/* 2. Barra de Marcadores Idéntica a Frame 001 */
+.bookmarks-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.bm-apps-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ea0aa;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.bm-apps-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.bm-hint-text {
+  font-size: 12px;
+  color: #9ea0aa;
+}
+.bm-import-link {
+  font-size: 12px;
+  color: #8ab4f8;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.bm-import-link:hover {
+  color: #aecbfa;
+}
+
+/* 3. Popup de Brave VPN (Frame 005) */
+.vpn-popup {
+  display: none;
+  position: absolute;
+  top: 48px;
+  right: 60px;
+  width: 360px;
+  background: #1a1b20;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  padding: 22px 24px;
+  z-index: 100000;
+  animation: ctxMenuFadeIn 0.14s ease-out;
+}
+.vpn-popup.open {
+  display: flex;
+  flex-direction: column;
+}
+.vpn-popup-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.vpn-popup-shield-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(251, 84, 43, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.vpn-popup-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+.vpn-popup-guardian {
+  font-size: 12px;
+  color: #9ea0aa;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.vpn-popup-features {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+.vpn-feat-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: #d1d3db;
+  line-height: 1.35;
+}
+.vpn-check {
+  color: var(--brave-orange);
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.btn-vpn-cta {
+  background: var(--brave-orange);
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 14px rgba(251, 84, 43, 0.35);
+}
+.btn-vpn-cta:hover {
+  background: var(--brave-orange-hover);
+  transform: translateY(-1px);
+}
+.vpn-account-link {
+  color: #9ea0aa;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 12px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+.vpn-account-link:hover {
+  text-decoration: underline;
+  color: #ffffff;
+}
+
+/* 4. Leo AI Sidebar (Frame 009) */
+.leo-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100%;
+  background: #18191d;
+  border-left: 1px solid #2e2f38;
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  transform: translateX(100%);
+  transition: transform 0.24s cubic-bezier(0.1, 0.9, 0.2, 1);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.45);
+}
+.leo-sidebar.open {
+  transform: translateX(0);
+}
+.leo-sidebar.expanded {
+  width: 520px;
+}
+.leo-sidebar-header {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #2e2f38;
+  background: #141518;
+}
+.leo-header-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.leo-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.leo-btn-icon {
+  background: none;
+  border: none;
+  color: #9ea0aa;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+.leo-btn-icon:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.leo-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.leo-headline {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+.leo-subheadline {
+  font-size: 13px;
+  color: #9ea0aa;
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.45;
+}
+
+.leo-hero-card {
+  margin: 22px 0 18px 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
+  padding: 28px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+}
+
+.leo-chat-mockup {
+  width: 100%;
+  max-width: 240px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.mockup-bar {
+  width: 40%;
+  height: 6px;
+  border-radius: 3px;
+  background: #a855f7;
+  margin-bottom: 8px;
+}
+.mockup-bubble {
+  background: #f3e8ff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: inline-block;
+}
+.mockup-dots {
+  color: #7c3aed;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 14px;
+}
+
+.leo-privacy-box {
+  margin-top: 8px;
+}
+.leo-privacy-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+.leo-privacy-desc {
+  font-size: 12.5px;
+  color: #9ea0aa;
+  line-height: 1.5;
+}
+
+/* Chat Stream */
+.leo-chat-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+.leo-msg {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 85%;
+  word-break: break-word;
+}
+.leo-msg.user {
+  align-self: flex-end;
+  background: var(--brave-orange);
+  color: #ffffff;
+}
+.leo-msg.assistant {
+  align-self: flex-start;
+  background: #23242a;
+  border: 1px solid #32333d;
+  color: #e2e4ea;
+}
+
+/* Input Container */
+.leo-input-container {
+  padding: 12px 16px 16px 16px;
+  background: #141518;
+  border-top: 1px solid #2e2f38;
+}
+.leo-textarea {
+  width: 100%;
+  background: #212228;
+  border: 1px solid #33343e;
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 10px 12px;
+  font-size: 13px;
+  outline: none;
+  resize: none;
+  transition: border-color 0.15s;
+}
+.leo-textarea:focus {
+  border-color: #7c3aed;
+}
+.leo-input-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.leo-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.leo-attach-btn {
+  background: none;
+  border: none;
+  color: #9ea0aa;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+}
+.leo-attach-btn:hover {
+  color: #ffffff;
+}
+.leo-model-select {
+  background: #212228;
+  border: 1px solid #33343e;
+  border-radius: 14px;
+  color: #c4c5cf;
+  font-size: 11px;
+  padding: 4px 10px;
+  outline: none;
+  cursor: pointer;
+}
+.leo-send-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #7c3aed;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.leo-send-btn:hover {
+  background: #6d28d9;
+  transform: scale(1.05);
+}
+
+
+/* ========================================================
+   ESTILOS DE MENÚ PRINCIPAL BRAVE (FRAME 012)
+   ======================================================== */
+.main-menu {
+  width: 320px;
+  background-color: #212227;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  padding: 8px 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #f1f2f6;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.menu-left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-item-icon {
+  color: #9ea0aa;
+  flex-shrink: 0;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+}
+
+/* Barra lateral segmented control */
+.menu-sidebar-row {
+  cursor: default;
+}
+.menu-sidebar-row:hover {
+  background-color: transparent;
+}
+.menu-segmented-pills {
+  display: flex;
+  background: #141518;
+  border-radius: 20px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 2px;
+}
+.menu-pill {
+  background: none;
+  border: 1px solid transparent;
+  color: #9ea0aa;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.menu-pill:hover {
+  color: #ffffff;
+}
+.menu-pill.active {
+  background: #2a2b32;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Zoom Controls in Main Menu */
+.menu-zoom-row {
+  cursor: default;
+}
+.menu-zoom-row:hover {
+  background-color: transparent;
+}
+.menu-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.zoom-btn {
+  background: #2a2b32;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.zoom-btn:hover {
+  background: #383944;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.zoom-level-text {
+  font-size: 11.5px;
+  color: #ffffff;
+  min-width: 44px;
+  text-align: center;
+}
+.zoom-fullscreen {
+  border-radius: 6px;
+  font-size: 11px;
+}

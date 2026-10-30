@@ -2,139 +2,200 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Nueva Pestaña</title>
+  <title>Nueva pestaña</title>
   <link rel="icon" type="image/png" href="logo.png">
   <style>
+    :root {
+      --brave-orange: #fb542b;
+      --brave-orange-hover: #ff6f4a;
+      --bg-dark: #121316;
+      --text-white: #ffffff;
+      --text-muted: #b4b4be;
+      --card-bg: rgba(22, 23, 28, 0.78);
+      --card-border: rgba(255, 255, 255, 0.12);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       user-select: none;
     }
 
     body {
+      width: 100vw;
       height: 100vh;
-      background-color: #101114;
+      overflow: hidden;
+      position: relative;
+      background-color: var(--bg-dark);
+      background-image: url('wallpapers/veli-batuhan.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      color: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 36px 50px;
-      overflow: hidden;
-      position: relative;
+      color: var(--text-white);
       transition: background-image 0.6s ease-in-out;
     }
 
-    /* Overlay oscuro sutil para máxima legibilidad */
+    /* Vignette and contrast gradient */
     body::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.65) 100%);
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.55) 100%),
+                  linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
       z-index: 1;
       pointer-events: none;
     }
 
-    .content-layer {
+    .ntp-content {
       position: relative;
       z-index: 2;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 100%;
+      padding: 40px 48px 30px 48px;
     }
 
-    /* Top Stats Widget */
-    .stats-container {
-      display: flex;
-      gap: 36px;
-    }
-
-    .stat-item {
+    /* Top & Center Area */
+    .top-center-zone {
       display: flex;
       flex-direction: column;
-      background: rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(12px);
-      padding: 8px 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      align-items: center;
+      width: 100%;
+      max-width: 860px;
+      margin: 40px auto 0 auto;
     }
 
-    .stat-val {
-      font-size: 28px;
-      font-weight: 800;
-      color: #fb542b;
-      letter-spacing: -0.5px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    /* Shortcuts Row */
+    .shortcuts-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
     }
 
-    .stat-lbl {
+    .shortcuts-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: nowrap;
+    }
+
+    .shortcut-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      width: 72px;
+      cursor: pointer;
+      transition: transform 0.18s ease;
+    }
+
+    .shortcut-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .shortcut-icon-wrapper {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .shortcut-card:hover .shortcut-icon-wrapper {
+      background: rgba(255, 255, 255, 0.28);
+      border-color: rgba(255, 255, 255, 0.45);
+    }
+
+    .shortcut-label {
+      margin-top: 8px;
       font-size: 11.5px;
-      color: #e2e2e8;
-      margin-top: 2px;
       font-weight: 500;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-    }
-
-    /* Center Section */
-    .center-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      color: #f1f2f6;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       width: 100%;
-      max-width: 680px;
-      margin: 0 auto;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
     }
 
-    .clock {
-      font-size: 86px;
-      font-weight: 700;
-      letter-spacing: -2px;
-      line-height: 1;
-      margin-bottom: 6px;
-      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
-    }
-
-    .date-str {
-      font-size: 16px;
-      color: #f0f0f5;
-      margin-bottom: 26px;
-      font-weight: 500;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
-    }
-
-    /* Search Box */
-    .search-bar {
-      width: 100%;
+    /* Carousel Pagination Dots */
+    .pagination-dots {
       display: flex;
       align-items: center;
-      background: rgba(20, 21, 26, 0.65);
-      backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 30px;
-      padding: 10px 22px;
-      margin-bottom: 34px;
-      transition: all 0.25s ease;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      cursor: pointer;
     }
 
-    .search-bar:focus-within {
-      background: rgba(20, 21, 26, 0.85);
-      border-color: #fb542b;
-      box-shadow: 0 10px 40px rgba(251, 84, 43, 0.35);
+    .dot {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+      transition: all 0.2s ease;
     }
 
-    .search-logo {
-      width: 22px;
-      height: 22px;
-      margin-right: 14px;
+    .dot.circle {
+      width: 6px;
+      height: 6px;
+    }
+
+    .dot.pill {
+      width: 16px;
+      height: 6px;
+      background: #ffffff;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+    }
+
+    /* Central Brave Leo / Search Bar */
+    .search-zone {
+      width: 100%;
+      max-width: 440px;
+      margin-top: 28px;
+    }
+
+    .search-capsule {
+      width: 100%;
+      background: rgba(18, 19, 24, 0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 28px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      transition: all 0.2s ease;
+    }
+
+    .search-capsule:focus-within {
+      background: rgba(24, 25, 32, 0.95);
+      border-color: var(--brave-orange);
+      box-shadow: 0 8px 32px rgba(251, 84, 43, 0.28);
+    }
+
+    .search-lion-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
 
     .search-input {
@@ -143,1119 +204,467 @@
       border: none;
       outline: none;
       color: #ffffff;
-      font-size: 15.5px;
+      font-size: 14px;
+      font-weight: 400;
     }
 
     .search-input::placeholder {
-      color: #a8a8b2;
+      color: #8c8d98;
     }
 
-    /* Top Sites */
-    .top-sites {
+    /* Bottom Area Layout (Stats on Left, VPN on Right, Credit) */
+    .bottom-zone {
       display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .site-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 82px;
-      cursor: pointer;
-      text-decoration: none;
-      color: #ffffff;
-      position: relative;
-      transition: transform 0.2s ease;
-    }
-
-    .site-card:hover {
-      transform: translateY(-4px);
-    }
-
-    .site-card-remove {
-      position: absolute;
-      top: -4px;
-      right: 10px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(20, 21, 26, 0.85);
-      color: #e8eaed;
-      font-size: 10px;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-      z-index: 5;
-    }
-
-    .site-card:hover .site-card-remove {
-      display: flex;
-    }
-
-    .site-card-remove:hover {
-      background: #fb542b;
-      border-color: #fb542b;
-      color: #fff;
-      transform: scale(1.15);
-    }
-
-    .site-icon {
-      width: 54px;
-      height: 54px;
-      background: rgba(20, 21, 26, 0.65);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 8px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      transition: all 0.2s;
-    }
-
-    .site-card:hover .site-icon {
-      background: rgba(30, 31, 38, 0.85);
-      border-color: #fb542b;
-      box-shadow: 0 6px 20px rgba(251, 84, 43, 0.3);
-    }
-
-    .site-name {
-      font-size: 12px;
-      color: #ffffff;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      align-items: flex-end;
+      justify-content: space-between;
       width: 100%;
-      font-weight: 500;
     }
 
-    /* Bottom Footer */
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12.5px;
-      color: #d1d1dc;
+    /* Left Stats Box */
+    .stats-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      min-width: 370px;
     }
 
-    .wallpaper-credit {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .wallpaper-credit:hover {
-      background: rgba(0, 0, 0, 0.6);
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .shield-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fb542b;
-      font-weight: 600;
-    }
-
-    .customize-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-      font-weight: 500;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .customize-btn:hover {
-      background: rgba(0, 0, 0, 0.65);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .ntp-modal {
-      display: none;
-      position: fixed;
-      bottom: 70px;
-      right: 50px;
-      width: 320px;
-      background: rgba(25, 26, 31, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 14px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
-      padding: 18px;
-      z-index: 100;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .ntp-modal.open {
-      display: flex;
-    }
-    .ntp-modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 10px;
-      font-weight: 700;
-      font-size: 13.5px;
-    }
-    .ntp-modal-close {
-      background: none;
-      border: none;
-      color: #9e9ea7;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .ntp-modal-close:hover {
-      color: #fff;
-    }
-    .ntp-switch-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-    }
-    .ntp-switch-row input[type="checkbox"] {
-      accent-color: #fb542b;
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-    .btn-add-shortcut {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 4px;
-      transition: background 0.15s;
-    }
-    .btn-add-shortcut:hover {
-      background: rgba(251, 84, 43, 0.25);
-      border-color: #fb542b;
-    }
-    .site-card-add {
-      border: 2px dashed rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 82px;
-      height: 76px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .site-card-add:hover {
-      border-color: #fb542b;
-      background: rgba(251, 84, 43, 0.1);
-      transform: translateY(-4px);
-    }
-    .site-card-add-icon {
-      font-size: 24px;
-      color: #a8a8b2;
-    }
-    .site-card-add-text {
+    .stats-header-title {
       font-size: 11px;
-      color: #a8a8b2;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #9ea0aa;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stats-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+    }
+
+    .stat-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-number {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-desc {
+      font-size: 11.5px;
+      color: #b2b4be;
       margin-top: 4px;
+      line-height: 1.3;
+      max-width: 110px;
     }
 
-    /* Responsividad Adaptativa de NTP */
-    @media (max-height: 750px) {
-      body {
-        padding: 20px 30px;
-      }
-      .clock {
-        font-size: 56px;
-      }
-      .date-str {
-        font-size: 14px;
-        margin-bottom: 16px;
-      }
-      .search-bar {
-        margin-bottom: 20px;
-        padding: 8px 18px;
-      }
-      .stat-val {
-        font-size: 22px;
-      }
+    /* Photographer Credit (under stats) */
+    .photo-credit {
+      margin-top: 14px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+      cursor: pointer;
+      display: inline-block;
+      transition: color 0.15s;
     }
 
-    @media (max-width: 800px) {
-      body {
-        padding: 16px 20px;
-        overflow-y: auto;
-      }
-      .stats-container {
-        gap: 16px;
-        flex-wrap: wrap;
-      }
-      .clock {
-        font-size: 48px;
-      }
-      .search-bar {
-        padding: 8px 16px;
-      }
-      .top-sites {
-        gap: 12px;
-      }
-      .site-card {
-        width: 68px;
-      }
-      .site-icon {
-        width: 44px;
-        height: 44px;
-      }
+    .photo-credit:hover {
+      color: #ffffff;
+      text-decoration: underline;
     }
 
-    /* Modal Añadir/Editar Acceso Directo NTP */
-    .shortcut-modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
-      display: none;
+    /* Right VPN Widget */
+    .vpn-widget-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      max-width: 480px;
+    }
+
+    .vpn-tabs-strip {
+      width: 42px;
+      background: rgba(15, 16, 20, 0.6);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 16px;
+    }
+
+    .vpn-tab-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
-    }
-    .shortcut-modal-overlay.open {
-      display: flex;
-    }
-    .shortcut-modal {
-      background: #24252a;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      width: 380px;
-      padding: 22px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      animation: fadeIn 0.15s ease-out;
-    }
-    .shortcut-modal-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .shortcut-modal-field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .shortcut-modal-field label {
-      font-size: 12px;
-      color: #9e9ea7;
-    }
-    .shortcut-modal-field input {
-      background: #18191c;
-      border: 1px solid #33343d;
-      border-radius: 6px;
-      padding: 9px 12px;
-      color: #fff;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .shortcut-modal-field input:focus {
-      border-color: #fb542b;
-    }
-    .shortcut-modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .shortcut-btn {
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
       cursor: pointer;
-      border: none;
+      color: #9ea0aa;
       transition: all 0.15s;
     }
-    .shortcut-btn.cancel {
-      background: #33343d;
-      color: #fff;
-    }
-    .shortcut-btn.cancel:hover {
-      background: #40424d;
-    }
-    .shortcut-btn.save {
-      background: #fb542b;
-      color: #fff;
-    }
-    .shortcut-btn.save:hover {
-      background: #e0441d;
-    }
 
-    /* Menú Contextual de Acceso Directo NTP (Réplica 100% idéntica a Brave) */
-    .site-context-menu {
-      position: fixed;
-      background: #202127;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.4);
-      padding: 6px 0;
-      z-index: 99999;
-      display: none;
-      min-width: 224px;
-      animation: fadeIn 0.1s ease-out;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      user-select: none;
-    }
-    .site-context-menu.open {
-      display: block;
-    }
-    .site-ctx-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 7px 14px;
-      font-size: 13px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: #f1f3f5;
-      cursor: pointer;
-      transition: background 0.1s ease;
-    }
-    .site-ctx-item:hover {
+    .vpn-tab-icon:hover {
+      color: #ffffff;
       background: rgba(255, 255, 255, 0.08);
     }
-    .site-ctx-icon {
+
+    .vpn-tab-icon.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .vpn-widget-body {
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .vpn-widget-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vpn-shield-icon {
+      color: #f43f5e;
       width: 16px;
       height: 16px;
+    }
+
+    .vpn-widget-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .vpn-guardian-badge {
+      font-size: 11px;
+      color: #9ea0aa;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .vpn-bullets-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 4px 0 6px 0;
+    }
+
+    .vpn-bullet-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #d1d3db;
+    }
+
+    .vpn-bullet-check {
+      color: #9ea0aa;
+      font-size: 11px;
+    }
+
+    .vpn-bottom-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-vpn-trial {
+      background: #e2e4ea;
+      color: #121316;
+      border: none;
+      border-radius: 20px;
+      padding: 7px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-vpn-trial:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .vpn-login-link {
+      font-size: 11px;
+      color: #9ea0aa;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .vpn-login-link:hover {
+      text-decoration: underline;
+      color: #ffffff;
+    }
+
+    /* Fixed NTP Settings Cogwheel on the Far Right Edge */
+    .ntp-settings-btn {
+      position: fixed;
+      right: 28px;
+      bottom: 28px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(20, 21, 26, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #b2b4be;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
     }
-    .site-ctx-separator {
-      height: 1px;
-      background: rgba(255, 255, 255, 0.09);
-      margin: 5px 0;
+
+    .ntp-settings-btn:hover {
+      color: #ffffff;
+      background: rgba(30, 31, 38, 0.85);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: rotate(45deg);
     }
   </style>
 </head>
 <body>
-  <div class="content-layer">
-    <!-- Widget Superior de Estadísticas -->
-    <div class="stats-container" id="stats-container">
-      <div class="stat-item">
-        <div class="stat-val" id="stat-ads">0</div>
-        <div class="stat-lbl">Rastreadores y anuncios bloqueados</div>
+  <div class="ntp-content">
+    <!-- Top & Center Zone -->
+    <div class="top-center-zone">
+      <!-- Shortcuts Grid -->
+      <div class="shortcuts-container">
+        <div class="shortcuts-row" id="shortcuts-row">
+          <!-- 1. Google -->
+          <a class="shortcut-card" href="https://www.google.com" target="_blank" title="Google">
+            <div class="shortcut-icon-wrapper">
+              <svg width="26" height="26" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">Google</span>
+          </a>
+
+          <!-- 2. Google Gemini -->
+          <a class="shortcut-card" href="https://gemini.google.com" target="_blank" title="Google Gemini">
+            <div class="shortcut-icon-wrapper" style="background: radial-gradient(circle at center, #6366f1 0%, #3b82f6 100%);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
+                <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">Google Ge...</span>
+          </a>
+
+          <!-- 3. (625) YouTube -->
+          <a class="shortcut-card" href="https://www.youtube.com" target="_blank" title="YouTube">
+            <div class="shortcut-icon-wrapper" style="background: #e11d48;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#ffffff">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">(625) YouT...</span>
+          </a>
+
+          <!-- 4. YouTube -->
+          <a class="shortcut-card" href="https://www.youtube.com" target="_blank" title="YouTube">
+            <div class="shortcut-icon-wrapper" style="background: #dc2626;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#ffffff">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">YouTube</span>
+          </a>
+
+          <!-- 5. Rollin' (Air ... -->
+          <a class="shortcut-card" href="https://open.spotify.com" target="_blank" title="Rollin' (Air ...">
+            <div class="shortcut-icon-wrapper" style="background: #1db954;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#ffffff">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.307a.75.75 0 0 1-1.031.25c-2.822-1.725-6.375-2.115-10.558-1.16a.75.75 0 0 1-.336-1.462c4.582-1.047 8.528-.601 11.675 1.341a.75.75 0 0 1 .25 1.031zm1.467-3.26a.937.937 0 0 1-1.29.312c-3.23-1.986-8.156-2.56-11.977-1.4a.938.938 0 1 1-.546-1.794c4.372-1.327 9.803-.687 13.5 1.592a.938.938 0 0 1 .313 1.29zm.126-3.39c-3.874-2.3-10.264-2.513-13.974-1.386a1.125 1.125 0 0 1-.652-2.155c4.262-1.295 11.317-1.047 15.78 1.602a1.125 1.125 0 1 1-1.154 1.939z"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">Rollin' (Air ...</span>
+          </a>
+
+          <!-- 6. Spotify -->
+          <a class="shortcut-card" href="https://open.spotify.com" target="_blank" title="Spotify">
+            <div class="shortcut-icon-wrapper" style="background: #1ed760;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#ffffff">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.307a.75.75 0 0 1-1.031.25c-2.822-1.725-6.375-2.115-10.558-1.16a.75.75 0 0 1-.336-1.462c4.582-1.047 8.528-.601 11.675 1.341a.75.75 0 0 1 .25 1.031zm1.467-3.26a.937.937 0 0 1-1.29.312c-3.23-1.986-8.156-2.56-11.977-1.4a.938.938 0 1 1-.546-1.794c4.372-1.327 9.803-.687 13.5 1.592a.938.938 0 0 1 .313 1.29zm.126-3.39c-3.874-2.3-10.264-2.513-13.974-1.386a1.125 1.125 0 0 1-.652-2.155c4.262-1.295 11.317-1.047 15.78 1.602a1.125 1.125 0 1 1-1.154 1.939z"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">Spotify</span>
+          </a>
+
+          <!-- 7. URBE -->
+          <a class="shortcut-card" href="https://urbe.edu" target="_blank" title="URBE">
+            <div class="shortcut-icon-wrapper" style="background: #94a3b8;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="#ffffff" stroke-width="2"/>
+                <line x1="2" y1="12" x2="22" y2="12" stroke="#ffffff" stroke-width="2"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="#ffffff" stroke-width="2"/>
+              </svg>
+            </div>
+            <span class="shortcut-label">URBE</span>
+          </a>
+        </div>
+
+        <!-- Pagination Dots -->
+        <div class="pagination-dots" id="pagination-dots" title="Páginas de accesos directos">
+          <div class="dot pill" id="dot-1"></div>
+          <div class="dot circle" id="dot-2"></div>
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-val" id="stat-band">0 MB</div>
-        <div class="stat-lbl">Banda ancha ahorrada</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-val" id="stat-time">0 s</div>
-        <div class="stat-lbl">Tiempo ahorrado</div>
+
+      <!-- Center Search Capsule: Pregunta, encuentra... -->
+      <div class="search-zone">
+        <form class="search-capsule" id="search-form" onsubmit="handleSearch(event)">
+          <img class="search-lion-icon" src="logo.png" alt="Brave">
+          <input type="text" class="search-input" id="search-input" placeholder="Pregunta, encuentra..." autocomplete="off">
+        </form>
       </div>
     </div>
 
-    <!-- Sección Central: Reloj y Buscador -->
-    <div class="center-container">
-      <div id="clock-container" style="display: flex; flex-direction: column; align-items: center;">
-        <div class="clock" id="clock">12:00</div>
-        <div class="date-str" id="date-str">Cargando fecha...</div>
+    <!-- Bottom Zone: Stats, Photo Credit, VPN Widget -->
+    <div class="bottom-zone">
+      <!-- Left Stats Section -->
+      <div>
+        <div class="stats-card">
+          <div class="stats-header-title">ESTADÍSTICAS</div>
+          <div class="stats-row">
+            <div class="stat-col">
+              <div class="stat-number" id="stat-ads">15.490</div>
+              <div class="stat-desc">Rastreadores y anuncios bloqueados</div>
+            </div>
+            <div class="stat-col">
+              <div class="stat-number" id="stat-bandwidth">149,3 MB</div>
+              <div class="stat-desc">Ancho de banda ahorrado</div>
+            </div>
+            <div class="stat-col">
+              <div class="stat-number" id="stat-time">13 Minutos</div>
+              <div class="stat-desc">Tiempo ahorrado estimado</div>
+            </div>
+          </div>
+        </div>
+        <div class="photo-credit" id="photo-credit" onclick="toggleWallpaper()" title="Clic para alternar fondo de pantalla">
+          Fotografía de Veli Batuhan Aytaç
+        </div>
       </div>
 
-      <form class="search-bar" id="search-form">
-        <img class="search-logo" src="logo.png" alt="Brave">
-        <input type="text" class="search-input" id="search-input" placeholder="Buscar en la web con Brave..." autofocus>
-      </form>
+      <!-- Right VPN de Brave Widget -->
+      <div class="vpn-widget-card" id="vpn-widget-card">
+        <div class="vpn-tabs-strip">
+          <div class="vpn-tab-icon active" title="VPN de Brave">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="vpn-tab-icon" title="Brave Talk (Videollamadas privadas)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"></polygon>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+          </div>
+        </div>
 
-      <!-- Sitios Frecuentes / Top Sites -->
-      <div class="top-sites" id="top-sites-container">
-        <!-- Renderizado dinámico -->
-      </div>
-    </div>
+        <div class="vpn-widget-body">
+          <div class="vpn-widget-header">
+            <svg class="vpn-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span class="vpn-widget-title">VPN de Brave</span>
+            <span class="vpn-guardian-badge">
+              Proporcionado por
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+              Guardian
+            </span>
+          </div>
 
-    <!-- Pie de Página: Crédito de Foto y Personalización -->
-    <div class="footer">
-      <div class="wallpaper-credit" id="wallpaper-btn" title="Clic para cambiar fondo">
-        <span>📷</span>
-        <span id="photo-credit">Foto por Daniel Schwarz en Unsplash</span>
-      </div>
+          <div class="vpn-bullets-list">
+            <div class="vpn-bullet-item">
+              <span class="vpn-bullet-check">🛡️</span>
+              <span>Más privacidad y seguridad en línea</span>
+            </div>
+            <div class="vpn-bullet-item">
+              <span class="vpn-bullet-check">🛡️</span>
+              <span>Oculte su IP y cambie su ubicación</span>
+            </div>
+            <div class="vpn-bullet-item">
+              <span class="vpn-bullet-check">🛡️</span>
+              <span>Protege todas las aplicaciones de tu dispositivo</span>
+            </div>
+          </div>
 
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button class="customize-btn" id="btn-customize-ntp" title="Personalizar panel de Nueva Pestaña">
-          <span>⚙️</span>
-          <span>Personalizar</span>
-        </button>
-
-        <div class="shield-badge">
-          <span>🛡️</span>
-          <span>Brave Shields v1.0 Activo</span>
+          <div class="vpn-bottom-actions">
+            <button class="btn-vpn-trial" id="btn-vpn-trial" onclick="openVpnTrial()">Inicia la prueba gratuita</button>
+            <a class="vpn-login-link" onclick="openVpnTrial()">¿Ya lo has contratado?</a>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal / Flyout de Personalización de la Nueva Pestaña -->
-  <div class="ntp-modal" id="ntp-modal">
-    <div class="ntp-modal-header">
-      <span>Personalizar panel</span>
-      <button class="ntp-modal-close" id="btn-close-ntp-modal">✕</button>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      <label class="ntp-switch-row">
-        <span>Estadísticas de Shields</span>
-        <input type="checkbox" id="chk-ntp-stats" checked>
-      </label>
-      <label class="ntp-switch-row">
-        <span>Reloj y fecha</span>
-        <input type="checkbox" id="chk-ntp-clock" checked>
-      </label>
-      <label class="ntp-switch-row">
-        <span>Sitios frecuentes</span>
-        <input type="checkbox" id="chk-ntp-sites" checked>
-      </label>
-    </div>
-    <button class="btn-add-shortcut" id="btn-modal-add-shortcut">
-      <span>➕</span>
-      <span>Añadir acceso directo</span>
-    </button>
-  </div>
-
-  <!-- Modal Añadir/Editar Acceso Directo NTP -->
-  <div class="shortcut-modal-overlay" id="shortcut-modal-overlay">
-    <div class="shortcut-modal">
-      <div class="shortcut-modal-title" id="shortcut-modal-title">Añadir acceso directo</div>
-      <div class="shortcut-modal-field">
-        <label>Nombre:</label>
-        <input type="text" id="shortcut-name-input" placeholder="ej. Google" autocomplete="off">
-      </div>
-      <div class="shortcut-modal-field">
-        <label>URL:</label>
-        <input type="text" id="shortcut-url-input" placeholder="https://example.com" autocomplete="off">
-      </div>
-      <div class="shortcut-modal-actions">
-        <button class="shortcut-btn cancel" id="btn-cancel-shortcut">Cancelar</button>
-        <button class="shortcut-btn save" id="btn-save-shortcut">Guardar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Menú Contextual de Acceso Directo NTP (Réplica 100% idéntica a Brave) -->
-  <div class="site-context-menu" id="site-context-menu">
-    <div class="site-ctx-item" id="site-ctx-open-newtab">
-      <span class="site-ctx-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <rect width="24" height="24" rx="5" fill="#3b82f6"/>
-          <path d="M7 17L17 7M17 7H9M17 7V15" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span>Abrir en nueva pestaña</span>
-    </div>
-    <div class="site-ctx-item" id="site-ctx-open-newwin">
-      <span class="site-ctx-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="#60a5fa">
-          <rect x="2" y="2" width="9" height="9" rx="2"/>
-          <rect x="13" y="2" width="9" height="9" rx="2"/>
-          <rect x="2" y="13" width="9" height="9" rx="2"/>
-          <rect x="13" y="13" width="9" height="9" rx="2"/>
-        </svg>
-      </span>
-      <span>Abrir en nueva ventana</span>
-    </div>
-    <div class="site-ctx-item" id="site-ctx-open-private">
-      <span class="site-ctx-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="7" cy="13" r="3.5" fill="#7e22ce" stroke="#a855f7"/>
-          <circle cx="17" cy="13" r="3.5" fill="#7e22ce" stroke="#a855f7"/>
-          <path d="M10.5 13h3"/>
-          <path d="M3.5 11.5L2 10M20.5 11.5L22 10"/>
-        </svg>
-      </span>
-      <span>Abrir en ventana privada</span>
-    </div>
-    <div class="site-ctx-separator"></div>
-    <div class="site-ctx-item" id="site-ctx-edit">
-      <span class="site-ctx-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="#fb923c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 6l4 4" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </span>
-      <span>Editar...</span>
-    </div>
-    <div class="site-ctx-item" id="site-ctx-delete">
-      <span class="site-ctx-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          <line x1="10" y1="11" x2="10" y2="17"/>
-          <line x1="14" y1="11" x2="14" y2="17"/>
-        </svg>
-      </span>
-      <span>Eliminar</span>
-    </div>
-    <div class="site-ctx-separator"></div>
-    <div class="site-ctx-item" id="site-ctx-add-bookmark">
-      <span class="site-ctx-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-      </span>
-      <span>Añadir página a marcadores...</span>
-    </div>
-    <div class="site-ctx-item" id="site-ctx-open-bookmarks">
-      <span class="site-ctx-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="#f87171" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-        </svg>
-      </span>
-      <span>Administrador de marcadores</span>
-    </div>
-  </div>
+  <!-- Cogwheel / Customize button on far right -->
+  <button class="ntp-settings-btn" id="ntp-settings-btn" onclick="toggleWallpaper()" title="Personalizar fondo de pantalla">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
 
   <script>
-    // Catálogo oficial de fondos fotográficos
-    const wallpapers = [
-      { file: 'wallpapers/daniel-schwarz.jpg', author: 'Daniel Schwarz', location: 'Montañas y Lago' },
-      { file: 'wallpapers/pascal-debrunner.jpg', author: 'Pascal Debrunner', location: 'Picos Rocosos al Amanecer' },
-      { file: 'wallpapers/david-becker.jpg', author: 'David Becker', location: 'Atardecer en la Costa' },
-      { file: 'wallpapers/hunter-newton.jpg', author: 'Hunter Newton', location: 'Cascada en Bosque Profundo' },
-      { file: 'wallpapers/andrew-svk.jpg', author: 'Andrew Svk', location: 'Cadena Montañosa con Cielo Rosa' },
-      { file: 'wallpapers/rafael-peier2.jpg', author: 'Rafael Peier', location: 'Dunas Doradas al Atardecer' },
-    ];
-
-    let currentWpIndex = Math.floor(Math.random() * wallpapers.length);
-
-    function applyWallpaper(idx) {
-      const wp = wallpapers[idx];
-      document.body.style.backgroundImage = `url('${wp.file}')`;
-      document.getElementById('photo-credit').textContent = `Foto por ${wp.author} en Unsplash (${wp.location})`;
-    }
-
-    applyWallpaper(currentWpIndex);
-
-    document.getElementById('wallpaper-btn').addEventListener('click', () => {
-      currentWpIndex = (currentWpIndex + 1) % wallpapers.length;
-      applyWallpaper(currentWpIndex);
-    });
-
-    function updateClock() {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('clock').textContent = `${hours}:${minutes}`;
-
-      const options = { weekday: 'long', day: 'numeric', month: 'long' };
-      const dateStr = now.toLocaleDateString('es-ES', options);
-      document.getElementById('date-str').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-    }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    async function loadStats() {
-      if (window.braveAPI && window.braveAPI.getShieldsStats) {
-        try {
-          const stats = await window.braveAPI.getShieldsStats();
-          if (stats && typeof stats.totalBlocked === 'number') {
-            document.getElementById('stat-ads').textContent = stats.totalBlocked.toLocaleString();
-            document.getElementById('stat-band').textContent = `${stats.globalBandwidthMB} MB`;
-            document.getElementById('stat-time').textContent = stats.globalTimeSaved;
-            return;
-          }
-        } catch {}
-      }
-
-      const adsBlocked = parseInt(localStorage.getItem('brave_total_ads') || '0', 10);
-      document.getElementById('stat-ads').textContent = adsBlocked.toLocaleString();
-
-      const mbSaved = localStorage.getItem('brave_mb_saved') || ((adsBlocked * 34.2) / 1024).toFixed(1);
-      document.getElementById('stat-band').textContent = `${mbSaved} MB`;
-
-      const secondsSaved = parseInt(localStorage.getItem('brave_time_saved') || String(Math.round((adsBlocked * 65) / 1000)), 10);
-      if (secondsSaved >= 60) {
-        document.getElementById('stat-time').textContent = `${(secondsSaved / 60).toFixed(1)} m`;
-      } else {
-        document.getElementById('stat-time').textContent = `${secondsSaved} s`;
-      }
-    }
-
-    function updateSearchPlaceholder() {
-      const searchInput = document.getElementById('search-input');
-      if (!searchInput) return;
-      const engine = localStorage.getItem('brave_setting_engine') || 'brave';
-      const names = {
-        google: 'Google',
-        duckduckgo: 'DuckDuckGo',
-        bing: 'Bing',
-        qwant: 'Qwant',
-        brave: 'Brave',
-      };
-      const name = names[engine] || 'Brave';
-      searchInput.placeholder = `Buscar en la web con ${name}...`;
-    }
-
-    window.addEventListener('brave-bridge-ready', () => {
-      loadStats();
-      updateSearchPlaceholder();
-    });
-    loadStats();
-    updateSearchPlaceholder();
-    window.addEventListener('storage', () => {
-      loadStats();
-      updateSearchPlaceholder();
-    });
-
-    function getSearchUrl(query) {
-      let engine = localStorage.getItem('brave_setting_engine') || 'brave';
-      const q = encodeURIComponent(query);
-      switch (engine) {
-        case 'google':
-          return `https://www.google.com/search?q=${q}`;
-        case 'duckduckgo':
-          return `https://duckduckgo.com/?q=${q}`;
-        case 'bing':
-          return `https://www.bing.com/search?q=${q}`;
-        case 'qwant':
-          return `https://www.qwant.com/?q=${q}`;
-        case 'brave':
-        default:
-          return `https://search.brave.com/search?q=${q}`;
-      }
-    }
-
-    document.getElementById('search-form').addEventListener('submit', (e) => {
+    // Search handler
+    function handleSearch(e) {
       e.preventDefault();
-      const query = document.getElementById('search-input').value.trim();
-      if (!query) return;
+      const val = document.getElementById('search-input').value.trim();
+      if (!val) return;
+      window.location.href = 'https://search.brave.com/search?q=' + encodeURIComponent(val);
+    }
 
-      if (/^https?:\/\//i.test(query) || (query.includes('.') && !query.includes(' '))) {
-        window.location.href = query.startsWith('http') ? query : 'https://' + query;
-      } else {
-        window.location.href = getSearchUrl(query);
-      }
-    });
-
-    // Gestión y renderizado de Accesos Directos (Top Sites)
-    const defaultSites = [
-      { name: 'Brave Search', url: 'https://search.brave.com', icon: '🦁' },
-      { name: 'YouTube', url: 'https://www.youtube.com', icon: '▶️' },
-      { name: 'GitHub', url: 'https://github.com', icon: '🐙' },
-      { name: 'Wikipedia', url: 'https://www.wikipedia.org', icon: '📖' },
-      { name: 'Reddit', url: 'https://www.reddit.com', icon: '🤖' },
-      { name: 'X / Twitter', url: 'https://twitter.com', icon: '🐦' }
+    // Toggle wallpapers between Veli Batuhan Aytaç and John Murphey
+    let currentWallpaper = 0;
+    const wallpapers = [
+      { file: 'wallpapers/veli-batuhan.jpg', credit: 'Fotografía de Veli Batuhan Aytaç' },
+      { file: 'wallpapers/john-murphey.jpg', credit: 'Fotografía de John Murphey' }
     ];
 
-    function getTopSites() {
-      try {
-        const custom = JSON.parse(localStorage.getItem('ntp_custom_sites'));
-        if (Array.isArray(custom)) return custom;
-      } catch {}
-      return defaultSites;
+    function toggleWallpaper() {
+      currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
+      document.body.style.backgroundImage = `url('${wallpapers[currentWallpaper].file}')`;
+      document.getElementById('photo-credit').textContent = wallpapers[currentWallpaper].credit;
     }
 
-    let editingShortcutIndex = -1;
-    let activeSiteCtxIndex = -1;
-
-    const shortcutOverlay = document.getElementById('shortcut-modal-overlay');
-    const shortcutTitle = document.getElementById('shortcut-modal-title');
-    const shortcutNameInput = document.getElementById('shortcut-name-input');
-    const shortcutUrlInput = document.getElementById('shortcut-url-input');
-    const btnCancelShortcut = document.getElementById('btn-cancel-shortcut');
-    const btnSaveShortcut = document.getElementById('btn-save-shortcut');
-    const siteCtxMenu = document.getElementById('site-context-menu');
-
-    function closeSiteContextMenu() {
-      if (siteCtxMenu) {
-        siteCtxMenu.classList.remove('open');
-        siteCtxMenu.style.display = 'none';
+    function openVpnTrial() {
+      if (window.parent && window.parent.postMessage) {
+        window.parent.postMessage({ action: 'openVpnPopup' }, '*');
       }
     }
-
-    document.addEventListener('click', closeSiteContextMenu);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeSiteContextMenu();
-        closeShortcutModal();
-      }
-    });
-
-    function openSiteContextMenu(idx, x, y) {
-      if (!siteCtxMenu) return;
-      activeSiteCtxIndex = idx;
-      siteCtxMenu.style.display = 'block';
-      siteCtxMenu.classList.add('open');
-      const rect = siteCtxMenu.getBoundingClientRect();
-      let left = x;
-      let top = y;
-      if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 8;
-      if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 8;
-      siteCtxMenu.style.left = `${Math.max(8, left)}px`;
-      siteCtxMenu.style.top = `${Math.max(8, top)}px`;
-    }
-
-    function openShortcutModal(idx = -1) {
-      editingShortcutIndex = idx;
-      const list = getTopSites();
-      if (idx >= 0 && list[idx]) {
-        shortcutTitle.textContent = 'Editar acceso directo';
-        shortcutNameInput.value = list[idx].name || '';
-        shortcutUrlInput.value = list[idx].url || '';
-      } else {
-        shortcutTitle.textContent = 'Añadir acceso directo';
-        shortcutNameInput.value = '';
-        shortcutUrlInput.value = 'https://';
-      }
-      shortcutOverlay.classList.add('open');
-      shortcutOverlay.style.display = 'flex';
-      setTimeout(() => {
-        if (shortcutNameInput.value) shortcutUrlInput.focus();
-        else shortcutNameInput.focus();
-      }, 50);
-    }
-
-    function closeShortcutModal() {
-      if (shortcutOverlay) {
-        shortcutOverlay.classList.remove('open');
-        shortcutOverlay.style.display = 'none';
-      }
-      editingShortcutIndex = -1;
-    }
-
-    if (shortcutOverlay) {
-      shortcutOverlay.addEventListener('click', (e) => {
-        if (e.target === shortcutOverlay) closeShortcutModal();
-      });
-    }
-
-    if (shortcutNameInput) {
-      shortcutNameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') shortcutUrlInput.focus();
-      });
-    }
-
-    if (shortcutUrlInput) {
-      shortcutUrlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && btnSaveShortcut) btnSaveShortcut.click();
-      });
-    }
-
-    if (btnCancelShortcut) {
-      btnCancelShortcut.addEventListener('click', closeShortcutModal);
-    }
-
-    if (btnSaveShortcut) {
-      btnSaveShortcut.addEventListener('click', () => {
-        const name = shortcutNameInput.value.trim() || 'Acceso';
-        let url = shortcutUrlInput.value.trim();
-        if (!url) return;
-        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-
-        const list = getTopSites();
-        if (editingShortcutIndex >= 0 && list[editingShortcutIndex]) {
-          list[editingShortcutIndex].name = name;
-          list[editingShortcutIndex].url = url;
-        } else {
-          list.push({ name, url, icon: '🌐' });
-        }
-        localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
-        renderTopSites();
-        closeShortcutModal();
-      });
-    }
-
-    // Opciones del Menú Contextual (Réplica 100% idéntica a Brave)
-    const ctxSiteOpenNewTab = document.getElementById('site-ctx-open-newtab');
-    if (ctxSiteOpenNewTab) {
-      ctxSiteOpenNewTab.addEventListener('click', () => {
-        const list = getTopSites();
-        if (activeSiteCtxIndex >= 0 && list[activeSiteCtxIndex]) {
-          const u = list[activeSiteCtxIndex].url;
-          if (window.braveAPI && window.braveAPI.createTab) {
-            window.braveAPI.createTab(u);
-          } else {
-            window.open(u, '_blank');
-          }
-        }
-        closeSiteContextMenu();
-      });
-    }
-
-    const ctxSiteOpenNewWin = document.getElementById('site-ctx-open-newwin');
-    if (ctxSiteOpenNewWin) {
-      ctxSiteOpenNewWin.addEventListener('click', () => {
-        const list = getTopSites();
-        if (activeSiteCtxIndex >= 0 && list[activeSiteCtxIndex]) {
-          const u = list[activeSiteCtxIndex].url;
-          if (window.braveAPI && window.braveAPI.openWindow) {
-            window.braveAPI.openWindow(u);
-          } else {
-            window.open(u, '_blank');
-          }
-        }
-        closeSiteContextMenu();
-      });
-    }
-
-    const ctxSiteOpenPrivate = document.getElementById('site-ctx-open-private');
-    if (ctxSiteOpenPrivate) {
-      ctxSiteOpenPrivate.addEventListener('click', () => {
-        const list = getTopSites();
-        if (activeSiteCtxIndex >= 0 && list[activeSiteCtxIndex]) {
-          const u = list[activeSiteCtxIndex].url;
-          if (window.braveAPI && window.braveAPI.openPrivateWindow) {
-            window.braveAPI.openPrivateWindow(u);
-          } else {
-            window.open(u, '_blank');
-          }
-        }
-        closeSiteContextMenu();
-      });
-    }
-
-    const ctxSiteEdit = document.getElementById('site-ctx-edit');
-    if (ctxSiteEdit) {
-      ctxSiteEdit.addEventListener('click', () => {
-        const idx = activeSiteCtxIndex;
-        closeSiteContextMenu();
-        if (idx >= 0) openShortcutModal(idx);
-      });
-    }
-
-    const ctxSiteDelete = document.getElementById('site-ctx-delete');
-    if (ctxSiteDelete) {
-      ctxSiteDelete.addEventListener('click', () => {
-        const list = getTopSites();
-        if (activeSiteCtxIndex >= 0 && list[activeSiteCtxIndex]) {
-          list.splice(activeSiteCtxIndex, 1);
-          localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
-          renderTopSites();
-        }
-        closeSiteContextMenu();
-      });
-    }
-
-    const ctxSiteAddBookmark = document.getElementById('site-ctx-add-bookmark');
-    if (ctxSiteAddBookmark) {
-      ctxSiteAddBookmark.addEventListener('click', () => {
-        const list = getTopSites();
-        if (activeSiteCtxIndex >= 0 && list[activeSiteCtxIndex]) {
-          const item = list[activeSiteCtxIndex];
-          if (window.braveAPI && window.braveAPI.getBookmarks && window.braveAPI.saveBookmarks) {
-            window.braveAPI.getBookmarks().then((bms) => {
-              const arr = Array.isArray(bms) ? bms : [];
-              if (!arr.some((b) => b.url === item.url)) {
-                arr.push({ title: item.name, url: item.url, folder: 'Favoritos', dateAdded: Date.now() });
-                window.braveAPI.saveBookmarks(arr);
-              }
-            }).catch(() => {});
-          } else {
-            try {
-              const bm = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
-              if (!bm.some((b) => b.url === item.url)) {
-                bm.push({ title: item.name, url: item.url, folder: 'Favoritos', dateAdded: Date.now() });
-                localStorage.setItem('brave_bookmarks', JSON.stringify(bm));
-              }
-            } catch {}
-          }
-        }
-        closeSiteContextMenu();
-      });
-    }
-
-    const ctxSiteOpenBookmarks = document.getElementById('site-ctx-open-bookmarks');
-    if (ctxSiteOpenBookmarks) {
-      ctxSiteOpenBookmarks.addEventListener('click', () => {
-        if (window.braveAPI && window.braveAPI.createTab) {
-          window.braveAPI.createTab('brave://bookmarks');
-        } else {
-          window.open('bookmarks.html', '_blank');
-        }
-        closeSiteContextMenu();
-      });
-    }
-
-    function renderTopSites() {
-      const container = document.getElementById('top-sites-container');
-      if (!container) return;
-      container.innerHTML = '';
-      const list = getTopSites();
-
-      list.forEach((s, idx) => {
-        const a = document.createElement('a');
-        a.className = 'site-card';
-        a.href = s.url;
-        a.innerHTML = `
-          <button class="site-card-remove" title="Eliminar acceso directo">✕</button>
-          <div class="site-icon">${s.icon || '🌐'}</div>
-          <div class="site-name">${s.name}</div>
-        `;
-        const removeBtn = a.querySelector('.site-card-remove');
-        if (removeBtn) {
-          removeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            list.splice(idx, 1);
-            localStorage.setItem('ntp_custom_sites', JSON.stringify(list));
-            renderTopSites();
-          });
-        }
-        a.addEventListener('click', (e) => {
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            if (window.braveAPI && window.braveAPI.createTab) {
-              window.braveAPI.createTab(s.url);
-            } else {
-              window.open(s.url, '_blank');
-            }
-          }
-        });
-        a.addEventListener('auxclick', (e) => {
-          if (e.button === 1) {
-            e.preventDefault();
-            if (window.braveAPI && window.braveAPI.createTab) {
-              window.braveAPI.createTab(s.url);
-            } else {
-              window.open(s.url, '_blank');
-            }
-          }
-        });
-        a.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          openSiteContextMenu(idx, e.clientX, e.clientY);
-        });
-        container.appendChild(a);
-      });
-
-      // Tarjeta "+" para añadir acceso directo
-      const addCard = document.createElement('div');
-      addCard.className = 'site-card-add';
-      addCard.innerHTML = `
-        <div class="site-card-add-icon">+</div>
-        <div class="site-card-add-text">Añadir</div>
-      `;
-      addCard.addEventListener('click', () => openShortcutModal(-1));
-      container.appendChild(addCard);
-    }
-
-    renderTopSites();
-
-    // Personalización del panel NTP (Toggles)
-    const ntpModal = document.getElementById('ntp-modal');
-    const btnCustomize = document.getElementById('btn-customize-ntp');
-    const btnCloseNtpModal = document.getElementById('btn-close-ntp-modal');
-    const btnModalAddShortcut = document.getElementById('btn-modal-add-shortcut');
-
-    const chkNtpStats = document.getElementById('chk-ntp-stats');
-    const chkNtpClock = document.getElementById('chk-ntp-clock');
-    const chkNtpSites = document.getElementById('chk-ntp-sites');
-
-    const statsContainer = document.getElementById('stats-container');
-    const clockContainer = document.getElementById('clock-container');
-    const topSitesContainer = document.getElementById('top-sites-container');
-
-    function applyNtpVisibility() {
-      const showStats = localStorage.getItem('ntp_show_stats') !== 'false';
-      const showClock = localStorage.getItem('ntp_show_clock') !== 'false';
-      const showSites = localStorage.getItem('ntp_show_sites') !== 'false';
-
-      if (chkNtpStats) chkNtpStats.checked = showStats;
-      if (chkNtpClock) chkNtpClock.checked = showClock;
-      if (chkNtpSites) chkNtpSites.checked = showSites;
-
-      if (statsContainer) statsContainer.style.display = showStats ? 'flex' : 'none';
-      if (clockContainer) clockContainer.style.display = showClock ? 'flex' : 'none';
-      if (topSitesContainer) topSitesContainer.style.display = showSites ? 'flex' : 'none';
-    }
-
-    applyNtpVisibility();
-
-    if (btnCustomize) {
-      btnCustomize.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (ntpModal) ntpModal.classList.toggle('open');
-      });
-    }
-
-    if (btnCloseNtpModal) {
-      btnCloseNtpModal.addEventListener('click', () => {
-        if (ntpModal) ntpModal.classList.remove('open');
-      });
-    }
-
-    if (btnModalAddShortcut) {
-      btnModalAddShortcut.addEventListener('click', () => {
-        if (ntpModal) ntpModal.classList.remove('open');
-        promptAddShortcut();
-      });
-    }
-
-    if (chkNtpStats) {
-      chkNtpStats.addEventListener('change', () => {
-        localStorage.setItem('ntp_show_stats', String(chkNtpStats.checked));
-        applyNtpVisibility();
-      });
-    }
-
-    if (chkNtpClock) {
-      chkNtpClock.addEventListener('change', () => {
-        localStorage.setItem('ntp_show_clock', String(chkNtpClock.checked));
-        applyNtpVisibility();
-      });
-    }
-
-    if (chkNtpSites) {
-      chkNtpSites.addEventListener('change', () => {
-        localStorage.setItem('ntp_show_sites', String(chkNtpSites.checked));
-        applyNtpVisibility();
-      });
-    }
-
-    document.addEventListener('click', (e) => {
-      if (ntpModal && ntpModal.classList.contains('open')) {
-        if (!ntpModal.contains(e.target) && e.target !== btnCustomize && !btnCustomize.contains(e.target)) {
-          ntpModal.classList.remove('open');
-        }
-      }
-    });
   </script>
 </body>
 </html>

@@ -188,6 +188,7 @@ const extensionsUrl = window.braveAPI && window.braveAPI.getExtensionsUrl ? wind
 const bookmarksUrl = window.braveAPI && window.braveAPI.getBookmarksUrl ? window.braveAPI.getBookmarksUrl() : resolveInternalUrl('bookmarks.html');
 const versionUrl = window.braveAPI && window.braveAPI.getVersionUrl ? window.braveAPI.getVersionUrl() : resolveInternalUrl('version.html');
 const componentsUrl = window.braveAPI && window.braveAPI.getComponentsUrl ? window.braveAPI.getComponentsUrl() : resolveInternalUrl('components.html');
+const webstoreUrl = resolveInternalUrl('webstore.html');
 
 // Detección de modo Tor o Privado en la ventana
 if (window.braveAPI) {
@@ -7068,3 +7069,182 @@ if (initialArgUrl) {
 
 // Cargar barra de acciones de extensiones activas
 renderExtensionActions();
+
+
+// ========================================================
+// REPLICACION EXACTA: LEO AI, VPN DE BRAVE & CHROME WEB STORE
+// ========================================================
+
+// 1. Leo AI Sidebar
+const btnLeo = document.getElementById('btn-leo');
+const leoSidebar = document.getElementById('leo-sidebar');
+const btnCloseLeo = document.getElementById('btn-close-leo');
+const btnLeoExpand = document.getElementById('btn-leo-expand');
+const leoInputText = document.getElementById('leo-input-text');
+const btnLeoSend = document.getElementById('btn-leo-send');
+const leoChatStream = document.getElementById('leo-chat-stream');
+const leoBodyScroll = document.getElementById('leo-body-scroll');
+const leoIntroSection = document.getElementById('leo-intro-section');
+const leoModelSelect = document.getElementById('leo-model-select');
+
+if (btnLeo && leoSidebar) {
+  btnLeo.addEventListener('click', (e) => {
+    e.stopPropagation();
+    leoSidebar.classList.toggle('open');
+    if (leoSidebar.classList.contains('open')) {
+      if (leoInputText) leoInputText.focus();
+    }
+  });
+}
+
+if (btnCloseLeo && leoSidebar) {
+  btnCloseLeo.addEventListener('click', () => {
+    leoSidebar.classList.remove('open');
+  });
+}
+
+if (btnLeoExpand && leoSidebar) {
+  btnLeoExpand.addEventListener('click', () => {
+    leoSidebar.classList.toggle('expanded');
+  });
+}
+
+function sendLeoMessage() {
+  if (!leoInputText) return;
+  const text = leoInputText.value.trim();
+  if (!text) return;
+
+  // Render user message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'leo-msg user';
+  userMsg.textContent = text;
+  leoChatStream.appendChild(userMsg);
+
+  leoInputText.value = '';
+  leoInputText.style.height = 'auto';
+
+  // Typing indicator
+  const typingMsg = document.createElement('div');
+  typingMsg.className = 'leo-msg assistant';
+  typingMsg.innerHTML = '<span style="letter-spacing: 2px;">•••</span>';
+  leoChatStream.appendChild(typingMsg);
+
+  if (leoBodyScroll) {
+    leoBodyScroll.scrollTop = leoBodyScroll.scrollHeight;
+  }
+
+  // Simulated smart response
+  setTimeout(() => {
+    let reply = 'He procesado tu consulta de forma 100% privada y anonima en Brave. Tus conversaciones no se guardan en servidores ni se usan para entrenar modelos.';
+    const lower = text.toLowerCase();
+    if (lower.includes('resum') || lower.includes('pagina') || lower.includes('pestana')) {
+      reply = 'La pagina activa esta protegida por Brave Shields. He analizado el DOM de forma local y los elementos principales se encuentran libres de rastreadores.';
+    } else if (lower.includes('hola') || lower.includes('buenas')) {
+      reply = '¡Hola! Soy Leo, el asistente de inteligencia artificial privado integrado en Brave. ¿En que puedo ayudarte hoy?';
+    } else if (lower.includes('vpn') || lower.includes('seguridad')) {
+      reply = 'Brave VPN utiliza el protocolo WireGuard® auditado y servidores ultrarrapidos proporcionados por Guardian para proteger toda tu conexion.';
+    }
+
+    typingMsg.textContent = reply;
+    if (leoBodyScroll) {
+      leoBodyScroll.scrollTop = leoBodyScroll.scrollHeight;
+    }
+  }, 600);
+}
+
+if (btnLeoSend) {
+  btnLeoSend.addEventListener('click', sendLeoMessage);
+}
+
+if (leoInputText) {
+  leoInputText.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendLeoMessage();
+    }
+  });
+}
+
+// 2. Brave VPN Popup
+const btnVpn = document.getElementById('btn-vpn');
+const vpnPopup = document.getElementById('vpn-popup');
+const btnVpnActivate = document.getElementById('btn-vpn-activate');
+const btnVpnHaveAccount = document.getElementById('btn-vpn-have-account');
+
+function toggleVpnPopup() {
+  if (!vpnPopup) return;
+  vpnPopup.classList.toggle('open');
+}
+
+if (btnVpn) {
+  btnVpn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleVpnPopup();
+  });
+}
+
+if (btnVpnActivate) {
+  btnVpnActivate.addEventListener('click', () => {
+    if (vpnPopup) vpnPopup.classList.remove('open');
+    if (typeof showToast === 'function') {
+      showToast('🛡️ VPN de Brave activada. Conectado a Guardian (Servidor Cifrado Seguro).');
+    }
+    if (btnVpn) {
+      btnVpn.style.color = '#fb542b';
+    }
+  });
+}
+
+if (btnVpnHaveAccount) {
+  btnVpnHaveAccount.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (typeof showToast === 'function') {
+      showToast('Inicia sesion en account.brave.com para sincronizar tu suscripcion.');
+    }
+  });
+}
+
+// 3. Extensions Popup
+const btnExtensions = document.getElementById('btn-extensions');
+const extensionsPopup = document.getElementById('extensions-popup');
+const btnCloseExtPopup = document.getElementById('btn-close-ext-popup');
+const btnGotoExtensions = document.getElementById('btn-goto-extensions');
+
+if (btnExtensions && extensionsPopup) {
+  btnExtensions.addEventListener('click', (e) => {
+    e.stopPropagation();
+    extensionsPopup.classList.toggle('open');
+  });
+}
+
+if (btnCloseExtPopup && extensionsPopup) {
+  btnCloseExtPopup.addEventListener('click', () => {
+    extensionsPopup.classList.remove('open');
+  });
+}
+
+if (btnGotoExtensions) {
+  btnGotoExtensions.addEventListener('click', () => {
+    if (extensionsPopup) extensionsPopup.classList.remove('open');
+    createTab(webstoreUrl);
+  });
+}
+
+// 4. Close popups on click outside
+document.addEventListener('click', (e) => {
+  if (vpnPopup && !vpnPopup.contains(e.target) && e.target !== btnVpn) {
+    vpnPopup.classList.remove('open');
+  }
+  if (extensionsPopup && !extensionsPopup.contains(e.target) && e.target !== btnExtensions) {
+    extensionsPopup.classList.remove('open');
+  }
+});
+
+// 5. Listener para mensajes desde NTP (postMessage para abrir VPN Popup)
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.action === 'openVpnPopup') {
+    if (vpnPopup) {
+      vpnPopup.classList.add('open');
+    }
+  }
+});

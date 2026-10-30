@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chrome Web Store - Extensiones</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    :root {
+      --bg-page: #202124;
+      --bg-card: #292a2d;
+      --bg-hover: #35363a;
+      --border-color: #3c4043;
+      --google-blue: #8ab4f8;
+      --google-blue-hover: #aecbfa;
+      --text-main: #e8eaed;
+      --text-muted: #9aa0a6;
+      --brave-orange: #fb542b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Google Sans', Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* Top Navigation Bar */
+    .top-header {
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-page);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .store-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .store-icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .search-container {
+      flex: 1;
+      max-width: 580px;
+      margin: 0 32px;
+      position: relative;
+    }
+
+    .search-box {
+      width: 100%;
+      background: #28292c;
+      border: 1px solid transparent;
+      border-radius: 24px;
+      padding: 10px 18px 10px 42px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-box:focus {
+      background: #303134;
+      border-color: var(--google-blue);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .search-icon-svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e11d48;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    /* Sub-header Navigation Tabs */
+    .tabs-bar {
+      display: flex;
+      gap: 32px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-page);
+    }
+
+    .tab-link {
+      padding: 14px 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .tab-link:hover {
+      color: var(--text-main);
+    }
+
+    .tab-link.active {
+      color: var(--google-blue);
+    }
+
+    .tab-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--google-blue);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Main Container Layout */
+    .store-layout {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px 60px 32px;
+      gap: 36px;
+    }
+
+    /* Sidebar Categories */
+    .categories-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cat-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin: 16px 0 8px 12px;
+    }
+
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 20px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cat-item:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .cat-item.active {
+      background-color: rgba(138, 180, 248, 0.15);
+      color: var(--google-blue);
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
+    .store-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    /* Hero Banner: Favoritos del 2025 */
+    .hero-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #4c1d95 100%);
+      border-radius: 16px;
+      padding: 36px 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-text {
+      max-width: 460px;
+      z-index: 2;
+    }
+
+    .hero-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      color: #e0e7ff;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .btn-hero {
+      background-color: #ffffff;
+      color: #1e1b4b;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .btn-hero:hover {
+      background-color: #f1f5f9;
+      transform: translateY(-2px);
+    }
+
+    .hero-trophy {
+      font-size: 90px;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Sections */
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .section-link {
+      color: var(--google-blue);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+
+    .section-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Cards Grid */
+    .extensions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .ext-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ext-card:hover {
+      border-color: #5f6368;
+      background-color: var(--bg-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .ext-top {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .ext-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: #3c4043;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .ext-meta {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .ext-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .ext-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .ext-rating-star {
+      color: #fbbc04;
+    }
+
+    .ext-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 14px;
+      height: 36px;
+    }
+
+    .ext-action-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-add-ext {
+      background: transparent;
+      border: 1px solid var(--google-blue);
+      color: var(--google-blue);
+      border-radius: 18px;
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-add-ext:hover {
+      background: rgba(138, 180, 248, 0.15);
+    }
+
+    .btn-add-ext.installed {
+      border-color: #34d399;
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="top-header">
+    <div class="header-left">
+      <a href="#" class="store-logo">
+        <svg class="store-icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="#4285f4"/>
+          <circle cx="12" cy="12" r="4" fill="#ffffff"/>
+        </svg>
+        <span>chrome web store</span>
+      </a>
+    </div>
+
+    <div class="search-container">
+      <svg class="search-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" class="search-box" id="store-search" placeholder="Buscar extensiones y temas" autocomplete="off">
+    </div>
+
+    <div class="header-right">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--text-muted)" style="cursor: pointer;">
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="12" cy="5" r="2"/>
+        <circle cx="12" cy="19" r="2"/>
+      </svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--text-muted)" style="cursor: pointer;">
+        <rect x="3" y="3" width="4" height="4" rx="1"/>
+        <rect x="10" y="3" width="4" height="4" rx="1"/>
+        <rect x="17" y="3" width="4" height="4" rx="1"/>
+        <rect x="3" y="10" width="4" height="4" rx="1"/>
+        <rect x="10" y="10" width="4" height="4" rx="1"/>
+        <rect x="17" y="10" width="4" height="4" rx="1"/>
+        <rect x="3" y="17" width="4" height="4" rx="1"/>
+        <rect x="10" y="17" width="4" height="4" rx="1"/>
+        <rect x="17" y="17" width="4" height="4" rx="1"/>
+      </svg>
+      <div class="header-avatar" title="Miguel">M</div>
+    </div>
+  </header>
+
+  <!-- Secondary Navigation Tabs -->
+  <nav class="tabs-bar">
+    <div class="tab-link">Descubrir</div>
+    <div class="tab-link active">Extensiones</div>
+    <div class="tab-link">Temas</div>
+  </nav>
+
+  <!-- Layout: Categories Sidebar + Main Content -->
+  <div class="store-layout">
+    <aside class="categories-sidebar">
+      <div class="cat-title">Categorías</div>
+      <div class="cat-item active">Todos</div>
+      <div class="cat-item">Productividad</div>
+      <div class="cat-item">Comunicación</div>
+      <div class="cat-item">DevTools</div>
+      <div class="cat-item">Educación</div>
+      <div class="cat-item">Herramientas</div>
+      <div class="cat-item">Trabajo y planificación</div>
+      <div class="cat-item">Estilo de vida</div>
+      <div class="cat-item">Arte y diseño</div>
+      <div class="cat-item">Bienestar</div>
+      <div class="cat-item">Compras</div>
+      <div class="cat-item">Entretenimiento</div>
+      <div class="cat-item">Familia</div>
+      <div class="cat-item">Juegos</div>
+      <div class="cat-item">Noticias y el tiempo</div>
+      <div class="cat-item">Para divertirse</div>
+      <div class="cat-item">Redes sociales</div>
+      <div class="cat-item">Viajes</div>
+    </aside>
+
+    <main class="store-content">
+      <!-- Hero Banner -->
+      <section class="hero-banner">
+        <div class="hero-text">
+          <h1 class="hero-title">Favoritos del 2025</h1>
+          <p class="hero-desc">Descubre las extensiones destacadas de IA que han marcado el año y optimizan tu flujo diario.</p>
+          <button class="btn-hero" onclick="alert('Explorando colección de extensiones destacadas.')">Ver colección</button>
+        </div>
+        <div class="hero-trophy">🏆</div>
+      </section>
+
+      <!-- Section: Miguel, esto podría gustarte -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-title">Miguel, esto podría gustarte</h2>
+          <a href="#" class="section-link">Ver más</a>
+        </div>
+        <div class="extensions-grid">
+          <!-- Enhancer for YouTube -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #e11d48;">▶️</div>
+              <div class="ext-meta">
+                <div class="ext-name">Enhancer for YouTube™</div>
+                <div class="ext-rating">
+                  <span>4,5</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(12k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">¡Toma el control de YouTube y lleva tu experiencia de usuario al siguiente nivel!</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'Enhancer for YouTube™')">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Modo incógnito -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #475569;">🕶️</div>
+              <div class="ext-meta">
+                <div class="ext-name">Modo incógnito</div>
+                <div class="ext-rating">
+                  <span>4,6</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(3.2k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Modo incógnito: cambia la pestaña actual al modo de navegación privada con un clic.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'Modo incógnito')">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Picture in Picture -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #dc2626;">🔲</div>
+              <div class="ext-meta">
+                <div class="ext-name">Picture in Picture - PiP...</div>
+                <div class="ext-rating">
+                  <span>3,9</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(8.4k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Ver videos en una ventana PiP flotante (siempre encima de otras ventanas).</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext installed" onclick="toggleInstall(this, 'Picture-in-Picture')">Instalada ✓</button>
+            </div>
+          </div>
+
+          <!-- Auto High Quality -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #ef4444;">HD</div>
+              <div class="ext-meta">
+                <div class="ext-name">Auto High Quality for...</div>
+                <div class="ext-rating">
+                  <span>3,5</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(1.5k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Automatically change YouTube video quality to HD resolution instantly.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'Auto High Quality')">Añadir a Brave</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Acaba con el desorden -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-title">Acaba con el desorden</h2>
+          <a href="#" class="section-link">Ver más</a>
+        </div>
+        <div class="extensions-grid">
+          <!-- PinLove -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #e11d48;">📌</div>
+              <div class="ext-meta">
+                <div class="ext-name">PinLove (Pinterest)</div>
+                <div class="ext-rating">
+                  <span>4,6</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(640)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Guarda y descarga capturas directamente en tus tableros de Pinterest favoritos.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'PinLove')">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Bookmarks Quick Search -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #2563eb;">🔖</div>
+              <div class="ext-meta">
+                <div class="ext-name">Bookmarks Quick Search</div>
+                <div class="ext-rating">
+                  <span>4,6</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(1.1k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Buscador instantáneo en tu árbol de marcadores con atajos de teclado rápidos.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'Bookmarks Quick Search')">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Checker Plus for Gmail -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #ea4335;">✉️</div>
+              <div class="ext-meta">
+                <div class="ext-name">Checker Plus for Gmail™</div>
+                <div class="ext-rating">
+                  <span>4,3</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(18k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Notificaciones instantáneas de correos nuevos y lectura de bandejas de entrada múltiples.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'Checker Plus for Gmail™')">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Extensity -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #3b82f6;">⚡</div>
+              <div class="ext-meta">
+                <div class="ext-name">Extensity</div>
+                <div class="ext-rating">
+                  <span>4,8</span>
+                  <span class="ext-rating-star">★</span>
+                  <span>(9.2k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Habilita y deshabilita todas tus extensiones rápidamente desde un menú compacto.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" onclick="toggleInstall(this, 'Extensity')">Añadir a Brave</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function toggleInstall(btn, name) {
+      if (btn.classList.contains('installed')) {
+        btn.classList.remove('installed');
+        btn.textContent = 'Añadir a Brave';
+      } else {
+        btn.classList.add('installed');
+        btn.textContent = 'Instalada ✓';
+      }
+    }
+  </script>
+</body>
+</html>

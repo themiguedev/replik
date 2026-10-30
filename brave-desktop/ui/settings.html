@@ -432,37 +432,61 @@
       <div class="brand-title">Configuración</div>
     </div>
 
-    <div class="nav-item active" data-section="shields">
-      <span class="nav-icon">🛡️</span>
-      <span>Brave Shields</span>
+    <div class="nav-item active" data-section="getstarted">
+      <span class="nav-icon">🚀</span>
+      <span>Empezar</span>
     </div>
-    <div class="nav-item" data-section="privacy">
-      <span class="nav-icon">🔒</span>
-      <span>Privacidad y seguridad</span>
+    <div class="nav-item" data-section="web3">
+      <span class="nav-icon">⬡</span>
+      <span>Web3</span>
     </div>
-    <div class="nav-item" data-section="autofill">
-      <span class="nav-icon">🔑</span>
-      <span>Contraseñas y Autocompletado</span>
-    </div>
-    <div class="nav-item" data-section="appearance">
-      <span class="nav-icon">🎨</span>
-      <span>Aspecto</span>
-    </div>
-    <div class="nav-item" data-section="startup">
-      <span class="nav-icon">⚡</span>
-      <span>Al iniciar</span>
-    </div>
-    <div class="nav-item" data-section="search">
-      <span class="nav-icon">🔍</span>
-      <span>Motor de búsqueda</span>
+    <div class="nav-item" data-section="leo">
+      <span class="nav-icon">✨</span>
+      <span>Leo</span>
     </div>
     <div class="nav-item" data-section="sync">
       <span class="nav-icon">🔄</span>
-      <span>Sincronización (Sync)</span>
+      <span>Brave Sync</span>
     </div>
-    <div class="nav-item" data-section="about">
+    <div class="nav-item" data-section="search">
+      <span class="nav-icon">🔍</span>
+      <span>Buscador</span>
+    </div>
+    <div class="nav-item" data-section="extensions">
+      <span class="nav-icon">🧩</span>
+      <span>Extensiones</span>
+    </div>
+    <div class="nav-item" data-section="autofill">
+      <span class="nav-icon">🔑</span>
+      <span>Autocompletar y contraseñas</span>
+    </div>
+    <div class="nav-item" data-section="shields">
+      <span class="nav-icon">🛡️</span>
+      <span>Brave Shields</span>
+    </div>
+    <div class="nav-item" data-section="languages">
+      <span class="nav-icon">🌐</span>
+      <span>Idiomas</span>
+    </div>
+    <div class="nav-item" data-section="downloads">
+      <span class="nav-icon">📥</span>
+      <span>Descargas</span>
+    </div>
+    <div class="nav-item" data-section="accessibility">
+      <span class="nav-icon">♿</span>
+      <span>Accesibilidad</span>
+    </div>
+    <div class="nav-item" data-section="system">
+      <span class="nav-icon">⚙️</span>
+      <span>Sistema</span>
+    </div>
+    <div class="nav-item" data-section="reset">
+      <span class="nav-icon">↺</span>
+      <span>Restablecer configuración</span>
+    </div>
+    <div class="nav-item" data-section="about" style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 14px;">
       <span class="nav-icon"><img src="logo.png" width="16" height="16" style="vertical-align: middle; object-fit: contain;"></span>
-      <span>Acerca de Brave</span>
+      <span>Información de Brave</span>
     </div>
   </div>
 
@@ -470,7 +494,82 @@
   <div class="content">
     <div class="search-box">
       <span>🔍</span>
-      <input type="text" placeholder="Buscar en la configuración...">
+      <input type="text" placeholder="Buscar ajustes" id="settings-search-input">
+    </div>
+
+    <!-- SECCIÓN 0: EMPEZAR (Frame 010) -->
+    <div id="section-getstarted" class="settings-tab active">
+      <div class="section-title">Empezar</div>
+
+      <!-- Tarjeta Iniciar sesión Brave -->
+      <div class="settings-group" style="padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(251, 84, 43, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <img src="logo.png" width="26" height="26" alt="Brave" style="object-fit: contain;">
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14.5px; color: #fff;">Inicia sesión o crea una cuenta de Brave</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 3px;">Una cuenta de Brave te permite crear y administrar tus alias de correo electrónico. <a href="#" style="color: var(--brave-orange); text-decoration: none;">Más información</a></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="padding: 8px 22px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer;">Empezar</button>
+      </div>
+
+      <!-- Opciones Básicas -->
+      <div class="settings-group">
+        <div class="setting-row" style="cursor: pointer;">
+          <div class="setting-info">
+            <div class="setting-name">Nombre e icono del perfil</div>
+          </div>
+          <span style="color: var(--text-muted); font-size: 18px;">›</span>
+        </div>
+
+        <div class="setting-row" style="cursor: pointer;">
+          <div class="setting-info">
+            <div class="setting-name">Importar marcadores y configuración</div>
+          </div>
+          <span style="color: var(--text-muted); font-size: 18px;">›</span>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Navegador predeterminado</div>
+            <div class="setting-desc">Establecer Brave como navegador predeterminado</div>
+          </div>
+          <button class="btn" style="padding: 7px 16px; border-radius: 18px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Elegir como predeterminado</button>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Fijar a barra de tareas</div>
+            <div class="setting-desc">Haga clic en "Fijar" y confirme la acción en la posterior notificación de Windows</div>
+          </div>
+          <button class="btn" style="padding: 7px 18px; border-radius: 18px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Fijar</button>
+        </div>
+      </div>
+
+      <!-- Al Iniciar -->
+      <div class="section-title" style="margin-top: 28px; font-size: 17px;">Al iniciar</div>
+      <div class="settings-group">
+        <div class="setting-row" style="cursor: pointer;" onclick="document.getElementById('radio-startup-ntp').checked = true">
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; width: 100%;">
+            <input type="radio" name="startup_choice" id="radio-startup-ntp" style="accent-color: var(--brave-orange);">
+            <div class="setting-name" style="font-weight: 500;">Abrir la página Nueva pestaña</div>
+          </label>
+        </div>
+        <div class="setting-row" style="cursor: pointer;" onclick="document.getElementById('radio-startup-continue').checked = true">
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; width: 100%;">
+            <input type="radio" name="startup_choice" id="radio-startup-continue" checked style="accent-color: var(--brave-orange);">
+            <div class="setting-name" style="font-weight: 500;">Continuar por donde lo dejaste</div>
+          </label>
+        </div>
+        <div class="setting-row" style="cursor: pointer;" onclick="document.getElementById('radio-startup-specific').checked = true">
+          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; width: 100%;">
+            <input type="radio" name="startup_choice" id="radio-startup-specific" style="accent-color: var(--brave-orange);">
+            <div class="setting-name" style="font-weight: 500;">Abrir una página específica o un conjunto de páginas</div>
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- SECCIÓN 1: BRAVE SHIELDS -->
@@ -845,6 +944,160 @@
               <span style="font-size: 12px; color: #4ade80; font-weight: 600;">Activo</span>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN WEB3 -->
+    <div id="section-web3" class="settings-tab" style="display: none;">
+      <div class="section-title">Web3 & Brave Wallet</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Brave Wallet predeterminado</div>
+            <div class="setting-desc">Monedero criptográfico autocustodio integrado directamente en el navegador.</div>
+          </div>
+          <select class="setting-select">
+            <option>Brave Wallet (Recomendado)</option>
+            <option>Ninguno</option>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN LEO -->
+    <div id="section-leo" class="settings-tab" style="display: none;">
+      <div class="section-title">Brave Leo AI</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Modelo predeterminado de Leo</div>
+            <div class="setting-desc">Selecciona el modelo de IA que procesará tus consultas de forma privada sin guardar registros.</div>
+          </div>
+          <select class="setting-select">
+            <option>Automatic (Llama 3 / Mixtral)</option>
+            <option>Claude 3.5 Sonnet</option>
+            <option>Mixtral 8x7B</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Mostrar icono de Leo en la barra de herramientas</div>
+            <div class="setting-desc">Acceso rápido al asistente de IA desde la esquina superior derecha.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN EXTENSIONES -->
+    <div id="section-extensions" class="settings-tab" style="display: none;">
+      <div class="section-title">Extensiones</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Administrador de extensiones</div>
+            <div class="setting-desc">Ver, activar o desinstalar extensiones de Chromium.</div>
+          </div>
+          <button class="btn btn-primary" onclick="window.location.href='webstore.html'" style="cursor: pointer;">Abrir Web Store</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN IDIOMAS -->
+    <div id="section-languages" class="settings-tab" style="display: none;">
+      <div class="section-title">Idiomas</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Idioma del navegador</div>
+            <div class="setting-desc">Español (España)</div>
+          </div>
+          <span style="color: var(--brave-orange); font-weight: 600; font-size: 13px;">Predeterminado</span>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Brave Translate</div>
+            <div class="setting-desc">Ofrecer traducción automática de páginas web que no estén en tu idioma preferido.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN DESCARGAS -->
+    <div id="section-downloads" class="settings-tab" style="display: none;">
+      <div class="section-title">Descargas</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Ubicación de descarga</div>
+            <div class="setting-desc">C:\Users\UCE.FCBA\Downloads</div>
+          </div>
+          <button class="btn" style="cursor: pointer;">Cambiar</button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Preguntar dónde guardar cada archivo antes de descargarlo</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN ACCESIBILIDAD -->
+    <div id="section-accessibility" class="settings-tab" style="display: none;">
+      <div class="section-title">Accesibilidad</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Subtítulos automáticos (Live Caption)</div>
+            <div class="setting-desc">Genera subtítulos automáticamente para cualquier contenido multimedia en inglés y español.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN SISTEMA -->
+    <div id="section-system" class="settings-tab" style="display: none;">
+      <div class="section-title">Sistema</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Aceleración por hardware</div>
+            <div class="setting-desc">Utilizar aceleración por hardware cuando esté disponible para máxima fluidez.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN RESTABLECER -->
+    <div id="section-reset" class="settings-tab" style="display: none;">
+      <div class="section-title">Restablecer configuración</div>
+      <div class="settings-group">
+        <div class="setting-row" style="cursor: pointer;" onclick="if(confirm('¿Restablecer la configuración predeterminada de Brave?')) location.reload();">
+          <div class="setting-info">
+            <div class="setting-name" style="color: #f87171;">Restaurar los valores predeterminados originales de la configuración</div>
+            <div class="setting-desc">Restablece la página de inicio, nueva pestaña y motor de búsqueda predeterminado.</div>
+          </div>
+          <span style="color: var(--text-muted); font-size: 18px;">›</span>
         </div>
       </div>
     </div>
