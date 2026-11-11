@@ -421,6 +421,228 @@
       color: #ffffff;
     }
 
+    /* Central Brave Clock */
+    .clock-widget {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .clock-widget:hover {
+      transform: scale(1.03);
+    }
+
+    .clock-time {
+      font-size: 76px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -2px;
+      line-height: 1;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.8);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .clock-ampm {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0px;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .clock-greeting-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 14.5px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+    }
+
+    .clock-date {
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: capitalize;
+    }
+
+    /* Customize Modal */
+    .ntp-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .ntp-modal-overlay.open {
+      display: flex;
+    }
+
+    .ntp-modal-card {
+      background: #1c1d22;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      width: 520px;
+      max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+    }
+
+    .ntp-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ntp-modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ntp-modal-close {
+      background: none;
+      border: none;
+      color: #9ea0aa;
+      font-size: 18px;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .ntp-modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .ntp-modal-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .customize-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .customize-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .customize-info p {
+      font-size: 12px;
+      color: #9ea0aa;
+      margin-top: 3px;
+    }
+
+    .switch-ui {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch-ui input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-ui {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #3e404b;
+      transition: .2s;
+      border-radius: 24px;
+    }
+
+    .slider-ui:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    .switch-ui input:checked + .slider-ui {
+      background-color: var(--brave-orange);
+    }
+
+    .switch-ui input:checked + .slider-ui:before {
+      transform: translateX(20px);
+    }
+
+    .wallpaper-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .wallpaper-thumb {
+      height: 64px;
+      border-radius: 10px;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .wallpaper-thumb:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    }
+
+    .wallpaper-thumb.active {
+      border-color: var(--brave-orange);
+      box-shadow: 0 0 0 2px rgba(251, 84, 43, 0.5);
+    }
+
     /* Fixed NTP Settings Cogwheel on the Far Right Edge */
     .ntp-settings-btn {
       position: fixed;
@@ -454,8 +676,21 @@
   <div class="ntp-content">
     <!-- Top & Center Zone -->
     <div class="top-center-zone">
+      <!-- Brave Clock & Greeting Widget -->
+      <div class="clock-widget" id="clock-widget" onclick="toggleClockFormat()" title="Clic para alternar formato 12h / 24h">
+        <div class="clock-time" id="clock-time">
+          <span id="clock-digits">12:00</span>
+          <span class="clock-ampm" id="clock-ampm">PM</span>
+        </div>
+        <div class="clock-greeting-row">
+          <span id="clock-greeting">Buenas tardes</span>
+          <span>•</span>
+          <span class="clock-date" id="clock-date">miércoles, 11 de noviembre</span>
+        </div>
+      </div>
+
       <!-- Shortcuts Grid -->
-      <div class="shortcuts-container">
+      <div class="shortcuts-container" id="shortcuts-container">
         <div class="shortcuts-row" id="shortcuts-row">
           <!-- 1. Google -->
           <a class="shortcut-card" href="https://www.google.com" target="_blank" title="Google">
@@ -531,6 +766,17 @@
             </div>
             <span class="shortcut-label">URBE</span>
           </a>
+
+          <!-- 8. Añadir Acceso Directo (+) -->
+          <div class="shortcut-card" id="btn-add-shortcut" onclick="openAddShortcutDialog()" title="Añadir acceso directo">
+            <div class="shortcut-icon-wrapper" style="background: rgba(255, 255, 255, 0.12); border: 1px dashed rgba(255, 255, 255, 0.35);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+            <span class="shortcut-label">Añadir</span>
+          </div>
         </div>
 
         <!-- Pagination Dots -->
@@ -631,12 +877,75 @@
   </div>
 
   <!-- Cogwheel / Customize button on far right -->
-  <button class="ntp-settings-btn" id="ntp-settings-btn" onclick="toggleWallpaper()" title="Personalizar fondo de pantalla">
+  <button class="ntp-settings-btn" id="ntp-settings-btn" onclick="openCustomizeModal()" title="Personalizar Nueva Pestaña">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="3"></circle>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
     </svg>
   </button>
+
+  <!-- Modal de Personalización (Brave NTP Customize) -->
+  <div class="ntp-modal-overlay" id="customize-modal" onclick="closeCustomizeModal(event)">
+    <div class="ntp-modal-card" onclick="event.stopPropagation()">
+      <div class="ntp-modal-header">
+        <div class="ntp-modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Personalizar Nueva Pestaña</span>
+        </div>
+        <button class="ntp-modal-close" onclick="closeCustomizeModal()">✕</button>
+      </div>
+      <div class="ntp-modal-body">
+        <div class="customize-row">
+          <div class="customize-info">
+            <h4>Mostrar Reloj</h4>
+            <p>Muestra el reloj digital y saludo en el centro de la pantalla</p>
+          </div>
+          <label class="switch-ui">
+            <input type="checkbox" id="toggle-clock-cb" checked onchange="toggleClockVisibility(this.checked)">
+            <span class="slider-ui"></span>
+          </label>
+        </div>
+        <div class="customize-row">
+          <div class="customize-info">
+            <h4>Formato de 24 horas</h4>
+            <p>Alternar entre formato militar (24h) y formato de 12 horas (AM/PM)</p>
+          </div>
+          <label class="switch-ui">
+            <input type="checkbox" id="toggle-24h-cb" onchange="toggle24HourFormat(this.checked)">
+            <span class="slider-ui"></span>
+          </label>
+        </div>
+        <div class="customize-row">
+          <div class="customize-info">
+            <h4>Mostrar Estadísticas de Brave</h4>
+            <p>Contadores de anuncios, rastreadores y tiempo ahorrado en vivo</p>
+          </div>
+          <label class="switch-ui">
+            <input type="checkbox" id="toggle-stats-cb" checked onchange="toggleStatsVisibility(this.checked)">
+            <span class="slider-ui"></span>
+          </label>
+        </div>
+        <div class="customize-row">
+          <div class="customize-info">
+            <h4>Mostrar Accesos Directos (Top Sites)</h4>
+            <p>Tus páginas favoritas y visitadas frecuentemente</p>
+          </div>
+          <label class="switch-ui">
+            <input type="checkbox" id="toggle-shortcuts-cb" checked onchange="toggleShortcutsVisibility(this.checked)">
+            <span class="slider-ui"></span>
+          </label>
+        </div>
+        <div style="margin-top: 10px;">
+          <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Fondos de Pantalla Oficiales</h4>
+          <p style="font-size: 12px; color: #9ea0aa; margin-bottom: 12px;">Selecciona una imagen de fondo de la colección Brave</p>
+          <div class="wallpaper-grid" id="wallpaper-thumbs-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Search handler
@@ -647,17 +956,157 @@
       window.location.href = 'https://search.brave.com/search?q=' + encodeURIComponent(val);
     }
 
-    // Toggle wallpapers between Veli Batuhan Aytaç and John Murphey
-    let currentWallpaper = 0;
+    // Catálogo Oficial de Fondos de Pantalla (8 Wallpapers de producción)
     const wallpapers = [
       { file: 'wallpapers/veli-batuhan.jpg', credit: 'Fotografía de Veli Batuhan Aytaç' },
-      { file: 'wallpapers/john-murphey.jpg', credit: 'Fotografía de John Murphey' }
+      { file: 'wallpapers/john-murphey.jpg', credit: 'Fotografía de John Murphey' },
+      { file: 'wallpapers/pascal-debrunner.jpg', credit: 'Fotografía de Pascal Debrunner' },
+      { file: 'wallpapers/rafael-peier2.jpg', credit: 'Fotografía de Rafael Peier' },
+      { file: 'wallpapers/david-becker.jpg', credit: 'Fotografía de David Becker' },
+      { file: 'wallpapers/hunter-newton.jpg', credit: 'Fotografía de Hunter Newton' },
+      { file: 'wallpapers/andrew-svk.jpg', credit: 'Fotografía de Andrew Svk' },
+      { file: 'wallpapers/daniel-schwarz.jpg', credit: 'Fotografía de Daniel Schwarz' }
     ];
 
-    function toggleWallpaper() {
-      currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
+    let currentWallpaper = parseInt(localStorage.getItem('brave_wallpaper_idx') || '0', 10);
+    if (isNaN(currentWallpaper) || currentWallpaper < 0 || currentWallpaper >= wallpapers.length) {
+      currentWallpaper = 0;
+    }
+
+    function applyWallpaper(idx) {
+      currentWallpaper = idx;
+      localStorage.setItem('brave_wallpaper_idx', String(currentWallpaper));
       document.body.style.backgroundImage = `url('${wallpapers[currentWallpaper].file}')`;
-      document.getElementById('photo-credit').textContent = wallpapers[currentWallpaper].credit;
+      const creditEl = document.getElementById('photo-credit');
+      if (creditEl) creditEl.textContent = wallpapers[currentWallpaper].credit;
+      
+      // Actualizar selección visual en el modal
+      document.querySelectorAll('.wallpaper-thumb').forEach((thumb, i) => {
+        if (i === currentWallpaper) thumb.classList.add('active');
+        else thumb.classList.remove('active');
+      });
+    }
+
+    function toggleWallpaper() {
+      const nextIdx = (currentWallpaper + 1) % wallpapers.length;
+      applyWallpaper(nextIdx);
+    }
+
+    // Reloj Digital y Saludo en Tiempo Real
+    let is24Hour = localStorage.getItem('brave_clock_24h') === 'true';
+    let isClockVisible = localStorage.getItem('brave_clock_enabled') !== 'false';
+
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      let ampm = '';
+
+      if (!is24Hour) {
+        ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 se convierte en 12
+      }
+
+      const digitsEl = document.getElementById('clock-digits');
+      const ampmEl = document.getElementById('clock-ampm');
+      const greetingEl = document.getElementById('clock-greeting');
+      const dateEl = document.getElementById('clock-date');
+
+      if (digitsEl) digitsEl.textContent = `${hours}:${minutes}`;
+      if (ampmEl) {
+        ampmEl.textContent = ampm;
+        ampmEl.style.display = is24Hour ? 'none' : 'inline';
+      }
+
+      // Saludo contextual
+      const realHour = now.getHours();
+      let greeting = 'Buenos días';
+      if (realHour >= 12 && realHour < 19) greeting = 'Buenas tardes';
+      else if (realHour >= 19 || realHour < 6) greeting = 'Buenas noches';
+      if (greetingEl) greetingEl.textContent = greeting;
+
+      // Fecha en español
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      if (dateEl) dateEl.textContent = now.toLocaleDateString('es-ES', options);
+    }
+
+    function toggleClockFormat() {
+      is24Hour = !is24Hour;
+      localStorage.setItem('brave_clock_24h', String(is24Hour));
+      const cb = document.getElementById('toggle-24h-cb');
+      if (cb) cb.checked = is24Hour;
+      updateClock();
+    }
+
+    // Modal de Personalización
+    function openCustomizeModal() {
+      const modal = document.getElementById('customize-modal');
+      if (modal) modal.classList.add('open');
+      renderWallpaperThumbnails();
+    }
+
+    function closeCustomizeModal(e) {
+      if (e && e.target && e.target.id !== 'customize-modal' && !e.target.classList.contains('ntp-modal-close')) {
+        return;
+      }
+      const modal = document.getElementById('customize-modal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function renderWallpaperThumbnails() {
+      const container = document.getElementById('wallpaper-thumbs-grid');
+      if (!container || container.children.length > 0) return;
+      container.innerHTML = '';
+      wallpapers.forEach((wp, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'wallpaper-thumb' + (idx === currentWallpaper ? ' active' : '');
+        thumb.style.backgroundImage = `url('${wp.file}')`;
+        thumb.title = wp.credit;
+        thumb.onclick = () => applyWallpaper(idx);
+        container.appendChild(thumb);
+      });
+    }
+
+    function toggleClockVisibility(visible) {
+      isClockVisible = visible;
+      localStorage.setItem('brave_clock_enabled', String(visible));
+      const clockWidget = document.getElementById('clock-widget');
+      if (clockWidget) clockWidget.style.display = visible ? 'flex' : 'none';
+    }
+
+    function toggle24HourFormat(is24) {
+      is24Hour = is24;
+      localStorage.setItem('brave_clock_24h', String(is24));
+      updateClock();
+    }
+
+    function toggleStatsVisibility(visible) {
+      localStorage.setItem('brave_stats_enabled', String(visible));
+      const statsCard = document.querySelector('.stats-card');
+      if (statsCard) statsCard.style.display = visible ? 'block' : 'none';
+    }
+
+    function toggleShortcutsVisibility(visible) {
+      localStorage.setItem('brave_shortcuts_enabled', String(visible));
+      const shortcuts = document.getElementById('shortcuts-container');
+      if (shortcuts) shortcuts.style.display = visible ? 'flex' : 'none';
+    }
+
+    // Sincronización de Estadísticas en Vivo con LocalStorage
+    function syncLiveStats() {
+      const ads = localStorage.getItem('brave_trackers_blocked');
+      const mb = localStorage.getItem('brave_mb_saved');
+      const time = localStorage.getItem('brave_time_saved');
+
+      if (ads) document.getElementById('stat-ads').textContent = Number(ads).toLocaleString('es-ES');
+      if (mb) {
+        const mbNum = parseFloat(mb);
+        document.getElementById('stat-bandwidth').textContent = !isNaN(mbNum) ? `${mbNum.toFixed(1)} MB` : mb;
+      }
+      if (time) {
+        document.getElementById('stat-time').textContent = time.includes('Minutos') || time.includes('s') ? time : `${time} Minutos`;
+      }
     }
 
     function openVpnTrial() {
@@ -665,6 +1114,79 @@
         window.parent.postMessage({ action: 'openVpnPopup' }, '*');
       }
     }
+
+    // Gestión dinámica de accesos directos personalizados
+    function openAddShortcutDialog() {
+      const name = prompt('Nombre del acceso directo (ej: GitHub):');
+      if (!name || !name.trim()) return;
+      let url = prompt('Dirección URL del sitio (ej: https://github.com):');
+      if (!url || !url.trim()) return;
+      url = url.trim();
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+      const custom = JSON.parse(localStorage.getItem('brave_custom_shortcuts') || '[]');
+      custom.push({ name: name.trim(), url });
+      localStorage.setItem('brave_custom_shortcuts', JSON.stringify(custom));
+      renderCustomShortcuts();
+    }
+
+    function renderCustomShortcuts() {
+      const row = document.getElementById('shortcuts-row');
+      if (!row) return;
+      row.querySelectorAll('.custom-shortcut-card').forEach(el => el.remove());
+
+      const addBtn = document.getElementById('btn-add-shortcut');
+      const custom = JSON.parse(localStorage.getItem('brave_custom_shortcuts') || '[]');
+      custom.forEach((sc, i) => {
+        const card = document.createElement('a');
+        card.className = 'shortcut-card custom-shortcut-card';
+        card.href = sc.url;
+        card.target = '_blank';
+        card.title = `${sc.name} (${sc.url})\nClic derecho para eliminar`;
+        card.oncontextmenu = (e) => {
+          e.preventDefault();
+          if (confirm(`¿Deseas eliminar el acceso directo "${sc.name}"?`)) {
+            custom.splice(i, 1);
+            localStorage.setItem('brave_custom_shortcuts', JSON.stringify(custom));
+            renderCustomShortcuts();
+          }
+        };
+
+        const initial = sc.name.charAt(0).toUpperCase();
+        card.innerHTML = `
+          <div class="shortcut-icon-wrapper" style="background: rgba(251, 84, 43, 0.85); font-weight: 800; font-size: 20px; color: #ffffff;">
+            ${initial}
+          </div>
+          <span class="shortcut-label">${sc.name}</span>
+        `;
+        if (addBtn) row.insertBefore(card, addBtn);
+        else row.appendChild(card);
+      });
+    }
+
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      applyWallpaper(currentWallpaper);
+      updateClock();
+      setInterval(updateClock, 1000);
+      syncLiveStats();
+      renderCustomShortcuts();
+
+      // Restaurar preferencias guardadas
+      const clockCb = document.getElementById('toggle-clock-cb');
+      const h24Cb = document.getElementById('toggle-24h-cb');
+      const statsCb = document.getElementById('toggle-stats-cb');
+      const shortcutsCb = document.getElementById('toggle-shortcuts-cb');
+
+      if (clockCb) clockCb.checked = isClockVisible;
+      if (h24Cb) h24Cb.checked = is24Hour;
+      if (statsCb) statsCb.checked = localStorage.getItem('brave_stats_enabled') !== 'false';
+      if (shortcutsCb) shortcutsCb.checked = localStorage.getItem('brave_shortcuts_enabled') !== 'false';
+
+      toggleClockVisibility(isClockVisible);
+      toggleStatsVisibility(localStorage.getItem('brave_stats_enabled') !== 'false');
+      toggleShortcutsVisibility(localStorage.getItem('brave_shortcuts_enabled') !== 'false');
+    });
   </script>
 </body>
 </html>
