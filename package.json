@@ -7,12 +7,22 @@
   "type": "module",
   "scripts": {
     "start": "npx electron brave-desktop/dist/main.mjs",
-    "build": "esbuild brave-desktop/main.ts --bundle --platform=node --external:electron --format=esm --outfile=brave-desktop/dist/main.mjs",
-    "portable": "npm run build && electron-builder build --win portable --project brave-desktop"
+    "build": "npx esbuild brave-desktop/main.ts --bundle --platform=node --external:electron --format=esm --outfile=brave-desktop/dist/main.mjs",
+    "test": "vitest run --config brave-shields/vitest.config.ts",
+    "portable": "npm run build && electron-builder build --win portable --project brave-desktop",
+    "pretest:e2e": "npm run build",
+    "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.ts",
+    "test:e2e:tier1": "playwright test tests/e2e/tier1-features",
+    "test:e2e:tier2": "playwright test tests/e2e/tier2-boundaries",
+    "test:e2e:tier3": "playwright test tests/e2e/tier3-interactions",
+    "test:e2e:tier4": "playwright test tests/e2e/tier4-realworld"
   },
   "devDependencies": {
+    "@playwright/test": "^1.50.0",
     "electron": "^45.0.0",
     "electron-builder": "^26.15.3",
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.28.0",
+    "vitest": "^5.1.0"
   }
 }

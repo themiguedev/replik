@@ -1,0 +1,89 @@
+rules:
+  - id: electron-ipc-unvalidated-file-write
+    languages: [typescript, javascript]
+    message: "Arbitrary file write in IPC handler without path sanitization."
+    severity: ERROR
+    patterns:
+      - pattern: |
+          ipcMain.handle($CHANNEL, async ($EVENT, $PATH, $DATA) => {
+            ...
+            fs.writeFileSync($PATH, ...);
+            ...
+          })
+
+  - id: electron-ipc-unvalidated-shell-open
+    languages: [typescript, javascript]
+    message: "Unvalidated shell.openPath invocation in IPC handler."
+    severity: ERROR
+    patterns:
+      - pattern: |
+          ipcMain.handle($CHANNEL, async ($EVENT, $PATH) => {
+            ...
+            shell.openPath($PATH);
+            ...
+          })
+
+  - id: electron-dangerous-execsync
+    languages: [typescript, javascript]
+    message: "Use of child_process.execSync in Electron main process can lead to command injection."
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: child_process.execSync(...)
+          - pattern: execSync(...)
+
+  - id: electron-webview-unfiltered-console-rpc
+    languages: [javascript]
+    message: "Webview console-message event handler processes RPC commands without sender origin verification."
+    severity: ERROR
+    patterns:
+      - pattern: |
+          $EL.addEventListener('console-message', async ($E) => {
+            ...
+            if ($E.message && $E.message.startsWith('__BRAVE_RPC__:')) {
+              ...
+            }
+            ...
+          })
+
+  - id: electron-webview-dynamic-api-reflection
+    languages: [javascript]
+    message: "Dynamic reflection call window.braveAPI[action](...args) exposes privileged host APIs to guest messages."
+    severity: ERROR
+    patterns:
+      - pattern: window.braveAPI[$ACTION](...$ARGS)
+
+  - id: electron-missing-senderframe-validation
+    languages: [typescript]
+    message: "Privileged IPC handler does not validate event.senderFrame."
+    severity: WARNING
+    patterns:
+      - pattern: |
+          ipcMain.handle($CHANNEL, async ($EVENT, ...) => {
+            ...
+          })
+      - pattern-not: |
+          ipcMain.handle($CHANNEL, async ($EVENT, ...) => {
+            ...
+            if (!isTrustedSender($EVENT)) ...;
+            ...
+          })
+
+  - id: electron-insecure-webpreferences
+    languages: [typescript, javascript]
+    message: "Insecure webPreferences detected: contextIsolation must be true and nodeIntegration false."
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: |
+              webPreferences: {
+                ...,
+                nodeIntegration: true,
+                ...
+              }
+          - pattern: |
+              webPreferences: {
+                ...,
+                contextIsolation: false,
+                ...
+              }

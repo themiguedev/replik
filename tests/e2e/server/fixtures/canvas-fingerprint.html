@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvas Fingerprinting Test</title>
+</head>
+<body>
+  <h1>Canvas and Hardware Fingerprint Test</h1>
+  <canvas id="test-canvas" width="200" height="50"></canvas>
+  <div id="canvas-hash"></div>
+  <div id="webgl-vendor"></div>
+  <div id="hardware-cores"></div>
+
+  <script>
+    // Canvas test
+    const canvas = document.getElementById('test-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Replik Farbling Fingerprint Test 12345', 2, 2);
+    const dataUrl = canvas.toDataURL();
+    document.getElementById('canvas-hash').textContent = dataUrl.substring(0, 80);
+
+    // WebGL test
+    try {
+      const glCanvas = document.createElement('canvas');
+      const gl = glCanvas.getContext('webgl');
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'none';
+        document.getElementById('webgl-vendor').textContent = vendor;
+      }
+    } catch (e) {
+      document.getElementById('webgl-vendor').textContent = 'error';
+    }
+
+    // Hardware Concurrency test
+    document.getElementById('hardware-cores').textContent = String(navigator.hardwareConcurrency || 0);
+  </script>
+</body>
+</html>
