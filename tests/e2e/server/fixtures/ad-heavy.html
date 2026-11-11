@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Replik Ad Heavy Page</title>
+  <style>
+    .ad-banner { width: 728px; height: 90px; background: red; color: white; }
+    .sponsored-post { padding: 10px; background: yellow; }
+    #cookie-banner { position: fixed; bottom: 0; background: black; color: white; }
+  </style>
+</head>
+<body>
+  <h1>News and Articles</h1>
+  <div class="ad-banner" id="top-ad">Advertisement 1</div>
+  <div class="sponsored-post">Sponsored recommendation</div>
+  <main>
+    <h2>Genuine Editorial Content</h2>
+    <p id="article-body">Clean text that should remain visible while ad banners and trackers get blocked.</p>
+  </main>
+  <div id="cookie-banner">Notice: This site uses cookies.</div>
+
+  <!-- Simulated Ad scripts and tracker pixels -->
+  <script src="/pagead/adsbygoogle.js"></script>
+  <script src="/ads/banner.js"></script>
+  <img src="/track/pixel.png" width="1" height="1" alt="tracking pixel">
+</body>
+</html>

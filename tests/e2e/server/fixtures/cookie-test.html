@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie and Storage Isolation Test</title>
+</head>
+<body>
+  <h1>Cookie and Storage Isolation Test</h1>
+  <div id="cookie-display"></div>
+  <button id="btn-set-cookie" onclick="setTestCookie()">Set Cookie</button>
+
+  <script>
+    function updateDisplay() {
+      document.getElementById('cookie-display').textContent = document.cookie || 'NO_COOKIES';
+    }
+    function setTestCookie() {
+      document.cookie = 'replik_test_cookie=verified_' + Date.now() + '; path=/; max-age=3600';
+      updateDisplay();
+    }
+    updateDisplay();
+  </script>
+</body>
+</html>

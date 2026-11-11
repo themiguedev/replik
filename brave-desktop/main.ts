@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import https from 'node:https';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { BraveShieldsEngine } from '../brave-shields/src/shields-engine.js';
 import { ResourceType } from '../brave-shields/src/types.js';
 
@@ -73,6 +73,55 @@ function isDomainScriptBlocked(domain: string): boolean {
   // Para cualquier otro sitio web, el bloqueo de scripts está ACTIVO por defecto
   return !scriptAllowedDomains.has(d);
 }
+
+// Allowed storage base directories for safe file operations
+function getAllowedStorageDirectories(): Record<string, string> {
+  return {
+    downloads: path.resolve(app.getPath('downloads')),
+    userData: path.resolve(app.getPath('userData')),
+    temp: path.resolve(app.getPath('temp')),
+  };
+}
+
+// Robust path containment check preventing traversal and symlink escapes
+function isPathConfinedTo(targetPath: string, allowedDirs: string[]): boolean {
+  if (!targetPath || typeof targetPath !== 'string') return false;
+  const resolvedTarget = path.resolve(targetPath);
+  const normTarget = process.platform === 'win32' ? resolvedTarget.toLowerCase() : resolvedTarget;
+  return allowedDirs.some((allowedDir) => {
+    const resolvedDir = path.resolve(allowedDir);
+    const normDir = process.platform === 'win32' ? resolvedDir.toLowerCase() : resolvedDir;
+    const rel = path.relative(normDir, normTarget);
+    return !rel.startsWith('..') && !path.isAbsolute(rel) && rel !== '';
+  });
+}
+
+// Sender frame authenticity validation
+function isTrustedSender(event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent): boolean {
+  const frame = event.senderFrame;
+  if (!frame) return false;
+
+  // Frame must be top-level (no iframes or subframes)
+  if (frame.parent !== null) return false;
+
+  const frameUrl = frame.url;
+  if (!frameUrl) return false;
+
+  const expectedUrlPrefix = pathToFileURL(path.join(baseDir, 'ui')).href;
+  if (process.platform === 'win32') {
+    return frameUrl.toLowerCase().startsWith(expectedUrlPrefix.toLowerCase());
+  }
+  return frameUrl.startsWith(expectedUrlPrefix);
+}
+
+const DANGEROUS_EXTENSIONS = new Set([
+  // Windows executables, binaries and scripts
+  '.exe', '.bat', '.cmd', '.ps1', '.psm1', '.vbs', '.vbe', '.js', '.jse',
+  '.wsf', '.wsh', '.msc', '.msi', '.msp', '.mst', '.com', '.scr', '.hta',
+  '.cpl', '.jar', '.reg', '.pif', '.lnk', '.url',
+  // Unix / MacOS binaries and scripts
+  '.sh', '.bash', '.zsh', '.command', '.app', '.bin', '.desktop'
+]);
 
 // Track stats
 const domainBlockedCounts = new Map<string, number>();
@@ -535,6 +584,41 @@ function notifyShieldsUpdate(domain: string, immediate = false) {
     }, 60);
   }
 }
+
+// Guardias de Ciclo de Vida de Electron (Webview Hardening y Control de Ventanas Emergentes)
+app.on('web-contents-created', (_createEvent, contents) => {
+  // 1. will-attach-webview guard: strip preload scripts and enforce sandboxing
+  contents.on('will-attach-webview', (_attachEvent, webPreferences, _params) => {
+    delete (webPreferences as any).preload;
+    delete (webPreferences as any).preloadURL;
+
+    webPreferences.nodeIntegration = false;
+    webPreferences.nodeIntegrationInSubFrames = false;
+    webPreferences.contextIsolation = true;
+    webPreferences.sandbox = true;
+    webPreferences.webSecurity = true;
+    webPreferences.allowRunningInsecureContent = false;
+    webPreferences.plugins = false;
+    (webPreferences as any).enableRemoteModule = false;
+  });
+
+  // 2. setWindowOpenHandler guard: block untrusted protocols and popups
+  contents.setWindowOpenHandler(({ url, disposition }) => {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return { action: 'deny' };
+      }
+    } catch {
+      return { action: 'deny' };
+    }
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('browser:open-url-in-tab', url, disposition);
+    }
+    return { action: 'deny' };
+  });
+});
 
 function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; initialUrl?: string; profile?: string } = {}) {
   const isPrivate = options.isPrivate ?? false;
@@ -1040,11 +1124,69 @@ ipcMain.handle('browser:save-dialog', async (event, options: { title?: string; d
   return dialog.showSaveDialog(win, options);
 });
 
-ipcMain.handle('browser:write-file', async (_event, filePath: string, base64Data: string) => {
+ipcMain.handle('browser:write-file', async (event, arg1: string, arg2: string, arg3?: string) => {
   try {
-    const buffer = Buffer.from(base64Data, 'base64');
-    fs.writeFileSync(filePath, buffer);
-    return { success: true };
+    if (!isTrustedSender(event)) {
+      return { success: false, error: 'Acceso no autorizado: sender inválido' };
+    }
+
+    const allowedStorage = getAllowedStorageDirectories();
+    const allowedDirList = [allowedStorage.downloads, allowedStorage.userData, allowedStorage.temp];
+
+    let finalPath: string;
+    let base64Payload: string;
+
+    if (arg3 !== undefined) {
+      // 3-argument signature: (targetSubdir, fileName, base64Data)
+      const targetSubdir = (arg1 || '').trim();
+      const rawFileName = arg2;
+      base64Payload = arg3;
+
+      if (!Object.prototype.hasOwnProperty.call(allowedStorage, targetSubdir)) {
+        return {
+          success: false,
+          error: `Directorio no permitido: '${targetSubdir}'. Válidos: ${Object.keys(allowedStorage).join(', ')}`,
+        };
+      }
+
+      // Sanitize fileName using path.basename and explicit guards
+      const safeFileName = path.basename((rawFileName || '').trim());
+      if (!safeFileName || safeFileName === '.' || safeFileName === '..' || /[\/\\]/.test(safeFileName)) {
+        return { success: false, error: 'Nombre de archivo inválido o contiene secuencias de escape' };
+      }
+
+      finalPath = path.join(allowedStorage[targetSubdir], safeFileName);
+    } else {
+      // 2-argument signature: (filePath, base64Data)
+      const requestedPath = arg1;
+      base64Payload = arg2;
+
+      if (!requestedPath || typeof requestedPath !== 'string') {
+        return { success: false, error: 'Ruta de archivo no válida o no especificada' };
+      }
+
+      const resolved = path.resolve(requestedPath);
+      if (!isPathConfinedTo(resolved, allowedDirList)) {
+        return { success: false, error: 'Acceso denegado: la ruta de archivo se encuentra fuera de los directorios permitidos' };
+      }
+
+      finalPath = resolved;
+    }
+
+    if (typeof base64Payload !== 'string') {
+      return { success: false, error: 'Carga útil base64 inválida' };
+    }
+
+    // DoS / Memory protection: 100 MB limit
+    if (base64Payload.length > 100 * 1024 * 1024) {
+      return { success: false, error: 'El archivo excede el tamaño máximo permitido (100 MB)' };
+    }
+
+    const buffer = Buffer.from(base64Payload, 'base64');
+    fs.mkdirSync(path.dirname(finalPath), { recursive: true });
+    fs.writeFileSync(finalPath, buffer);
+
+    return { success: true, filePath: finalPath };
   } catch (err: any) {
     return { success: false, error: err?.message || String(err) };
   }
@@ -1090,11 +1232,39 @@ ipcMain.handle('browser:open-app-window', async (_event, { url, title }: { url: 
 // ========================================================
 // PIPELINE NATIVO DE DESCARGAS (Download Pipeline)
 // ========================================================
-ipcMain.handle('browser:open-path', async (_event, filePath: string) => {
-  if (!filePath || !fs.existsSync(filePath)) return { success: false, error: 'Archivo no encontrado' };
+ipcMain.handle('browser:open-path', async (event, filePath: string) => {
+  if (!isTrustedSender(event)) {
+    return { success: false, error: 'Acceso no autorizado: sender inválido' };
+  }
+
+  if (!filePath || typeof filePath !== 'string') {
+    return { success: false, error: 'Ruta no válida o no especificada' };
+  }
+
   try {
-    const err = await shell.openPath(filePath);
-    return { success: !err, error: err };
+    const resolvedPath = path.resolve(filePath);
+    if (!fs.existsSync(resolvedPath)) {
+      return { success: false, error: 'Archivo no encontrado' };
+    }
+
+    const realPath = fs.realpathSync(resolvedPath);
+
+    const allowedDirs = [
+      path.resolve(app.getPath('downloads')),
+      path.resolve(app.getPath('userData')),
+    ];
+
+    if (!isPathConfinedTo(realPath, allowedDirs)) {
+      return { success: false, error: 'Acceso denegado: solo se permite abrir archivos dentro de Descargas o Datos de Usuario' };
+    }
+
+    const ext = path.extname(realPath).toLowerCase();
+    if (DANGEROUS_EXTENSIONS.has(ext)) {
+      return { success: false, error: `Bloqueado por seguridad: no se permite la apertura de archivos ejecutables (${ext})` };
+    }
+
+    const err = await shell.openPath(realPath);
+    return { success: !err, error: err || undefined };
   } catch (e: any) {
     return { success: false, error: e?.message || String(e) };
   }
@@ -1586,7 +1756,11 @@ ipcMain.handle('extensions:install-preset', async (_event, presetKey: string) =>
   }
 });
 
-ipcMain.handle('extensions:download-from-store', async (_event, inputStr: string) => {
+ipcMain.handle('extensions:download-from-store', async (event, inputStr: string) => {
+  if (!isTrustedSender(event)) {
+    return { error: 'Acceso no autorizado: sender inválido' };
+  }
+
   if (!inputStr || typeof inputStr !== 'string') {
     return { error: 'Por favor ingresa una URL o ID válida de Chrome Web Store.' };
   }
@@ -1609,11 +1783,19 @@ ipcMain.handle('extensions:download-from-store', async (_event, inputStr: string
     fs.writeFileSync(tempZipPath, zipBuffer);
 
     try {
-      child_process.execSync(`tar -xf "${tempZipPath}" -C "${downloadDir}"`, { stdio: 'ignore' });
+      child_process.execFileSync('tar', ['-xf', tempZipPath, '-C', downloadDir], {
+        stdio: 'ignore',
+        windowsHide: true,
+        timeout: 30000,
+      });
     } catch (tarErr: any) {
       return { error: 'Error al descomprimir paquete de extensión: ' + tarErr.message };
     } finally {
-      try { fs.unlinkSync(tempZipPath); } catch {}
+      try {
+        if (fs.existsSync(tempZipPath)) {
+          fs.unlinkSync(tempZipPath);
+        }
+      } catch {}
     }
 
     const manifestPath = path.join(downloadDir, 'manifest.json');

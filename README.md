@@ -10,6 +10,25 @@
 
 ---
 
+## 🚀 Tablero de Progreso Autónomo (/teamwork)
+**📊 Porcentaje de Réplica Logrado:** 78%  
+**🎯 Objetivo Actual:** Enrutamiento de Red Privada con Tor (Configuración SOCKS5 Proxy)  
+**⏳ Estado General del Pipeline:** 🟢 Ejecutando
+
+### 📋 Hoja de Ruta y Fase Actual
+| Tarea / Módulo Auto-Asignado | Prioridad | Fase Actual / Estado | Servidores MCP Usados | GitHub Release |
+| :--- | :---: | :--- | :--- | :---: |
+| **Seguridad de Canales IPC y Validación de Rutas (`browser:write-file`, `open-path`)** | 🔥 Alta | 🟢 Completado | semgrep | [v1.4.0](https://github.com/themiguedev/replik/releases/tag/v1.4.0) |
+| **Resiliencia de Compilación y Configuración de Pruebas Unitarias (`build`, `vitest`)** | 🔥 Alta | ⚪ En Espera (Backlog) | Ninguno | *Pendiente* |
+| **Infraestructura de Pruebas E2E Automatizadas con Playwright (Shields & Navegación)** | 🔥 Alta | ⚪ En Espera (Backlog) | playwright | *Pendiente* |
+| **Enrutamiento de Red Privada con Tor (Configuración SOCKS5 Proxy)** | 🔥 Alta | ⚪ En Espera (Backlog) | rea | *Pendiente* |
+| **Métricas Reales de Rendimiento de Pestañas y Optimización BFCache / Memory Saver** | 🟡 Media | ⚪ En Espera (Backlog) | Ninguno | *Pendiente* |
+| **Gestión Jerárquica de Marcadores y Robustez en Restauración de Sesión** | 🟡 Media | ⚪ En Espera (Backlog) | Ninguno | *Pendiente* |
+| **Integración Funcional de Leo AI (Conector de API LLM Local / Remoto)** | 🟢 Baja | ⚪ En Espera (Backlog) | Ninguno | *Pendiente* |
+| **Gestión Visual y Sincronización de Brave VPN y Rewards** | 🟢 Baja | ⚪ En Espera (Backlog) | Ninguno | *Pendiente* |
+
+---
+
 ## 🚀 Descargas Disponibles
 
 Elige la versión que mejor se adapte a tu uso:

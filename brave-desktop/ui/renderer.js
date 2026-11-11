@@ -1747,6 +1747,37 @@ function resolveBraveUrl(url) {
   return url;
 }
 
+// Origin verification and page scoping helpers for guest webview isolation
+function isInternalWebviewOrigin(webviewEl) {
+  try {
+    const urlStr = (webviewEl && typeof webviewEl.getURL === 'function') ? webviewEl.getURL() : '';
+    if (!urlStr) return false;
+    const parsed = new URL(urlStr);
+    // Must be internal file:// scheme pointing to the app's ui directory
+    // or an internal brave:// / chrome-extension:// scheme
+    if (parsed.protocol === 'file:') {
+      const normalizedPath = parsed.pathname.replace(/\\/g, '/').toLowerCase();
+      return normalizedPath.includes('/brave-desktop/ui/') || normalizedPath.includes('/ui/');
+    }
+    return parsed.protocol === 'chrome-extension:' || parsed.protocol === 'brave:';
+  } catch {
+    return false;
+  }
+}
+
+function getInternalPageName(webviewEl) {
+  try {
+    const urlStr = (webviewEl && typeof webviewEl.getURL === 'function') ? webviewEl.getURL() : '';
+    if (!urlStr) return '';
+    const parsed = new URL(urlStr);
+    const pathname = parsed.pathname.toLowerCase().replace(/\\/g, '/');
+    const filename = pathname.split('/').pop() || '';
+    return filename;
+  } catch {
+    return '';
+  }
+}
+
 function createTab(initialUrl = ntpUrl, options = {}) {
   tabCounter++;
   const id = `tab-${tabCounter}`;
@@ -2346,162 +2377,366 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   });
 
   webviewEl.addEventListener('console-message', async (e) => {
-    if (e.message && e.message.startsWith('__BRAVE_PW_SUBMIT__:')) {
+    const msg = typeof e.message === 'string' ? e.message : '';
+    if (!msg) return;
+
+    const isPwSubmit = msg.startsWith('__BRAVE_PW_SUBMIT__:');
+    const isRpc = msg.startsWith('__BRAVE_RPC__:');
+
+    if (!isPwSubmit && !isRpc) {
+      return;
+    }
+
+    // Origin verification guard: drop messages from untrusted origins
+    if (!isInternalWebviewOrigin(webviewEl)) {
+      return;
+    }
+
+    if (isPwSubmit) {
       try {
-        const data = JSON.parse(e.message.slice(20));
+        const data = JSON.parse(msg.slice(20));
         promptSavePassword(tabData, data.username, data.password);
       } catch {}
       return;
     }
 
-    if (e.message && e.message.startsWith('__BRAVE_RPC__:')) {
+    if (isRpc) {
       try {
-        const payload = JSON.parse(e.message.slice(14));
+        const payload = JSON.parse(msg.slice(14));
         const { callId, action, args = [] } = payload;
         let result = null;
         let handled = true;
+        const pageName = getInternalPageName(webviewEl);
 
         if (action === 'getDownloads') {
-          result = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-        } else if (action === 'clearDownloads') {
-          localStorage.removeItem('brave_downloads');
-          result = true;
-        } else if (action === 'deleteDownload') {
-          const dlId = args[0];
-          const list = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-          const filtered = list.filter((item) => item.id !== dlId);
-          localStorage.setItem('brave_downloads', JSON.stringify(filtered));
-          result = true;
-        } else if (action === 'getHistory') {
-          result = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
-        } else if (action === 'clearHistory') {
-          localStorage.removeItem('brave_browser_history');
-          result = true;
-        } else if (action === 'deleteHistoryItem') {
-          const target = args[0];
-          const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
-          let filtered = list;
-          if (typeof target === 'string') {
-            filtered = list.filter((item) => item.id !== target && item.url !== target);
-          } else if (typeof target === 'number' && target >= 0 && target < list.length) {
-            list.splice(target, 1);
-            filtered = list;
+          if (pageName === 'downloads.html') {
+            result = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+          } else {
+            handled = false;
           }
-          localStorage.setItem('brave_browser_history', JSON.stringify(filtered));
-          result = true;
+        } else if (action === 'clearDownloads') {
+          if (pageName === 'downloads.html') {
+            localStorage.removeItem('brave_downloads');
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'deleteDownload') {
+          if (pageName === 'downloads.html') {
+            const dlId = args[0];
+            const list = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+            const filtered = list.filter((item) => item.id !== dlId);
+            localStorage.setItem('brave_downloads', JSON.stringify(filtered));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'openDownloadsFolder') {
+          if (pageName === 'downloads.html' && window.braveAPI && window.braveAPI.openDownloadsFolder) {
+            result = await window.braveAPI.openDownloadsFolder();
+          } else {
+            handled = false;
+          }
+        } else if (action === 'showItemInFolder') {
+          if (pageName === 'downloads.html' && window.braveAPI && window.braveAPI.showItemInFolder) {
+            result = await window.braveAPI.showItemInFolder(args[0]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'cancelDownload') {
+          if (pageName === 'downloads.html' && window.braveAPI && window.braveAPI.cancelDownload) {
+            result = await window.braveAPI.cancelDownload(args[0]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'openPath') {
+          if (pageName === 'downloads.html') {
+            const requestedPath = args[0];
+            const downloadsList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+            const isKnownDownload = downloadsList.some((d) => d.savePath === requestedPath || d.path === requestedPath || d.filename === requestedPath);
+            if (isKnownDownload && window.braveAPI && window.braveAPI.openPath) {
+              result = await window.braveAPI.openPath(requestedPath);
+            } else {
+              result = { success: false, error: 'Ruta no autorizada en historial de descargas' };
+            }
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getHistory') {
+          if (['history.html', 'settings.html', 'ntp.html'].includes(pageName)) {
+            result = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+          } else {
+            handled = false;
+          }
+        } else if (action === 'clearHistory') {
+          if (['history.html', 'settings.html'].includes(pageName)) {
+            localStorage.removeItem('brave_browser_history');
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'deleteHistoryItem') {
+          if (['history.html', 'settings.html'].includes(pageName)) {
+            const target = args[0];
+            const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+            let filtered = list;
+            if (typeof target === 'string') {
+              filtered = list.filter((item) => item.id !== target && item.url !== target);
+            } else if (typeof target === 'number' && target >= 0 && target < list.length) {
+              list.splice(target, 1);
+              filtered = list;
+            }
+            localStorage.setItem('brave_browser_history', JSON.stringify(filtered));
+            result = true;
+          } else {
+            handled = false;
+          }
         } else if (action === 'createTab') {
-          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
-          createTab(targetUrl);
-          result = true;
+          const rawUrl = args[0] || ntpUrl;
+          const targetUrl = resolveBraveUrl(rawUrl);
+          if (!/^javascript:/i.test(targetUrl)) {
+            createTab(targetUrl);
+            result = true;
+          } else {
+            handled = false;
+          }
         } else if (action === 'openWindow') {
           const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
-          if (window.braveAPI && window.braveAPI.openWindow) {
-            window.braveAPI.openWindow(targetUrl);
+          if (!/^javascript:/i.test(targetUrl)) {
+            if (window.braveAPI && window.braveAPI.openWindow) {
+              window.braveAPI.openWindow(targetUrl);
+            } else {
+              createTab(targetUrl);
+            }
+            result = true;
           } else {
-            createTab(targetUrl);
+            handled = false;
           }
-          result = true;
         } else if (action === 'openPrivateWindow') {
           const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
-          if (window.braveAPI && window.braveAPI.openPrivateWindow) {
-            window.braveAPI.openPrivateWindow(targetUrl);
+          if (!/^javascript:/i.test(targetUrl)) {
+            if (window.braveAPI && window.braveAPI.openPrivateWindow) {
+              window.braveAPI.openPrivateWindow(targetUrl);
+            } else {
+              createTab(targetUrl);
+            }
+            result = true;
           } else {
-            createTab(targetUrl);
+            handled = false;
           }
-          result = true;
         } else if (action === 'getBookmarks') {
-          result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
-        } else if (action === 'saveBookmarks') {
-          const newList = args[0] || [];
-          localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
-          renderBookmarks();
-          updateBookmarkStarState();
-          result = true;
-        } else if (action === 'getBookmarkFolders') {
-          result = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
-        } else if (action === 'saveBookmarkFolders') {
-          const folders = args[0] || ['Favoritos', 'Trabajo'];
-          localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
-          result = true;
-        } else if (action === 'getPasswords') {
-          result = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
-        } else if (action === 'savePasswords') {
-          const pwList = args[0] || [];
-          localStorage.setItem('brave_passwords', JSON.stringify(pwList));
-          result = true;
-        } else if (action === 'deletePassword') {
-          const [d, u] = args;
-          const pwList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
-          const filtered = pwList.filter((p) => !(p.domain === d && p.username === u));
-          localStorage.setItem('brave_passwords', JSON.stringify(filtered));
-          result = true;
-        } else if (action === 'clearPasswords') {
-          localStorage.removeItem('brave_passwords');
-          result = true;
-        } else if (action === 'getPlaylist') {
-          result = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
-        } else if (action === 'savePlaylist') {
-          const pl = args[0] || [];
-          localStorage.setItem('brave_playlist_items', JSON.stringify(pl));
-          result = true;
-        } else if (action === 'deletePlaylistItem') {
-          const plId = args[0];
-          const pl = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
-          const filtered = pl.filter((item) => item.id !== plId && item.url !== plId);
-          localStorage.setItem('brave_playlist_items', JSON.stringify(filtered));
-          result = true;
-        } else if (action === 'clearPlaylist') {
-          localStorage.removeItem('brave_playlist_items');
-          result = true;
-        } else if (action === 'getProfile') {
-          result = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
-        } else if (action === 'saveProfile') {
-          localStorage.setItem('brave_autofill_profile', JSON.stringify(args[0] || {}));
-          result = true;
-        } else if (action === 'getSettings') {
-          result = {
-            theme: localStorage.getItem('brave_theme') || 'dark',
-            accent: localStorage.getItem('brave_accent') || 'orange',
-            searchEngine: localStorage.getItem('brave_setting_engine') || 'brave',
-            shieldsLevel: localStorage.getItem('brave_setting_level') || 'standard',
-            farbling: localStorage.getItem('brave_setting_farbling') !== 'false',
-            queryStrip: localStorage.getItem('brave_setting_query') !== 'false',
-            tabSnooze: localStorage.getItem('brave_tab_snooze') || '30',
-            startupMode: localStorage.getItem('brave_startup_mode') || 'continue',
-            syncPhrase: localStorage.getItem('brave_sync_phrase') || '',
-          };
-        } else if (action === 'updateSetting') {
-          const [key, val] = args;
-          localStorage.setItem(key, String(val));
-          if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
-          if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
-          if (key === 'brave_setting_engine') currentSearchEngine = val;
-          if (window.braveAPI && window.braveAPI.updateBackendSetting) {
-            window.braveAPI.updateBackendSetting(key, val);
-          }
-          result = true;
-        } else if (action === 'clearBrowsingData') {
-          const opts = args[0] || {};
-          const dTypes = opts.dataTypes || [];
-          if (dTypes.includes('history')) {
-            localStorage.removeItem('brave_browser_history');
-          }
-          if (dTypes.includes('storage') || dTypes.includes('cookies')) {
-            try {
-              Object.keys(localStorage).forEach((k) => {
-                if (k.startsWith('brave_perms_')) {
-                  localStorage.removeItem(k);
-                }
-              });
-            } catch {}
-          }
-          if (window.braveAPI && window.braveAPI.clearBrowsingData) {
-            result = await window.braveAPI.clearBrowsingData(opts);
+          if (['bookmarks.html', 'ntp.html', 'settings.html'].includes(pageName)) {
+            result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
           } else {
-            result = { success: true };
+            handled = false;
           }
-        } else if (window.braveAPI && typeof window.braveAPI[action] === 'function') {
-          result = await window.braveAPI[action](...args);
+        } else if (action === 'saveBookmarks') {
+          if (pageName === 'bookmarks.html') {
+            const newList = args[0] || [];
+            localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
+            renderBookmarks();
+            updateBookmarkStarState();
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getBookmarkFolders') {
+          if (['bookmarks.html', 'settings.html'].includes(pageName)) {
+            result = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+          } else {
+            handled = false;
+          }
+        } else if (action === 'saveBookmarkFolders') {
+          if (pageName === 'bookmarks.html') {
+            const folders = args[0] || ['Favoritos', 'Trabajo'];
+            localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getPasswords') {
+          if (pageName === 'settings.html') {
+            result = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+          } else {
+            handled = false;
+          }
+        } else if (action === 'savePasswords') {
+          if (pageName === 'settings.html') {
+            const pwList = args[0] || [];
+            localStorage.setItem('brave_passwords', JSON.stringify(pwList));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'deletePassword') {
+          if (pageName === 'settings.html') {
+            const [d, u] = args;
+            const pwList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+            const filtered = pwList.filter((p) => !(p.domain === d && p.username === u));
+            localStorage.setItem('brave_passwords', JSON.stringify(filtered));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'clearPasswords') {
+          if (pageName === 'settings.html') {
+            localStorage.removeItem('brave_passwords');
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getPlaylist') {
+          if (pageName === 'playlist.html') {
+            result = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
+          } else {
+            handled = false;
+          }
+        } else if (action === 'savePlaylist') {
+          if (pageName === 'playlist.html') {
+            const pl = args[0] || [];
+            localStorage.setItem('brave_playlist_items', JSON.stringify(pl));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'deletePlaylistItem') {
+          if (pageName === 'playlist.html') {
+            const plId = args[0];
+            const pl = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
+            const filtered = pl.filter((item) => item.id !== plId && item.url !== plId);
+            localStorage.setItem('brave_playlist_items', JSON.stringify(filtered));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'clearPlaylist') {
+          if (pageName === 'playlist.html') {
+            localStorage.removeItem('brave_playlist_items');
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getProfile') {
+          if (pageName === 'settings.html') {
+            result = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
+          } else {
+            handled = false;
+          }
+        } else if (action === 'saveProfile') {
+          if (pageName === 'settings.html') {
+            localStorage.setItem('brave_autofill_profile', JSON.stringify(args[0] || {}));
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getSettings') {
+          if (['settings.html', 'ntp.html'].includes(pageName)) {
+            result = {
+              theme: localStorage.getItem('brave_theme') || 'dark',
+              accent: localStorage.getItem('brave_accent') || 'orange',
+              searchEngine: localStorage.getItem('brave_setting_engine') || 'brave',
+              shieldsLevel: localStorage.getItem('brave_setting_level') || 'standard',
+              farbling: localStorage.getItem('brave_setting_farbling') !== 'false',
+              queryStrip: localStorage.getItem('brave_setting_query') !== 'false',
+              tabSnooze: localStorage.getItem('brave_tab_snooze') || '30',
+              startupMode: localStorage.getItem('brave_startup_mode') || 'continue',
+              syncPhrase: localStorage.getItem('brave_sync_phrase') || '',
+            };
+          } else {
+            handled = false;
+          }
+        } else if (action === 'updateSetting') {
+          if (pageName === 'settings.html') {
+            const [key, val] = args;
+            localStorage.setItem(key, String(val));
+            if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
+            if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
+            if (key === 'brave_setting_engine') currentSearchEngine = val;
+            if (window.braveAPI && window.braveAPI.updateBackendSetting) {
+              window.braveAPI.updateBackendSetting(key, val);
+            }
+            result = true;
+          } else {
+            handled = false;
+          }
+        } else if (action === 'clearBrowsingData') {
+          if (['settings.html', 'history.html'].includes(pageName)) {
+            const opts = args[0] || {};
+            const dTypes = opts.dataTypes || [];
+            if (dTypes.includes('history')) {
+              localStorage.removeItem('brave_browser_history');
+            }
+            if (dTypes.includes('storage') || dTypes.includes('cookies')) {
+              try {
+                Object.keys(localStorage).forEach((k) => {
+                  if (k.startsWith('brave_perms_')) {
+                    localStorage.removeItem(k);
+                  }
+                });
+              } catch {}
+            }
+            if (window.braveAPI && window.braveAPI.clearBrowsingData) {
+              result = await window.braveAPI.clearBrowsingData(opts);
+            } else {
+              result = { success: true };
+            }
+          } else {
+            handled = false;
+          }
+        } else if (action === 'syncCustomRules') {
+          if (pageName === 'adblock.html' && window.braveAPI && window.braveAPI.syncCustomRules) {
+            result = await window.braveAPI.syncCustomRules(args[0]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'listExtensions') {
+          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.listExtensions) {
+            result = await window.braveAPI.listExtensions();
+          } else {
+            handled = false;
+          }
+        } else if (action === 'toggleExtension') {
+          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.toggleExtension) {
+            result = await window.braveAPI.toggleExtension(args[0], args[1]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'removeExtension') {
+          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.removeExtension) {
+            result = await window.braveAPI.removeExtension(args[0]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'loadUnpackedExtension') {
+          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.loadUnpackedExtension) {
+            result = await window.braveAPI.loadUnpackedExtension();
+          } else {
+            handled = false;
+          }
+        } else if (action === 'installPresetExtension') {
+          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.installPresetExtension) {
+            result = await window.braveAPI.installPresetExtension(args[0]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'downloadStoreExtension') {
+          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.downloadStoreExtension) {
+            result = await window.braveAPI.downloadStoreExtension(args[0]);
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getVersionInfo') {
+          if (pageName === 'version.html' && window.braveAPI && window.braveAPI.getVersionInfo) {
+            result = await window.braveAPI.getVersionInfo();
+          } else {
+            handled = false;
+          }
+        } else if (action === 'getSavingsStats') {
+          if (['ntp.html', 'version.html'].includes(pageName) && window.braveAPI && window.braveAPI.getSavingsStats) {
+            result = await window.braveAPI.getSavingsStats();
+          } else {
+            handled = false;
+          }
         } else {
           handled = false;
         }
@@ -3006,14 +3241,16 @@ function hideTabHoverCard() {
 // ==========================================
 // 7. CONTROL GLOBAL DE MULTIMEDIA (Global Media Controls)
 // ==========================================
-btnGlobalMedia.addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeSuggestions();
-  shieldsPopup.classList.remove('open');
-  mainMenu.classList.remove('open');
-  globalMediaPopup.classList.toggle('open');
-  updateGlobalMediaMenu();
-});
+if (btnGlobalMedia) {
+  btnGlobalMedia.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeSuggestions();
+    shieldsPopup.classList.remove('open');
+    mainMenu.classList.remove('open');
+    globalMediaPopup.classList.toggle('open');
+    updateGlobalMediaMenu();
+  });
+}
 
 const btnGlobalMuteAll = document.getElementById('btn-global-mute-all');
 if (btnGlobalMuteAll) {
@@ -4396,10 +4633,13 @@ if (menuFind) {
   });
 }
 
-document.getElementById('menu-new-tab').addEventListener('click', () => {
-  createTab(ntpUrl);
-  mainMenu.classList.remove('open');
-});
+const menuNewTab = document.getElementById('menu-new-tab');
+if (menuNewTab) {
+  menuNewTab.addEventListener('click', () => {
+    createTab(ntpUrl);
+    mainMenu.classList.remove('open');
+  });
+}
 
 const menuNewWindow = document.getElementById('menu-new-window');
 if (menuNewWindow) {
@@ -4413,10 +4653,13 @@ if (menuNewWindow) {
   });
 }
 
-document.getElementById('menu-new-private').addEventListener('click', () => {
-  if (window.braveAPI) window.braveAPI.openPrivateWindow();
-  mainMenu.classList.remove('open');
-});
+const menuNewPrivate = document.getElementById('menu-new-private');
+if (menuNewPrivate) {
+  menuNewPrivate.addEventListener('click', () => {
+    if (window.braveAPI) window.braveAPI.openPrivateWindow();
+    mainMenu.classList.remove('open');
+  });
+}
 
 const menuNewTor = document.getElementById('menu-new-tor');
 if (menuNewTor) {
@@ -4474,16 +4717,22 @@ if (menuAdblock) {
   });
 }
 
-document.getElementById('menu-settings').addEventListener('click', () => {
-  createTab(settingsUrl);
-  mainMenu.classList.remove('open');
-});
+const menuSettings = document.getElementById('menu-settings');
+if (menuSettings) {
+  menuSettings.addEventListener('click', () => {
+    createTab(settingsUrl);
+    mainMenu.classList.remove('open');
+  });
+}
 
-document.getElementById('menu-devtools').addEventListener('click', () => {
-  const tab = getActiveTab();
-  if (tab) tab.webviewEl.openDevTools();
-  mainMenu.classList.remove('open');
-});
+const menuDevtools = document.getElementById('menu-devtools');
+if (menuDevtools) {
+  menuDevtools.addEventListener('click', () => {
+    const tab = getActiveTab();
+    if (tab) tab.webviewEl.openDevTools();
+    mainMenu.classList.remove('open');
+  });
+}
 
 const menuBookmarksManager = document.getElementById('menu-bookmarks-manager');
 if (menuBookmarksManager) {
@@ -4493,10 +4742,13 @@ if (menuBookmarksManager) {
   });
 }
 
-document.getElementById('menu-about').addEventListener('click', () => {
-  createTab(versionUrl);
-  mainMenu.classList.remove('open');
-});
+const menuAbout = document.getElementById('menu-about');
+if (menuAbout) {
+  menuAbout.addEventListener('click', () => {
+    createTab(versionUrl);
+    mainMenu.classList.remove('open');
+  });
+}
 
 const menuPlaylist = document.getElementById('menu-playlist');
 if (menuPlaylist) {
@@ -7205,28 +7457,11 @@ if (btnVpnHaveAccount) {
 }
 
 // 3. Extensions Popup
-const btnExtensions = document.getElementById('btn-extensions');
-const extensionsPopup = document.getElementById('extensions-popup');
 const btnCloseExtPopup = document.getElementById('btn-close-ext-popup');
-const btnGotoExtensions = document.getElementById('btn-goto-extensions');
-
-if (btnExtensions && extensionsPopup) {
-  btnExtensions.addEventListener('click', (e) => {
-    e.stopPropagation();
-    extensionsPopup.classList.toggle('open');
-  });
-}
 
 if (btnCloseExtPopup && extensionsPopup) {
   btnCloseExtPopup.addEventListener('click', () => {
     extensionsPopup.classList.remove('open');
-  });
-}
-
-if (btnGotoExtensions) {
-  btnGotoExtensions.addEventListener('click', () => {
-    if (extensionsPopup) extensionsPopup.classList.remove('open');
-    createTab(webstoreUrl);
   });
 }
 
