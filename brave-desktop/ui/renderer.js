@@ -2852,22 +2852,28 @@ function restoreTabBFCache(tabData, targetUrl) {
 // ==========================================
 function throttleBackgroundTab(tabData) {
   if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function' || tabData.isAudible) return;
-  tabData.webviewEl.executeJavaScript(`
-    if (!window.__brave_throttled__) {
-      window.__brave_throttled__ = true;
-      document.body && document.body.setAttribute('data-brave-background', 'true');
-    }
-  `).catch(() => {});
+  try {
+    if (!tabData.webviewEl.isConnected) return;
+    tabData.webviewEl.executeJavaScript(`
+      if (!window.__brave_throttled__) {
+        window.__brave_throttled__ = true;
+        document.body && document.body.setAttribute('data-brave-background', 'true');
+      }
+    `).catch(() => {});
+  } catch (_) {}
 }
 
 function resumeTabExecution(tabData) {
   if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function') return;
-  tabData.webviewEl.executeJavaScript(`
-    if (window.__brave_throttled__) {
-      window.__brave_throttled__ = false;
-      document.body && document.body.removeAttribute('data-brave-background');
-    }
-  `).catch(() => {});
+  try {
+    if (!tabData.webviewEl.isConnected) return;
+    tabData.webviewEl.executeJavaScript(`
+      if (window.__brave_throttled__) {
+        window.__brave_throttled__ = false;
+        document.body && document.body.removeAttribute('data-brave-background');
+      }
+    `).catch(() => {});
+  } catch (_) {}
 }
 
 function switchTab(id) {

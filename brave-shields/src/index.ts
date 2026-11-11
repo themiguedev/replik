@@ -5,3 +5,4 @@ export * from './network-matcher.js';
 export * from './cosmetic-filter.js';
 export * from './query-stripper.js';
 export * from './shields-engine.js';
+export * from './default-rules.js';

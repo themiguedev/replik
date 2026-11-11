@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, session, shell } from 'electron';
 import child_process from 'node:child_process';
 import fs from 'node:fs';
 import https from 'node:https';
+import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -27,22 +28,16 @@ app.commandLine.appendSwitch('enable-features', 'OverlayScrollbar,CanvasOopRaste
 app.commandLine.appendSwitch('high-dpi-support', '1');
 app.commandLine.appendSwitch('enable-accelerated-video-decode');
 app.commandLine.appendSwitch('enable-accelerated-2d-canvas');
+app.commandLine.appendSwitch('dns-prefetch-disable');
 
-// Shields per-domain configuration: Bloqueo de scripts activo por defecto
+// Shields per-domain configuration: Scripts permitidos por defecto
 const shieldsDisabledDomains = new Set<string>();
-const scriptAllowedDomains = new Set<string>([
-  'search.brave.com',
-  'brave.com',
-  'youtube.com',
-  'googlevideo.com',
-  'ytimg.com',
-  'ggpht.com',
-  'localhost',
-  '127.0.0.1',
-]);
 const scriptBlockedDomains = new Set<string>();
+const scriptAllowedDomains = new Set<string>();
+let isScriptsGloballyBlocked = false;
 const aggressiveModeDomains = new Set<string>();
 const forgetfulDomains = new Set<string>();
+const torWindows = new Set<BrowserWindow>();
 
 function isLocalOrPrivateIp(hostname: string): boolean {
   if (!hostname) return false;
@@ -55,23 +50,79 @@ function isLocalOrPrivateIp(hostname: string): boolean {
   return false;
 }
 
-function isDomainScriptBlocked(domain: string): boolean {
+function isDomainInSet(domain: string, domainSet: Set<string>): boolean {
   if (!domain) return false;
   const d = domain.toLowerCase();
-  // Sitios esenciales para reproducción multimedia y servicios internos: permitidos salvo bloqueo explícito
-  if (
-    d === 'localhost' ||
-    d === '127.0.0.1' ||
-    d.endsWith('youtube.com') ||
-    d.endsWith('googlevideo.com') ||
-    d.endsWith('ytimg.com') ||
-    d.endsWith('ggpht.com') ||
-    d.endsWith('brave.com')
-  ) {
-    return scriptBlockedDomains.has(d);
+  if (domainSet.has(d)) return true;
+  const parts = d.split('.');
+  for (let i = 1; i < parts.length - 1; i++) {
+    if (domainSet.has(parts.slice(i).join('.'))) return true;
   }
-  // Para cualquier otro sitio web, el bloqueo de scripts está ACTIVO por defecto
-  return !scriptAllowedDomains.has(d);
+  return false;
+}
+
+export function isDomainScriptBlocked(domain: string): boolean {
+  if (!domain) return false;
+  const d = domain.toLowerCase();
+
+  // Si el bloqueo global de scripts está activo (modo seguridad máxima)
+  if (isScriptsGloballyBlocked) {
+    if (d === 'localhost' || d === '127.0.0.1' || isLocalOrPrivateIp(d)) {
+      return false;
+    }
+    return !isDomainInSet(d, scriptAllowedDomains);
+  }
+
+  // Por defecto, JavaScript está PERMITIDO en toda la web abierta.
+  // Solo se bloquea si el usuario lo activó explícitamente para este dominio o dominio padre.
+  return isDomainInSet(d, scriptBlockedDomains);
+}
+
+export function checkTorConnectivity(host = '127.0.0.1', port = 9050, timeoutMs = 1000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    let resolved = false;
+
+    const cleanup = (result: boolean) => {
+      if (!resolved) {
+        resolved = true;
+        socket.removeAllListeners();
+        socket.destroy();
+        resolve(result);
+      }
+    };
+
+    socket.setTimeout(timeoutMs);
+    socket.once('connect', () => cleanup(true));
+    socket.once('timeout', () => cleanup(false));
+    socket.once('error', () => cleanup(false));
+
+    try {
+      socket.connect(port, host);
+    } catch {
+      cleanup(false);
+    }
+  });
+}
+
+export async function configureTorSession(torSession: Electron.Session): Promise<void> {
+  if (typeof torSession.setProxy === 'function') {
+    await torSession.setProxy({
+      mode: 'fixed_servers',
+      proxyRules: 'socks5://127.0.0.1:9050',
+      proxyBypassRules: '<local>',
+    });
+  }
+  if (typeof torSession.closeAllConnections === 'function') {
+    try {
+      await torSession.closeAllConnections();
+    } catch {}
+  }
+  if (typeof torSession.setWebRTCIPHandlingPolicy === 'function') {
+    try {
+      torSession.setWebRTCIPHandlingPolicy('disable_non_proxied_udp');
+    } catch {}
+  }
 }
 
 // Allowed storage base directories for safe file operations
@@ -149,14 +200,20 @@ function getDomain(urlStr: string): string {
 function initShieldsRules() {
   console.log('[Brave-Replica] Inicializando motor de protección Brave Shields...');
 
-  // 1. Cargar reglas empaquetadas si existen (modo portable autónomo)
+  // 1. Cargar SIEMPRE las reglas base esenciales de EasyList y EasyPrivacy
+  const baseCounts = shieldsEngine.loadBaseRules();
+  console.log(
+    `[Brave-Replica] Reglas base EasyList cargadas: ${baseCounts.network} red, ${baseCounts.cosmetic} cosméticas.`
+  );
+
+  // 2. Cargar filtros complementarios empaquetados si existen (modo portable autónomo)
   const localRulesPath = path.join(baseDir, 'data', 'rules.txt');
   const localQueryPath = path.join(baseDir, 'data', 'query-filter.json');
 
   let loadedRules = false;
 
   if (fs.existsSync(localRulesPath)) {
-    console.log(`[Brave-Replica] Cargando filtros empaquetados desde: ${localRulesPath}`);
+    console.log(`[Brave-Replica] Cargando filtros complementarios desde: ${localRulesPath}`);
     const raw = fs.readFileSync(localRulesPath, 'utf-8');
     const counts = shieldsEngine.loadRulesFromText(raw);
     console.log(
@@ -588,7 +645,12 @@ function notifyShieldsUpdate(domain: string, immediate = false) {
 // Guardias de Ciclo de Vida de Electron (Webview Hardening y Control de Ventanas Emergentes)
 app.on('web-contents-created', (_createEvent, contents) => {
   // 1. will-attach-webview guard: strip preload scripts and enforce sandboxing
-  contents.on('will-attach-webview', (_attachEvent, webPreferences, _params) => {
+  contents.on('will-attach-webview', (_attachEvent, webPreferences, params: any) => {
+    if (params && params.partition && (params.partition.startsWith('temp_tor_') || params.partition.startsWith('tor_'))) {
+      const torSess = session.fromPartition(params.partition);
+      configureTorSession(torSess).catch(() => {});
+    }
+
     delete (webPreferences as any).preload;
     delete (webPreferences as any).preloadURL;
 
@@ -628,11 +690,17 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
   let title = 'Brave Browser';
   let backgroundColor = '#19191c';
   let modeArg = '--normal-mode';
+  let torPartitionName: string | null = null;
 
   if (isTor) {
     title = 'Brave (Ventana Privada con Tor)';
     backgroundColor = '#140824';
     modeArg = '--tor-mode';
+    torPartitionName = `temp_tor_${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+    const torSess = session.fromPartition(torPartitionName);
+    configureTorSession(torSess).catch((err) => {
+      console.warn('[Tor] Error al configurar proxy SOCKS5 en partición:', err);
+    });
   } else if (isPrivate) {
     title = 'Brave (Ventana Privada)';
     backgroundColor = '#181124';
@@ -647,6 +715,9 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
   }
   if (profile) {
     additionalArgs.push(`--profile=${profile}`);
+  }
+  if (torPartitionName) {
+    additionalArgs.push(`--tor-partition=${torPartitionName}`);
   }
 
   const win = new BrowserWindow({
@@ -671,6 +742,9 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
   });
 
   openWindows.add(win);
+  if (isTor) {
+    torWindows.add(win);
+  }
   if (!isPrivate && !isTor && !mainWindow) {
     mainWindow = win;
   }
@@ -829,6 +903,7 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
   });
 
   win.on('closed', () => {
+    torWindows.delete(win);
     openWindows.delete(win);
     if (mainWindow === win) {
       const nextWin = openWindows.values().next().value;
@@ -953,8 +1028,8 @@ ipcMain.handle('shields:toggle-scripts', (_event, domain: string) => {
   const cleanDomain = domain.toLowerCase();
   const currentlyBlocked = isDomainScriptBlocked(cleanDomain);
   if (currentlyBlocked) {
-    scriptAllowedDomains.add(cleanDomain);
     scriptBlockedDomains.delete(cleanDomain);
+    scriptAllowedDomains.add(cleanDomain);
   } else {
     scriptBlockedDomains.add(cleanDomain);
     scriptAllowedDomains.delete(cleanDomain);
@@ -988,6 +1063,20 @@ ipcMain.handle('browser:open-private-window', (_event, initialUrl?: string) => {
 
 ipcMain.handle('browser:open-tor-window', (_event, initialUrl?: string) => {
   createBrowserWindow({ isPrivate: true, isTor: true, initialUrl });
+});
+
+ipcMain.handle('tor:get-status', async (event) => {
+  if (!isTrustedSender(event)) {
+    return { connected: false, port: 9050, proxyActive: false, error: 'Acceso no autorizado: sender inválido' };
+  }
+  const isConnected = await checkTorConnectivity('127.0.0.1', 9050, 1000);
+  const win = typeof BrowserWindow.fromWebContents === 'function' ? BrowserWindow.fromWebContents(event.sender) : null;
+  const isTor = win ? torWindows.has(win) : false;
+  return {
+    connected: isConnected,
+    port: 9050,
+    proxyActive: isTor,
+  };
 });
 
 ipcMain.handle('browser:open-profile-window', (_event, profileId: string, initialUrl?: string) => {
@@ -1113,6 +1202,8 @@ ipcMain.handle('settings:update', (_event, key: string, value: any) => {
     isFarblingGloballyEnabled = value !== 'false' && value !== false;
   } else if (key === 'brave_setting_query') {
     isQueryStripGloballyEnabled = value !== 'false' && value !== false;
+  } else if (key === 'brave_setting_scripts' || key === 'brave_setting_block_scripts') {
+    isScriptsGloballyBlocked = value === 'true' || value === true;
   }
   return { success: true };
 });
@@ -1894,7 +1985,9 @@ app.whenReady().then(async () => {
     }
   });
 
-  createBrowserWindow();
+  const startTor = process.argv.includes('--tor-mode');
+  const startPrivate = process.argv.includes('--private-mode');
+  createBrowserWindow({ isTor: startTor, isPrivate: startPrivate || startTor });
 
   app.on('activate', () => {
     if (openWindows.size === 0) createBrowserWindow();

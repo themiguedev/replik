@@ -3,6 +3,7 @@ import { NetworkMatcher } from './network-matcher.js';
 import { QueryStripper } from './query-stripper.js';
 import { ResourceCatalog } from './resource-catalog.js';
 import { RuleParser } from './rule-parser.js';
+import { BASE_EASYLIST_RULES } from './default-rules.js';
 import {
   MatchResult,
   QueryFilterRule,
@@ -31,6 +32,14 @@ export class BraveShieldsEngine {
     this.networkMatcher = new NetworkMatcher(this.resourceCatalog);
     this.cosmeticEngine = new CosmeticFilterEngine();
     this.queryStripper = new QueryStripper();
+  }
+
+  public loadBaseRules(): {
+    network: number;
+    cosmetic: number;
+    scriptlets: number;
+  } {
+    return this.loadRulesFromText(BASE_EASYLIST_RULES);
   }
 
   public loadRulesFromText(rulesContent: string): {

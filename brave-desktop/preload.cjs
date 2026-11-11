@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
     return found ? found.slice(prefix.length) : null;
   },
   toggleFullScreen: () => ipcRenderer.invoke('browser:toggle-fullscreen'),
+  getTorStatus: () => ipcRenderer.invoke('tor:get-status'),
   isTorMode: () => process.argv.includes('--tor-mode'),
   isPrivateMode: () => process.argv.includes('--private-mode') || process.argv.includes('--tor-mode'),
 
@@ -115,7 +116,17 @@ contextBridge.exposeInMainWorld('braveAPI', {
   openProfileWindow: (profileId, initialUrl) => ipcRenderer.invoke('browser:open-profile-window', profileId, initialUrl),
 
   getSessionPartition: () => {
-    const isPrivate = process.argv.includes('--private-mode') || process.argv.includes('--tor-mode');
+    const isTor = process.argv.includes('--tor-mode');
+    if (isTor) {
+      if (!cachedPrivatePartition) {
+        const torArg = process.argv.find((a) => a.startsWith('--tor-partition='));
+        cachedPrivatePartition = torArg
+          ? torArg.split('=')[1]
+          : `temp_tor_${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+      }
+      return cachedPrivatePartition;
+    }
+    const isPrivate = process.argv.includes('--private-mode');
     if (isPrivate) {
       if (!cachedPrivatePartition) {
         cachedPrivatePartition = `temp_private_${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2)}`;

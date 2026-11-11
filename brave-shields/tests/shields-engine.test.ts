@@ -119,6 +119,53 @@ describe('Brave Shields Reconstructed Engine', () => {
         'data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
       );
     });
+
+    it('loads baseline EasyList rules and blocks major ad networks out of the box', () => {
+      const engine = new BraveShieldsEngine();
+      const counts = engine.loadBaseRules();
+
+      expect(counts.network).toBeGreaterThanOrEqual(35);
+      expect(counts.cosmetic).toBeGreaterThanOrEqual(5);
+
+      // Block DoubleClick
+      const doubleclickRes = engine.interceptRequest({
+        url: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+        documentUrl: 'https://news.example.com',
+        resourceType: 'script',
+      });
+      expect(doubleclickRes.action).toBe('block');
+
+      // Surrogate redirect for Google Analytics
+      const gaRes = engine.interceptRequest({
+        url: 'https://www.google-analytics.com/analytics.js',
+        documentUrl: 'https://news.example.com',
+        resourceType: 'script',
+      });
+      expect(gaRes.action).toBe('redirect');
+      expect(gaRes.redirectDataUri).toContain('data:application/javascript');
+
+      // Block AppNexus (adnxs.com)
+      const adnxsRes = engine.interceptRequest({
+        url: 'https://ib.adnxs.com/seg?add=1',
+        documentUrl: 'https://news.example.com',
+        resourceType: 'script',
+      });
+      expect(adnxsRes.action).toBe('block');
+
+      // Block Criteo
+      const criteoRes = engine.interceptRequest({
+        url: 'https://static.criteo.net/js/ld/ld.js',
+        documentUrl: 'https://shop.example.com',
+        resourceType: 'script',
+      });
+      expect(criteoRes.action).toBe('block');
+
+      // Cosmetic hiding selectors for ads
+      const cosmetics = engine.injectCosmetics('randomsite.org');
+      expect(cosmetics.selectors).toContain('.ad-banner');
+      expect(cosmetics.selectors).toContain('.adsbygoogle');
+      expect(cosmetics.selectors).toContain('[id^="google_ads_"]');
+    });
   });
 
   describe('Cosmetic Filtering (Element Hiding)', () => {

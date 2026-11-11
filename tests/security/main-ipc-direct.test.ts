@@ -32,6 +32,8 @@ vi.mock('electron', () => {
       quit: vi.fn(),
     },
     BrowserWindow: class {
+      static fromWebContents = vi.fn().mockReturnValue(null);
+      static getFocusedWindow = vi.fn().mockReturnValue(null);
       webContents = {
         send: vi.fn(),
         on: vi.fn(),
@@ -66,6 +68,8 @@ vi.mock('electron', () => {
         setUserAgent: vi.fn(),
         setWebRTCIPHandlingPolicy: vi.fn(),
         setPermissionRequestHandler: vi.fn(),
+        setProxy: vi.fn().mockResolvedValue(undefined),
+        closeAllConnections: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
         loadExtension: vi.fn(),
       },
@@ -78,6 +82,8 @@ vi.mock('electron', () => {
         setUserAgent: vi.fn(),
         setWebRTCIPHandlingPolicy: vi.fn(),
         setPermissionRequestHandler: vi.fn(),
+        setProxy: vi.fn().mockResolvedValue(undefined),
+        closeAllConnections: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
         loadExtension: vi.fn(),
       }),
@@ -93,6 +99,9 @@ describe('Direct Integration Tests on brave-desktop/main.ts Handlers', () => {
   let writeFileHandler: Function;
   let openPathHandler: Function;
   let downloadExtensionHandler: Function;
+  let shieldsGetStatusHandler: Function;
+  let shieldsToggleScriptsHandler: Function;
+  let torGetStatusHandler: Function;
   let trustedEvent: any;
   let untrustedEvent: any;
 
@@ -103,11 +112,15 @@ describe('Direct Integration Tests on brave-desktop/main.ts Handlers', () => {
     writeFileHandler = registeredHandlers.get('browser:write-file')!;
     openPathHandler = registeredHandlers.get('browser:open-path')!;
     downloadExtensionHandler = registeredHandlers.get('extensions:download-from-store')!;
+    shieldsGetStatusHandler = registeredHandlers.get('shields:get-status')!;
+    shieldsToggleScriptsHandler = registeredHandlers.get('shields:toggle-scripts')!;
+    torGetStatusHandler = registeredHandlers.get('tor:get-status')!;
 
     const baseDir = path.resolve(__dirname, '../../brave-desktop');
     const trustedUrl = pathToFileURL(path.join(baseDir, 'ui', 'index.html')).href;
 
     trustedEvent = {
+      sender: { id: 1 },
       senderFrame: {
         parent: null,
         url: trustedUrl,
@@ -115,6 +128,7 @@ describe('Direct Integration Tests on brave-desktop/main.ts Handlers', () => {
     };
 
     untrustedEvent = {
+      sender: { id: 2 },
       senderFrame: {
         parent: null,
         url: 'https://attacker.com/index.html',
@@ -132,6 +146,9 @@ describe('Direct Integration Tests on brave-desktop/main.ts Handlers', () => {
     expect(writeFileHandler).toBeDefined();
     expect(openPathHandler).toBeDefined();
     expect(downloadExtensionHandler).toBeDefined();
+    expect(shieldsGetStatusHandler).toBeDefined();
+    expect(shieldsToggleScriptsHandler).toBeDefined();
+    expect(torGetStatusHandler).toBeDefined();
   });
 
   // --- browser:write-file Direct Stress Tests ---
@@ -269,6 +286,75 @@ describe('Direct Integration Tests on brave-desktop/main.ts Handlers', () => {
         const res = await downloadExtensionHandler(trustedEvent, inp);
         expect(res.error).toMatch(/No se detectó un ID de extensión válido|Por favor ingresa/i);
       }
+    });
+  });
+
+  // --- Shields Script Blocking Inversion & Per-Domain Tests ---
+  describe('Shields Script Blocking Inversion (allowed by default)', () => {
+    it('allows scripts by default on open web domains', async () => {
+      const domains = ['example.com', 'wikipedia.org', 'github.com', 'news.ycombinator.com'];
+      for (const domain of domains) {
+        const status = await shieldsGetStatusHandler(trustedEvent, domain);
+        expect(status.scriptsBlocked).toBe(false);
+      }
+    });
+
+    it('toggles script blocking for a specific domain and persists state', async () => {
+      // Initially not blocked
+      const initial = await shieldsGetStatusHandler(trustedEvent, 'testsite.org');
+      expect(initial.scriptsBlocked).toBe(false);
+
+      // Toggle to blocked
+      const toggled1 = await shieldsToggleScriptsHandler(trustedEvent, 'testsite.org');
+      expect(toggled1.scriptsBlocked).toBe(true);
+
+      const status1 = await shieldsGetStatusHandler(trustedEvent, 'testsite.org');
+      expect(status1.scriptsBlocked).toBe(true);
+
+      // Subdomains also inherit script blocking
+      const subStatus = await shieldsGetStatusHandler(trustedEvent, 'sub.testsite.org');
+      expect(subStatus.scriptsBlocked).toBe(true);
+
+      // Toggle back to allowed
+      const toggled2 = await shieldsToggleScriptsHandler(trustedEvent, 'testsite.org');
+      expect(toggled2.scriptsBlocked).toBe(false);
+
+      const status2 = await shieldsGetStatusHandler(trustedEvent, 'testsite.org');
+      expect(status2.scriptsBlocked).toBe(false);
+    });
+  });
+
+  // --- Tor SOCKS5 Proxy & Status IPC Tests ---
+  describe('tor:get-status and Tor Connectivity Verification', () => {
+    it('rejects untrusted sender for tor:get-status', async () => {
+      const res = await torGetStatusHandler(untrustedEvent);
+      expect(res.proxyActive).toBe(false);
+      expect(res.error).toMatch(/Acceso no autorizado: sender inválido/i);
+    });
+
+    it('returns Tor status object for trusted sender', async () => {
+      const res = await torGetStatusHandler(trustedEvent);
+      expect(res).toHaveProperty('connected');
+      expect(typeof res.connected).toBe('boolean');
+      expect(res.port).toBe(9050);
+      expect(typeof res.proxyActive).toBe('boolean');
+    });
+
+    it('verifies checkTorConnectivity with local net socket', async () => {
+      const { checkTorConnectivity } = await import('../../brave-desktop/main.ts');
+      const net = await import('node:net');
+
+      // Test offline port cleanly returns false without throwing
+      const offline = await checkTorConnectivity('127.0.0.1', 65432, 200);
+      expect(offline).toBe(false);
+
+      // Test active listening server cleanly returns true
+      const server = net.createServer();
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+      const address = server.address() as net.AddressInfo;
+      const online = await checkTorConnectivity('127.0.0.1', address.port, 500);
+      expect(online).toBe(true);
+      await new Promise<void>((resolve) => server.close(() => resolve()));
     });
   });
 });
