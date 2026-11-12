@@ -1,6 +1,6 @@
 {
   "name": "brave-replica",
-  "version": "1.0.0",
+  "version": "1.7.0",
   "description": "Brave Browser Educational Replica",
   "main": "dist/main.mjs",
   "type": "module",
