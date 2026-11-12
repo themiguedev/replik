@@ -164,10 +164,34 @@ body {
   height: 32px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.15s ease, color 0.15s ease, max-width 0.15s ease, min-width 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, max-width 0.15s ease, min-width 0.15s ease, width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   color: #9aa0a6;
   -webkit-app-region: no-drag;
   margin: 4px 0;
+}
+
+@keyframes tabCloseKeyframes {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    max-width: 210px;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+    max-width: 0;
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.tab.closing {
+  animation: tabCloseKeyframes 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .tab:hover {
@@ -1690,6 +1714,12 @@ input:checked + .slider:before {
 
 .tab.sleeping:hover {
   opacity: 0.9;
+}
+
+/* Evitar flash blanco en webviews durmientes / en reactivación */
+.webview-instance.sleeping,
+webview[sleeping] {
+  background-color: #19191c !important;
 }
 
 .tab-sleep-badge {

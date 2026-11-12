@@ -3049,7 +3049,13 @@ function closeTab(id) {
     tabToRemove.bfCache.clear();
   }
 
-  tabToRemove.tabEl.remove();
+  // Animación de cierre suave con clase transitoria .closing
+  if (tabToRemove.tabEl) {
+    tabToRemove.tabEl.classList.add('closing');
+    setTimeout(() => {
+      try { tabToRemove.tabEl.remove(); } catch {}
+    }, 180);
+  }
   tabToRemove.webviewEl.remove();
   tabs.splice(index, 1);
 
@@ -3191,6 +3197,11 @@ function putTabToSleep(tabData) {
     titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(tabData.title);
   }
 
+  // Prevenir flash blanco fijando fondo base oscuro
+  if (tabData.webviewEl) {
+    tabData.webviewEl.style.backgroundColor = '#19191c';
+  }
+
   // Liberar recursos pesados navegando temporalmente a about:blank
   tabData.webviewEl.src = 'about:blank';
 }
@@ -3202,6 +3213,11 @@ function wakeUpSleepingTab(tabData) {
   const titleEl = tabData.tabEl.querySelector('.tab-title');
   if (titleEl) {
     titleEl.textContent = tabData.title;
+  }
+
+  // Prevenir flash blanco al deshibernar aplicando #19191c de fondo base antes de restaurar src
+  if (tabData.webviewEl) {
+    tabData.webviewEl.style.backgroundColor = '#19191c';
   }
 
   if (tabData.savedUrl && tabData.savedUrl !== 'about:blank') {
@@ -7298,6 +7314,24 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
 
     showGlobalToast(`🦁 Descarga completada: ${data.filename}`);
     relayDownloadEvent('dl:completed', data);
+
+    // Notificación nativa de escritorio cuando la ventana esté en segundo plano o minimizada
+    try {
+      if (typeof Notification !== 'undefined') {
+        const sendNativeNotification = () => {
+          new Notification('Brave: Descarga completa', {
+            body: data.filename || 'Archivo descargado',
+          });
+        };
+        if (Notification.permission === 'granted') {
+          sendNativeNotification();
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then((perm) => {
+            if (perm === 'granted') sendNativeNotification();
+          }).catch(() => {});
+        }
+      }
+    } catch {}
   });
 
   window.braveAPI.onDownloadFailed((data) => {
