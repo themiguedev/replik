@@ -45,7 +45,37 @@ export class RuleParser {
     // Check if scriptlet: starts with +js(...) or script:inject(...)
     if (!isException && selectorOrScript.startsWith('+js(') && selectorOrScript.endsWith(')')) {
       const inner = selectorOrScript.substring(4, selectorOrScript.length - 1);
-      const args = inner.split(',').map((s) => s.trim().replace(/^['"]|['"]$/g, ''));
+      const rawArgs: string[] = [];
+      let current = '';
+      let inQuote: string | null = null;
+      let escaped = false;
+
+      for (let i = 0; i < inner.length; i++) {
+        const char = inner[i];
+        if (escaped) {
+          current += char;
+          escaped = false;
+        } else if (char === '\\') {
+          escaped = true;
+          current += char;
+        } else if (inQuote) {
+          if (char === inQuote) {
+            inQuote = null;
+          }
+          current += char;
+        } else if (char === '\'' || char === '"') {
+          inQuote = char;
+          current += char;
+        } else if (char === ',') {
+          rawArgs.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      rawArgs.push(current);
+
+      const args = rawArgs.map((s) => s.trim().replace(/^['"]|['"]$/g, ''));
       const scriptletName = args[0] || '';
       return {
         raw,
