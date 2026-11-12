@@ -224,14 +224,15 @@ function initShieldsRules() {
 
   // 2. Si no se cargó localmente, buscar dinámicamente la versión más reciente en Brave User Data
   if (!loadedRules) {
-    const BRAVE_USER_DATA = path.join(
-      process.env.LOCALAPPDATA || 'D:\\Usuarios\\UCE.FCBA\\AppData\\Local',
+    const localAppData = process.env.LOCALAPPDATA || (process.env.USERPROFILE ? path.join(process.env.USERPROFILE, 'AppData', 'Local') : '');
+    const BRAVE_USER_DATA = localAppData ? path.join(
+      localAppData,
       'BraveSoftware',
       'Brave-Browser',
       'User Data'
-    );
-    const componentDir = path.join(BRAVE_USER_DATA, 'iodkpdagapdfkphljnddpjlldadblomo');
-    if (fs.existsSync(componentDir)) {
+    ) : '';
+    const componentDir = BRAVE_USER_DATA ? path.join(BRAVE_USER_DATA, 'iodkpdagapdfkphljnddpjlldadblomo') : '';
+    if (componentDir && fs.existsSync(componentDir)) {
       const versions = fs
         .readdirSync(componentDir)
         .filter((d) => fs.statSync(path.join(componentDir, d)).isDirectory());
