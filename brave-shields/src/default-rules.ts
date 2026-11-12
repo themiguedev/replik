@@ -75,6 +75,18 @@ export const BASE_EASYLIST_RULES = `
 ##.ad-unit
 ##[id^="google_ads_"]
 ##[id^="div-gpt-ad"]
+
+! YouTube Ads & Sponsor Layout Selectors
+youtube.com###player-ads
+youtube.com##ytd-ad-slot-renderer
+youtube.com##ytd-in-feed-ad-layout-renderer
+youtube.com##ytd-banner-promo-renderer
+youtube.com##ytd-statement-banner-renderer
+youtube.com##.ytd-merch-shelf-renderer
+youtube.com##ytd-action-companion-ad-renderer
+youtube.com##.ytp-ad-overlay-container
+youtube.com##.ytp-ad-message-container
+youtube.com##tp-yt-paper-dialog:has(#feedback.ytd-enforcement-message-view-model)
 `;
 
 /**

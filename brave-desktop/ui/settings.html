@@ -617,7 +617,7 @@
             <div class="setting-desc">Deshabilita JavaScript de forma predeterminada en todos los sitios web (modo de máxima seguridad).</div>
           </div>
           <label class="switch">
-            <input type="checkbox" id="opt-block-scripts">
+            <input type="checkbox" id="opt-block-scripts" checked>
             <span class="slider"></span>
           </label>
         </div>
@@ -1147,6 +1147,7 @@
     const optLevel = document.getElementById('opt-shields-level');
     const optFarbling = document.getElementById('opt-farbling');
     const optQueryStrip = document.getElementById('opt-query-strip');
+    const optBlockScripts = document.getElementById('opt-block-scripts');
     const optEngine = document.getElementById('opt-search-engine');
     const optTheme = document.getElementById('opt-theme');
     const optTabSnooze = document.getElementById('opt-tab-snooze');
@@ -1159,6 +1160,7 @@
       if (optLevel) optLevel.value = s.shieldsLevel || localStorage.getItem('brave_setting_level') || 'standard';
       if (optFarbling) optFarbling.checked = s.farbling !== undefined ? s.farbling : localStorage.getItem('brave_setting_farbling') !== 'false';
       if (optQueryStrip) optQueryStrip.checked = s.queryStrip !== undefined ? s.queryStrip : localStorage.getItem('brave_setting_query') !== 'false';
+      if (optBlockScripts) optBlockScripts.checked = s.scriptsBlocked !== undefined ? s.scriptsBlocked : localStorage.getItem('brave_setting_scripts') !== 'false';
       if (optEngine) optEngine.value = s.searchEngine || localStorage.getItem('brave_setting_engine') || 'brave';
       if (optTheme) optTheme.value = s.theme || localStorage.getItem('brave_theme') || 'dark';
       if (optTabSnooze) optTabSnooze.value = s.tabSnooze || localStorage.getItem('brave_tab_snooze') || '30';
@@ -1189,6 +1191,15 @@
         window.braveAPI.updateSetting('brave_setting_query', String(optQueryStrip.checked));
       }
     });
+
+    if (optBlockScripts) {
+      optBlockScripts.addEventListener('change', () => {
+        localStorage.setItem('brave_setting_scripts', String(optBlockScripts.checked));
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('brave_setting_scripts', String(optBlockScripts.checked));
+        }
+      });
+    }
 
     optEngine.addEventListener('change', () => {
       localStorage.setItem('brave_setting_engine', optEngine.value);

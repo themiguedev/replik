@@ -603,6 +603,45 @@ describe('Milestone 2 Shields Adversarial Challenge Suite', () => {
       expect(res.redirectURL).toBeDefined();
       expect(res.redirectURL).toMatch(/^data:application\/javascript/);
     });
+
+    it('blocks YouTube ad and tracking requests while preserving legitimate video streaming', async () => {
+      // 1. YouTube ad requests MUST be blocked
+      const adRequests = [
+        { url: 'https://www.youtube.com/api/stats/ads?v=xyz&adformat=1', resourceType: 'xhr' },
+        { url: 'https://www.youtube.com/pagead/lvz?v=xyz', resourceType: 'xhr' },
+        { url: 'https://www.youtube.com/ptracking?v=xyz', resourceType: 'xhr' },
+        { url: 'https://rr1---sn-abc.googlevideo.com/videoplayback?id=123&adformat=1_2_3', resourceType: 'media' },
+        { url: 'https://googleads.g.doubleclick.net/pagead/id', resourceType: 'xhr' },
+      ];
+
+      for (const adReq of adRequests) {
+        const res = await simulateWebRequest({
+          url: adReq.url,
+          resourceType: adReq.resourceType,
+          initiator: 'https://www.youtube.com',
+          documentUrl: 'https://www.youtube.com/watch?v=test',
+        });
+        expect(res.cancel).toBe(true);
+      }
+
+      // 2. YouTube legitimate playback & telemetry MUST be allowed
+      const legitRequests = [
+        { url: 'https://rr1---sn-abc.googlevideo.com/videoplayback?id=123&itag=18', resourceType: 'media' },
+        { url: 'https://www.youtube.com/youtubei/v1/player', resourceType: 'xhr' },
+        { url: 'https://www.youtube.com/api/stats/playback?ns=yt', resourceType: 'xhr' },
+        { url: 'https://i.ytimg.com/vi/test/hqdefault.jpg', resourceType: 'image' },
+      ];
+
+      for (const legitReq of legitRequests) {
+        const res = await simulateWebRequest({
+          url: legitReq.url,
+          resourceType: legitReq.resourceType,
+          initiator: 'https://www.youtube.com',
+          documentUrl: 'https://www.youtube.com/watch?v=test',
+        });
+        expect(res.cancel).toBe(false);
+      }
+    });
   });
 
   // =========================================================================

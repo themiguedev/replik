@@ -779,19 +779,29 @@ function attachSessionInterception(targetSession: Electron.Session) {
 
     // 0.5 Protección y Whitelist de Infraestructura Esencial de Streaming (YouTube / Video Playback)
     const reqHost = getDomain(reqUrl);
-    if (
-      reqHost.endsWith('googlevideo.com') ||
-      reqHost.endsWith('ytimg.com') ||
-      reqHost.endsWith('ggpht.com') ||
-      (reqHost.endsWith('youtube.com') && (
-        reqUrl.includes('/youtubei/') ||
-        reqUrl.includes('/api/stats/') ||
-        reqUrl.includes('/get_video_info') ||
-        reqUrl.includes('/videoplayback')
-      ))
-    ) {
-      callback({ cancel: false });
-      return;
+    const isYouTubeAdRequest =
+      reqUrl.includes('/pagead/') ||
+      reqUrl.includes('/api/stats/ads') ||
+      reqUrl.includes('/ptracking') ||
+      (reqUrl.includes('/videoplayback') && (reqUrl.includes('&adformat=') || reqUrl.includes('?adformat='))) ||
+      reqUrl.includes('doubleclick.net') ||
+      reqUrl.includes('googleads');
+
+    if (!isYouTubeAdRequest) {
+      if (
+        (reqHost.endsWith('googlevideo.com') && !reqUrl.includes('adformat=')) ||
+        reqHost.endsWith('ytimg.com') ||
+        reqHost.endsWith('ggpht.com') ||
+        (reqHost.endsWith('youtube.com') && (
+          reqUrl.includes('/youtubei/') ||
+          reqUrl.includes('/get_video_info') ||
+          reqUrl.includes('/videoplayback') ||
+          (reqUrl.includes('/api/stats/') && !reqUrl.includes('/api/stats/ads'))
+        ))
+      ) {
+        callback({ cancel: false });
+        return;
+      }
     }
 
     const documentUrl = details.referrer || details.initiator || '';
@@ -1250,6 +1260,69 @@ function createBrowserWindow(options: { isPrivate?: boolean; isTor?: boolean; in
       const { css } = shieldsEngine.injectCosmetics(domain);
       if (css) {
         webContents.insertCSS(css).catch(() => {});
+      }
+
+      // 3. YouTube Ad Skipper & Anti-Adblock Defuser Scriptlet
+      if (domain === 'youtube.com' || domain.endsWith('.youtube.com')) {
+        const ytAdSkipperScript = `
+          (function() {
+            if (window.__brave_yt_skipper_injected) return;
+            window.__brave_yt_skipper_injected = true;
+
+            const skipYouTubeAds = () => {
+              // 1. Ocultar o presionar botones de saltar anuncios
+              const skipButtons = [
+                '.ytp-ad-skip-button',
+                '.ytp-ad-skip-button-modern',
+                '.ytp-skip-ad-button',
+                '.videoAdUiSkipButton',
+                'button.ytp-ad-skip-button',
+                '.ytp-ad-overlay-close-button'
+              ];
+              for (const sel of skipButtons) {
+                const btn = document.querySelector(sel);
+                if (btn && typeof btn.click === 'function') {
+                  btn.click();
+                }
+              }
+
+              // 2. Saltar o mutear video si está reproduciendo un anuncio activo
+              const adElement = document.querySelector('.ad-showing, .ad-interrupting');
+              const video = document.querySelector('video');
+              if (adElement && video) {
+                video.muted = true;
+                if (!isNaN(video.duration) && isFinite(video.duration) && video.duration > 0) {
+                  video.currentTime = video.duration;
+                }
+                const playBtn = document.querySelector('.ytp-play-button');
+                if (playBtn && video.paused) {
+                  video.play().catch(() => {});
+                }
+              }
+
+              // 3. Remover overlays o banners de anuncio dentro del reproductor
+              const adOverlays = document.querySelectorAll('#player-ads, ytd-ad-slot-renderer, ytd-in-feed-ad-layout-renderer, .ytp-ad-overlay-container, .ytp-ad-message-container');
+              adOverlays.forEach((el) => {
+                if (el && el.parentNode) {
+                  el.style.display = 'none';
+                }
+              });
+
+              // 4. Cerrar diálogos anti-adblock si aparecen
+              const antiAdblockDialog = document.querySelector('tp-yt-paper-dialog:has(#feedback.ytd-enforcement-message-view-model), ytd-enforcement-message-view-model');
+              if (antiAdblockDialog) {
+                antiAdblockDialog.remove();
+                if (video && video.paused) {
+                  video.play().catch(() => {});
+                }
+              }
+            };
+
+            setInterval(skipYouTubeAds, 500);
+            skipYouTubeAds();
+          })();
+        `;
+        webContents.executeJavaScript(ytAdSkipperScript).catch(() => {});
       }
     };
 

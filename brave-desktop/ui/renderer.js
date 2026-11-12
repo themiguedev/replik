@@ -2704,6 +2704,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
               shieldsLevel: localStorage.getItem('brave_setting_level') || 'standard',
               farbling: localStorage.getItem('brave_setting_farbling') !== 'false',
               queryStrip: localStorage.getItem('brave_setting_query') !== 'false',
+              scriptsBlocked: localStorage.getItem('brave_setting_scripts') !== 'false',
               tabSnooze: localStorage.getItem('brave_tab_snooze') || '30',
               startupMode: localStorage.getItem('brave_startup_mode') || 'continue',
               syncPhrase: localStorage.getItem('brave_sync_phrase') || '',

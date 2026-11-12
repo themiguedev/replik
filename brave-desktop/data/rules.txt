@@ -10,6 +10,19 @@
 
 ! https://github.com/uBlockOrigin/uAssets/issues/1408
 *_ad_$media,domain=youtube.com,3p
+||googlevideo.com/videoplayback?*&adformat=$media,domain=youtube.com
+||youtube.com/api/stats/ads$xhr,1p
+||youtube.com/pagead/$xhr,script,1p
+||youtube.com/ptracking$xhr,1p
+youtube.com###player-ads
+youtube.com##ytd-ad-slot-renderer
+youtube.com##ytd-in-feed-ad-layout-renderer
+youtube.com##ytd-banner-promo-renderer
+youtube.com##ytd-statement-banner-renderer
+youtube.com##.ytd-merch-shelf-renderer
+youtube.com##ytd-action-companion-ad-renderer
+youtube.com##.ytp-ad-overlay-container
+youtube.com##.ytp-ad-message-container
 ! https://github.com/easylist/easylist/issues/5112
 ! @@||youtube.com/get_video_info?*timedtext_editor$xhr,1p
 ! https://redd.it/ggcmkp https://redd.it/gx03e0
