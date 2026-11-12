@@ -32,6 +32,7 @@ export class RuleParser {
 
     const domainPart = parts[0].trim();
     const selectorOrScript = parts.slice(1).join(separator).trim();
+    if (!selectorOrScript) return null;
 
     const domains = new Set<string>();
     if (domainPart) {
@@ -74,10 +75,11 @@ export class RuleParser {
     let pattern = text;
     let optionsPart = '';
 
-    const dollarIdx = text.lastIndexOf('$');
+    const dollarIdx = text.indexOf('$');
     if (dollarIdx !== -1) {
       pattern = text.substring(0, dollarIdx);
       optionsPart = text.substring(dollarIdx + 1);
+      if (!pattern) return null;
     }
 
     const regex = this.compilePatternToRegex(pattern);
