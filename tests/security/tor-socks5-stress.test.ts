@@ -577,4 +577,44 @@ describe('Milestone 2 — Adversarial Tor SOCKS5 & IPC Security Stress Suite', (
       expect(attachedSession.setWebRTCIPHandlingPolicy).toHaveBeenCalledWith('disable_non_proxied_udp');
     });
   });
+
+  // =========================================================================
+  // 6. Autonomous Tor Sidecar Launcher & Process Lifecycle
+  // =========================================================================
+  describe('6. Autonomous Tor Sidecar Launcher & Process Lifecycle', () => {
+    it('findTorBinary() locates the Tor executable in Brave component directory or fallback', () => {
+      expect(typeof mainModule.findTorBinary).toBe('function');
+      const binPath = mainModule.findTorBinary();
+      if (binPath) {
+        expect(fs.existsSync(binPath)).toBe(true);
+        expect(path.basename(binPath)).toMatch(/^tor/i);
+      }
+    });
+
+    it('startTorDaemon() resolves immediately without spawning if Tor port is already open', async () => {
+      const checkSpy = vi.spyOn(mainModule, 'checkTorConnectivity').mockResolvedValue(true);
+      const startResult = await mainModule.startTorDaemon(9050);
+      expect(startResult).toBe(true);
+      checkSpy.mockRestore();
+    });
+
+    it('browser:open-tor-window handler triggers startTorDaemon() before creating window', async () => {
+      let torStarted = false;
+      const startSpy = vi.spyOn(mainModule.torLauncher, 'startTorDaemon').mockImplementation(async () => {
+        torStarted = true;
+        return true;
+      });
+
+      const event = { senderFrame: { parent: null, url: trustedUrl } };
+      await openTorWindowHandler(event, 'https://check.torproject.org');
+
+      expect(torStarted).toBe(true);
+      startSpy.mockRestore();
+    });
+
+    it('stopTorDaemon() safely cleans up without throwing even if no process was running', async () => {
+      expect(typeof mainModule.stopTorDaemon).toBe('function');
+      await expect(mainModule.stopTorDaemon()).resolves.toBeUndefined();
+    });
+  });
 });

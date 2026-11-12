@@ -105,6 +105,229 @@ export function checkTorConnectivity(host = '127.0.0.1', port = 9050, timeoutMs 
   });
 }
 
+// =========================================================================
+// Brave Tor Sidecar Autonomous Launcher & Process Management
+// =========================================================================
+
+let torChildProcess: child_process.ChildProcess | null = null;
+let torDaemonStartingPromise: Promise<boolean> | null = null;
+
+export function findTorBinary(): string | null {
+  // 1. Check Brave component directory in %LOCALAPPDATA% (Windows)
+  const localAppData = process.env.LOCALAPPDATA;
+  if (localAppData) {
+    const braveComponentBase = path.join(
+      localAppData,
+      'BraveSoftware',
+      'Brave-Browser',
+      'User Data',
+      'cpoalefficncklhjfpglfiplenlpccdb'
+    );
+
+    if (fs.existsSync(braveComponentBase)) {
+      try {
+        const versionDirs = fs.readdirSync(braveComponentBase);
+        for (const vDir of versionDirs) {
+          const fullVDirPath = path.join(braveComponentBase, vDir);
+          try {
+            const stat = fs.statSync(fullVDirPath);
+            if (stat.isDirectory()) {
+              const files = fs.readdirSync(fullVDirPath);
+              for (const file of files) {
+                // Match tor-*.exe or Brave tor component binary naming
+                if (/^tor(-.*)?(\.exe)?$/i.test(file)) {
+                  const candidatePath = path.join(fullVDirPath, file);
+                  try {
+                    const fstat = fs.statSync(candidatePath);
+                    if (fstat.isFile()) {
+                      return candidatePath;
+                    }
+                  } catch {}
+                }
+              }
+            }
+          } catch {}
+        }
+      } catch {}
+    }
+  }
+
+  // 2. Check PATH environment variable
+  const envPath = process.env.PATH || '';
+  const pathParts = envPath.split(path.delimiter);
+  const exeNames = process.platform === 'win32' ? ['tor.exe', 'tor'] : ['tor'];
+
+  for (const dir of pathParts) {
+    if (!dir) continue;
+    for (const exe of exeNames) {
+      const candidate = path.join(dir, exe);
+      try {
+        if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+          return candidate;
+        }
+      } catch {}
+    }
+  }
+
+  // 3. Check common known locations
+  const commonPaths: string[] = [];
+  if (process.platform === 'win32') {
+    if (process.env.ProgramFiles) {
+      commonPaths.push(path.join(process.env.ProgramFiles, 'Tor Browser', 'Browser', 'TorBrowser', 'Tor', 'tor.exe'));
+    }
+    if (process.env['ProgramFiles(x86)']) {
+      commonPaths.push(path.join(process.env['ProgramFiles(x86)'], 'Tor Browser', 'Browser', 'TorBrowser', 'Tor', 'tor.exe'));
+    }
+  } else {
+    commonPaths.push('/usr/bin/tor', '/usr/local/bin/tor', '/opt/homebrew/bin/tor');
+  }
+
+  for (const candidate of commonPaths) {
+    try {
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        return candidate;
+      }
+    } catch {}
+  }
+
+  return null;
+}
+
+export function getTorChildProcess(): child_process.ChildProcess | null {
+  return torChildProcess;
+}
+
+export async function stopTorDaemon(): Promise<void> {
+  if (!torChildProcess) return;
+
+  const proc = torChildProcess;
+  torChildProcess = null;
+
+  return new Promise<void>((resolve) => {
+    let resolved = false;
+    const finish = () => {
+      if (!resolved) {
+        resolved = true;
+        resolve();
+      }
+    };
+
+    proc.once('exit', finish);
+    proc.once('close', finish);
+
+    try {
+      if (process.platform === 'win32') {
+        try {
+          child_process.exec(`taskkill /pid ${proc.pid} /T /F`, () => finish());
+        } catch {
+          proc.kill('SIGKILL');
+          finish();
+        }
+      } else {
+        proc.kill('SIGTERM');
+        setTimeout(() => {
+          try {
+            proc.kill('SIGKILL');
+          } catch {}
+          finish();
+        }, 1000);
+      }
+    } catch {
+      finish();
+    }
+  });
+}
+
+export async function startTorDaemon(port = 9050): Promise<boolean> {
+  // If port 9050 is already listening (e.g. system tor daemon or previous instance), reuse it
+  const alreadyListening = await checkTorConnectivity('127.0.0.1', port, 800);
+  if (alreadyListening) {
+    return true;
+  }
+
+  // Prevent multiple concurrent spawns
+  if (torDaemonStartingPromise) {
+    return torDaemonStartingPromise;
+  }
+
+  torDaemonStartingPromise = (async () => {
+    try {
+      const binaryPath = findTorBinary();
+      if (!binaryPath) {
+        console.warn('[Tor Sidecar] No se encontró el binario de Tor en el sistema.');
+        return false;
+      }
+
+      // Prepare Tor data directory
+      const torDataDir = path.join(
+        app.getPath('userData') || os.tmpdir(),
+        'tor-data'
+      );
+      if (!fs.existsSync(torDataDir)) {
+        try {
+          fs.mkdirSync(torDataDir, { recursive: true });
+        } catch {}
+      }
+
+      const torArgs = [
+        '--SocksPort',
+        String(port),
+        '--DataDirectory',
+        torDataDir,
+        '--CookieAuthentication',
+        '0',
+        '--ControlPort',
+        'auto',
+      ];
+
+      const child = child_process.spawn(binaryPath, torArgs, {
+        windowsHide: true,
+        stdio: 'ignore',
+        detached: false,
+      });
+
+      torChildProcess = child;
+
+      child.on('error', (err) => {
+        console.warn('[Tor Sidecar] Error en proceso de Tor:', err);
+        if (torChildProcess === child) {
+          torChildProcess = null;
+        }
+      });
+
+      child.on('exit', (code, signal) => {
+        if (torChildProcess === child) {
+          torChildProcess = null;
+        }
+      });
+
+      // Poll until Tor SOCKS5 port becomes reachable (up to 15 seconds)
+      const startTime = Date.now();
+      const maxWaitMs = 15000;
+      while (Date.now() - startTime < maxWaitMs) {
+        if (!torChildProcess) {
+          // Process exited early
+          return false;
+        }
+        const connected = await checkTorConnectivity('127.0.0.1', port, 500);
+        if (connected) {
+          return true;
+        }
+        await new Promise((r) => setTimeout(r, 400));
+      }
+
+      return false;
+    } catch (err) {
+      console.warn('[Tor Sidecar] Fallo al iniciar Tor:', err);
+      return false;
+    } finally {
+      torDaemonStartingPromise = null;
+    }
+  })();
+
+  return torDaemonStartingPromise;
+}
+
 export async function configureTorSession(torSession: Electron.Session): Promise<void> {
   if (typeof torSession.setProxy === 'function') {
     await torSession.setProxy({
@@ -1062,8 +1285,19 @@ ipcMain.handle('browser:open-private-window', (_event, initialUrl?: string) => {
   createBrowserWindow({ isPrivate: true, initialUrl });
 });
 
-ipcMain.handle('browser:open-tor-window', (_event, initialUrl?: string) => {
-  createBrowserWindow({ isPrivate: true, isTor: true, initialUrl });
+export const torLauncher = {
+  startTorDaemon,
+  stopTorDaemon,
+  findTorBinary,
+};
+
+ipcMain.handle('browser:open-tor-window', async (_event, initialUrl?: string) => {
+  try {
+    await torLauncher.startTorDaemon();
+  } catch (err) {
+    console.warn('[Tor] Fallo al intentar iniciar el daemon de Tor:', err);
+  }
+  return createBrowserWindow({ isPrivate: true, isTor: true, initialUrl });
 });
 
 ipcMain.handle('tor:get-status', async (event) => {
@@ -1999,4 +2233,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('will-quit', () => {
+  stopTorDaemon();
 });
