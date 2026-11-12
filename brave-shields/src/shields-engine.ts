@@ -3,7 +3,7 @@ import { NetworkMatcher } from './network-matcher.js';
 import { QueryStripper } from './query-stripper.js';
 import { ResourceCatalog } from './resource-catalog.js';
 import { RuleParser } from './rule-parser.js';
-import { BASE_EASYLIST_RULES } from './default-rules.js';
+import { BASE_EASYLIST_RULES, BASE_COOKIE_RULES } from './default-rules.js';
 import {
   MatchResult,
   QueryFilterRule,
@@ -40,6 +40,14 @@ export class BraveShieldsEngine {
     scriptlets: number;
   } {
     return this.loadRulesFromText(BASE_EASYLIST_RULES);
+  }
+
+  public loadCookieRules(customCookieRules?: string): {
+    network: number;
+    cosmetic: number;
+    scriptlets: number;
+  } {
+    return this.loadRulesFromText(customCookieRules || BASE_COOKIE_RULES);
   }
 
   public loadRulesFromText(rulesContent: string): {

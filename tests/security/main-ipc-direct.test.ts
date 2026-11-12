@@ -356,5 +356,16 @@ describe('Direct Integration Tests on brave-desktop/main.ts Handlers', () => {
       expect(online).toBe(true);
       await new Promise<void>((resolve) => server.close(() => resolve()));
     });
+
+    it('identifies Brave User-Agent exception domains from brave-checks.txt', async () => {
+      const { isBraveCheckExceptionDomain } = await import('../../brave-desktop/main.ts');
+      expect(isBraveCheckExceptionDomain('twitch.tv')).toBe(true);
+      expect(isBraveCheckExceptionDomain('www.twitch.tv')).toBe(true);
+      expect(isBraveCheckExceptionDomain('chess.com')).toBe(true);
+      expect(isBraveCheckExceptionDomain('vanguard.com')).toBe(true);
+      expect(isBraveCheckExceptionDomain('algs.ea.com')).toBe(true);
+      expect(isBraveCheckExceptionDomain('ea.com')).toBe(true);
+      expect(isBraveCheckExceptionDomain('unrelated-domain-xyz.com')).toBe(false);
+    });
   });
 });

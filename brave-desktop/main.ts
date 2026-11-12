@@ -411,6 +411,61 @@ try {
   console.warn('[Brave-Replica] No se pudo leer farbling.js');
 }
 
+// Lista oficial de excepciones de User-Agent de Brave (brave-checks.txt)
+const braveCheckExceptions = new Set<string>();
+
+function loadBraveCheckExceptions(): void {
+  const localChecksPath = path.join(baseDir, 'data', 'brave-checks.txt');
+  let raw = '';
+  if (fs.existsSync(localChecksPath)) {
+    try {
+      raw = fs.readFileSync(localChecksPath, 'utf-8');
+    } catch {}
+  }
+  if (!raw) {
+    const localAppData = process.env.LOCALAPPDATA || (process.env.USERPROFILE ? path.join(process.env.USERPROFILE, 'AppData', 'Local') : '');
+    const compDir = localAppData ? path.join(localAppData, 'BraveSoftware', 'Brave-Browser', 'User Data', 'nlpaeekllejnmhoonlpcefpfnpbajbpe') : '';
+    if (compDir && fs.existsSync(compDir)) {
+      const versions = fs.readdirSync(compDir).filter((d) => fs.statSync(path.join(compDir, d)).isDirectory());
+      if (versions.length > 0) {
+        const latest = versions.sort().pop()!;
+        const p = path.join(compDir, latest, 'brave-checks.txt');
+        if (fs.existsSync(p)) {
+          try {
+            raw = fs.readFileSync(p, 'utf-8');
+          } catch {}
+        }
+      }
+    }
+  }
+
+  if (raw) {
+    const lines = raw.split(/\r?\n/);
+    for (const l of lines) {
+      const trimmed = l.trim().toLowerCase();
+      if (trimmed && !trimmed.startsWith('#')) {
+        braveCheckExceptions.add(trimmed);
+      }
+    }
+    console.log(`[Brave User-Agent] Excepciones de brave-checks cargadas: ${braveCheckExceptions.size} dominios.`);
+  } else {
+    // Excepciones base de contingencia identificadas con REA
+    ['vanguard.com', 'algs.ea.com', 'ea.com', 'chess.com', 'twitch.tv', 'multitwitch.tv'].forEach((d) =>
+      braveCheckExceptions.add(d)
+    );
+  }
+}
+
+export function isBraveCheckExceptionDomain(hostname: string): boolean {
+  if (!hostname) return false;
+  const h = hostname.toLowerCase();
+  if (braveCheckExceptions.has(h)) return true;
+  for (const domain of braveCheckExceptions) {
+    if (h.endsWith('.' + domain)) return true;
+  }
+  return false;
+}
+
 function getDomain(urlStr: string): string {
   try {
     const u = new URL(urlStr);
@@ -488,19 +543,46 @@ function initShieldsRules() {
     `);
   }
 
-  // 3. Reglas avanzadas de bloqueo de avisos de cookies (Cookie Notice Blocker)
-  shieldsEngine.loadRulesFromText(`
-    ###cookie-banner
-    ###cookie-notice
-    ###onetrust-banner-sdk
-    ##.cookie-banner
-    ##.qc-cmp2-container
-    ##[aria-label*="cookie" i]
-    ###cmpbox
-    ##.didomi-popup-container
-    ##.cookie-law-info-bar
-    ##.cc-banner
-  `);
+  // 3. Reglas avanzadas de bloqueo de avisos de cookies (Cookie Notice Blocker - GDPR/CNIL)
+  const localCookiePath = path.join(baseDir, 'data', 'cookie-rules.txt');
+  let loadedCookieRules = false;
+
+  if (fs.existsSync(localCookiePath)) {
+    try {
+      console.log(`[Brave-Replica] Cargando Cookie Notice Blocker (Easylist Cookie List) desde: ${localCookiePath}`);
+      const rawCookies = fs.readFileSync(localCookiePath, 'utf-8');
+      const cookieCounts = shieldsEngine.loadCookieRules(rawCookies);
+      console.log(
+        `[Brave-Replica] Cookie Rules cargadas: ${cookieCounts.network} red, ${cookieCounts.cosmetic} cosméticas, ${cookieCounts.scriptlets} scriptlets.`
+      );
+      loadedCookieRules = true;
+    } catch (e) {
+      console.warn('[Brave-Replica] Error cargando cookie-rules.txt:', e);
+    }
+  }
+
+  if (!loadedCookieRules) {
+    const localAppData = process.env.LOCALAPPDATA || (process.env.USERPROFILE ? path.join(process.env.USERPROFILE, 'AppData', 'Local') : '');
+    const BRAVE_USER_DATA = localAppData ? path.join(localAppData, 'BraveSoftware', 'Brave-Browser', 'User Data') : '';
+    const cookieCompDir = BRAVE_USER_DATA ? path.join(BRAVE_USER_DATA, 'cdbbhgbmjhfnhnmgeddbliobbofkgdhe') : '';
+    if (cookieCompDir && fs.existsSync(cookieCompDir)) {
+      const versions = fs.readdirSync(cookieCompDir).filter((d) => fs.statSync(path.join(cookieCompDir, d)).isDirectory());
+      if (versions.length > 0) {
+        const latest = versions.sort().pop()!;
+        const listPath = path.join(cookieCompDir, latest, 'list.txt');
+        if (fs.existsSync(listPath)) {
+          console.log(`[Brave-Replica] Cargando Cookie Rules desde instalación Brave (${latest}): ${listPath}`);
+          const rawCookies = fs.readFileSync(listPath, 'utf-8');
+          shieldsEngine.loadCookieRules(rawCookies);
+          loadedCookieRules = true;
+        }
+      }
+    }
+  }
+
+  if (!loadedCookieRules) {
+    shieldsEngine.loadCookieRules();
+  }
 
   // 4. Cargar Query Filter (Des-rastreo de URLs)
   if (fs.existsSync(localQueryPath)) {
@@ -806,6 +888,36 @@ function attachSessionInterception(targetSession: Electron.Session) {
 
     callback({ cancel: false });
   });
+
+  // Lista de excepciones User-Agent de Brave: aplicar bypass / restaurar UA estándar
+  if (targetSession.webRequest && typeof targetSession.webRequest.onBeforeSendHeaders === 'function') {
+    targetSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+      const requestHeaders = details.requestHeaders || {};
+      const host = getDomain(details.url);
+
+      if (isBraveCheckExceptionDomain(host)) {
+        // En sitios con verificaciones anti-Brave (Twitch, EA, Vanguard, Chess.com),
+        // garantizar User-Agent idéntico a Chrome puro sin tokens adicionales
+        const currentUA = requestHeaders['User-Agent'] || requestHeaders['user-agent'] || '';
+        if (currentUA && (currentUA.includes('Brave') || currentUA.includes('brave') || currentUA.includes('Electron'))) {
+          const spoofedUA = currentUA
+            .replace(/Brave\/[0-9.]+\s?/gi, '')
+            .replace(/Electron\/[0-9.]+\s?/gi, '')
+            .replace(/brave-replica\/[0-9.]+\s?/gi, '')
+            .trim();
+          requestHeaders['User-Agent'] = spoofedUA;
+        }
+
+        // Spoof de Sec-CH-UA (Client Hints) a Google Chrome estándar
+        if (requestHeaders['Sec-CH-UA'] || requestHeaders['sec-ch-ua']) {
+          const brandKey = requestHeaders['Sec-CH-UA'] ? 'Sec-CH-UA' : 'sec-ch-ua';
+          requestHeaders[brandKey] = '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"';
+        }
+      }
+
+      callback({ requestHeaders });
+    });
+  }
 }
 
 function calculateSavings(blocked: number) {
@@ -2160,6 +2272,7 @@ ipcMain.handle('extensions:download-from-store', async (event, inputStr: string)
 
 app.whenReady().then(async () => {
   loadSitePermissionsFromDisk();
+  loadBraveCheckExceptions();
   initShieldsRules();
   await initExtensions();
 
