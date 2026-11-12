@@ -4606,11 +4606,15 @@ body.energy-saver-active * {
   flex-direction: column;
   z-index: 9999;
   transform: translateX(100%);
+  pointer-events: none;
+  visibility: hidden;
   transition: transform 0.24s cubic-bezier(0.1, 0.9, 0.2, 1);
   box-shadow: -8px 0 24px rgba(0, 0, 0, 0.45);
 }
 .leo-sidebar.open {
   transform: translateX(0);
+  pointer-events: auto;
+  visibility: visible;
 }
 .leo-sidebar.expanded {
   width: 520px;

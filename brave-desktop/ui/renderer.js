@@ -2939,8 +2939,8 @@ function switchTab(id) {
       if (t.id === id) {
         t.tabEl.classList.add('active');
         t.webviewEl.classList.remove('hidden');
-        t.webviewEl.style.width = '100%';
-        t.webviewEl.style.height = '100%';
+        t.webviewEl.style.width = '';
+        t.webviewEl.style.height = '';
         t.webviewEl.style.position = 'absolute';
         t.webviewEl.style.top = '0';
         t.webviewEl.style.left = '0';
@@ -5468,8 +5468,8 @@ function toggleSplitView(targetSecondTabId) {
       t.webviewEl.style.position = 'absolute';
       t.webviewEl.style.top = '0';
       t.webviewEl.style.left = '0';
-      t.webviewEl.style.width = '100%';
-      t.webviewEl.style.height = '100%';
+      t.webviewEl.style.width = '';
+      t.webviewEl.style.height = '';
       t.webviewEl.style.zIndex = '';
       t.webviewEl.style.pointerEvents = '';
     });
@@ -7353,6 +7353,13 @@ if (btnCrashReload) {
       tab.hasCrashed = false;
       if (tab.webviewEl) tab.webviewEl.reload();
     }
+  });
+}
+
+if (window.braveAPI && window.braveAPI.onOpenUrlInTab) {
+  window.braveAPI.onOpenUrlInTab((url, disposition) => {
+    const isBackground = disposition === 'background-tab';
+    createTab(url, { background: isBackground });
   });
 }
 

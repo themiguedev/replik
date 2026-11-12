@@ -63,6 +63,9 @@ contextBridge.exposeInMainWorld('braveAPI', {
   onWebviewShortcut: (callback) => {
     ipcRenderer.on('browser:webview-shortcut', (_event, data) => callback(data));
   },
+  onOpenUrlInTab: (callback) => {
+    ipcRenderer.on('browser:open-url-in-tab', (_event, url, disposition) => callback(url, disposition));
+  },
   onContextMenu: (callback) => {
     ipcRenderer.on('browser:context-menu', (_event, data) => callback(data));
   },
