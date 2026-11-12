@@ -33,6 +33,16 @@ describe('Brave Shields Engine Extended Coverage & Edge-Case Suite', () => {
       }
     });
 
+    it('handles scriptlet with commas inside quoted arguments', () => {
+      const rule = RuleParser.parse('example.com##+js(set, key, "val,with,comma")');
+      expect(rule).not.toBeNull();
+      if (rule && 'scriptletName' in rule) {
+        expect(rule.scriptletName).toBe('set');
+        expect(rule.args).toEqual(['key', 'val,with,comma']);
+        expect(rule.domains.has('example.com')).toBe(true);
+      }
+    });
+
     it('parses cosmetic rules with domain negation (~domain)', () => {
       const rule = RuleParser.parse('~whitelisted.com,example.com##.ad-banner');
       expect(rule).not.toBeNull();
