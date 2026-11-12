@@ -64,6 +64,46 @@ test.describe('Tier 2: Internal Schemes Routing & Display', () => {
     expect(copyBtnExists).toBe(true);
   });
 
+  test('brave://bookmarks routes to bookmarks.html', async ({ shellPage, driver }) => {
+    await shellPage.navigateTo('brave://bookmarks');
+    await expect.poll(async () => await shellPage.getActiveWebviewUrl(), { timeout: 10000 }).toContain('bookmarks.html');
+    await expect(shellPage.urlInput).toHaveValue('brave://bookmarks');
+
+    const searchInputExists = await driver.executeInActiveWebview<boolean>(
+      "!!document.getElementById('search-input')"
+    );
+    expect(searchInputExists).toBe(true);
+  });
+
+  test('brave://history routes to history.html', async ({ shellPage, driver }) => {
+    await shellPage.navigateTo('brave://history');
+    await expect.poll(async () => await shellPage.getActiveWebviewUrl(), { timeout: 10000 }).toContain('history.html');
+    await expect(shellPage.urlInput).toHaveValue('brave://history');
+
+    const searchInputExists = await driver.executeInActiveWebview<boolean>(
+      "!!document.getElementById('search-input')"
+    );
+    expect(searchInputExists).toBe(true);
+  });
+
+  test('brave://extensions and brave://components route cleanly', async ({ shellPage, driver }) => {
+    // 1. Extensions
+    await shellPage.navigateTo('brave://extensions');
+    await expect.poll(async () => await shellPage.getActiveWebviewUrl(), { timeout: 10000 }).toContain('extensions.html');
+    await expect(shellPage.urlInput).toHaveValue('brave://extensions');
+
+    // 2. Components
+    await shellPage.navigateTo('brave://components');
+    await expect.poll(async () => await shellPage.getActiveWebviewUrl(), { timeout: 10000 }).toContain('components.html');
+    await expect(shellPage.urlInput).toHaveValue('brave://components');
+  });
+
+  test('brave://playlist routes to playlist.html', async ({ shellPage, driver }) => {
+    await shellPage.navigateTo('brave://playlist');
+    await expect.poll(async () => await shellPage.getActiveWebviewUrl(), { timeout: 10000 }).toContain('playlist.html');
+    await expect(shellPage.urlInput).toHaveValue('brave://playlist');
+  });
+
   test('Internal schemes support case-insensitive input and chrome:// aliases', async ({ shellPage }) => {
     // Case-insensitive navigation
     await shellPage.navigateTo('BRAVE://SETTINGS');
