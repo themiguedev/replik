@@ -5159,7 +5159,11 @@ function handleBrowserShortcut(e) {
   // Ctrl + Shift + N: Ventana Privada normal
   if (isCtrl && isShift && isN) {
     prevent();
-    if (window.braveAPI) window.braveAPI.openPrivateWindow();
+    if (window.braveAPI && window.braveAPI.openPrivateWindow) {
+      window.braveAPI.openPrivateWindow();
+    } else if (window.electronAPI && window.electronAPI.openPrivateWindow) {
+      window.electronAPI.openPrivateWindow();
+    }
     return;
   }
 
