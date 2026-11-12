@@ -218,6 +218,7 @@ const extensionsUrl = window.braveAPI && window.braveAPI.getExtensionsUrl ? wind
 const bookmarksUrl = window.braveAPI && window.braveAPI.getBookmarksUrl ? window.braveAPI.getBookmarksUrl() : resolveInternalUrl('bookmarks.html');
 const versionUrl = window.braveAPI && window.braveAPI.getVersionUrl ? window.braveAPI.getVersionUrl() : resolveInternalUrl('version.html');
 const errorUrl = window.braveAPI && window.braveAPI.getErrorUrl ? window.braveAPI.getErrorUrl() : resolveInternalUrl('error.html');
+const welcomeUrl = window.braveAPI && window.braveAPI.getWelcomeUrl ? window.braveAPI.getWelcomeUrl() : resolveInternalUrl('welcome.html');
 const componentsUrl = window.braveAPI && window.braveAPI.getComponentsUrl ? window.braveAPI.getComponentsUrl() : resolveInternalUrl('components.html');
 const webstoreUrl = resolveInternalUrl('webstore.html');
 
@@ -1298,6 +1299,7 @@ const INTERNAL_PAGES = [
   { title: 'Brave Playlist', url: 'brave://playlist', icon: '📑', badge: 'Brave' },
   { title: 'Extensiones de Brave', url: 'brave://extensions', icon: '🧩', badge: 'Brave' },
   { title: 'Versión del Sistema y Diagnóstico', url: 'brave://version', icon: '🦁', badge: 'Brave' },
+  { title: 'Bienvenida y Primer Inicio', url: 'brave://welcome', icon: '🦁', badge: 'Brave' },
   { title: 'Componentes y Módulos de Protección', url: 'brave://components', icon: '🧩', badge: 'Brave' },
   { title: 'Nueva Pestaña', url: 'brave://newtab', icon: '🦁', badge: 'Brave' },
 ];
@@ -1702,6 +1704,7 @@ function extractDomain(url) {
       if (url.includes('downloads.html')) return 'Descargas';
       if (url.includes('bookmarks.html')) return 'Marcadores';
       if (url.includes('version.html')) return 'Acerca de Brave';
+      if (url.includes('welcome.html')) return 'Bienvenida';
       if (url.includes('adblock.html')) return 'Adblock';
       if (url.includes('playlist.html')) return 'Playlist';
       if (url.includes('extensions.html')) return 'Extensiones';
@@ -1765,6 +1768,7 @@ function resolveBraveUrl(url) {
   if (lower === 'brave://extensions' || lower === 'about:extensions' || lower === 'chrome://extensions') return extensionsUrl;
   if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') return versionUrl;
   if (lower === 'brave://error' || lower === 'about:error') return errorUrl;
+  if (lower === 'brave://welcome' || lower === 'about:welcome') return welcomeUrl;
   if (lower === 'brave://adblock') return adblockUrl;
   if (lower === 'brave://playlist' || lower === 'about:playlist') return playlistUrl;
   if (lower === 'brave://components' || lower === 'about:components') return componentsUrl;
@@ -2583,13 +2587,13 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             handled = false;
           }
         } else if (action === 'getBookmarks') {
-          if (['bookmarks.html', 'ntp.html', 'settings.html'].includes(pageName)) {
+          if (['bookmarks.html', 'ntp.html', 'settings.html', 'welcome.html'].includes(pageName)) {
             result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
           } else {
             handled = false;
           }
         } else if (action === 'saveBookmarks') {
-          if (pageName === 'bookmarks.html') {
+          if (['bookmarks.html', 'welcome.html'].includes(pageName)) {
             const newList = args[0] || [];
             localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
             renderBookmarks();
@@ -2688,7 +2692,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             handled = false;
           }
         } else if (action === 'getSettings') {
-          if (['settings.html', 'ntp.html'].includes(pageName)) {
+          if (['settings.html', 'ntp.html', 'welcome.html'].includes(pageName)) {
             result = {
               theme: localStorage.getItem('brave_theme') || 'dark',
               accent: localStorage.getItem('brave_accent') || 'orange',
@@ -2704,7 +2708,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             handled = false;
           }
         } else if (action === 'updateSetting') {
-          if (pageName === 'settings.html') {
+          if (['settings.html', 'welcome.html'].includes(pageName)) {
             const [key, val] = args;
             localStorage.setItem(key, String(val));
             if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
@@ -3179,6 +3183,10 @@ function updateOmniboxForUrl(url) {
     }
     lockIcon.innerHTML = LOCK_SVG_INSECURE;
     lockIcon.title = 'No se puede acceder a este sitio';
+  } else if (url.includes('welcome.html') || url === 'brave://welcome') {
+    urlInput.value = 'brave://welcome';
+    lockIcon.innerHTML = LOCK_SVG_BRAVE;
+    lockIcon.title = 'Bienvenida a Brave';
   } else if (url.includes('extensions.html') || url === 'brave://extensions') {
     urlInput.value = 'brave://extensions';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
@@ -4409,6 +4417,8 @@ function navigateTo(raw) {
     target = bookmarksUrl;
   } else if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') {
     target = versionUrl;
+  } else if (lower === 'brave://welcome' || lower === 'about:welcome') {
+    target = welcomeUrl;
   } else if (lower === 'brave://history' || lower === 'about:history' || lower === 'chrome://history') {
     target = historyUrl;
   } else if (lower === 'brave://downloads' || lower === 'about:downloads' || lower === 'chrome://downloads') {
@@ -7571,9 +7581,11 @@ if (initialArgUrl) {
     } catch {}
   }
 
-  // 3. Si no hay pestañas abiertas, abrir la Nueva Pestaña (NTP)
+  // 3. Si no hay pestañas abiertas, abrir la página de inicio (Onboarding Wizard o NTP)
   if (tabs.length === 0) {
-    createTab(ntpUrl);
+    const isFirstRunDone = localStorage.getItem('replik_first_run_done');
+    const initialUrl = !isFirstRunDone ? welcomeUrl : ntpUrl;
+    createTab(initialUrl);
   } else {
     // Enfocar la primera pestaña no fijada o la primera disponible
     const firstNonPinned = tabs.find((t) => !t.isPinned) || tabs[0];

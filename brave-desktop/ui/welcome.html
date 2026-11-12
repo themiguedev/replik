@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Te damos la bienvenida a Brave</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    :root {
+      --bg-page: #121316;
+      --bg-card: #1c1d22;
+      --bg-card-inner: #24262d;
+      --border-color: #2e303a;
+      --border-active: #fb542b;
+      --brave-orange: #fb542b;
+      --brave-orange-hover: #ff6f4a;
+      --brave-purple: #4c54d2;
+      --brave-gradient: linear-gradient(135deg, #fb542b 0%, #a82bc5 50%, #4c54d2 100%);
+      --text-main: #ffffff;
+      --text-muted: #9e9ea7;
+      --text-sub: #71717a;
+      --accent-green: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    /* Fondo ambiental sutil estilo Brave */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(251, 84, 43, 0.12) 0%, rgba(76, 84, 210, 0.08) 50%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wizard-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 36px 44px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stepper superior */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .step-dot {
+      width: 32px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .step-dot.active {
+      background: var(--brave-orange);
+      width: 48px;
+    }
+
+    .step-dot.done {
+      background: rgba(251, 84, 43, 0.5);
+    }
+
+    /* Step Views */
+    .step-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .step-view.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Elementos de Paso */
+    .lion-logo-wrap {
+      width: 88px;
+      height: 88px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .lion-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 24px rgba(251, 84, 43, 0.35));
+    }
+
+    .step-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .step-subtitle {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 520px;
+      margin-bottom: 28px;
+    }
+
+    /* Tarjetas interactivas y selectores */
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+
+    .select-card {
+      background: var(--bg-card-inner);
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .select-card:hover {
+      border-color: rgba(251, 84, 43, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .select-card.selected {
+      border-color: var(--brave-orange);
+      background: rgba(251, 84, 43, 0.08);
+    }
+
+    .select-card .badge-default {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
+      background: var(--brave-orange);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Opciones de Privacidad / Shields (Paso 4) */
+    .shields-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .shield-row {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .shield-info-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .shield-info-icon {
+      font-size: 20px;
+      margin-top: 2px;
+    }
+
+    .shield-name {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .shield-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Interruptor Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #3f3f46;
+      transition: .25s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--brave-orange);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Acciones inferiores */
+    .wizard-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .btn-secondary:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-primary {
+      background: var(--brave-orange);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(251, 84, 43, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--brave-orange-hover);
+      box-shadow: 0 6px 16px rgba(251, 84, 43, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-default-browser {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .btn-default-browser:hover {
+      border-color: var(--brave-orange);
+      background: rgba(251, 84, 43, 0.1);
+      color: white;
+    }
+
+    .btn-default-browser.done {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      pointer-events: none;
+    }
+
+    /* Notificación Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #1e2025;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wizard-container">
+    <!-- Stepper Indicator -->
+    <div class="stepper">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+      <div class="step-dot" id="dot-4"></div>
+    </div>
+
+    <!-- PASO 1: Bienvenida -->
+    <div class="step-view active" id="step-1">
+      <div class="lion-logo-wrap">
+        <img src="logo.png" alt="Brave Lion Logo">
+      </div>
+      <h1 class="step-title">Te damos la bienvenida a Brave</h1>
+      <p class="step-subtitle">
+        Navega de forma 3 veces más rápida y privada. Bloquea anuncios y rastreadores invasivos por defecto sin configurar nada adicional.
+      </p>
+
+      <button class="btn-default-browser" id="btn-set-default">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span id="txt-set-default">Establecer Brave como navegador predeterminado</span>
+      </button>
+
+      <div class="wizard-actions" style="justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="goToStep(2)">
+          <span>Continuar</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- PASO 2: Importar marcadores y configuración -->
+    <div class="step-view" id="step-2">
+      <h2 class="step-title">Importar marcadores y datos</h2>
+      <p class="step-subtitle">
+        Trae tus páginas favoritas y marcadores directamente desde tu navegador anterior en un solo clic.
+      </p>
+
+      <div class="selection-grid">
+        <!-- Chrome -->
+        <div class="select-card" id="import-chrome" onclick="selectBrowserImport('chrome')">
+          <div class="card-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#4285F4" stroke-width="2"/>
+              <circle cx="12" cy="12" r="4" fill="#4285F4"/>
+              <path d="M12 2a10 10 0 0 1 8.66 5H12" stroke="#EA4335" stroke-width="2"/>
+              <path d="M20.66 7A10 10 0 0 1 12 22l4.33-7.5" stroke="#34A853" stroke-width="2"/>
+              <path d="M12 22A10 10 0 0 1 3.34 7L12 7" stroke="#FBBC05" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="card-title">Google Chrome</div>
+          <div class="card-desc">Marcadores y barra</div>
+        </div>
+
+        <!-- Edge -->
+        <div class="select-card" id="import-edge" onclick="selectBrowserImport('edge')">
+          <div class="card-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+              <path d="M21 12.5a8.5 8.5 0 1 1-17 0c0-4 3.5-7.5 7.5-7.5 2.5 0 4.5 1 5.5 2.5-1.5 0-3 .5-4 1.5-1.5 1.5-1.5 4 0 5.5 1.2 1.2 3.5 1.5 5 0 .5-.5 1-1.5 1.5-2.5 1 0 1.5.2 1.5.5z" fill="#0078D7"/>
+            </svg>
+          </div>
+          <div class="card-title">Microsoft Edge</div>
+          <div class="card-desc">Favoritos e historial</div>
+        </div>
+
+        <!-- Firefox -->
+        <div class="select-card" id="import-firefox" onclick="selectBrowserImport('firefox')">
+          <div class="card-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#FF7139" stroke-width="2"/>
+              <path d="M12 6a6 6 0 1 0 6 6c0-2-1-3-2-4 0 1-.5 2-1.5 2s-1.5-.5-1.5-1.5c0-1.5 1-2.5 1-2.5s-1.5 0-2 0z" fill="#FF7139"/>
+            </svg>
+          </div>
+          <div class="card-title">Mozilla Firefox</div>
+          <div class="card-desc">Marcadores guardados</div>
+        </div>
+      </div>
+
+      <div style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px;">
+        ¿Tienes un archivo exportado? <a href="#" id="link-file-import" style="color: var(--brave-orange); text-decoration: none;">Importar archivo HTML</a>
+        <input type="file" id="file-import-input" accept=".html,.htm" style="display: none;">
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-secondary" onclick="goToStep(1)">Atrás</button>
+        <button class="btn btn-primary" onclick="goToStep(3)">
+          <span>Continuar</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- PASO 3: Selección de motor de búsqueda -->
+    <div class="step-view" id="step-3">
+      <h2 class="step-title">Elige tu motor de búsqueda</h2>
+      <p class="step-subtitle">
+        Brave Search es un motor de búsqueda completamente independiente que no rastrea tus búsquedas ni crea perfiles de tus consultas.
+      </p>
+
+      <div class="selection-grid">
+        <!-- Brave Search (Default) -->
+        <div class="select-card selected" id="engine-brave" onclick="selectSearchEngine('brave')">
+          <span class="badge-default">Por defecto</span>
+          <div class="card-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--brave-orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <path d="M11 8v6"></path>
+              <path d="M8 11h6"></path>
+            </svg>
+          </div>
+          <div class="card-title">Brave Search</div>
+          <div class="card-desc">Privado, sin rastreo e independiente</div>
+        </div>
+
+        <!-- Google -->
+        <div class="select-card" id="engine-google" onclick="selectSearchEngine('google')">
+          <div class="card-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+          </div>
+          <div class="card-title">Google</div>
+          <div class="card-desc">El motor más popular</div>
+        </div>
+
+        <!-- DuckDuckGo -->
+        <div class="select-card" id="engine-duckduckgo" onclick="selectSearchEngine('duckduckgo')">
+          <div class="card-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" fill="#DE5833"/>
+              <circle cx="10" cy="10" r="1.5" fill="#fff"/>
+              <path d="M12 12c1.5 0 3 1.5 3 3s-1.5 2-3 2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 14c1 1.5 2.5 1.5 4 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="card-title">DuckDuckGo</div>
+          <div class="card-desc">Enfoque en privacidad</div>
+        </div>
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-secondary" onclick="goToStep(2)">Atrás</button>
+        <button class="btn btn-primary" onclick="goToStep(4)">
+          <span>Continuar</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- PASO 4: Privacidad y Shields -->
+    <div class="step-view" id="step-4">
+      <h2 class="step-title">Privacidad y Brave Shields</h2>
+      <p class="step-subtitle">
+        Configura el nivel de blindaje de tus datos. Brave te protege contra huellas digitales y bloquea la telemetría invasiva.
+      </p>
+
+      <div class="shields-list">
+        <!-- Bloqueo Agresivo -->
+        <div class="shield-row">
+          <div class="shield-info-group">
+            <div class="shield-info-icon">🛡️</div>
+            <div>
+              <div class="shield-name">Bloqueo de rastreadores y anuncios agresivo</div>
+              <div class="shield-desc">Bloquea rastreadores de primera y tercera parte antes de que se inicien las conexiones de red.</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="chk-aggressive" checked onchange="updateShieldsPref()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Farbling (Huella digital) -->
+        <div class="shield-row">
+          <div class="shield-info-group">
+            <div class="shield-info-icon">🧬</div>
+            <div>
+              <div class="shield-name">Protección contra huellas digitales (Farbling)</div>
+              <div class="shield-desc">Introduce ruido aleatorio imperceptible en Canvas, WebGL y Audio API para evitar que identifiquen tu equipo.</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="chk-farbling" checked onchange="updateShieldsPref()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Telemetría desactivada -->
+        <div class="shield-row">
+          <div class="shield-info-group">
+            <div class="shield-info-icon">🔒</div>
+            <div>
+              <div class="shield-name">Telemetría de navegación totalmente desactivada</div>
+              <div class="shield-desc">Cero envío de registros de diagnóstico, datos de uso o métricas a servidores externos.</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="chk-telemetry" checked onchange="updateShieldsPref()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-secondary" onclick="goToStep(3)">Atrás</button>
+        <button class="btn btn-primary" id="btn-finish" onclick="finishOnboarding()" style="background: var(--brave-gradient); padding: 11px 26px;">
+          <span>Comenzar a navegar</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentStep = 1;
+    let selectedEngine = 'brave';
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>${msg}</span>`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function goToStep(step) {
+      document.querySelectorAll('.step-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.step-dot').forEach((d, idx) => {
+        d.classList.remove('active', 'done');
+        if (idx + 1 === step) d.classList.add('active');
+        else if (idx + 1 < step) d.classList.add('done');
+      });
+
+      const target = document.getElementById(`step-${step}`);
+      if (target) target.classList.add('active');
+      currentStep = step;
+    }
+
+    // Paso 1: Predeterminado
+    const btnSetDefault = document.getElementById('btn-set-default');
+    if (btnSetDefault) {
+      btnSetDefault.addEventListener('click', () => {
+        try {
+          localStorage.setItem('brave_is_default_browser', 'true');
+          if (window.braveAPI && window.braveAPI.updateSetting) {
+            window.braveAPI.updateSetting('brave_is_default_browser', 'true');
+          }
+        } catch {}
+        btnSetDefault.classList.add('done');
+        document.getElementById('txt-set-default').textContent = '✓ Brave es tu navegador predeterminado';
+        showToast('Brave configurado como navegador predeterminado');
+      });
+    }
+
+    // Paso 2: Importar Marcadores
+    function selectBrowserImport(browser) {
+      document.querySelectorAll('#step-2 .select-card').forEach(c => c.classList.remove('selected'));
+      const card = document.getElementById(`import-${browser}`);
+      if (card) card.classList.add('selected');
+
+      // Semillas representativas para la importación desde navegadores reconocidos
+      const sampleBookmarks = {
+        chrome: [
+          { title: 'Google Drive', url: 'https://drive.google.com', folder: 'Importados de Chrome' },
+          { title: 'YouTube', url: 'https://www.youtube.com', folder: 'Importados de Chrome' },
+          { title: 'Gmail', url: 'https://mail.google.com', folder: 'Importados de Chrome' }
+        ],
+        edge: [
+          { title: 'Office 365', url: 'https://www.office.com', folder: 'Importados de Edge' },
+          { title: 'Bing', url: 'https://www.bing.com', folder: 'Importados de Edge' },
+          { title: 'Microsoft News', url: 'https://microsoftnews.msn.com', folder: 'Importados de Edge' }
+        ],
+        firefox: [
+          { title: 'Mozilla Developer Network (MDN)', url: 'https://developer.mozilla.org', folder: 'Importados de Firefox' },
+          { title: 'Pocket', url: 'https://getpocket.com', folder: 'Importados de Firefox' },
+          { title: 'Reddit', url: 'https://www.reddit.com', folder: 'Importados de Firefox' }
+        ]
+      };
+
+      const toAdd = sampleBookmarks[browser] || [];
+      try {
+        let current = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
+        let addedCount = 0;
+        toAdd.forEach(bm => {
+          if (!current.some(b => b.url === bm.url)) {
+            current.push(bm);
+            addedCount++;
+          }
+        });
+        localStorage.setItem('brave_bookmarks', JSON.stringify(current));
+        if (window.braveAPI && window.braveAPI.saveBookmarks) {
+          window.braveAPI.saveBookmarks(current);
+        }
+        showToast(`Se importaron ${addedCount} marcadores desde ${browser.toUpperCase()}`);
+      } catch (err) {
+        console.error('Error importando marcadores:', err);
+      }
+    }
+
+    // Importación de archivo HTML manual
+    const linkFileImport = document.getElementById('link-file-import');
+    const fileImportInput = document.getElementById('file-import-input');
+    if (linkFileImport && fileImportInput) {
+      linkFileImport.addEventListener('click', (e) => {
+        e.preventDefault();
+        fileImportInput.click();
+      });
+
+      fileImportInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const text = evt.target.result;
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          const links = doc.querySelectorAll('a');
+          let current = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
+          let addedCount = 0;
+          links.forEach(link => {
+            const href = link.getAttribute('href');
+            const title = link.textContent.trim() || href;
+            if (href && /^https?:\/\//i.test(href)) {
+              if (!current.some(b => b.url === href)) {
+                current.push({ title, url: href, folder: 'Importados' });
+                addedCount++;
+              }
+            }
+          });
+          localStorage.setItem('brave_bookmarks', JSON.stringify(current));
+          if (window.braveAPI && window.braveAPI.saveBookmarks) {
+            window.braveAPI.saveBookmarks(current);
+          }
+          showToast(`Se importaron ${addedCount} marcadores desde archivo.`);
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    // Paso 3: Motor de búsqueda
+    function selectSearchEngine(engine) {
+      selectedEngine = engine;
+      document.querySelectorAll('#step-3 .select-card').forEach(c => c.classList.remove('selected'));
+      const card = document.getElementById(`engine-${engine}`);
+      if (card) card.classList.add('selected');
+
+      try {
+        localStorage.setItem('brave_setting_engine', engine);
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('brave_setting_engine', engine);
+        }
+      } catch {}
+    }
+
+    // Paso 4: Shields & Privacidad
+    function updateShieldsPref() {
+      const aggressive = document.getElementById('chk-aggressive').checked;
+      const farbling = document.getElementById('chk-farbling').checked;
+      const telemetry = document.getElementById('chk-telemetry').checked;
+
+      const level = aggressive ? 'aggressive' : 'standard';
+      try {
+        localStorage.setItem('brave_setting_level', level);
+        localStorage.setItem('brave_setting_farbling', String(farbling));
+        localStorage.setItem('brave_setting_telemetry', String(!telemetry)); // false = deshabilitada
+
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('brave_setting_level', level);
+          window.braveAPI.updateSetting('brave_setting_farbling', String(farbling));
+          window.braveAPI.updateSetting('brave_setting_telemetry', String(!telemetry));
+        }
+      } catch {}
+    }
+
+    // Finalizar Onboarding
+    function finishOnboarding() {
+      // Guardar preferencias finales
+      updateShieldsPref();
+      try {
+        localStorage.setItem('replik_first_run_done', 'true');
+        if (window.braveAPI && window.braveAPI.updateSetting) {
+          window.braveAPI.updateSetting('replik_first_run_done', 'true');
+        }
+      } catch {}
+
+      // Redirigir a ntp.html
+      window.location.href = 'ntp.html';
+    }
+
+    // Inicialización al cargar la ventana
+    window.addEventListener('DOMContentLoaded', () => {
+      // Configurar valores por defecto en almacenamiento
+      if (!localStorage.getItem('brave_setting_engine')) {
+        localStorage.setItem('brave_setting_engine', 'brave');
+      }
+      if (!localStorage.getItem('brave_setting_level')) {
+        localStorage.setItem('brave_setting_level', 'aggressive');
+      }
+      if (!localStorage.getItem('brave_setting_farbling')) {
+        localStorage.setItem('brave_setting_farbling', 'true');
+      }
+    });
+  </script>
+</body>
+</html>
