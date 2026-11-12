@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No se puede acceder a este sitio</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    :root {
+      --bg-page: #19191c;
+      --bg-card: #212226;
+      --border-color: #2e2f38;
+      --brave-orange: #fb542b;
+      --brave-orange-hover: #ff6f4a;
+      --text-main: #ffffff;
+      --text-muted: #9e9ea7;
+      --text-sub: #72727d;
+      --font-mono: "Consolas", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: text;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+
+    .error-container {
+      max-width: 640px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .lion-container {
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .lion-icon {
+      width: 96px;
+      height: 96px;
+      filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 16px;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+
+    .target-url {
+      color: var(--text-muted);
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    .error-description {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .suggestions-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px 24px;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+
+    .suggestions-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .suggestions-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .suggestions-list li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .suggestions-list li::before {
+      content: "•";
+      position: absolute;
+      left: 4px;
+      color: var(--brave-orange);
+      font-size: 18px;
+      line-height: 1;
+      top: -1px;
+    }
+
+    .actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .btn-retry {
+      background-color: var(--brave-orange);
+      color: #ffffff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s, transform 0.1s;
+      user-select: none;
+      outline: none;
+    }
+
+    .btn-retry:hover {
+      background-color: var(--brave-orange-hover);
+    }
+
+    .btn-retry:active {
+      transform: scale(0.98);
+    }
+
+    .btn-retry svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+
+    .error-code-badge {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-sub);
+      user-select: all;
+    }
+
+    .diagnostics-details {
+      margin-top: 12px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      width: 100%;
+    }
+
+    .diagnostics-toggle {
+      font-size: 13px;
+      color: var(--brave-orange);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .diagnostics-toggle:hover {
+      text-decoration: underline;
+    }
+
+    .diagnostics-content {
+      margin-top: 12px;
+      display: none;
+      background: #141416;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .diagnostics-content.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="lion-container">
+      <!-- Sad / Disconnected Brave Lion SVG -->
+      <svg class="lion-icon" viewBox="0 0 2770 2770" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="shield-grad-sad" y1="51%" y2="51%">
+            <stop offset="0.4" stop-color="#4a4a52"/>
+            <stop offset="0.6" stop-color="#34343a"/>
+          </linearGradient>
+          <linearGradient id="shield-grad-sad-top" x1="2%" y1="51%" y2="51%">
+            <stop offset="0" stop-color="#555560"/>
+            <stop offset="1" stop-color="#34343a"/>
+          </linearGradient>
+          <filter id="glow-sad" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+          </filter>
+        </defs>
+
+        <!-- Base Lion Shield in muted offline slate tone -->
+        <path fill="url(#shield-grad-sad)" filter="url(#glow-sad)" d="M2395 723l60-147-170-176c-92-92-288-38-288-38l-222-252H992L769 363s-196-53-288 37L311 575l60 147-75 218 250 953c52 204 87 283 234 387l457 310c44 27 98 74 147 74s103-47 147-74l457-310c147-104 182-183 234-387l250-953z"/>
+        <!-- Sad / Closed Mane and Facial Geometry -->
+        <path fill="#8a8a93" d="M1935 524s287 347 287 420c0 75-36 94-72 133l-215 230c-20 20-63 54-38 113 25 60 60 134 20 210-40 77-110 128-155 120a820 820 0 01-190-90c-38-25-160-126-160-165s126-110 150-124c23-16 130-78 132-102s2-30-30-90-88-140-80-192c10-52 100-80 167-105l207-78c16-8 12-15-36-20-48-4-183-22-244-5s-163 43-173 57c-8 14-16 14-7 62l58 315c4 40 12 67-30 77-44 10-117 27-142 27s-99-17-142-27-35-37-30-77c4-40 48-268 57-315 10-48 1-48-7-62-10-14-113-40-174-57-60-17-196 1-244 6-48 4-52 10-36 20l207 77c66 25 158 53 167 105 10 53-47 132-80 192s-32 66-30 90 110 86 132 102c24 15 150 85 150 124s-119 140-159 165a820 820 0 01-190 90c-45 8-115-43-156-120-40-76-4-150 20-210 25-60-17-92-38-113l-215-230c-35-37-71-57-71-131s287-420 287-420l273 44c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47zm-215 1328c18 10 7 32-10 44l-254 198c-20 20-52 50-73 50s-52-30-73-50a13200 13200 0 00-255-198c-16-12-27-33-10-44l150-80a870 870 0 01188-73c15 0 110 34 187 73l150 80z"/>
+        <path fill="url(#shield-grad-sad-top)" d="M1999 363l-224-253H992L769 363s-196-53-288 37c0 0 260-23 350 123l276 47c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47 90-146 350-123 350-123-92-92-288-38-288-38"/>
+        
+        <!-- Disconnection Slash / Signal Offline Indicator Overlay -->
+        <circle cx="2100" cy="2100" r="420" fill="#212226" stroke="#fb542b" stroke-width="64"/>
+        <line x1="1840" y1="1840" x2="2360" y2="2360" stroke="#fb542b" stroke-width="72" stroke-linecap="round"/>
+        <line x1="1920" y1="2100" x2="2280" y2="2100" stroke="#9e9ea7" stroke-width="48" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1 class="title">No se puede acceder a este sitio</h1>
+
+    <p class="error-description" id="error-desc">
+      Es posible que la página web <span class="target-url" id="target-url-display"></span> esté temporalmente fuera de servicio o se haya trasladado permanentemente a una nueva dirección web.
+    </p>
+
+    <div class="suggestions-box">
+      <div class="suggestions-title">Prueba lo siguiente:</div>
+      <ul class="suggestions-list">
+        <li>Comprueba los cables de red, el módem y la conexión del router Wi-Fi.</li>
+        <li>Verifica la configuración del servidor proxy y firewall en los ajustes de tu sistema.</li>
+        <li>Comprueba que los servidores DNS (como Cloudflare 1.1.1.1 o Google 8.8.8.8) responden adecuadamente.</li>
+        <li>Si utilizas extensiones de red o VPN, intenta desactivarlas temporalmente.</li>
+      </ul>
+    </div>
+
+    <div class="actions-bar">
+      <button class="btn-retry" id="btn-retry">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        <span>Reintentar</span>
+      </button>
+
+      <span class="error-code-badge" id="error-code-badge">ERR_INTERNET_DISCONNECTED</span>
+    </div>
+
+    <div class="diagnostics-details">
+      <button class="diagnostics-toggle" id="btn-diagnostics-toggle">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+        <span>Detalles técnicos de diagnóstico</span>
+      </button>
+      <div class="diagnostics-content" id="diagnostics-content"></div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const rawUrl = params.get('url') || '';
+      const rawCode = params.get('code') || 'ERR_INTERNET_DISCONNECTED';
+
+      // Sanitización segura de salida
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      const targetUrlDisplay = document.getElementById('target-url-display');
+      const errorCodeBadge = document.getElementById('error-code-badge');
+      const errorDesc = document.getElementById('error-desc');
+      const btnRetry = document.getElementById('btn-retry');
+      const btnDiagToggle = document.getElementById('btn-diagnostics-toggle');
+      const diagContent = document.getElementById('diagnostics-content');
+
+      // Códigos comunes y mensajes descriptivos acordes
+      const errorDescriptions = {
+        'ERR_INTERNET_DISCONNECTED': 'No hay conexión a Internet. Comprueba la configuración de red de tu equipo.',
+        'ERR_NAME_NOT_RESOLVED': 'No se pudo encontrar la dirección IP del servidor correspondiente a este dominio (error en resolución de nombres DNS).',
+        'ERR_CONNECTION_REFUSED': 'El servidor de destino ha rechazado activamente la solicitud de conexión.',
+        'ERR_CONNECTION_TIMED_OUT': 'El servidor tardó demasiado tiempo en responder a la solicitud.',
+        'ERR_CONNECTION_RESET': 'La conexión de red con el host se restableció inesperadamente.',
+        'ERR_NAME_RESOLUTION_FAILED': 'Error crítico al intentar resolver el nombre de dominio DNS.',
+        'ERR_ADDRESS_UNREACHABLE': 'No es posible establecer una ruta de red hacia la dirección IP especificada.',
+        'ERR_TUNNEL_CONNECTION_FAILED': 'Error al intentar establecer la conexión mediante un túnel o servidor proxy.',
+        'ERR_PROXY_CONNECTION_FAILED': 'No fue posible comunicarse con el servidor proxy configurado.',
+        'ERR_CERT_COMMON_NAME_INVALID': 'El certificado de seguridad SSL/TLS del sitio no coincide con el dominio solicitado.',
+        'ERR_CERT_DATE_INVALID': 'El certificado de seguridad SSL/TLS del sitio ha caducado o su fecha no es válida.',
+        'ERR_CERT_AUTHORITY_INVALID': 'La entidad emisora del certificado de seguridad SSL/TLS no es de confianza.'
+      };
+
+      const cleanCode = rawCode.trim();
+      errorCodeBadge.textContent = cleanCode;
+
+      if (rawUrl) {
+        let domainOnly = rawUrl;
+        try {
+          const parsed = new URL(rawUrl);
+          domainOnly = parsed.hostname || rawUrl;
+        } catch {
+          domainOnly = rawUrl;
+        }
+
+        const friendlyMsg = errorDescriptions[cleanCode] 
+          ? errorDescriptions[cleanCode] 
+          : 'Es posible que la página web esté temporalmente fuera de servicio o se haya trasladado a una nueva dirección web.';
+
+        errorDesc.innerHTML = `No se ha podido cargar <span class="target-url">${escapeHtml(domainOnly)}</span>. ${friendlyMsg}`;
+        document.title = `${domainOnly} - No se puede acceder a este sitio`;
+      } else {
+        errorDesc.innerHTML = `No se puede acceder a la dirección solicitada. ${errorDescriptions[cleanCode] || 'Comprueba tu conexión de red e inténtalo de nuevo.'}`;
+      }
+
+      // Preparación de detalles de diagnóstico
+      const diagLines = [
+        `Código de error: ${cleanCode}`,
+        `URL solicitada: ${rawUrl || '(desconocida)'}`,
+        `Fecha y hora: ${new Date().toISOString()}`,
+        `Agente de usuario: ${navigator.userAgent}`,
+        `Estado en línea del navegador: ${navigator.onLine ? 'En línea (conexión local activa)' : 'Sin conexión de red'}`,
+      ];
+      diagContent.textContent = diagLines.join('\n');
+
+      btnDiagToggle.addEventListener('click', () => {
+        diagContent.classList.toggle('open');
+      });
+
+      // Acción de reintento
+      btnRetry.addEventListener('click', () => {
+        if (rawUrl && /^https?:\/\//i.test(rawUrl)) {
+          window.location.href = rawUrl;
+        } else if (rawUrl) {
+          window.location.href = rawUrl;
+        } else {
+          window.location.reload();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
