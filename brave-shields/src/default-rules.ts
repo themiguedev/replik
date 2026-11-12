@@ -76,3 +76,43 @@ export const BASE_EASYLIST_RULES = `
 ##[id^="google_ads_"]
 ##[id^="div-gpt-ad"]
 `;
+
+/**
+ * Baseline Cookie Notice, GDPR and CNIL blocking rules (Cookie Notice Blocker).
+ * Eliminates annoying consent dialogs and privacy notices.
+ */
+export const BASE_COOKIE_RULES = `
+! Easylist Cookie & GDPR / CNIL notices baseline
+-consent-banner-
+-cookie-banner-
+-cookie-cnil.
+-cookie-notice-
+-gdpr-cookie-
+||onetrust.com^
+||cookiebot.com^
+||cookielaw.org^
+||trustarc.com^
+||usercentrics.eu^
+||didomi.io^
+||quantcast.mgr.consensu.org^
+###cookie-banner
+###cookie-notice
+###onetrust-banner-sdk
+###onetrust-consent-sdk
+###cmpbox
+###consent-popup
+###gdpr-cookie-message
+##.cookie-banner
+##.cookie-notice
+##.cookie-popup
+##.qc-cmp2-container
+##.didomi-popup-container
+##.cookie-law-info-bar
+##.cc-banner
+##.cc-window
+##[aria-label*="cookie" i]
+##[aria-label*="consent" i]
+##[id*="cookie-law"]
+##[id*="cookieConsent"]
+##[class*="cookie-modal"]
+`;

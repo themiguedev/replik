@@ -356,6 +356,27 @@ describe('Brave Shields Engine Extended Coverage & Edge-Case Suite', () => {
       expect(stats.queryFilterRulesCount).toBe(1);
     });
 
+    it('loads Cookie Notice Blocker rules and blocks consent banners', () => {
+      const engine = new BraveShieldsEngine();
+      const cookieCounts = engine.loadCookieRules();
+      expect(cookieCounts.network).toBeGreaterThan(0);
+      expect(cookieCounts.cosmetic).toBeGreaterThan(0);
+
+      // Verify cosmetic cookie banner suppression
+      const injected = engine.injectCosmetics('european-site.eu', { includeGeneric: true });
+      expect(injected.selectors).toContain('#cookie-banner');
+      expect(injected.selectors).toContain('.cookie-banner');
+      expect(injected.selectors).toContain('#onetrust-banner-sdk');
+
+      // Verify network blocking of consent managers
+      const blockedManager = engine.interceptRequest({
+        url: 'https://cdn.onetrust.com/scripttemplates/otSDKStub.js',
+        documentUrl: 'https://european-site.eu',
+        resourceType: 'script',
+      });
+      expect(blockedManager.action).toBe('block');
+    });
+
     it('injects cosmetic filters and scriptlets in unison for a target domain', () => {
       const engine = new BraveShieldsEngine();
       engine.loadRulesFromText(`
