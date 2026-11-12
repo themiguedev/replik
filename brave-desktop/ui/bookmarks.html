@@ -608,17 +608,17 @@
     <div class="sidebar-subtitle">Organización</div>
 
     <div class="folder-item active" data-folder="all">
-      <span class="folder-icon">📂</span>
+      <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><polygon points="2 10 22 10 20 21 4 21"></polygon></svg></span>
       <span class="folder-label">Todos los marcadores</span>
       <span class="folder-count" id="count-all">0</span>
     </div>
     <div class="folder-item" data-folder="bar">
-      <span class="folder-icon">⭐</span>
+      <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
       <span class="folder-label">Barra de marcadores</span>
       <span class="folder-count" id="count-bar">0</span>
     </div>
     <div class="folder-item" data-folder="other">
-      <span class="folder-icon">📁</span>
+      <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
       <span class="folder-label">Otros marcadores</span>
       <span class="folder-count" id="count-other">0</span>
     </div>
@@ -629,7 +629,7 @@
     <div id="custom-folders-container" style="display: flex; flex-direction: column; gap: 4px;"></div>
 
     <button class="btn-new-folder" id="btn-sidebar-new-folder">
-      <span>➕</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
       <span>Nueva carpeta</span>
     </button>
   </div>
@@ -642,11 +642,11 @@
       </div>
       <div class="header-actions">
         <button class="btn-action btn-primary" id="btn-add-modal">
-          <span>➕</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
           <span>Añadir marcador</span>
         </button>
         <button class="btn-action" id="btn-new-folder-top">
-          <span>📁</span>
+          <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg></span>
           <span>Añadir carpeta</span>
         </button>
         <button class="btn-action btn-more-options" id="btn-header-more" title="Más opciones">⋮</button>
@@ -656,7 +656,7 @@
     <!-- Barra de Búsqueda -->
     <div class="search-bar-row">
       <div class="search-box">
-        <span>🔍</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" id="search-input" placeholder="Buscar en los marcadores (título o dirección URL)...">
       </div>
     </div>
@@ -674,10 +674,10 @@
           <option value="other">Otros marcadores</option>
         </select>
         <button class="btn-action" id="btn-batch-delete" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
-          <span>🗑️</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></span>
           <span>Eliminar</span>
         </button>
-        <button class="btn-action" id="btn-batch-cancel">✕ Cancelar</button>
+        <button class="btn-action" id="btn-batch-cancel"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Cancelar</button>
       </div>
     </div>
 
@@ -693,7 +693,7 @@
   <div class="modal-overlay" id="bm-modal">
     <div class="modal-card">
       <div class="modal-title" id="modal-heading">
-        <span>✏️</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
         <span id="modal-heading-text">Editar marcador</span>
       </div>
       <div class="input-field">
@@ -722,7 +722,7 @@
   <div class="modal-overlay" id="folder-modal">
     <div class="modal-card">
       <div class="modal-title">
-        <span>📁</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
         <span id="folder-modal-heading">Nueva carpeta</span>
       </div>
       <div class="input-field">
@@ -739,20 +739,20 @@
   <!-- Menú Contextual Flotante de Marcador -->
   <div class="context-menu" id="bm-context-menu">
     <div class="context-menu-item" id="ctx-open-newtab">
-      <span>↗️</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></span>
       <span>Abrir en nueva pestaña</span>
     </div>
     <div class="context-menu-item" id="ctx-copy-url">
-      <span>📋</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>
       <span>Copiar dirección de enlace</span>
     </div>
     <div class="context-menu-separator"></div>
     <div class="context-menu-item" id="ctx-edit">
-      <span>✏️</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
       <span>Editar...</span>
     </div>
     <div class="context-menu-item danger" id="ctx-delete">
-      <span>🗑️</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></span>
       <span>Eliminar</span>
     </div>
   </div>
@@ -760,11 +760,11 @@
   <!-- Menú Contextual de Carpeta -->
   <div class="context-menu" id="folder-context-menu">
     <div class="context-menu-item" id="folder-ctx-rename">
-      <span>✏️</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
       <span>Cambiar nombre...</span>
     </div>
     <div class="context-menu-item danger" id="folder-ctx-delete">
-      <span>🗑️</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></span>
       <span>Eliminar carpeta</span>
     </div>
   </div>
@@ -772,16 +772,16 @@
   <!-- Menú de Opciones del Header -->
   <div class="context-menu" id="header-context-menu">
     <div class="context-menu-item" id="header-ctx-sort-title">
-      <span>🔤</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h5l-5 6h5"></path><path d="M4 20h6"></path><path d="M4 14l3-7 3 7"></path><line x1="5.2" y1="17" x2="8.8" y2="17"></line></svg></span>
       <span>Ordenar por título (A-Z)</span>
     </div>
     <div class="context-menu-separator"></div>
     <div class="context-menu-item" id="header-ctx-import">
-      <span>📥</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>
       <span>Importar marcadores (HTML)...</span>
     </div>
     <div class="context-menu-item" id="header-ctx-export">
-      <span>📤</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></span>
       <span>Exportar marcadores (HTML)...</span>
     </div>
   </div>
@@ -820,9 +820,13 @@
       updateFolderSelectors();
     }
 
+    const SVG_TOAST_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    const BM_FAVICON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>';
+
     function showToast(msg) {
       const toast = document.getElementById('global-toast');
-      toast.textContent = msg;
+      if (!toast) return;
+      toast.innerHTML = SVG_TOAST_CHECK + escapeHtml(msg.replace(/^[\u2713\s]+/, ''));
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
@@ -865,7 +869,7 @@
           item.setAttribute('data-folder', folderName);
           const count = bookmarks.filter(b => b.folder === folderName).length;
           item.innerHTML = `
-            <span class="folder-icon">📁</span>
+            <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
             <span class="folder-label">${escapeHtml(folderName)}</span>
             <span class="folder-count">${count}</span>
             <button class="folder-more-btn" title="Opciones de carpeta" data-folder="${escapeHtml(folderName)}">⋮</button>
@@ -886,7 +890,7 @@
               const movedBm = bookmarks[draggedIndex];
               movedBm.folder = folderName;
               saveBookmarks();
-              showToast(`✓ Movido "${movedBm.title}" a "${folderName}"`);
+              showToast(`Movido "${movedBm.title}" a "${folderName}"`);
               renderList(document.getElementById('search-input').value);
             }
           });
@@ -925,7 +929,7 @@
               movedBm.folder = fKey;
               saveBookmarks();
               const fTitle = fKey === 'bar' ? 'Barra de marcadores' : 'Otros marcadores';
-              showToast(`✓ Movido "${movedBm.title}" a "${fTitle}"`);
+              showToast(`Movido "${movedBm.title}" a "${fTitle}"`);
               renderList(document.getElementById('search-input').value);
             }
           });
@@ -1037,9 +1041,9 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
-            <span style="font-size: 32px;">🔖</span>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
             <span>${q ? 'No se encontraron marcadores coincidentes.' : 'Esta carpeta está vacía.'}</span>
-            <button class="btn-action btn-primary" onclick="openAddModal()" style="margin-top: 8px;">➕ Añadir marcador</button>
+            <button class="btn-action btn-primary" onclick="openAddModal()" style="margin-top: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Añadir marcador</button>
           </div>
         `;
         return;
@@ -1058,7 +1062,7 @@
         row.innerHTML = `
           <input type="checkbox" class="bm-checkbox" ${selectedBookmarks.has(realIdx) ? 'checked' : ''} data-idx="${realIdx}">
           <div class="bm-favicon">
-            ${favSrc ? `<img src="${favSrc}" width="16" height="16" onerror="this.outerHTML='🔖'">` : '🔖'}
+            ${favSrc ? `<img src="${favSrc}" width="16" height="16" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';"><span class="bm-fallback-icon" style="display:none;">${BM_FAVICON_SVG}</span>` : `<span class="bm-fallback-icon">${BM_FAVICON_SVG}</span>`}
           </div>
           <div class="bm-info">
             <div class="bm-title-row">
@@ -1068,7 +1072,7 @@
             <span class="bm-url" title="${escapeHtml(bm.url)}">${escapeHtml(bm.url)}</span>
           </div>
           <div class="bm-actions">
-            <button class="bm-btn-icon btn-edit-row" title="Editar marcador" data-idx="${realIdx}">✏️</button>
+            <button class="bm-btn-icon btn-edit-row" title="Editar marcador" data-idx="${realIdx}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
             <button class="bm-btn-icon btn-more-row" title="Más opciones" data-idx="${realIdx}">⋮</button>
           </div>
         `;
@@ -1174,7 +1178,7 @@
           bookmarks.splice(targetIdx, 0, itemToMove);
           saveBookmarks();
           renderList(document.getElementById('search-input').value);
-          showToast('✓ Marcadores reordenados');
+          showToast('Marcadores reordenados');
         });
 
         container.appendChild(row);
@@ -1224,7 +1228,7 @@
       });
 
       await saveBookmarks();
-      showToast(`✓ Se movieron ${selectedBookmarks.size} marcadores a "${targetFolder}"`);
+      showToast(`Se movieron ${selectedBookmarks.size} marcadores a "${targetFolder}"`);
       selectedBookmarks.clear();
       e.target.value = '';
       updateBatchBar();
@@ -1238,7 +1242,7 @@
         bookmarks = bookmarks.filter((_, idx) => !selectedBookmarks.has(idx));
         selectedBookmarks.clear();
         await saveBookmarks();
-        showToast('✓ Marcadores eliminados');
+        showToast('Marcadores eliminados');
         updateBatchBar();
         renderList(document.getElementById('search-input').value);
       }
@@ -1299,7 +1303,7 @@
     document.getElementById('ctx-copy-url').addEventListener('click', () => {
       if (activeContextMenuRow !== null && bookmarks[activeContextMenuRow]) {
         navigator.clipboard.writeText(bookmarks[activeContextMenuRow].url);
-        showToast('✓ Dirección copiada al portapapeles');
+        showToast('Dirección copiada al portapapeles');
       }
     });
 
@@ -1314,7 +1318,7 @@
         const title = bookmarks[activeContextMenuRow].title;
         bookmarks.splice(activeContextMenuRow, 1);
         await saveBookmarks();
-        showToast(`✓ Marcador "${title}" eliminado`);
+        showToast(`Marcador "${title}" eliminado`);
         renderList(document.getElementById('search-input').value);
       }
     });
@@ -1334,7 +1338,7 @@
         await saveBookmarks();
         saveCustomFolders();
         if (currentFolder === fName) currentFolder = 'all';
-        showToast(`✓ Carpeta "${fName}" eliminada`);
+        showToast(`Carpeta "${fName}" eliminada`);
         renderFolders();
         renderList(document.getElementById('search-input').value);
       }
@@ -1350,7 +1354,7 @@
     document.getElementById('header-ctx-sort-title').addEventListener('click', async () => {
       bookmarks.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
       await saveBookmarks();
-      showToast('✓ Marcadores ordenados alfabéticamente (A-Z)');
+      showToast('Marcadores ordenados alfabéticamente (A-Z)');
       renderList(document.getElementById('search-input').value);
     });
 
@@ -1407,10 +1411,10 @@
 
       if (editIndex >= 0 && editIndex < bookmarks.length) {
         bookmarks[editIndex] = { ...bookmarks[editIndex], title, url, folder };
-        showToast('✓ Marcador actualizado con éxito');
+        showToast('Marcador actualizado con éxito');
       } else {
         bookmarks.unshift({ title, url, folder });
-        showToast('✓ Nuevo marcador añadido');
+        showToast('Nuevo marcador añadido');
       }
 
       await saveBookmarks();
@@ -1461,14 +1465,14 @@
           if (currentFolder === folderToRename) currentFolder = newName;
           await saveBookmarks();
           saveCustomFolders();
-          showToast(`✓ Carpeta renombrada a "${newName}"`);
+          showToast(`Carpeta renombrada a "${newName}"`);
         }
       } else {
         // Crear nueva carpeta
         if (!customFolders.includes(newName)) {
           customFolders.push(newName);
           saveCustomFolders();
-          showToast(`✓ Carpeta "${newName}" creada`);
+          showToast(`Carpeta "${newName}" creada`);
         }
       }
 
@@ -1496,7 +1500,7 @@
       a.href = URL.createObjectURL(blob);
       a.download = `brave_marcadores_${new Date().toISOString().slice(0, 10)}.html`;
       a.click();
-      showToast('✓ Marcadores exportados a HTML');
+      showToast('Marcadores exportados a HTML');
     }
 
     // Importar HTML
@@ -1524,7 +1528,7 @@
         await saveBookmarks();
         renderFolders();
         renderList();
-        showToast(`✓ Se importaron ${addedCount} marcadores exitosamente.`);
+        showToast(`Se importaron ${addedCount} marcadores exitosamente.`);
       };
       reader.readAsText(file);
       fileImport.value = '';

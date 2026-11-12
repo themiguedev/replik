@@ -15,7 +15,12 @@
     <div class="tab-bar" id="tab-bar">
       <!-- Pestañas dinámicas tipo píldora se inyectan aquí -->
     </div>
-    <div class="tab-new" id="new-tab-btn" title="Nueva pestaña (Ctrl+T)">+</div>
+    <div class="tab-new" id="new-tab-btn" title="Nueva pestaña (Ctrl+T)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </div>
 
     <!-- Región arrastrable de la ventana -->
     <div class="titlebar-drag-region" id="titlebar-drag-region"></div>
@@ -50,19 +55,19 @@
   <!-- Barra de Herramientas / Omnibox -->
   <div class="toolbar">
     <button class="nav-btn" id="btn-back" title="Atrás (Alt+←)" disabled>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
     </button>
     <button class="nav-btn" id="btn-forward" title="Adelante (Alt+→)" disabled>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"></line>
         <polyline points="12 5 19 12 12 19"></polyline>
       </svg>
     </button>
     <button class="nav-btn" id="btn-reload" title="Recargar (Ctrl+R)">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"></polyline>
         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
       </svg>
@@ -77,7 +82,7 @@
 
     <div class="omnibox-container">
       <div class="lock-icon" id="lock-icon" title="Ver información del sitio y permisos">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
@@ -87,7 +92,12 @@
       <!-- Indicador Dinámico de Zoom -->
       <div class="zoom-indicator" id="zoom-indicator" style="display: none;" title="Restablecer zoom al 100%">
         <span id="zoom-value">100%</span>
-        <span class="zoom-reset-btn" id="zoom-reset-btn">✕</span>
+        <span class="zoom-reset-btn" id="zoom-reset-btn" title="Restablecer">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </span>
       </div>
 
       <!-- Botón de Speedreader (Modo Lectura) -->
@@ -117,7 +127,21 @@
 
       <!-- Botón del León de Brave Shields -->
       <button class="shields-btn" id="shields-btn" title="Brave Shields">
-        <img class="shields-lion-img" src="logo.png" width="16" height="16" alt="Brave Shields">
+        <svg class="shields-lion-img" width="16" height="16" viewBox="0 0 2770 2770" style="vertical-align: middle; display: inline-block; pointer-events: none;">
+          <defs>
+            <linearGradient id="shields-lion-grad-1" y1="51%" y2="51%">
+              <stop offset="0.4" stop-color="#ff5500"/>
+              <stop offset="0.6" stop-color="#ff2000"/>
+            </linearGradient>
+            <linearGradient id="shields-lion-grad-2" x1="2%" y1="51%" y2="51%">
+              <stop offset="0" stop-color="#ff452a"/>
+              <stop offset="1" stop-color="#ff2000"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#shields-lion-grad-1)" d="M2395 723l60-147-170-176c-92-92-288-38-288-38l-222-252H992L769 363s-196-53-288 37L311 575l60 147-75 218 250 953c52 204 87 283 234 387l457 310c44 27 98 74 147 74s103-47 147-74l457-310c147-104 182-183 234-387l250-953z"/>
+          <path fill="#ffffff" d="M1935 524s287 347 287 420c0 75-36 94-72 133l-215 230c-20 20-63 54-38 113 25 60 60 134 20 210-40 77-110 128-155 120a820 820 0 01-190-90c-38-25-160-126-160-165s126-110 150-124c23-16 130-78 132-102s2-30-30-90-88-140-80-192c10-52 100-80 167-105l207-78c16-8 12-15-36-20-48-4-183-22-244-5s-163 43-173 57c-8 14-16 14-7 62l58 315c4 40 12 67-30 77-44 10-117 27-142 27s-99-17-142-27-35-37-30-77c4-40 48-268 57-315 10-48 1-48-7-62-10-14-113-40-174-57-60-17-196 1-244 6-48 4-52 10-36 20l207 77c66 25 158 53 167 105 10 53-47 132-80 192s-32 66-30 90 110 86 132 102c24 15 150 85 150 124s-119 140-159 165a820 820 0 01-190 90c-45 8-115-43-156-120-40-76-4-150 20-210 25-60-17-92-38-113l-215-230c-35-37-71-57-71-131s287-420 287-420l273 44c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47zm-215 1328c18 10 7 32-10 44l-254 198c-20 20-52 50-73 50s-52-30-73-50a13200 13200 0 00-255-198c-16-12-27-33-10-44l150-80a870 870 0 01188-73c15 0 110 34 187 73l150 80z"/>
+          <path fill="url(#shields-lion-grad-2)" d="M1999 363l-224-253H992L769 363s-196-53-288 37c0 0 260-23 350 123l276 47c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47 90-146 350-123 350-123-92-92-288-38-288-38"/>
+        </svg>
         <span id="shields-counter">0</span>
       </button>
 
@@ -128,7 +152,7 @@
     <!-- 7 Botones a la Derecha del Omnibox (100% Idénticos a Frame 001) -->
     <!-- 1. Leo AI (Chispas) -->
     <button class="nav-btn-icon" id="btn-leo" title="Leo AI (Asistente de IA)">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
       </svg>
     </button>
@@ -180,7 +204,7 @@
 
     <!-- 7. Menú Principal (3 líneas horizontales) -->
     <button class="nav-btn" id="btn-menu" title="Personalizar y controlar Brave">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -447,10 +471,23 @@
           <span>Zoom</span>
         </div>
         <div class="menu-zoom-controls">
-          <button class="zoom-btn" id="menu-zoom-out" title="Reducir zoom">−</button>
+          <button class="zoom-btn" id="menu-zoom-out" title="Reducir zoom">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
           <span class="zoom-level-text" id="menu-zoom-text">100 %</span>
-          <button class="zoom-btn" id="menu-zoom-in" title="Aumentar zoom">+</button>
-          <button class="zoom-btn zoom-fullscreen" id="menu-fullscreen" title="Pantalla completa">⛶</button>
+          <button class="zoom-btn" id="menu-zoom-in" title="Aumentar zoom">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button class="zoom-btn zoom-fullscreen" id="menu-fullscreen" title="Pantalla completa">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -654,20 +691,83 @@
 
   <!-- Contenedor del Navegador Web (Múltiples Webviews) -->
   <div class="browser-content" id="browser-content">
+    <!-- Dock Vertical de Barra Lateral (Brave Sidebar Dock — 44px) -->
+    <aside class="brave-sidebar-dock" id="brave-sidebar-dock">
+      <div class="sidebar-dock-group sidebar-dock-top">
+        <!-- 1. Leo AI -->
+        <button class="sidebar-dock-btn" id="sidebar-btn-leo" title="Leo AI (Asistente de IA)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </button>
+
+        <!-- 2. Marcadores -->
+        <button class="sidebar-dock-btn" id="sidebar-btn-bookmarks" title="Marcadores (Ctrl+Mayús+O)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+
+        <!-- 3. Historial -->
+        <button class="sidebar-dock-btn" id="sidebar-btn-history" title="Historial (Ctrl+H)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+            <path d="M12 7v5l4 2"></path>
+          </svg>
+        </button>
+
+        <!-- 4. Brave Playlist -->
+        <button class="sidebar-dock-btn" id="sidebar-btn-playlist" title="Brave Playlist">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- 5. Brave Wallet -->
+        <button class="sidebar-dock-btn" id="sidebar-btn-wallet" title="Brave Wallet">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-dock-group sidebar-dock-bottom">
+        <div class="sidebar-dock-divider"></div>
+        <!-- Botón para ocultar/colapsar sidebar desde el propio dock -->
+        <button class="sidebar-dock-btn sidebar-dock-collapse-btn" id="sidebar-btn-collapse" title="Ocultar barra lateral">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </aside>
+
     <!-- Sidebar Leo AI (100% Idéntico a Frame 009) -->
     <aside class="leo-sidebar" id="leo-sidebar">
       <div class="leo-sidebar-header">
         <div class="leo-header-title">Leo AI</div>
         <div class="leo-header-actions">
           <button class="leo-btn-icon" id="btn-leo-expand" title="Expandir">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 3 21 3 21 9"></polyline>
               <polyline points="9 21 3 21 3 15"></polyline>
               <line x1="21" y1="3" x2="14" y2="10"></line>
               <line x1="3" y1="21" x2="10" y2="14"></line>
             </svg>
           </button>
-          <button class="leo-btn-icon" id="btn-close-leo" title="Cerrar">✕</button>
+          <button class="leo-btn-icon" id="btn-close-leo" title="Cerrar">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -701,7 +801,7 @@
         <div class="leo-input-toolbar">
           <div class="leo-toolbar-left">
             <button class="leo-attach-btn" title="Adjuntar pestaña actual o archivo">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
               </svg>
             </button>
@@ -713,7 +813,7 @@
             </select>
           </div>
           <button class="leo-send-btn" id="btn-leo-send" title="Enviar mensaje">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="19" x2="12" y2="5"></line>
               <polyline points="5 12 12 5 19 12"></polyline>
             </svg>
@@ -732,7 +832,12 @@
       </div>
       <div class="wayback-bar-actions">
         <button class="btn-wayback-action btn-wayback-check" id="btn-wayback-check">Ver versión archivada</button>
-        <button class="btn-wayback-action btn-wayback-close" id="btn-wayback-close">✕</button>
+        <button class="btn-wayback-action btn-wayback-close" id="btn-wayback-close" title="Cerrar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -744,7 +849,12 @@
       </div>
       <div class="crash-banner-actions">
         <button class="btn-crash-reload" id="btn-crash-reload">Volver a cargar</button>
-        <button class="btn-crash-close" id="btn-crash-close">✕</button>
+        <button class="btn-crash-close" id="btn-crash-close" title="Cerrar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -754,7 +864,12 @@
       <span class="find-count" id="find-in-page-count">0/0</span>
       <button class="btn-find-nav" id="btn-find-prev" title="Anterior (Shift+Enter)">▲</button>
       <button class="btn-find-nav" id="btn-find-next" title="Siguiente (Enter)">▼</button>
-      <button class="btn-find-close" id="btn-find-close" title="Cerrar (Esc)">✕</button>
+      <button class="btn-find-close" id="btn-find-close" title="Cerrar (Esc)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
 
     <!-- Modo Lectura Speedreader Overlay -->
@@ -779,7 +894,13 @@
             <button class="sr-btn" id="sr-btn-font-inc" title="Aumentar fuente (A+)">A+</button>
             <button class="sr-btn" id="sr-btn-font-family" title="Alternar Serif / Sans-Serif">Serif</button>
           </div>
-          <button class="btn-exit-reader" id="btn-close-speedreader">✕ Salir</button>
+          <button class="btn-exit-reader" id="btn-close-speedreader" title="Salir de Speedreader">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 4px; pointer-events: none;">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>Salir</span>
+          </button>
         </div>
       </div>
       <h1 class="speedreader-title" id="speedreader-title">Título del artículo</h1>
@@ -909,7 +1030,12 @@
     <div class="translate-bar-actions">
       <button class="btn-translate-action btn-translate-confirm" id="btn-do-translate">Traducir</button>
       <button class="btn-translate-action btn-translate-revert" id="btn-revert-translate" style="display: none;">Ver original</button>
-      <button class="btn-translate-action btn-translate-close" id="btn-close-translate">✕</button>
+      <button class="btn-translate-action btn-translate-close" id="btn-close-translate" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -920,7 +1046,12 @@
         <div class="task-manager-title">
           <span>⚡ Administrador de tareas - Brave</span>
         </div>
-        <button class="task-manager-close" id="btn-close-task-manager">✕</button>
+        <button class="task-manager-close" id="btn-close-task-manager" title="Cerrar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
       <div class="task-manager-body">
         <table class="task-table">
@@ -989,7 +1120,12 @@
   <div class="extension-action-popup" id="extension-action-popup">
     <div class="ext-popup-header">
       <div class="ext-popup-title" id="ext-popup-title">Extensión</div>
-      <button class="ext-popup-close" id="ext-popup-close">✕</button>
+      <button class="ext-popup-close" id="ext-popup-close" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <iframe class="ext-popup-frame" id="ext-popup-frame" src="about:blank"></iframe>
   </div>
@@ -998,7 +1134,12 @@
   <div class="qr-popup" id="qr-popup">
     <div class="qr-popup-header">
       <span style="font-weight: 700; font-size: 13px;">📱 Compartir con código QR</span>
-      <button class="qr-popup-close" id="btn-close-qr">✕</button>
+      <button class="qr-popup-close" id="btn-close-qr" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="qr-popup-body">
       <div id="qr-code-container" class="qr-code-container"></div>
@@ -1013,7 +1154,12 @@
   <div class="bookmark-edit-popup" id="bookmark-edit-popup">
     <div class="bm-popup-header">
       <span class="bm-popup-title" id="bm-popup-heading">Marcador añadido</span>
-      <button class="bm-popup-close" id="btn-close-bm-popup">✕</button>
+      <button class="bm-popup-close" id="btn-close-bm-popup" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="bm-popup-body">
       <div class="bm-popup-field">
@@ -1060,7 +1206,7 @@
   <div class="modal-overlay" id="bm-bar-edit-modal">
     <div class="modal-card" style="width: 420px; background: #24252a; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
       <div class="modal-title" style="font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <span id="bm-bar-modal-icon">✏️</span>
+        <span id="bm-bar-modal-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
         <span id="bm-bar-modal-title">Editar marcador</span>
       </div>
       <div class="input-field" style="display:flex; flex-direction:column; gap:6px; margin-bottom: 12px;">
@@ -1082,7 +1228,7 @@
   <div class="site-info-popup" id="site-info-popup">
     <div class="site-info-header">
       <div class="site-info-icon-badge" id="site-info-icon-badge">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
@@ -1091,7 +1237,12 @@
         <div class="site-info-domain" id="site-info-domain">sitio.com</div>
         <div class="site-info-security" id="site-info-security">La conexión es segura</div>
       </div>
-      <button class="site-info-close" id="site-info-close">✕</button>
+      <button class="site-info-close" id="site-info-close" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="site-info-desc" id="site-info-desc">
       Tus datos (contraseñas, datos de tarjetas de crédito) se mantienen privados al transmitirse a este sitio web mediante cifrado HTTPS moderno.
@@ -1123,7 +1274,12 @@
         </svg>
         <span style="font-weight: 700; font-size: 13px;">Captura de pantalla web</span>
       </div>
-      <button class="capture-popup-close" id="btn-close-capture">✕</button>
+      <button class="capture-popup-close" id="btn-close-capture" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="capture-popup-body">
       <img id="capture-preview-img" alt="Vista previa de captura" style="max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain; background: #000;">
@@ -1140,7 +1296,13 @@
       <span class="picker-icon">🎯</span>
       <span><strong>Selector de Elementos:</strong> Haz clic sobre cualquier elemento de la página para bloquearlo permanentemente. Presiona <strong>Esc</strong> para cancelar.</span>
     </div>
-    <button class="btn-cancel-picker" id="btn-cancel-picker">✕ Cancelar</button>
+    <button class="btn-cancel-picker" id="btn-cancel-picker">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 4px; pointer-events: none;">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      <span>Cancelar</span>
+    </button>
   </div>
 
   <!-- Modal Limpiador Avanzado de Datos de Navegación (Ctrl + Shift + Supr) -->
@@ -1156,7 +1318,12 @@
           </svg>
           <span>Borrar datos de navegación</span>
         </div>
-        <button class="clear-data-close" id="btn-close-clear-data">✕</button>
+        <button class="clear-data-close" id="btn-close-clear-data" title="Cerrar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       <div class="clear-data-body">
@@ -1220,7 +1387,12 @@
         <span class="pw-icon">🔑</span>
         <span style="font-weight: 700; font-size: 13.5px;">¿Guardar contraseña?</span>
       </div>
-      <button class="pw-popup-close" id="btn-close-pw-popup">✕</button>
+      <button class="pw-popup-close" id="btn-close-pw-popup" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="pw-popup-domain" id="pw-popup-domain">sitio.com</div>
     <div class="pw-popup-fields">
@@ -1256,11 +1428,22 @@
       </div>
     </div>
     <div class="download-bar-actions">
-      <button class="btn-download-act" id="btn-download-cancel" style="color: #f87171; border-color: rgba(248, 113, 113, 0.4);">✕ Cancelar</button>
+      <button class="btn-download-act" id="btn-download-cancel" style="color: #f87171; border-color: rgba(248, 113, 113, 0.4);">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 4px; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        <span>Cancelar</span>
+      </button>
       <button class="btn-download-act" id="btn-download-open" style="display: none;">Abrir archivo</button>
       <button class="btn-download-act" id="btn-download-folder" style="display: none;">Mostrar en carpeta</button>
       <button class="btn-download-act" id="btn-download-all">Todas las descargas (Ctrl+J)</button>
-      <button class="btn-download-close" id="btn-download-close" title="Cerrar">✕</button>
+      <button class="btn-download-close" id="btn-download-close" title="Cerrar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -1272,7 +1455,12 @@
           <span>🔒</span>
           <span>Autenticación requerida</span>
         </div>
-        <button class="auth-close" id="btn-auth-close">✕</button>
+        <button class="auth-close" id="btn-auth-close" title="Cerrar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
       <div class="auth-body">
         <div class="auth-desc" id="auth-desc">El servidor solicita un nombre de usuario y una contraseña.</div>

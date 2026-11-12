@@ -128,34 +128,64 @@ function initWindowControls() {
 
 initWindowControls();
 
-// Ícono del Escudo Brave con logo oficial
+// ==========================================
+// VECTOR SVG ICON SYSTEM (Milestone 1 Standardized)
+// ==========================================
+
+// 1. Authentic Brave Lion Shield Vector SVG (16x16px, dual gradient, 2770x2770 viewBox)
 const BRAVE_SHIELD_SVG = `
-  <img class="tab-shield-img" src="logo.png" width="16" height="16" alt="Brave" style="vertical-align: middle; object-fit: contain; display: block; pointer-events: none;">
+  <svg class="tab-shield-svg" width="16" height="16" viewBox="0 0 2770 2770" style="vertical-align: middle; display: block; pointer-events: none;">
+    <defs>
+      <linearGradient id="tab-shield-grad-1" y1="51%" y2="51%">
+        <stop offset="0.4" stop-color="#ff5500"/>
+        <stop offset="0.6" stop-color="#ff2000"/>
+      </linearGradient>
+      <linearGradient id="tab-shield-grad-2" x1="2%" y1="51%" y2="51%">
+        <stop offset="0" stop-color="#ff452a"/>
+        <stop offset="1" stop-color="#ff2000"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#tab-shield-grad-1)" d="M2395 723l60-147-170-176c-92-92-288-38-288-38l-222-252H992L769 363s-196-53-288 37L311 575l60 147-75 218 250 953c52 204 87 283 234 387l457 310c44 27 98 74 147 74s103-47 147-74l457-310c147-104 182-183 234-387l250-953z"/>
+    <path fill="#ffffff" d="M1935 524s287 347 287 420c0 75-36 94-72 133l-215 230c-20 20-63 54-38 113 25 60 60 134 20 210-40 77-110 128-155 120a820 820 0 01-190-90c-38-25-160-126-160-165s126-110 150-124c23-16 130-78 132-102s2-30-30-90-88-140-80-192c10-52 100-80 167-105l207-78c16-8 12-15-36-20-48-4-183-22-244-5s-163 43-173 57c-8 14-16 14-7 62l58 315c4 40 12 67-30 77-44 10-117 27-142 27s-99-17-142-27-35-37-30-77c4-40 48-268 57-315 10-48 1-48-7-62-10-14-113-40-174-57-60-17-196 1-244 6-48 4-52 10-36 20l207 77c66 25 158 53 167 105 10 53-47 132-80 192s-32 66-30 90 110 86 132 102c24 15 150 85 150 124s-119 140-159 165a820 820 0 01-190 90c-45 8-115-43-156-120-40-76-4-150 20-210 25-60-17-92-38-113l-215-230c-35-37-71-57-71-131s287-420 287-420l273 44c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47zm-215 1328c18 10 7 32-10 44l-254 198c-20 20-52 50-73 50s-52-30-73-50a13200 13200 0 00-255-198c-16-12-27-33-10-44l150-80a870 870 0 01188-73c15 0 110 34 187 73l150 80z"/>
+    <path fill="url(#tab-shield-grad-2)" d="M1999 363l-224-253H992L769 363s-196-53-288 37c0 0 260-23 350 123l276 47c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47 90-146 350-123 350-123-92-92-288-38-288-38"/>
+  </svg>
 `;
 
+// 2. Tab Close Button (10x10px, 2px stroke, rounded ends)
+const TAB_CLOSE_SVG = `<svg class="tab-close-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+// 3. Audio Playing Indicator (12x12px, 1.8px stroke, filled speaker + sound waves)
+const TAB_AUDIO_PLAYING_SVG = `<svg class="tab-audio-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg><span class="sr-only">🔊</span>`;
+
+// 4. Audio Muted Indicator (12x12px, 1.8px stroke, filled speaker + mute cross)
+const TAB_AUDIO_MUTED_SVG = `<svg class="tab-audio-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg><span class="sr-only">🔇</span>`;
+
+// 5. Tab Sleep Badge (Crescent Moon, 11x11px, fill currentColor)
+const TAB_SLEEP_SVG = `<svg class="tab-sleep-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align: -1px; margin-right: 4px; display: inline-block; pointer-events: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span class="sr-only">🌙</span>`;
+
 const RELOAD_SVG = `
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="23 4 23 10 17 10"></polyline>
     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
   </svg>
 `;
 
 const STOP_SVG = `
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
 `;
 
 const LOCK_SVG_SECURE = `
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
   </svg>
 `;
 
 const LOCK_SVG_INSECURE = `
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fb542b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fb542b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
     <line x1="12" y1="9" x2="12" y2="13"></line>
     <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -163,7 +193,7 @@ const LOCK_SVG_INSECURE = `
 `;
 
 const LOCK_SVG_BRAVE = `
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
   </svg>
 `;
@@ -1791,13 +1821,13 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     <span class="tab-icon">${BRAVE_SHIELD_SVG}</span>
     <span class="tab-throbber" title="Cargando...">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" stroke-width="2.5"/>
-        <path d="M12 3a9 9 0 0 1 9 9" stroke="#fb542b" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+        <path d="M12 3a9 9 0 0 1 9 9" stroke="#fb542b" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </span>
     <span class="tab-title">Nueva pestaña</span>
-    <span class="tab-audio-icon" title="Silenciar pestaña">🔊</span>
-    <span class="tab-close" title="Cerrar pestaña (Ctrl+W)">✕</span>
+    <span class="tab-audio-icon" title="Silenciar pestaña">${TAB_AUDIO_PLAYING_SVG}</span>
+    <span class="tab-close" title="Cerrar pestaña (Ctrl+W)">${TAB_CLOSE_SVG}</span>
   `;
 
   // Elemento Webview independiente con partición adecuada (persistente en modo normal, efímera en Privado/Tor/Invitado)
@@ -1843,7 +1873,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     tabEl.classList.add('sleeping');
     const titleEl = tabEl.querySelector('.tab-title');
     if (titleEl) {
-      titleEl.innerHTML = `<span class="tab-sleep-badge">🌙</span> ` + escapeHtml(initialTitle);
+      titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(initialTitle);
     }
   }
 
@@ -1930,12 +1960,12 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
     if (tabData.isMuted) {
       audioBtn.style.display = 'inline-flex';
-      audioBtn.textContent = '🔇';
+      audioBtn.innerHTML = TAB_AUDIO_MUTED_SVG;
       audioBtn.title = 'Reactivar sonido de la pestaña';
       audioBtn.classList.add('muted');
     } else if (tabData.isAudible) {
       audioBtn.style.display = 'inline-flex';
-      audioBtn.textContent = '🔊';
+      audioBtn.innerHTML = TAB_AUDIO_PLAYING_SVG;
       audioBtn.title = 'Silenciar pestaña';
       audioBtn.classList.remove('muted');
     } else {
@@ -2014,6 +2044,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     if (activeTabId === id) {
       btnReload.innerHTML = STOP_SVG;
       btnReload.title = 'Detener carga (Esc)';
+      btnReload.setAttribute('data-state', 'stop');
       hideWaybackBar();
       showPageLoadingBar();
     }
@@ -2025,6 +2056,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     if (activeTabId === id) {
       btnReload.innerHTML = RELOAD_SVG;
       btnReload.title = 'Recargar (Ctrl+R)';
+      btnReload.setAttribute('data-state', 'reload');
       updateNavControls();
       finishPageLoadingBar();
     }
@@ -2059,7 +2091,11 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     updateHistoryTitle(tabData.url, t);
     const titleEl = tabEl.querySelector('.tab-title');
     if (titleEl) {
-      titleEl.textContent = tabData.isSleeping ? `🌙 ${tabData.title}` : tabData.title;
+      if (tabData.isSleeping) {
+        titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(tabData.title);
+      } else {
+        titleEl.textContent = tabData.title;
+      }
     }
     if (activeTabId === id) {
       document.title = `${tabData.title} - Brave Browser`;
@@ -2095,6 +2131,8 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     tabEl.classList.remove('loading');
     if (activeTabId === id) {
       btnReload.innerHTML = RELOAD_SVG;
+      btnReload.title = 'Recargar (Ctrl+R)';
+      btnReload.setAttribute('data-state', 'reload');
       finishPageLoadingBar();
     }
     if (e.errorCode !== -3 && initialUrl.includes('ntp.html') && webviewEl.src !== ntpUrl) {
@@ -2958,10 +2996,12 @@ function switchTab(id) {
     showPageLoadingBar();
     btnReload.innerHTML = STOP_SVG;
     btnReload.title = 'Detener carga (Esc)';
+    btnReload.setAttribute('data-state', 'stop');
   } else {
     hidePageLoadingBar();
     btnReload.innerHTML = RELOAD_SVG;
     btnReload.title = 'Recargar (Ctrl+R)';
+    btnReload.setAttribute('data-state', 'reload');
   }
 
   // Aplicar factor de zoom del dominio de la pestaña seleccionada
@@ -3060,8 +3100,14 @@ function getActiveTab() {
 function updateNavControls() {
   const tab = getActiveTab();
   if (!tab || !tab.webviewEl) return;
-  const canBack = typeof tab.webviewEl.canGoBack === 'function' ? tab.webviewEl.canGoBack() : false;
-  const canFwd = typeof tab.webviewEl.canGoForward === 'function' ? tab.webviewEl.canGoForward() : false;
+  let canBack = false;
+  let canFwd = false;
+  try {
+    canBack = typeof tab.webviewEl.canGoBack === 'function' ? tab.webviewEl.canGoBack() : false;
+  } catch {}
+  try {
+    canFwd = typeof tab.webviewEl.canGoForward === 'function' ? tab.webviewEl.canGoForward() : false;
+  } catch {}
   btnBack.disabled = !canBack;
   btnForward.disabled = !canFwd;
   updateBookmarkStarState();
@@ -3141,8 +3187,8 @@ function putTabToSleep(tabData) {
   tabData.tabEl.classList.add('sleeping');
 
   const titleEl = tabData.tabEl.querySelector('.tab-title');
-  if (titleEl && !titleEl.textContent.includes('🌙')) {
-    titleEl.innerHTML = `<span class="tab-sleep-badge">🌙</span> ` + tabData.title;
+  if (titleEl && !titleEl.querySelector('.tab-sleep-badge')) {
+    titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(tabData.title);
   }
 
   // Liberar recursos pesados navegando temporalmente a about:blank
@@ -3223,11 +3269,11 @@ function showTabHoverCard(tabData, tabEl) {
   }
 
   if (tabData.isSleeping) {
-    hoverCardMem.textContent = `🌙 Suspendida • Ahorrando ~${tabData.estimatedMemoryMB} MB`;
+    hoverCardMem.textContent = `Suspendida • Ahorrando ~${tabData.estimatedMemoryMB} MB`;
     hoverCardStatus.textContent = 'Ahorro de memoria';
   } else {
-    hoverCardMem.textContent = `💾 Memoria: ~${tabData.estimatedMemoryMB} MB`;
-    hoverCardStatus.textContent = tabData.isAudible ? '🔊 Reproduciendo audio' : 'Activa';
+    hoverCardMem.textContent = `Memoria: ~${tabData.estimatedMemoryMB} MB`;
+    hoverCardStatus.textContent = tabData.isAudible ? 'Reproduciendo audio' : 'Activa';
   }
 
   let left = rect.left;
@@ -3305,7 +3351,7 @@ function updateGlobalMediaMenu() {
     card.className = 'media-card';
     card.innerHTML = `
       <div class="media-card-header">
-        <span>${t.isAudible ? '🔊' : '🔇'}</span>
+        <span>${t.isAudible ? TAB_AUDIO_PLAYING_SVG : TAB_AUDIO_MUTED_SVG}</span>
         <div class="media-title">${t.title}</div>
       </div>
       <div style="font-size: 11px; color: var(--text-muted);">${t.domain}</div>
@@ -4084,12 +4130,12 @@ document.getElementById('tab-ctx-mute').addEventListener('click', () => {
     if (audioBtn) {
       if (tab.isMuted) {
         audioBtn.style.display = 'inline-flex';
-        audioBtn.textContent = '🔇';
+        audioBtn.innerHTML = TAB_AUDIO_MUTED_SVG;
         audioBtn.classList.add('muted');
         audioBtn.title = 'Reactivar sonido de la pestaña';
       } else if (tab.isAudible) {
         audioBtn.style.display = 'inline-flex';
-        audioBtn.textContent = '🔊';
+        audioBtn.innerHTML = TAB_AUDIO_PLAYING_SVG;
         audioBtn.classList.remove('muted');
         audioBtn.title = 'Silenciar pestaña';
       } else {
@@ -4317,6 +4363,8 @@ function navigateTo(raw) {
 
   const tab = getActiveTab();
   if (tab) {
+    tab.url = target;
+    tab.webviewEl.setAttribute('src', target);
     tab.webviewEl.src = target;
   }
 }
@@ -4388,11 +4436,24 @@ btnForward.addEventListener('click', () => {
 
 btnReload.addEventListener('click', () => {
   const tab = getActiveTab();
-  if (tab) {
-    if (btnReload.textContent === '✕') {
+  if (!tab || !tab.webviewEl) return;
+  const isStop = tab.isLoading || btnReload.getAttribute('data-state') === 'stop';
+  if (isStop) {
+    try {
       tab.webviewEl.stop();
-    } else {
+    } catch (e) {
+      console.warn('[Navigation] Error al detener carga:', e);
+    }
+    tab.isLoading = false;
+    btnReload.innerHTML = RELOAD_SVG;
+    btnReload.title = 'Recargar (Ctrl+R)';
+    btnReload.setAttribute('data-state', 'reload');
+    finishPageLoadingBar();
+  } else {
+    try {
       tab.webviewEl.reload();
+    } catch (e) {
+      console.warn('[Navigation] Error al recargar página:', e);
     }
   }
 });
@@ -5159,8 +5220,17 @@ function handleBrowserShortcut(e) {
     return;
   }
 
-  // Escape: Cerrar menús, sugerencias o desenfocar
+  // Escape: Detener carga si la pestaña activa está cargando, o cerrar menús, sugerencias o desenfocar
   if (isEsc && !isShift && !isCtrl && !isAlt) {
+    const activeTab = getActiveTab();
+    if (activeTab && activeTab.isLoading && activeTab.webviewEl) {
+      try { activeTab.webviewEl.stop(); } catch {}
+      activeTab.isLoading = false;
+      btnReload.innerHTML = RELOAD_SVG;
+      btnReload.title = 'Recargar (Ctrl+R)';
+      btnReload.setAttribute('data-state', 'reload');
+      finishPageLoadingBar();
+    }
     shieldsPopup.classList.remove('open');
     mainMenu.classList.remove('open');
     if (globalMediaPopup) globalMediaPopup.classList.remove('open');
@@ -5444,10 +5514,12 @@ function switchSplitFocus(targetId) {
     showPageLoadingBar();
     btnReload.innerHTML = STOP_SVG;
     btnReload.title = 'Detener carga (Esc)';
+    btnReload.setAttribute('data-state', 'stop');
   } else {
     hidePageLoadingBar();
     btnReload.innerHTML = RELOAD_SVG;
     btnReload.title = 'Recargar (Ctrl+R)';
+    btnReload.setAttribute('data-state', 'reload');
   }
   const dom = currentTab.domain || extractDomain(currentTab.url);
   updateZoomUI(getStoredDomainZoom(dom));
@@ -5535,15 +5607,15 @@ function renderTabSearchResults(filterText = '') {
       const item = document.createElement('div');
       item.className = 'tab-search-item' + (t.id === activeTabId ? ' active' : '');
       item.innerHTML = `
-        <span class="tab-search-icon">${t.isAudible ? '🔊' : '<img src="logo.png" width="14" height="14" style="vertical-align:middle;object-fit:contain;">'}</span>
+        <span class="tab-search-icon">${t.isAudible ? TAB_AUDIO_PLAYING_SVG : BRAVE_SHIELD_SVG}</span>
         <div class="tab-search-details">
           <span class="tab-search-title">${t.title || 'Nueva pestaña'}</span>
           <span class="tab-search-domain">${t.domain || t.url}</span>
         </div>
-        <button class="tab-search-close-btn" title="Cerrar pestaña">✕</button>
+        <button class="tab-search-close-btn" title="Cerrar pestaña">${TAB_CLOSE_SVG}</button>
       `;
       item.addEventListener('click', (e) => {
-        if (e.target.classList.contains('tab-search-close-btn')) {
+        if (e.target.closest('.tab-search-close-btn')) {
           e.stopPropagation();
           closeTab(t.id);
           renderTabSearchResults(tabSearchInput.value);
@@ -6362,8 +6434,13 @@ function saveDomainZoom(domain, factor) {
 }
 
 function updateZoomUI(factor) {
+  const currentFactor = factor !== undefined ? factor : (getActiveTab()?.zoomFactor || 1.0);
+  const pct = Math.round(currentFactor * 100);
+  const menuZoomText = document.getElementById('menu-zoom-text');
+  if (menuZoomText) {
+    menuZoomText.textContent = `${pct} %`;
+  }
   if (!zoomIndicator || !zoomValue) return;
-  const pct = Math.round(factor * 100);
   if (pct === 100) {
     zoomIndicator.style.display = 'none';
   } else {
@@ -6392,6 +6469,44 @@ function applyCurrentTabZoom(newFactor, persist = true) {
 if (zoomIndicator) {
   zoomIndicator.addEventListener('click', () => {
     applyCurrentTabZoom(1.0, true);
+  });
+}
+
+// Controles de zoom y pantalla completa del menú principal
+const menuZoomOut = document.getElementById('menu-zoom-out');
+const menuZoomIn = document.getElementById('menu-zoom-in');
+const menuFullscreen = document.getElementById('menu-fullscreen');
+
+if (menuZoomOut) {
+  menuZoomOut.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const tab = getActiveTab();
+    if (!tab) return;
+    const curZoom = tab.zoomFactor || 1.0;
+    const nextZoom = Math.max(0.25, Math.round((curZoom - 0.1) * 10) / 10);
+    applyCurrentTabZoom(nextZoom, true);
+  });
+}
+
+if (menuZoomIn) {
+  menuZoomIn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const tab = getActiveTab();
+    if (!tab) return;
+    const curZoom = tab.zoomFactor || 1.0;
+    const nextZoom = Math.min(3.0, Math.round((curZoom + 0.1) * 10) / 10);
+    applyCurrentTabZoom(nextZoom, true);
+  });
+}
+
+if (menuFullscreen) {
+  menuFullscreen.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    }
   });
 }
 
@@ -7489,3 +7604,108 @@ window.addEventListener('message', (e) => {
     }
   }
 });
+
+// ==========================================================
+// BRAVE SIDEBAR DOCK & TOGGLE ORCHESTRATION (Milestone 1 Stream B)
+// ==========================================================
+const btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
+const sidebarDock = document.getElementById('brave-sidebar-dock');
+const sidebarBtnLeo = document.getElementById('sidebar-btn-leo');
+const sidebarBtnBookmarks = document.getElementById('sidebar-btn-bookmarks');
+const sidebarBtnHistory = document.getElementById('sidebar-btn-history');
+const sidebarBtnPlaylist = document.getElementById('sidebar-btn-playlist');
+const sidebarBtnWallet = document.getElementById('sidebar-btn-wallet');
+const sidebarBtnCollapse = document.getElementById('sidebar-btn-collapse');
+
+function setSidebarVisibility(visible, persist = true) {
+  if (!sidebarDock || !browserContent) return;
+  if (visible) {
+    sidebarDock.classList.remove('collapsed');
+    browserContent.classList.add('sidebar-open');
+    if (btnSidebarToggle) btnSidebarToggle.classList.add('active');
+  } else {
+    sidebarDock.classList.add('collapsed');
+    browserContent.classList.remove('sidebar-open');
+    if (btnSidebarToggle) btnSidebarToggle.classList.remove('active');
+  }
+  if (persist) {
+    try {
+      localStorage.setItem('brave_sidebar_visible', visible ? 'true' : 'false');
+    } catch {}
+  }
+}
+
+// Restore persisted sidebar state (defaults to visible)
+try {
+  const initialSidebarState = localStorage.getItem('brave_sidebar_visible') !== 'false';
+  setSidebarVisibility(initialSidebarState, false);
+} catch {
+  setSidebarVisibility(true, false);
+}
+
+if (btnSidebarToggle) {
+  btnSidebarToggle.addEventListener('click', () => {
+    const isCurrentlyOpen = browserContent && browserContent.classList.contains('sidebar-open');
+    setSidebarVisibility(!isCurrentlyOpen, true);
+  });
+}
+
+if (sidebarBtnCollapse) {
+  sidebarBtnCollapse.addEventListener('click', () => {
+    setSidebarVisibility(false, true);
+  });
+}
+
+// Side Panels Interaction
+if (sidebarBtnLeo) {
+  sidebarBtnLeo.addEventListener('click', () => {
+    if (leoSidebar) {
+      leoSidebar.classList.toggle('open');
+      const isOpen = leoSidebar.classList.contains('open');
+      sidebarBtnLeo.classList.toggle('active', isOpen);
+      if (btnLeo) btnLeo.classList.toggle('active', isOpen);
+      if (isOpen && leoInputText) {
+        leoInputText.focus();
+      }
+    }
+  });
+}
+
+if (sidebarBtnBookmarks) {
+  sidebarBtnBookmarks.addEventListener('click', () => {
+    createTab(bookmarksUrl, { activate: true });
+  });
+}
+
+if (sidebarBtnHistory) {
+  sidebarBtnHistory.addEventListener('click', () => {
+    createTab(historyUrl, { activate: true });
+  });
+}
+
+if (sidebarBtnPlaylist) {
+  sidebarBtnPlaylist.addEventListener('click', () => {
+    createTab(playlistUrl, { activate: true });
+  });
+}
+
+if (sidebarBtnWallet) {
+  sidebarBtnWallet.addEventListener('click', () => {
+    createTab('brave://wallet', { activate: true });
+  });
+}
+
+// Synchronize Leo open/close states with dock button
+if (btnCloseLeo) {
+  btnCloseLeo.addEventListener('click', () => {
+    if (sidebarBtnLeo) sidebarBtnLeo.classList.remove('active');
+    if (btnLeo) btnLeo.classList.remove('active');
+  });
+}
+if (btnLeo) {
+  btnLeo.addEventListener('click', () => {
+    if (sidebarBtnLeo && leoSidebar) {
+      sidebarBtnLeo.classList.toggle('active', leoSidebar.classList.contains('open'));
+    }
+  });
+}
