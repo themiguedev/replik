@@ -6,6 +6,7 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import zlib from 'node:zlib';
 import { BraveShieldsEngine } from '../brave-shields/src/shields-engine.js';
 import { ResourceType } from '../brave-shields/src/types.js';
 
@@ -699,10 +700,34 @@ function saveSitePermissionsToDisk(): void {
   }
 }
 
+function isCrxAllowedOrigin(originOrUrl: string): boolean {
+  if (!originOrUrl) return false;
+  return (
+    originOrUrl.startsWith('chrome-extension://') ||
+    originOrUrl.startsWith('devtools://') ||
+    originOrUrl.startsWith('chrome://') ||
+    originOrUrl.startsWith('brave://') ||
+    originOrUrl.startsWith('file://')
+  );
+}
+
 function attachSessionInterception(targetSession: Electron.Session) {
+  // Manejador de verificación de permisos (soporta permisos de extensiones y API de navegador)
+  if (typeof (targetSession as any).setPermissionCheckHandler === 'function') {
+    (targetSession as any).setPermissionCheckHandler((webContents: Electron.WebContents | null, permission: string, requestingOrigin: string) => {
+      if (isCrxAllowedOrigin(requestingOrigin)) {
+        return true;
+      }
+      return true;
+    });
+  }
+
   // Manejador nativo de solicitudes de permisos Web
   targetSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
-    const url = details.requestingUrl || webContents.getURL();
+    const url = details.requestingUrl || (webContents ? webContents.getURL() : '');
+    if (isCrxAllowedOrigin(url)) {
+      return callback(true);
+    }
     const domain = getDomain(url);
     const perms = sitePermissionsMap.get(domain) || {};
     let permKey = permission;
@@ -729,6 +754,16 @@ function attachSessionInterception(targetSession: Electron.Session) {
 
   targetSession.webRequest.onBeforeRequest(filter, (details, callback) => {
     const reqUrl = details.url;
+
+    // Permitir sin restricciones peticiones internas de extensiones o páginas de control
+    if (
+      reqUrl.startsWith('chrome-extension://') ||
+      reqUrl.startsWith('devtools://') ||
+      (details.initiator && details.initiator.startsWith('chrome-extension://'))
+    ) {
+      callback({ cancel: false });
+      return;
+    }
 
     // 0. Resolución de protocolo descentralizado IPFS / IPNS
     if (reqUrl.startsWith('ipfs://')) {
@@ -1949,20 +1984,37 @@ function saveInstalledExtensionsList(list: ExtensionMeta[]): void {
 
 async function loadExtensionInAllSessions(extPath: string): Promise<Electron.Extension | null> {
   let loaded: Electron.Extension | null = null;
+  let extName = path.basename(extPath);
+  try {
+    const manifestPath = path.join(extPath, 'manifest.json');
+    if (fs.existsSync(manifestPath)) {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      if (manifest.name) extName = manifest.name;
+    }
+  } catch {}
+
+  let defaultErr: any = null;
   try {
     loaded = await session.defaultSession.loadExtension(extPath, { allowFileAccess: true });
-    console.log(`[Brave Extensions] Cargada en defaultSession: ${extPath}`);
-  } catch (err) {
-    console.warn(`[Brave Extensions] Error en defaultSession:`, err);
+    console.log(`[Brave Extensions] Extensión montada exitosamente en defaultSession: "${extName}" (${loaded ? loaded.id : 'desconocido'}) desde ${extPath}`);
+  } catch (err: any) {
+    defaultErr = err;
+    console.warn(`[Brave Extensions] Error montando extensión "${extName}" en defaultSession:`, err);
   }
 
+  let persistErr: any = null;
   try {
     const persistSession = session.fromPartition('persist:brave_default');
     const pLoaded = await persistSession.loadExtension(extPath, { allowFileAccess: true });
-    console.log(`[Brave Extensions] Cargada en persist:brave_default: ${extPath}`);
+    console.log(`[Brave Extensions] Extensión montada exitosamente en persist:brave_default: "${extName}" (${pLoaded ? pLoaded.id : 'desconocido'}) desde ${extPath}`);
     if (!loaded) loaded = pLoaded;
-  } catch (err) {
-    console.warn(`[Brave Extensions] Error en persistSession:`, err);
+  } catch (err: any) {
+    persistErr = err;
+    console.warn(`[Brave Extensions] Error montando extensión "${extName}" en persistSession:`, err);
+  }
+
+  if (!loaded && (defaultErr || persistErr)) {
+    throw new Error(`Error cargando extensión "${extName}": ${(defaultErr || persistErr)?.message || 'Fallo de Electron al montar la extensión'}`);
   }
   return loaded;
 }
@@ -1975,6 +2027,100 @@ function removeExtensionFromAllSessions(extId: string): void {
     const persistSession = session.fromPartition('persist:brave_default');
     persistSession.removeExtension(extId);
   } catch {}
+}
+
+function extractZipBufferFromCrx(buffer: Buffer): Buffer {
+  // CRX header verification: Magic 'Cr24' (0x43 0x72 0x32 0x34)
+  if (buffer.length >= 16 && buffer.subarray(0, 4).toString('ascii') === 'Cr24') {
+    const version = buffer.readUInt32LE(4);
+    if (version === 3) {
+      const headerSize = buffer.readUInt32LE(8);
+      const zipOffset = 12 + headerSize;
+      if (zipOffset < buffer.length) {
+        return buffer.subarray(zipOffset);
+      }
+    } else if (version === 2) {
+      const pubKeyLen = buffer.readUInt32LE(8);
+      const sigLen = buffer.readUInt32LE(12);
+      const zipOffset = 16 + pubKeyLen + sigLen;
+      if (zipOffset < buffer.length) {
+        return buffer.subarray(zipOffset);
+      }
+    }
+  }
+
+  // Fallback: Buscar la firma estándar de cabecera ZIP PK\x03\x04
+  const zipSig = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+  const offset = buffer.indexOf(zipSig);
+  if (offset !== -1) {
+    return buffer.subarray(offset);
+  }
+
+  throw new Error('Formato no reconocido: no se encontró archivo ZIP o paquete CRX válido en los datos recibidos.');
+}
+
+function extractZipBufferFallback(buf: Buffer, targetDir: string): void {
+  let eocdOffset = -1;
+  for (let i = buf.length - 22; i >= 0; i--) {
+    if (buf.readUInt32LE(i) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset === -1) {
+    throw new Error('EOCD no encontrado en paquete ZIP');
+  }
+
+  const cdTotalEntries = buf.readUInt16LE(eocdOffset + 10);
+  const cdOffset = buf.readUInt32LE(eocdOffset + 16);
+
+  let curOffset = cdOffset;
+  const normalizedTarget = path.resolve(targetDir);
+
+  for (let i = 0; i < cdTotalEntries; i++) {
+    const sig = buf.readUInt32LE(curOffset);
+    if (sig !== 0x02014b50) break;
+    const method = buf.readUInt16LE(curOffset + 10);
+    const compSize = buf.readUInt32LE(curOffset + 20);
+    const nameLen = buf.readUInt16LE(curOffset + 28);
+    const extraLen = buf.readUInt16LE(curOffset + 30);
+    const commentLen = buf.readUInt16LE(curOffset + 32);
+    const localHeaderOffset = buf.readUInt32LE(curOffset + 42);
+
+    const fileName = buf.toString('utf8', curOffset + 46, curOffset + 46 + nameLen);
+    curOffset += 46 + nameLen + extraLen + commentLen;
+
+    const localSig = buf.readUInt32LE(localHeaderOffset);
+    if (localSig !== 0x04034b50) continue;
+    const localNameLen = buf.readUInt16LE(localHeaderOffset + 26);
+    const localExtraLen = buf.readUInt16LE(localHeaderOffset + 28);
+    const fileDataOffset = localHeaderOffset + 30 + localNameLen + localExtraLen;
+
+    const compressedData = buf.subarray(fileDataOffset, fileDataOffset + compSize);
+
+    let uncompressedData: Buffer;
+    if (method === 0) {
+      uncompressedData = compressedData;
+    } else if (method === 8) {
+      uncompressedData = zlib.inflateRawSync(compressedData);
+    } else {
+      throw new Error('Método de compresión ZIP no soportado: ' + method);
+    }
+
+    const cleanName = fileName.replace(/^[\\\/]+/, '');
+    if (!cleanName || cleanName === '.' || cleanName === './') continue;
+    const fullPath = path.resolve(normalizedTarget, cleanName);
+    if (!fullPath.startsWith(normalizedTarget + path.sep)) {
+      continue;
+    }
+
+    if (fileName.endsWith('/') || fileName.endsWith('\\')) {
+      fs.mkdirSync(fullPath, { recursive: true });
+    } else {
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, uncompressedData);
+    }
+  }
 }
 
 function downloadCrxAsZipBuffer(urlStr: string, redirects = 0): Promise<Buffer> {
@@ -1991,12 +2137,12 @@ function downloadCrxAsZipBuffer(urlStr: string, redirects = 0): Promise<Buffer> 
       res.on('data', (chunk) => chunks.push(chunk));
       res.on('end', () => {
         const fullBuf = Buffer.concat(chunks);
-        const zipSig = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
-        const offset = fullBuf.indexOf(zipSig);
-        if (offset === -1) {
-          return reject(new Error('Formato no reconocido: no se encontró archivo ZIP válido en el paquete descargado.'));
+        try {
+          const zipData = extractZipBufferFromCrx(fullBuf);
+          resolve(zipData);
+        } catch (err) {
+          reject(err);
         }
-        resolve(fullBuf.subarray(offset));
       });
     }).on('error', (err) => reject(err));
   });
@@ -2106,6 +2252,14 @@ ipcMain.handle('extensions:remove', async (_event, extId: string) => {
   const target = list.find((e) => e.id === extId);
   if (target) {
     removeExtensionFromAllSessions(extId);
+    if (target.path && fs.existsSync(target.path)) {
+      try {
+        fs.rmSync(target.path, { recursive: true, force: true });
+        console.log(`[Brave Extensions] Archivos eliminados de disco para: ${extId} (${target.path})`);
+      } catch (rmErr) {
+        console.warn(`[Brave Extensions] Advertencia al limpiar carpeta de extensión ${extId}:`, rmErr);
+      }
+    }
     list = list.filter((e) => e.id !== extId);
     saveInstalledExtensionsList(list);
   }
@@ -2211,6 +2365,17 @@ ipcMain.handle('extensions:download-from-store', async (event, inputStr: string)
 
   try {
     const downloadDir = path.join(app.getPath('userData'), 'extensions', extId);
+
+    // Soporte para desinstalar / reinstalar limpiamente extensiones existentes si ya estaban en disco
+    removeExtensionFromAllSessions(extId);
+    if (fs.existsSync(downloadDir)) {
+      try {
+        fs.rmSync(downloadDir, { recursive: true, force: true });
+        console.log(`[Brave Extensions] Limpieza previa de instalación existente en: ${downloadDir}`);
+      } catch (cleanErr) {
+        console.warn(`[Brave Extensions] Advertencia al limpiar instalación previa:`, cleanErr);
+      }
+    }
     fs.mkdirSync(downloadDir, { recursive: true });
 
     const crxUrl = `https://clients2.google.com/service/update2/crx?response=redirect&prodversion=120.0.0.0&acceptformat=crx2,crx3&x=id%3D${extId}%26uc`;
@@ -2220,20 +2385,37 @@ ipcMain.handle('extensions:download-from-store', async (event, inputStr: string)
     const tempZipPath = path.join(app.getPath('userData'), `temp_${extId}.zip`);
     fs.writeFileSync(tempZipPath, zipBuffer);
 
+    let unzippedOk = false;
+    let lastExtractionError = '';
+
+    // Intento 1: Descompresión primaria con comando nativo del sistema 'tar'
     try {
       child_process.execFileSync('tar', ['-xf', tempZipPath, '-C', downloadDir], {
         stdio: 'ignore',
         windowsHide: true,
         timeout: 30000,
       });
+      unzippedOk = true;
     } catch (tarErr: any) {
-      return { error: 'Error al descomprimir paquete de extensión: ' + tarErr.message };
+      lastExtractionError = tarErr.message || String(tarErr);
+      console.warn(`[Brave Extensions] Descompresión con 'tar' falló o no disponible (${lastExtractionError}). Activando fallback compatible...`);
     } finally {
       try {
         if (fs.existsSync(tempZipPath)) {
           fs.unlinkSync(tempZipPath);
         }
       } catch {}
+    }
+
+    // Intento 2: Fallback con descompresor compatible/nativo (unzipper)
+    if (!unzippedOk) {
+      try {
+        await extractZipBufferFallback(zipBuffer, downloadDir);
+        unzippedOk = true;
+        console.log(`[Brave Extensions] Descompresión con fallback completada exitosamente.`);
+      } catch (fallbackErr: any) {
+        return { error: `Error al descomprimir paquete de extensión: ${fallbackErr.message || lastExtractionError}` };
+      }
     }
 
     const manifestPath = path.join(downloadDir, 'manifest.json');
