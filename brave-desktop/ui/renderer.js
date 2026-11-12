@@ -2469,6 +2469,10 @@ function createTab(initialUrl = ntpUrl, options = {}) {
         let result = null;
         let handled = true;
         const pageName = getInternalPageName(webviewEl);
+        const curUrl = (webviewEl && typeof webviewEl.getURL === 'function') ? (webviewEl.getURL() || '').toLowerCase() : '';
+        const isExtensionPage = ['extensions.html', 'webstore.html'].includes(pageName) ||
+          curUrl.includes('extensions.html') ||
+          curUrl.includes('webstore.html');
 
         if (action === 'getDownloads') {
           if (pageName === 'downloads.html') {
@@ -2752,37 +2756,37 @@ function createTab(initialUrl = ntpUrl, options = {}) {
             handled = false;
           }
         } else if (action === 'listExtensions') {
-          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.listExtensions) {
+          if (isExtensionPage && window.braveAPI && window.braveAPI.listExtensions) {
             result = await window.braveAPI.listExtensions();
           } else {
             handled = false;
           }
         } else if (action === 'toggleExtension') {
-          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.toggleExtension) {
+          if (isExtensionPage && window.braveAPI && window.braveAPI.toggleExtension) {
             result = await window.braveAPI.toggleExtension(args[0], args[1]);
           } else {
             handled = false;
           }
         } else if (action === 'removeExtension') {
-          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.removeExtension) {
+          if (isExtensionPage && window.braveAPI && window.braveAPI.removeExtension) {
             result = await window.braveAPI.removeExtension(args[0]);
           } else {
             handled = false;
           }
         } else if (action === 'loadUnpackedExtension') {
-          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.loadUnpackedExtension) {
+          if (isExtensionPage && window.braveAPI && window.braveAPI.loadUnpackedExtension) {
             result = await window.braveAPI.loadUnpackedExtension();
           } else {
             handled = false;
           }
         } else if (action === 'installPresetExtension') {
-          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.installPresetExtension) {
+          if (isExtensionPage && window.braveAPI && window.braveAPI.installPresetExtension) {
             result = await window.braveAPI.installPresetExtension(args[0]);
           } else {
             handled = false;
           }
         } else if (action === 'downloadStoreExtension') {
-          if (pageName === 'extensions.html' && window.braveAPI && window.braveAPI.downloadStoreExtension) {
+          if (isExtensionPage && window.braveAPI && window.braveAPI.downloadStoreExtension) {
             result = await window.braveAPI.downloadStoreExtension(args[0]);
           } else {
             handled = false;

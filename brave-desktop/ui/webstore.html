@@ -408,6 +408,50 @@
       color: #34d399;
       background: rgba(52, 211, 153, 0.1);
     }
+
+    .btn-add-ext.loading {
+      border-color: var(--google-blue);
+      color: var(--google-blue);
+      opacity: 0.8;
+      cursor: wait;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #323639;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-color);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .toast-container.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .toast-container.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .toast-container.success {
+      border-left: 4px solid #34d399;
+    }
   </style>
 </head>
 <body>
@@ -502,6 +546,91 @@
         </div>
       </section>
 
+      <!-- Section: Extensiones Populares (Brave Presets) -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-title">Extensiones esenciales y recomendadas</h2>
+          <a href="#" class="section-link">Ver todas</a>
+        </div>
+        <div class="extensions-grid">
+          <!-- uBlock Origin -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #991b1b; font-size: 20px;">🧱</div>
+              <div class="ext-meta">
+                <div class="ext-name">uBlock Origin</div>
+                <div class="ext-rating">
+                  <span>4,9</span>
+                  <span class="ext-rating-star"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
+                  <span>(26k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Un eficiente bloqueador de amplio espectro que ahorra memoria y CPU.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" data-preset="ublock-origin" data-id="cjpalhdlnbpafiamejdnhcphjbkeiagm" data-name="uBlock Origin" onclick="installExt(this)">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Dark Reader -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #1e1b4b; font-size: 20px;">🌙</div>
+              <div class="ext-meta">
+                <div class="ext-name">Dark Reader</div>
+                <div class="ext-rating">
+                  <span>4,8</span>
+                  <span class="ext-rating-star"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
+                  <span>(15k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Modo oscuro avanzado para toda la web con ajuste de brillo y contraste.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" data-preset="dark-reader" data-id="eimadpbcbfnmbkopoojfekhnkhdbieeh" data-name="Dark Reader" onclick="installExt(this)">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Bitwarden -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #172554; font-size: 20px;">🛡️</div>
+              <div class="ext-meta">
+                <div class="ext-name">Bitwarden - Gestor</div>
+                <div class="ext-rating">
+                  <span>4,9</span>
+                  <span class="ext-rating-star"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
+                  <span>(10k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">Gestor de contraseñas seguro y de código abierto para todas tus cuentas.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" data-preset="bitwarden" data-id="nngceckbapebfimnlniiiahkandclblb" data-name="Bitwarden" onclick="installExt(this)">Añadir a Brave</button>
+            </div>
+          </div>
+
+          <!-- Tampermonkey -->
+          <div class="ext-card">
+            <div class="ext-top">
+              <div class="ext-icon-box" style="background: #042f2e; font-size: 20px;">🐒</div>
+              <div class="ext-meta">
+                <div class="ext-name">Tampermonkey</div>
+                <div class="ext-rating">
+                  <span>4,7</span>
+                  <span class="ext-rating-star"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
+                  <span>(60k)</span>
+                </div>
+              </div>
+            </div>
+            <div class="ext-desc">El gestor de scripts de usuario más popular para personalizar páginas web.</div>
+            <div class="ext-action-row">
+              <button class="btn-add-ext" data-preset="tampermonkey" data-id="dhdgffkkmingnoiobehalkhgimobgahj" data-name="Tampermonkey" onclick="installExt(this)">Añadir a Brave</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Section: Miguel, esto podría gustarte -->
       <section>
         <div class="section-header">
@@ -524,7 +653,7 @@
             </div>
             <div class="ext-desc">¡Toma el control de YouTube y lleva tu experiencia de usuario al siguiente nivel!</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'Enhancer for YouTube™')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="ponfpcnoihfmfllpaingbgckeeldkhle" data-name="Enhancer for YouTube™" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
 
@@ -543,7 +672,7 @@
             </div>
             <div class="ext-desc">Modo incógnito: cambia la pestaña actual al modo de navegación privada con un clic.</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'Modo incógnito')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="ajkaepcffpkoendcgmfcbndpjkhgbkfa" data-name="Modo incógnito" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
 
@@ -562,7 +691,7 @@
             </div>
             <div class="ext-desc">Ver videos en una ventana PiP flotante (siempre encima de otras ventanas).</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext installed" onclick="toggleInstall(this, 'Picture-in-Picture')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Instalada</button>
+              <button class="btn-add-ext" data-id="hkgfoiooedgoejojocmhlaklaeopbecg" data-name="Picture-in-Picture" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
 
@@ -581,7 +710,7 @@
             </div>
             <div class="ext-desc">Automatically change YouTube video quality to HD resolution instantly.</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'Auto High Quality')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="alageihdeogmjlkgifaeefodfbdbljjf" data-name="Auto High Quality for YouTube" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
         </div>
@@ -609,7 +738,7 @@
             </div>
             <div class="ext-desc">Guarda y descarga capturas directamente en tus tableros de Pinterest favoritos.</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'PinLove')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="gpdjojdkbbmdfjfahjcgigfpmkopogic" data-name="Pinterest Save Button" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
 
@@ -628,7 +757,7 @@
             </div>
             <div class="ext-desc">Buscador instantáneo en tu árbol de marcadores con atajos de teclado rápidos.</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'Bookmarks Quick Search')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="cofpegcepiccpobikjoddpmmocficdjj" data-name="Bookmarks Quick Search" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
 
@@ -647,7 +776,7 @@
             </div>
             <div class="ext-desc">Notificaciones instantáneas de correos nuevos y lectura de bandejas de entrada múltiples.</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'Checker Plus for Gmail™')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="oeopbcgkkoapgobdbedcemjljbihmemj" data-name="Checker Plus for Gmail™" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
 
@@ -666,7 +795,7 @@
             </div>
             <div class="ext-desc">Habilita y deshabilita todas tus extensiones rápidamente desde un menú compacto.</div>
             <div class="ext-action-row">
-              <button class="btn-add-ext" onclick="toggleInstall(this, 'Extensity')">Añadir a Brave</button>
+              <button class="btn-add-ext" data-id="jjmflmamggggndanpgfnpelongoepncg" data-name="Extensity" onclick="installExt(this)">Añadir a Brave</button>
             </div>
           </div>
         </div>
@@ -674,17 +803,121 @@
     </main>
   </div>
 
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="store-toast">
+    <span id="toast-text"></span>
+  </div>
+
   <script>
     const INSTALLED_CHECK_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-    function toggleInstall(btn, name) {
-      if (btn.classList.contains('installed')) {
-        btn.classList.remove('installed');
-        btn.textContent = 'Añadir a Brave';
-      } else {
-        btn.classList.add('installed');
-        btn.innerHTML = INSTALLED_CHECK_SVG + 'Instalada';
+    let toastTimeout = null;
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('store-toast');
+      const toastText = document.getElementById('toast-text');
+      if (!toast || !toastText) return;
+      toastText.textContent = message;
+      toast.className = 'toast-container show ' + type;
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    async function checkInstalledExtensions() {
+      if (!window.braveAPI || !window.braveAPI.listExtensions) return;
+      try {
+        const data = await window.braveAPI.listExtensions();
+        const installedList = data.installed || [];
+        const installedIds = new Set(installedList.map(i => (i.id || '').toLowerCase()));
+        const installedNames = new Set(installedList.map(i => (i.name || '').toLowerCase()));
+
+        document.querySelectorAll('.btn-add-ext').forEach(btn => {
+          const id = (btn.getAttribute('data-id') || '').toLowerCase();
+          const preset = (btn.getAttribute('data-preset') || '').toLowerCase();
+          const name = (btn.getAttribute('data-name') || '').toLowerCase();
+
+          const isInstalled = (id && installedIds.has(id)) ||
+            (preset && installedIds.has(preset)) ||
+            (name && installedNames.has(name));
+
+          if (isInstalled) {
+            btn.classList.add('installed');
+            btn.classList.remove('loading');
+            btn.innerHTML = INSTALLED_CHECK_SVG + 'Instalada ✓';
+            btn.disabled = true;
+          }
+        });
+      } catch (e) {
+        console.warn('[Webstore] Error comprobando extensiones instaladas:', e);
       }
     }
+
+    async function installExt(btn) {
+      if (!btn || btn.classList.contains('installed') || btn.classList.contains('loading')) return;
+
+      const presetKey = btn.getAttribute('data-preset');
+      const extId = btn.getAttribute('data-id');
+      const extName = btn.getAttribute('data-name') || 'Extensión';
+
+      if (!window.braveAPI) {
+        showToast('Error: El puente braveAPI no está inicializado en esta página.', 'error');
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+      btn.textContent = 'Descargando...';
+      showToast(`Descargando e instalando "${extName}"...`, 'info');
+
+      try {
+        let res = null;
+        if (presetKey && window.braveAPI.installPresetExtension) {
+          res = await window.braveAPI.installPresetExtension(presetKey);
+        } else if (extId && window.braveAPI.downloadStoreExtension) {
+          res = await window.braveAPI.downloadStoreExtension(extId);
+        } else {
+          throw new Error('Método de instalación no disponible.');
+        }
+
+        if (res && res.success) {
+          btn.classList.remove('loading');
+          btn.classList.add('installed');
+          btn.innerHTML = INSTALLED_CHECK_SVG + 'Instalada ✓';
+          btn.disabled = true;
+          showToast(`¡Extensión "${extName}" instalada correctamente!`, 'success');
+        } else {
+          const err = (res && res.error) ? res.error : 'Fallo en la instalación';
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          btn.textContent = 'Añadir a Brave';
+          showToast(`Error al instalar "${extName}": ${err}`, 'error');
+        }
+      } catch (err) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        btn.textContent = 'Añadir a Brave';
+        showToast(`Error al descargar "${extName}": ${err.message || err}`, 'error');
+      }
+    }
+
+    // Compatibilidad para cualquier llamada existente a toggleInstall
+    function toggleInstall(btn, name) {
+      installExt(btn);
+    }
+
+    // Inicialización y escucha de eventos del puente
+    window.addEventListener('DOMContentLoaded', () => {
+      checkInstalledExtensions();
+    });
+
+    window.addEventListener('brave-bridge-ready', () => {
+      checkInstalledExtensions();
+    });
+
+    // Fallback de polling ligero por si el bridge se inyecta tras dom-ready
+    setTimeout(checkInstalledExtensions, 600);
+    setTimeout(checkInstalledExtensions, 1500);
   </script>
 </body>
 </html>
