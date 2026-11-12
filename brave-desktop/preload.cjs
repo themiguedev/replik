@@ -79,6 +79,7 @@ contextBridge.exposeInMainWorld('braveAPI', {
   getExtensionsUrl: () => getLocalFileUrl('extensions.html'),
   getBookmarksUrl: () => getLocalFileUrl('bookmarks.html'),
   getVersionUrl: () => getLocalFileUrl('version.html'),
+  getErrorUrl: () => getLocalFileUrl('error.html'),
   getComponentsUrl: () => getLocalFileUrl('components.html'),
   getVersionInfo: () => ipcRenderer.invoke('browser:get-version-info'),
   updateBackendSetting: (key, value) => ipcRenderer.invoke('settings:update', key, value),

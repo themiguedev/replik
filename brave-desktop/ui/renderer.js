@@ -217,6 +217,7 @@ const playlistUrl = window.braveAPI && window.braveAPI.getPlaylistUrl ? window.b
 const extensionsUrl = window.braveAPI && window.braveAPI.getExtensionsUrl ? window.braveAPI.getExtensionsUrl() : resolveInternalUrl('extensions.html');
 const bookmarksUrl = window.braveAPI && window.braveAPI.getBookmarksUrl ? window.braveAPI.getBookmarksUrl() : resolveInternalUrl('bookmarks.html');
 const versionUrl = window.braveAPI && window.braveAPI.getVersionUrl ? window.braveAPI.getVersionUrl() : resolveInternalUrl('version.html');
+const errorUrl = window.braveAPI && window.braveAPI.getErrorUrl ? window.braveAPI.getErrorUrl() : resolveInternalUrl('error.html');
 const componentsUrl = window.braveAPI && window.braveAPI.getComponentsUrl ? window.braveAPI.getComponentsUrl() : resolveInternalUrl('components.html');
 const webstoreUrl = resolveInternalUrl('webstore.html');
 
@@ -1763,6 +1764,7 @@ function resolveBraveUrl(url) {
   if (lower === 'brave://downloads' || lower === 'about:downloads' || lower === 'chrome://downloads') return downloadsUrl;
   if (lower === 'brave://extensions' || lower === 'about:extensions' || lower === 'chrome://extensions') return extensionsUrl;
   if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') return versionUrl;
+  if (lower === 'brave://error' || lower === 'about:error') return errorUrl;
   if (lower === 'brave://adblock') return adblockUrl;
   if (lower === 'brave://playlist' || lower === 'about:playlist') return playlistUrl;
   if (lower === 'brave://components' || lower === 'about:components') return componentsUrl;
@@ -2135,16 +2137,34 @@ function createTab(initialUrl = ntpUrl, options = {}) {
       btnReload.setAttribute('data-state', 'reload');
       finishPageLoadingBar();
     }
-    if (e.errorCode !== -3 && initialUrl.includes('ntp.html') && webviewEl.src !== ntpUrl) {
-      console.warn('[Brave-Replica] Webview falló, recargando con ntpUrl absoluto:', ntpUrl);
-      webviewEl.src = ntpUrl;
-    } else if (tabData.url && tabData.url.includes('youtube.com') && (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102)) {
-      console.warn('[YouTube Recovery] Error de conexión transitorio en YouTube, autorecuperando...');
-      setTimeout(() => webviewEl.reload(), 400);
-    } else if (tabData.url && (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102 || e.errorCode === -101 || e.errorCode === -501)) {
-      if (activeTabId === id) {
-        showWaybackBar(tabData.url);
+
+    const failedUrl = (e.validatedURL && e.validatedURL.trim()) ? e.validatedURL : (tabData.url || webviewEl.src || initialUrl);
+    const isErrorPage = (failedUrl && failedUrl.includes('error.html')) || (webviewEl.src && webviewEl.src.includes('error.html'));
+
+    if (e.errorCode !== -3 && !isErrorPage) {
+      if (initialUrl.includes('ntp.html') && webviewEl.src !== ntpUrl) {
+        console.warn('[Brave-Replica] Webview falló, recargando con ntpUrl absoluto:', ntpUrl);
+        webviewEl.src = ntpUrl;
+        return;
       }
+
+      if (tabData.url && tabData.url.includes('youtube.com') && (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102)) {
+        console.warn('[YouTube Recovery] Error de conexión transitorio en YouTube, autorecuperando...');
+        setTimeout(() => webviewEl.reload(), 400);
+        return;
+      }
+
+      if (tabData.url && (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102 || e.errorCode === -101 || e.errorCode === -501)) {
+        if (activeTabId === id) {
+          showWaybackBar(tabData.url);
+        }
+      }
+
+      const errCodeStr = e.errorDescription || (typeof e.errorCode === 'number' ? `ERR_CODE_${e.errorCode}` : 'ERR_INTERNET_DISCONNECTED');
+      const targetErrorPageUrl = `${errorUrl}?url=${encodeURIComponent(failedUrl)}&code=${encodeURIComponent(errCodeStr)}`;
+      
+      console.warn(`[Brave-Network-Error] Redirigiendo a página de error interna: ${failedUrl} (${errCodeStr})`);
+      webviewEl.src = targetErrorPageUrl;
     }
   });
 
@@ -3149,6 +3169,16 @@ function updateOmniboxForUrl(url) {
     urlInput.value = 'brave://version';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
     lockIcon.title = 'Acerca de Brave - Versión y Diagnóstico';
+  } else if (url.includes('error.html') || url.startsWith('brave://error')) {
+    try {
+      const parsedErrorUrl = new URL(url);
+      const originalFailedUrl = parsedErrorUrl.searchParams.get('url');
+      urlInput.value = originalFailedUrl || 'brave://error';
+    } catch {
+      urlInput.value = 'brave://error';
+    }
+    lockIcon.innerHTML = LOCK_SVG_INSECURE;
+    lockIcon.title = 'No se puede acceder a este sitio';
   } else if (url.includes('extensions.html') || url === 'brave://extensions') {
     urlInput.value = 'brave://extensions';
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
