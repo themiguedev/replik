@@ -4,9 +4,21 @@
   <meta charset="UTF-8">
   <title>Brave Browser</title>
   <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Banner Visual de Desprendimiento de Pestaña (Tear-off Protocol) -->
+  <div class="tearoff-banner" id="tearoff-banner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff7626" stroke-width="2.2">
+      <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+    <span>Soltar aquí para abrir en una nueva ventana</span>
+  </div>
   <!-- Barra de Pestañas y Título Nativo (Frameless Titlebar) -->
   <div class="tab-bar-container" id="titlebar">
     <div class="titlebar-app-icon" id="titlebar-app-icon" title="Brave Browser">
@@ -15,12 +27,7 @@
     <div class="tab-bar" id="tab-bar">
       <!-- Pestañas dinámicas tipo píldora se inyectan aquí -->
     </div>
-    <div class="tab-new" id="new-tab-btn" title="Nueva pestaña (Ctrl+T)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-    </div>
+    <div class="tab-new" id="new-tab-btn" title="Nueva pestaña (Ctrl+T)">+</div>
 
     <!-- Región arrastrable de la ventana -->
     <div class="titlebar-drag-region" id="titlebar-drag-region"></div>
@@ -55,19 +62,19 @@
   <!-- Barra de Herramientas / Omnibox -->
   <div class="toolbar">
     <button class="nav-btn" id="btn-back" title="Atrás (Alt+←)" disabled>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
     </button>
     <button class="nav-btn" id="btn-forward" title="Adelante (Alt+→)" disabled>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"></line>
         <polyline points="12 5 19 12 12 19"></polyline>
       </svg>
     </button>
     <button class="nav-btn" id="btn-reload" title="Recargar (Ctrl+R)">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"></polyline>
         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
       </svg>
@@ -82,7 +89,7 @@
 
     <div class="omnibox-container">
       <div class="lock-icon" id="lock-icon" title="Ver información del sitio y permisos">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
@@ -92,12 +99,7 @@
       <!-- Indicador Dinámico de Zoom -->
       <div class="zoom-indicator" id="zoom-indicator" style="display: none;" title="Restablecer zoom al 100%">
         <span id="zoom-value">100%</span>
-        <span class="zoom-reset-btn" id="zoom-reset-btn" title="Restablecer">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </span>
+        <span class="zoom-reset-btn" id="zoom-reset-btn">✕</span>
       </div>
 
       <!-- Botón de Speedreader (Modo Lectura) -->
@@ -127,21 +129,7 @@
 
       <!-- Botón del León de Brave Shields -->
       <button class="shields-btn" id="shields-btn" title="Brave Shields">
-        <svg class="shields-lion-img" width="16" height="16" viewBox="0 0 2770 2770" style="vertical-align: middle; display: inline-block; pointer-events: none;">
-          <defs>
-            <linearGradient id="shields-lion-grad-1" y1="51%" y2="51%">
-              <stop offset="0.4" stop-color="#ff5500"/>
-              <stop offset="0.6" stop-color="#ff2000"/>
-            </linearGradient>
-            <linearGradient id="shields-lion-grad-2" x1="2%" y1="51%" y2="51%">
-              <stop offset="0" stop-color="#ff452a"/>
-              <stop offset="1" stop-color="#ff2000"/>
-            </linearGradient>
-          </defs>
-          <path fill="url(#shields-lion-grad-1)" d="M2395 723l60-147-170-176c-92-92-288-38-288-38l-222-252H992L769 363s-196-53-288 37L311 575l60 147-75 218 250 953c52 204 87 283 234 387l457 310c44 27 98 74 147 74s103-47 147-74l457-310c147-104 182-183 234-387l250-953z"/>
-          <path fill="#ffffff" d="M1935 524s287 347 287 420c0 75-36 94-72 133l-215 230c-20 20-63 54-38 113 25 60 60 134 20 210-40 77-110 128-155 120a820 820 0 01-190-90c-38-25-160-126-160-165s126-110 150-124c23-16 130-78 132-102s2-30-30-90-88-140-80-192c10-52 100-80 167-105l207-78c16-8 12-15-36-20-48-4-183-22-244-5s-163 43-173 57c-8 14-16 14-7 62l58 315c4 40 12 67-30 77-44 10-117 27-142 27s-99-17-142-27-35-37-30-77c4-40 48-268 57-315 10-48 1-48-7-62-10-14-113-40-174-57-60-17-196 1-244 6-48 4-52 10-36 20l207 77c66 25 158 53 167 105 10 53-47 132-80 192s-32 66-30 90 110 86 132 102c24 15 150 85 150 124s-119 140-159 165a820 820 0 01-190 90c-45 8-115-43-156-120-40-76-4-150 20-210 25-60-17-92-38-113l-215-230c-35-37-71-57-71-131s287-420 287-420l273 44c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47zm-215 1328c18 10 7 32-10 44l-254 198c-20 20-52 50-73 50s-52-30-73-50a13200 13200 0 00-255-198c-16-12-27-33-10-44l150-80a870 870 0 01188-73c15 0 110 34 187 73l150 80z"/>
-          <path fill="url(#shields-lion-grad-2)" d="M1999 363l-224-253H992L769 363s-196-53-288 37c0 0 260-23 350 123l276 47c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47 90-146 350-123 350-123-92-92-288-38-288-38"/>
-        </svg>
+        <img class="shields-lion-img" src="logo.png" width="16" height="16" alt="Brave Shields">
         <span id="shields-counter">0</span>
       </button>
 
@@ -152,7 +140,7 @@
     <!-- 7 Botones a la Derecha del Omnibox (100% Idénticos a Frame 001) -->
     <!-- 1. Leo AI (Chispas) -->
     <button class="nav-btn-icon" id="btn-leo" title="Leo AI (Asistente de IA)">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
       </svg>
     </button>
@@ -204,419 +192,15 @@
 
     <!-- 7. Menú Principal (3 líneas horizontales) -->
     <button class="nav-btn" id="btn-menu" title="Personalizar y controlar Brave">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
 
-    <!-- Línea Indicadora de Carga de Página (Page Load Progress Bar) -->
+    <!-- Línea Indicadora de Carga<!-- Línea Indicadora de Carga de Página (Page Load Progress Bar) -->
     <div class="page-loading-bar" id="page-loading-bar"></div>
-
-    <!-- Panel Emergente de Brave Shields (Avanzado) -->
-    <div class="shields-popup" id="shields-popup">
-      <div class="popup-header">
-        <div class="popup-title">
-          <img src="logo.png" width="18" height="18" style="vertical-align: middle; margin-right: 6px; object-fit: contain;">
-          <span>Brave Shields</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="shields-toggle" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="site-domain" id="popup-domain">search.brave.com</div>
-
-      <div class="stat-card">
-        <div class="stat-number" id="popup-blocked-count">0</div>
-        <div class="stat-label">Rastreadores y anuncios bloqueados</div>
-      </div>
-
-      <!-- Métricas Dinámicas de Ahorro y Rendimiento -->
-      <div class="savings-grid">
-        <div class="savings-card">
-          <div class="savings-val" id="popup-bandwidth-saved">0 MB</div>
-          <div class="savings-lbl">Ancho de banda ahorrado</div>
-        </div>
-        <div class="savings-card">
-          <div class="savings-val" id="popup-time-saved">0 s</div>
-          <div class="savings-lbl">Tiempo estimado ganado</div>
-        </div>
-      </div>
-
-      <!-- Controles Avanzados -->
-      <div class="advanced-section-title">Controles Avanzados</div>
-      
-      <div class="control-row">
-        <span class="control-label">Rastreadores y anuncios</span>
-        <button class="control-badge" id="btn-toggle-aggressive">Estándar</button>
-      </div>
-
-      <div class="control-row">
-        <span class="control-label">Bloquear scripts (JavaScript)</span>
-        <label class="switch switch-sm">
-          <input type="checkbox" id="scripts-toggle">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="control-row">
-        <span class="control-label">Navegación olvidadiza (Limpiar al salir)</span>
-        <label class="switch switch-sm">
-          <input type="checkbox" id="forgetful-toggle">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="control-row">
-        <span class="control-label">Protección de huella (Farbling)</span>
-        <span class="status-active">Activado</span>
-      </div>
-
-      <div class="control-row">
-        <span class="control-label">Des-rastreo de URLs (De-AMP)</span>
-        <span class="status-active">Activado</span>
-      </div>
-
-      <div class="control-row">
-        <span class="control-label">HTTPS Everywhere Forzado</span>
-        <span class="status-active">Activado</span>
-      </div>
-
-      <div class="control-row">
-        <span class="control-label">Protección red local (Anti-Portscan)</span>
-        <span class="status-active">Activado</span>
-      </div>
-    </div>
-
-    <!-- Menú Principal Desplegable de Brave (100% Idéntico al oficial) -->
-    <div class="main-menu" id="main-menu">
-      <div class="menu-item" id="menu-new-tab">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>Nueva pestaña</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+T</span>
-      </div>
-
-      <div class="menu-item" id="menu-new-window">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-            <line x1="8" y1="21" x2="16" y2="21"></line>
-            <line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-          <span>Nueva ventana</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+N</span>
-      </div>
-
-      <div class="menu-item" id="menu-new-private">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-          <span>Nueva ventana privada</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+Mayús+N</span>
-      </div>
-
-      <div class="menu-item" id="menu-new-tor">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <circle cx="12" cy="12" r="6"></circle>
-            <circle cx="12" cy="12" r="2"></circle>
-          </svg>
-          <span>Nueva ventana privada con Tor</span>
-        </div>
-        <span class="menu-shortcut">Alt+Mayús+N</span>
-      </div>
-
-      <div class="menu-divider"></div>
-
-      <div class="menu-item" id="menu-leo-ai">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-          </svg>
-          <span>Leo IA</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-wallet">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-            <line x1="2" y1="10" x2="22" y2="10"></line>
-          </svg>
-          <span>Wallet</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-vpn">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          <span>VPN de Brave</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-playlist">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-          <span>Brave Playlist</span>
-        </div>
-      </div>
-
-      <div class="menu-divider"></div>
-
-      <div class="menu-item" id="menu-history">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          <span>Historial</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+H</span>
-      </div>
-
-      <div class="menu-item" id="menu-bookmarks">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-          <span>Añadir a marcadores</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+D</span>
-      </div>
-
-      <div class="menu-item" id="menu-bookmarks-manager">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-          </svg>
-          <span>Gestor de marcadores</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+Mayús+O</span>
-      </div>
-
-      <div class="menu-item" id="menu-toggle-bookmarks">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-          </svg>
-          <span>Mostrar barra de marcadores</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+Mayús+B</span>
-      </div>
-
-      <div class="menu-item" id="menu-downloads">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Descargas</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+J</span>
-      </div>
-
-      <div class="menu-item" id="menu-extensions">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"></path>
-          </svg>
-          <span>Extensiones</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-clear-data">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-          <span>Eliminar datos de navegación...</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+Mayús+Supr</span>
-      </div>
-
-      <div class="menu-divider"></div>
-
-      <!-- Zoom Controls -->
-      <div class="menu-item menu-zoom-row">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Zoom</span>
-        </div>
-        <div class="menu-zoom-controls">
-          <button class="zoom-btn" id="menu-zoom-out" title="Reducir zoom">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-          <span class="zoom-level-text" id="menu-zoom-text">100 %</span>
-          <button class="zoom-btn" id="menu-zoom-in" title="Aumentar zoom">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-          <button class="zoom-btn zoom-fullscreen" id="menu-fullscreen" title="Pantalla completa">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="menu-divider"></div>
-
-      <div class="menu-item" id="menu-print">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-          </svg>
-          <span>Imprimir...</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+P</span>
-      </div>
-
-      <div class="menu-item" id="menu-find">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Buscar en la página</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+F</span>
-      </div>
-
-      <div class="menu-item" id="menu-screenshot">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
-          <span>Captura de pantalla web</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+Mayús+S</span>
-      </div>
-
-      <div class="menu-item" id="menu-create-shortcut">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
-          <span>Crear acceso directo de app...</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-element-picker">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-          </svg>
-          <span>Bloquear elemento en esta página</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+Mayús+E</span>
-      </div>
-
-      <div class="menu-item" id="menu-adblock">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          <span>Filtros Adblock</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-sync">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-          <span>Sincronización</span>
-        </div>
-      </div>
-
-      <div class="menu-item" id="menu-task-manager">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-            <line x1="8" y1="21" x2="16" y2="21"></line>
-            <line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-          <span>Administrador de tareas</span>
-        </div>
-        <span class="menu-shortcut">Mayús+Esc</span>
-      </div>
-
-      <div class="menu-divider"></div>
-
-      <div class="menu-item" id="menu-settings">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span>Configuración</span>
-        </div>
-        <span class="menu-shortcut">Ctrl+,</span>
-      </div>
-
-      <div class="menu-item" id="menu-devtools">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <span>Herramientas para desarrolladores</span>
-        </div>
-        <span class="menu-shortcut">F12</span>
-      </div>
-
-      <div class="menu-item" id="menu-about">
-        <div class="menu-left-group">
-          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <span>Acerca de Brave (Réplica Educativa)</span>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Popup Brave VPN (100% Idéntico a Frame 005) -->
@@ -691,83 +275,20 @@
 
   <!-- Contenedor del Navegador Web (Múltiples Webviews) -->
   <div class="browser-content" id="browser-content">
-    <!-- Dock Vertical de Barra Lateral (Brave Sidebar Dock — 44px) -->
-    <aside class="brave-sidebar-dock" id="brave-sidebar-dock">
-      <div class="sidebar-dock-group sidebar-dock-top">
-        <!-- 1. Leo AI -->
-        <button class="sidebar-dock-btn" id="sidebar-btn-leo" title="Leo AI (Asistente de IA)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-          </svg>
-        </button>
-
-        <!-- 2. Marcadores -->
-        <button class="sidebar-dock-btn" id="sidebar-btn-bookmarks" title="Marcadores (Ctrl+Mayús+O)">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-          </svg>
-        </button>
-
-        <!-- 3. Historial -->
-        <button class="sidebar-dock-btn" id="sidebar-btn-history" title="Historial (Ctrl+H)">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-            <path d="M3 3v5h5"></path>
-            <path d="M12 7v5l4 2"></path>
-          </svg>
-        </button>
-
-        <!-- 4. Brave Playlist -->
-        <button class="sidebar-dock-btn" id="sidebar-btn-playlist" title="Brave Playlist">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-        </button>
-
-        <!-- 5. Brave Wallet -->
-        <button class="sidebar-dock-btn" id="sidebar-btn-wallet" title="Brave Wallet">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-            <line x1="2" y1="10" x2="22" y2="10"></line>
-          </svg>
-        </button>
-      </div>
-
-      <div class="sidebar-dock-group sidebar-dock-bottom">
-        <div class="sidebar-dock-divider"></div>
-        <!-- Botón para ocultar/colapsar sidebar desde el propio dock -->
-        <button class="sidebar-dock-btn sidebar-dock-collapse-btn" id="sidebar-btn-collapse" title="Ocultar barra lateral">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
-    </aside>
-
     <!-- Sidebar Leo AI (100% Idéntico a Frame 009) -->
     <aside class="leo-sidebar" id="leo-sidebar">
       <div class="leo-sidebar-header">
         <div class="leo-header-title">Leo AI</div>
         <div class="leo-header-actions">
           <button class="leo-btn-icon" id="btn-leo-expand" title="Expandir">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="15 3 21 3 21 9"></polyline>
               <polyline points="9 21 3 21 3 15"></polyline>
               <line x1="21" y1="3" x2="14" y2="10"></line>
               <line x1="3" y1="21" x2="10" y2="14"></line>
             </svg>
           </button>
-          <button class="leo-btn-icon" id="btn-close-leo" title="Cerrar">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          <button class="leo-btn-icon" id="btn-close-leo" title="Cerrar">✕</button>
         </div>
       </div>
 
@@ -801,7 +322,7 @@
         <div class="leo-input-toolbar">
           <div class="leo-toolbar-left">
             <button class="leo-attach-btn" title="Adjuntar pestaña actual o archivo">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
               </svg>
             </button>
@@ -813,7 +334,7 @@
             </select>
           </div>
           <button class="leo-send-btn" id="btn-leo-send" title="Enviar mensaje">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="12" y1="19" x2="12" y2="5"></line>
               <polyline points="5 12 12 5 19 12"></polyline>
             </svg>
@@ -832,12 +353,7 @@
       </div>
       <div class="wayback-bar-actions">
         <button class="btn-wayback-action btn-wayback-check" id="btn-wayback-check">Ver versión archivada</button>
-        <button class="btn-wayback-action btn-wayback-close" id="btn-wayback-close" title="Cerrar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <button class="btn-wayback-action btn-wayback-close" id="btn-wayback-close">✕</button>
       </div>
     </div>
 
@@ -849,12 +365,7 @@
       </div>
       <div class="crash-banner-actions">
         <button class="btn-crash-reload" id="btn-crash-reload">Volver a cargar</button>
-        <button class="btn-crash-close" id="btn-crash-close" title="Cerrar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <button class="btn-crash-close" id="btn-crash-close">✕</button>
       </div>
     </div>
 
@@ -864,12 +375,7 @@
       <span class="find-count" id="find-in-page-count">0/0</span>
       <button class="btn-find-nav" id="btn-find-prev" title="Anterior (Shift+Enter)">▲</button>
       <button class="btn-find-nav" id="btn-find-next" title="Siguiente (Enter)">▼</button>
-      <button class="btn-find-close" id="btn-find-close" title="Cerrar (Esc)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="btn-find-close" id="btn-find-close" title="Cerrar (Esc)">✕</button>
     </div>
 
     <!-- Modo Lectura Speedreader Overlay -->
@@ -894,18 +400,440 @@
             <button class="sr-btn" id="sr-btn-font-inc" title="Aumentar fuente (A+)">A+</button>
             <button class="sr-btn" id="sr-btn-font-family" title="Alternar Serif / Sans-Serif">Serif</button>
           </div>
-          <button class="btn-exit-reader" id="btn-close-speedreader" title="Salir de Speedreader">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 4px; pointer-events: none;">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-            <span>Salir</span>
-          </button>
+          <button class="btn-exit-reader" id="btn-close-speedreader">✕ Salir</button>
         </div>
       </div>
       <h1 class="speedreader-title" id="speedreader-title">Título del artículo</h1>
       <div class="speedreader-meta" id="speedreader-meta">Lectura limpia sin rastreadores ni anuncios</div>
       <div class="speedreader-content" id="speedreader-content">Contenido del artículo...</div>
+    </div>
+
+    <!-- Panel Emergente de Brave Shields (Avanzado) -->
+    <div class="shields-popup" id="shields-popup">
+      <div class="popup-header">
+        <div class="popup-title">
+          <img src="logo.png" width="18" height="18" style="vertical-align: middle; margin-right: 6px; object-fit: contain;">
+          <span>Brave Shields</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="shields-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="site-domain" id="popup-domain">search.brave.com</div>
+
+      <div class="stat-card">
+        <div class="stat-number" id="popup-blocked-count">0</div>
+        <div class="stat-label">Rastreadores y anuncios bloqueados</div>
+      </div>
+
+      <!-- Métricas Dinámicas de Ahorro y Rendimiento -->
+      <div class="savings-grid">
+        <div class="savings-card">
+          <div class="savings-val" id="popup-bandwidth-saved">0 MB</div>
+          <div class="savings-lbl">Ancho de banda ahorrado</div>
+        </div>
+        <div class="savings-card">
+          <div class="savings-val" id="popup-time-saved">0 s</div>
+          <div class="savings-lbl">Tiempo estimado ganado</div>
+        </div>
+      </div>
+
+      <!-- Desglose por Categorías de Rastreadores (Shields v2 Breakdown) -->
+      <div class="shields-breakdown-section">
+        <div class="advanced-section-title">Protecciones en este Sitio</div>
+        <div class="shields-breakdown-grid" id="shields-breakdown-grid">
+          <div class="breakdown-category-item" id="cat-trackers">
+            <div class="breakdown-cat-header">
+              <span class="breakdown-cat-icon">🛡️</span>
+              <span class="breakdown-cat-title">Rastreadores y anuncios</span>
+              <span class="breakdown-badge" id="badge-cat-trackers">0</span>
+            </div>
+            <div class="breakdown-cat-desc">Bloqueo estricto ABP y EasyList</div>
+          </div>
+          <div class="breakdown-category-item" id="cat-farbling">
+            <div class="breakdown-cat-header">
+              <span class="breakdown-cat-icon">🎭</span>
+              <span class="breakdown-cat-title">Huella Digital (Farbling v2)</span>
+              <span class="breakdown-badge active" id="badge-cat-farbling">Activo</span>
+            </div>
+            <div class="breakdown-cat-desc">Ruido en Canvas, Audio, WebGL y Screen</div>
+          </div>
+          <div class="breakdown-category-item" id="cat-urls">
+            <div class="breakdown-cat-header">
+              <span class="breakdown-cat-icon">⚡</span>
+              <span class="breakdown-cat-title">Des-rastreo de URLs</span>
+              <span class="breakdown-badge" id="badge-cat-urls">0</span>
+            </div>
+            <div class="breakdown-cat-desc">64 parámetros de telemetría eliminados</div>
+          </div>
+          <div class="breakdown-category-item" id="cat-https">
+            <div class="breakdown-cat-header">
+              <span class="breakdown-cat-icon">🔒</span>
+              <span class="breakdown-cat-title">Conexión Segura</span>
+              <span class="breakdown-badge active" id="badge-cat-https">HTTPS</span>
+            </div>
+            <div class="breakdown-cat-desc">Cifrado estricto y protección anti-portscan</div>
+          </div>
+        </div>
+
+        <!-- Registro en Vivo de Rastreadores Bloqueados en esta Página -->
+        <div class="trackers-log-container">
+          <div class="trackers-log-header" id="trackers-log-toggle">
+            <span>Ver solicitudes bloqueadas en este sitio</span>
+            <span class="trackers-log-chevron" id="trackers-log-chevron">▼</span>
+          </div>
+          <div class="trackers-log-list" id="trackers-log-list" style="display: none;">
+            <div class="trackers-log-empty" id="trackers-log-empty">No se han registrado solicitudes bloqueadas en esta página.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controles Avanzados -->
+      <div class="advanced-section-title">Controles Avanzados</div>
+      
+      <div class="control-row">
+        <span class="control-label">Rastreadores y anuncios</span>
+        <button class="control-badge" id="btn-toggle-aggressive">Estándar</button>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Bloquear scripts (JavaScript)</span>
+        <label class="switch switch-sm">
+          <input type="checkbox" id="scripts-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Navegación olvidadiza (Limpiar al salir)</span>
+        <label class="switch switch-sm">
+          <input type="checkbox" id="forgetful-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Protección de huella (Farbling)</span>
+        <span class="status-active">Activado</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Des-rastreo de URLs (De-AMP)</span>
+        <span class="status-active">Activado</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">HTTPS Everywhere Forzado</span>
+        <span class="status-active">Activado</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">Protección red local (Anti-Portscan)</span>
+        <span class="status-active">Activado</span>
+      </div>
+    </div>
+
+        <!-- Menú Principal Desplegable (100% Idéntico a Frame 012) -->
+    <div class="main-menu" id="main-menu">
+      <div class="menu-item" id="menu-new-tor">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span>Nueva ventana privada con Tor</span>
+        </div>
+        <span class="menu-shortcut">Mayús+Alt+N</span>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-item" id="menu-leo-ai">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          <span>Leo IA</span>
+        </div>
+      </div>
+
+      <div class="menu-item" id="menu-wallet">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+          <span>Wallet</span>
+        </div>
+      </div>
+
+      <div class="menu-item" id="menu-vpn">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>VPN de Brave</span>
+        </div>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <!-- Barra lateral segmented control -->
+      <div class="menu-item menu-sidebar-row" id="menu-sidebar-row">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+          <span>Barra lateral</span>
+        </div>
+        <div class="menu-segmented-pills">
+          <button class="menu-pill" id="pill-sidebar-on">Activada</button>
+          <button class="menu-pill" id="pill-sidebar-auto">Ocultar automáticamente</button>
+          <button class="menu-pill active" id="pill-sidebar-off">Desactivado</button>
+        </div>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-item has-submenu" id="menu-passwords">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="7" r="4"></circle>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          </svg>
+          <span>Contraseñas y Autocompletar</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-item has-submenu" id="menu-history">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Historial</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-item has-submenu" id="menu-bookmarks-lists">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Marcadores y listas</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-item" id="menu-downloads">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Descargas</span>
+        </div>
+        <span class="menu-shortcut">Ctrl+J</span>
+      </div>
+
+      <div class="menu-item has-submenu" id="menu-extensions-sub">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"></path>
+          </svg>
+          <span>Extensiones</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-item" id="menu-clear-browsing-data">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Eliminar datos de navegación...</span>
+        </div>
+        <span class="menu-shortcut">Ctrl+Mayús+Supr</span>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <!-- Zoom Row -->
+      <div class="menu-item menu-zoom-row">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>Zoom</span>
+        </div>
+        <div class="menu-zoom-controls">
+          <button class="zoom-btn" id="menu-zoom-out" title="Reducir zoom">−</button>
+          <span class="zoom-level-text" id="menu-zoom-text">100 %</span>
+          <button class="zoom-btn" id="menu-zoom-in" title="Aumentar zoom">+</button>
+          <button class="zoom-btn zoom-fullscreen" id="menu-fullscreen" title="Pantalla completa">⛶</button>
+        </div>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-item" id="menu-print">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimir...</span>
+        </div>
+        <span class="menu-shortcut">Ctrl+P</span>
+      </div>
+
+      <div class="menu-item has-submenu" id="menu-search-edit">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <path d="M11 8v6M8 11h6"></path>
+          </svg>
+          <span>Buscar y editar</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-item has-submenu" id="menu-save-share">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+          <span>Guardar y compartir</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-item has-submenu" id="menu-more-tools">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+          <span>Más herramientas</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-item has-submenu" id="menu-help">
+        <div class="menu-left-group">
+          <svg class="menu-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Ayuda</span>
+        </div>
+        <span class="menu-shortcut">›</span>
+      </div>
+    </div>
+      </div>
+      <div class="menu-item" id="menu-new-private">
+        <span>Nueva ventana privada</span>
+        <span class="menu-shortcut">Ctrl+Shift+N</span>
+      </div>
+      <div class="menu-item" id="menu-new-tor">
+        <span>Nueva ventana privada con Tor</span>
+        <span class="menu-shortcut">Alt+Shift+N</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-bookmarks">
+        <span>Añadir a marcadores</span>
+        <span class="menu-shortcut">Ctrl+D</span>
+      </div>
+      <div class="menu-item" id="menu-bookmarks-manager">
+        <span>Gestor de marcadores</span>
+        <span class="menu-shortcut">Ctrl+Shift+O</span>
+      </div>
+      <div class="menu-item" id="menu-toggle-bookmarks">
+        <span>Barra de marcadores</span>
+        <span class="menu-shortcut">Ctrl+Shift+B</span>
+      </div>
+      <div class="menu-item" id="menu-history">
+        <span>Historial</span>
+        <span class="menu-shortcut">Ctrl+H</span>
+      </div>
+      <div class="menu-item" id="menu-downloads">
+        <span>Descargas</span>
+        <span class="menu-shortcut">Ctrl+J</span>
+      </div>
+      <div class="menu-item" id="menu-find">
+        <span>Buscar en la página</span>
+        <span class="menu-shortcut">Ctrl+F</span>
+      </div>
+      <div class="menu-item" id="menu-screenshot">
+        <span>Captura de pantalla</span>
+        <span class="menu-shortcut">Ctrl+Shift+S</span>
+      </div>
+      <div class="menu-item" id="menu-print">
+        <span>Imprimir...</span>
+        <span class="menu-shortcut">Ctrl+P</span>
+      </div>
+      <div class="menu-item" id="menu-create-shortcut">
+        <span>Crear acceso directo de app...</span>
+        <span class="menu-shortcut">🚀</span>
+      </div>
+      <div class="menu-item" id="menu-sync">
+        <span>Sincronización</span>
+        <span class="menu-shortcut">🔄</span>
+      </div>
+      <div class="menu-item" id="menu-adblock">
+        <span>Filtros Adblock</span>
+        <span class="menu-shortcut">🛡️</span>
+      </div>
+      <div class="menu-item" id="menu-element-picker">
+        <span>Bloquear elemento en esta página</span>
+        <span class="menu-shortcut">Ctrl+Shift+E</span>
+      </div>
+      <div class="menu-item" id="menu-clear-data">
+        <span>Borrar datos de navegación...</span>
+        <span class="menu-shortcut">Ctrl+Shift+Supr</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-settings">
+        <span>Configuración</span>
+        <span class="menu-shortcut">Ctrl+,</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-devtools">
+        <span>Herramientas para desarrolladores</span>
+        <span class="menu-shortcut">F12</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-playlist">
+        <span>Brave Playlist</span>
+        <span class="menu-shortcut">📑</span>
+      </div>
+      <div class="menu-item" id="menu-extensions">
+        <span>Extensiones</span>
+        <span class="menu-shortcut">🧩</span>
+      </div>
+      <div class="menu-item" id="menu-task-manager">
+        <span>Administrador de tareas</span>
+        <span class="menu-shortcut">Shift+Esc</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" id="menu-about">
+        <span>Acerca de Brave (Réplica Educativa)</span>
+      </div>
     </div>
   </div>
 
@@ -1030,12 +958,7 @@
     <div class="translate-bar-actions">
       <button class="btn-translate-action btn-translate-confirm" id="btn-do-translate">Traducir</button>
       <button class="btn-translate-action btn-translate-revert" id="btn-revert-translate" style="display: none;">Ver original</button>
-      <button class="btn-translate-action btn-translate-close" id="btn-close-translate" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="btn-translate-action btn-translate-close" id="btn-close-translate">✕</button>
     </div>
   </div>
 
@@ -1046,12 +969,7 @@
         <div class="task-manager-title">
           <span>⚡ Administrador de tareas - Brave</span>
         </div>
-        <button class="task-manager-close" id="btn-close-task-manager" title="Cerrar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <button class="task-manager-close" id="btn-close-task-manager">✕</button>
       </div>
       <div class="task-manager-body">
         <table class="task-table">
@@ -1104,10 +1022,7 @@
       <div style="font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 8px;">
         <span>🧩</span> Extensiones de Brave
       </div>
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <button class="btn-manage-ext" id="btn-goto-extensions">Administrar</button>
-        <button class="btn-manage-ext" id="btn-close-ext-popup" title="Cerrar" style="padding: 3px 6px; line-height: 1;">✕</button>
-      </div>
+      <button class="btn-manage-ext" id="btn-goto-extensions">Administrar</button>
     </div>
     <div class="extensions-popup-body" id="extensions-popup-list">
       <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0;">
@@ -1123,12 +1038,7 @@
   <div class="extension-action-popup" id="extension-action-popup">
     <div class="ext-popup-header">
       <div class="ext-popup-title" id="ext-popup-title">Extensión</div>
-      <button class="ext-popup-close" id="ext-popup-close" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="ext-popup-close" id="ext-popup-close">✕</button>
     </div>
     <iframe class="ext-popup-frame" id="ext-popup-frame" src="about:blank"></iframe>
   </div>
@@ -1137,12 +1047,7 @@
   <div class="qr-popup" id="qr-popup">
     <div class="qr-popup-header">
       <span style="font-weight: 700; font-size: 13px;">📱 Compartir con código QR</span>
-      <button class="qr-popup-close" id="btn-close-qr" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="qr-popup-close" id="btn-close-qr">✕</button>
     </div>
     <div class="qr-popup-body">
       <div id="qr-code-container" class="qr-code-container"></div>
@@ -1157,12 +1062,7 @@
   <div class="bookmark-edit-popup" id="bookmark-edit-popup">
     <div class="bm-popup-header">
       <span class="bm-popup-title" id="bm-popup-heading">Marcador añadido</span>
-      <button class="bm-popup-close" id="btn-close-bm-popup" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="bm-popup-close" id="btn-close-bm-popup">✕</button>
     </div>
     <div class="bm-popup-body">
       <div class="bm-popup-field">
@@ -1209,7 +1109,7 @@
   <div class="modal-overlay" id="bm-bar-edit-modal">
     <div class="modal-card" style="width: 420px; background: #24252a; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
       <div class="modal-title" style="font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <span id="bm-bar-modal-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
+        <span id="bm-bar-modal-icon">✏️</span>
         <span id="bm-bar-modal-title">Editar marcador</span>
       </div>
       <div class="input-field" style="display:flex; flex-direction:column; gap:6px; margin-bottom: 12px;">
@@ -1231,7 +1131,7 @@
   <div class="site-info-popup" id="site-info-popup">
     <div class="site-info-header">
       <div class="site-info-icon-badge" id="site-info-icon-badge">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
@@ -1240,12 +1140,7 @@
         <div class="site-info-domain" id="site-info-domain">sitio.com</div>
         <div class="site-info-security" id="site-info-security">La conexión es segura</div>
       </div>
-      <button class="site-info-close" id="site-info-close" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="site-info-close" id="site-info-close">✕</button>
     </div>
     <div class="site-info-desc" id="site-info-desc">
       Tus datos (contraseñas, datos de tarjetas de crédito) se mantienen privados al transmitirse a este sitio web mediante cifrado HTTPS moderno.
@@ -1277,12 +1172,7 @@
         </svg>
         <span style="font-weight: 700; font-size: 13px;">Captura de pantalla web</span>
       </div>
-      <button class="capture-popup-close" id="btn-close-capture" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="capture-popup-close" id="btn-close-capture">✕</button>
     </div>
     <div class="capture-popup-body">
       <img id="capture-preview-img" alt="Vista previa de captura" style="max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain; background: #000;">
@@ -1299,13 +1189,7 @@
       <span class="picker-icon">🎯</span>
       <span><strong>Selector de Elementos:</strong> Haz clic sobre cualquier elemento de la página para bloquearlo permanentemente. Presiona <strong>Esc</strong> para cancelar.</span>
     </div>
-    <button class="btn-cancel-picker" id="btn-cancel-picker">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 4px; pointer-events: none;">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-      <span>Cancelar</span>
-    </button>
+    <button class="btn-cancel-picker" id="btn-cancel-picker">✕ Cancelar</button>
   </div>
 
   <!-- Modal Limpiador Avanzado de Datos de Navegación (Ctrl + Shift + Supr) -->
@@ -1321,12 +1205,7 @@
           </svg>
           <span>Borrar datos de navegación</span>
         </div>
-        <button class="clear-data-close" id="btn-close-clear-data" title="Cerrar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <button class="clear-data-close" id="btn-close-clear-data">✕</button>
       </div>
 
       <div class="clear-data-body">
@@ -1390,12 +1269,7 @@
         <span class="pw-icon">🔑</span>
         <span style="font-weight: 700; font-size: 13.5px;">¿Guardar contraseña?</span>
       </div>
-      <button class="pw-popup-close" id="btn-close-pw-popup" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="pw-popup-close" id="btn-close-pw-popup">✕</button>
     </div>
     <div class="pw-popup-domain" id="pw-popup-domain">sitio.com</div>
     <div class="pw-popup-fields">
@@ -1431,22 +1305,11 @@
       </div>
     </div>
     <div class="download-bar-actions">
-      <button class="btn-download-act" id="btn-download-cancel" style="color: #f87171; border-color: rgba(248, 113, 113, 0.4);">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 4px; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-        <span>Cancelar</span>
-      </button>
+      <button class="btn-download-act" id="btn-download-cancel" style="color: #f87171; border-color: rgba(248, 113, 113, 0.4);">✕ Cancelar</button>
       <button class="btn-download-act" id="btn-download-open" style="display: none;">Abrir archivo</button>
       <button class="btn-download-act" id="btn-download-folder" style="display: none;">Mostrar en carpeta</button>
       <button class="btn-download-act" id="btn-download-all">Todas las descargas (Ctrl+J)</button>
-      <button class="btn-download-close" id="btn-download-close" title="Cerrar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <button class="btn-download-close" id="btn-download-close" title="Cerrar">✕</button>
     </div>
   </div>
 
@@ -1458,12 +1321,7 @@
           <span>🔒</span>
           <span>Autenticación requerida</span>
         </div>
-        <button class="auth-close" id="btn-auth-close" title="Cerrar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <button class="auth-close" id="btn-auth-close">✕</button>
       </div>
       <div class="auth-body">
         <div class="auth-desc" id="auth-desc">El servidor solicita un nombre de usuario y una contraseña.</div>

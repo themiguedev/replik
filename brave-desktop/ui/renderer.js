@@ -1,62 +1,62 @@
 // Gestor Completo de Pestañas, Rendimiento, Marcadores y Navegación
-const tabBar = document.getElementById('tab-bar');
-const newTabBtn = document.getElementById('new-tab-btn');
-const browserContent = document.getElementById('browser-content');
-const urlInput = document.getElementById('url-input');
-const omniboxSuggestions = document.getElementById('omnibox-suggestions');
-const bookmarksBar = document.getElementById('bookmarks-bar');
-const bookmarksList = document.getElementById('bookmarks-list');
-const btnBack = document.getElementById('btn-back');
-const btnForward = document.getElementById('btn-forward');
-const btnReload = document.getElementById('btn-reload');
-const btnHome = document.getElementById('btn-home');
-const shieldsBtn = document.getElementById('shields-btn');
-const shieldsCounter = document.getElementById('shields-counter');
-const shieldsPopup = document.getElementById('shields-popup');
-const popupDomain = document.getElementById('popup-domain');
-const popupBlockedCount = document.getElementById('popup-blocked-count');
-const shieldsToggle = document.getElementById('shields-toggle');
-const scriptsToggle = document.getElementById('scripts-toggle');
-const btnToggleAggressive = document.getElementById('btn-toggle-aggressive');
-const btnMenu = document.getElementById('btn-menu');
-const mainMenu = document.getElementById('main-menu');
-const lockIcon = document.getElementById('lock-icon');
+const tabBar = document.getElementById("tab-bar");
+const newTabBtn = document.getElementById("new-tab-btn");
+const browserContent = document.getElementById("browser-content");
+const urlInput = document.getElementById("url-input");
+const omniboxSuggestions = document.getElementById("omnibox-suggestions");
+const bookmarksBar = document.getElementById("bookmarks-bar");
+const bookmarksList = document.getElementById("bookmarks-list");
+const btnBack = document.getElementById("btn-back");
+const btnForward = document.getElementById("btn-forward");
+const btnReload = document.getElementById("btn-reload");
+const btnHome = document.getElementById("btn-home");
+const shieldsBtn = document.getElementById("shields-btn");
+const shieldsCounter = document.getElementById("shields-counter");
+const shieldsPopup = document.getElementById("shields-popup");
+const popupDomain = document.getElementById("popup-domain");
+const popupBlockedCount = document.getElementById("popup-blocked-count");
+const shieldsToggle = document.getElementById("shields-toggle");
+const scriptsToggle = document.getElementById("scripts-toggle");
+const btnToggleAggressive = document.getElementById("btn-toggle-aggressive");
+const btnMenu = document.getElementById("btn-menu");
+const mainMenu = document.getElementById("main-menu");
+const lockIcon = document.getElementById("lock-icon");
 
 // Nuevos Controles de Rendimiento y UX
-const btnSpeedreader = document.getElementById('btn-speedreader');
-const speedreaderOverlay = document.getElementById('speedreader-overlay');
-const btnCloseSpeedreader = document.getElementById('btn-close-speedreader');
-const speedreaderTitle = document.getElementById('speedreader-title');
-const speedreaderMeta = document.getElementById('speedreader-meta');
-const speedreaderContent = document.getElementById('speedreader-content');
-const batteryIndicator = document.getElementById('battery-indicator');
-const btnGlobalMedia = document.getElementById('btn-global-media');
-const globalMediaPopup = document.getElementById('global-media-popup');
-const mediaCardsContainer = document.getElementById('media-cards-container');
-const tabHoverCard = document.getElementById('tab-hover-card');
-const hoverCardTitle = document.getElementById('hover-card-title');
-const hoverCardDomain = document.getElementById('hover-card-domain');
-const hoverCardMem = document.getElementById('hover-card-mem');
-const hoverCardStatus = document.getElementById('hover-card-status');
-const customContextMenu = document.getElementById('custom-context-menu');
-const tabContextMenu = document.getElementById('tab-context-menu');
+const btnSpeedreader = document.getElementById("btn-speedreader");
+const speedreaderOverlay = document.getElementById("speedreader-overlay");
+const btnCloseSpeedreader = document.getElementById("btn-close-speedreader");
+const speedreaderTitle = document.getElementById("speedreader-title");
+const speedreaderMeta = document.getElementById("speedreader-meta");
+const speedreaderContent = document.getElementById("speedreader-content");
+const batteryIndicator = document.getElementById("battery-indicator");
+const btnGlobalMedia = document.getElementById("btn-global-media");
+const globalMediaPopup = document.getElementById("global-media-popup");
+const mediaCardsContainer = document.getElementById("media-cards-container");
+const tabHoverCard = document.getElementById("tab-hover-card");
+const hoverCardTitle = document.getElementById("hover-card-title");
+const hoverCardDomain = document.getElementById("hover-card-domain");
+const hoverCardMem = document.getElementById("hover-card-mem");
+const hoverCardStatus = document.getElementById("hover-card-status");
+const customContextMenu = document.getElementById("custom-context-menu");
+const tabContextMenu = document.getElementById("tab-context-menu");
 
 // Controles de Barra de Título Nativa y Ventana
-const winBtnMinimize = document.getElementById('win-btn-minimize');
-const winBtnMaximize = document.getElementById('win-btn-maximize');
-const winBtnClose = document.getElementById('win-btn-close');
-const winIconMaximize = document.getElementById('win-icon-maximize');
-const tabSearchBtn = document.getElementById('tab-search-btn');
-const titlebarDragRegion = document.getElementById('titlebar-drag-region');
+const winBtnMinimize = document.getElementById("win-btn-minimize");
+const winBtnMaximize = document.getElementById("win-btn-maximize");
+const winBtnClose = document.getElementById("win-btn-close");
+const winIconMaximize = document.getElementById("win-icon-maximize");
+const tabSearchBtn = document.getElementById("tab-search-btn");
+const titlebarDragRegion = document.getElementById("titlebar-drag-region");
 
 function updateMaximizeIcon(isMax) {
   if (winIconMaximize) {
     if (isMax) {
       winIconMaximize.innerHTML = `<path d="M2 0h8v8H8V2H2V0zm-2 2h8v8H0V2zm1 1v6h6V3H1z"/>`;
-      if (winBtnMaximize) winBtnMaximize.title = 'Restaurar';
+      if (winBtnMaximize) winBtnMaximize.title = "Restaurar";
     } else {
       winIconMaximize.innerHTML = `<path d="M1 1h8v8H1V1zm1 1v6h6V2H2z"/>`;
-      if (winBtnMaximize) winBtnMaximize.title = 'Maximizar';
+      if (winBtnMaximize) winBtnMaximize.title = "Maximizar";
     }
   }
 }
@@ -75,8 +75,8 @@ function initWindowControls() {
       lastTime = now;
       action();
     };
-    btn.addEventListener('click', trigger);
-    btn.addEventListener('mouseup', trigger);
+    btn.addEventListener("click", trigger);
+    btn.addEventListener("mouseup", trigger);
   }
 
   bindWindowAction(winBtnMinimize, () => {
@@ -87,9 +87,12 @@ function initWindowControls() {
 
   bindWindowAction(winBtnMaximize, () => {
     if (window.braveAPI && window.braveAPI.maximizeWindow) {
-      window.braveAPI.maximizeWindow().then((isMax) => {
-        if (typeof isMax === 'boolean') updateMaximizeIcon(isMax);
-      }).catch(() => {});
+      window.braveAPI
+        .maximizeWindow()
+        .then((isMax) => {
+          if (typeof isMax === "boolean") updateMaximizeIcon(isMax);
+        })
+        .catch(() => {});
     }
   });
 
@@ -100,12 +103,15 @@ function initWindowControls() {
   });
 
   if (titlebarDragRegion) {
-    titlebarDragRegion.addEventListener('dblclick', (e) => {
+    titlebarDragRegion.addEventListener("dblclick", (e) => {
       e.preventDefault();
       if (window.braveAPI && window.braveAPI.maximizeWindow) {
-        window.braveAPI.maximizeWindow().then((isMax) => {
-          if (typeof isMax === 'boolean') updateMaximizeIcon(isMax);
-        }).catch(() => {});
+        window.braveAPI
+          .maximizeWindow()
+          .then((isMax) => {
+            if (typeof isMax === "boolean") updateMaximizeIcon(isMax);
+          })
+          .catch(() => {});
       }
     });
   }
@@ -113,79 +119,52 @@ function initWindowControls() {
   if (window.braveAPI) {
     if (window.braveAPI.onWindowStateChanged) {
       window.braveAPI.onWindowStateChanged((state) => {
-        if (state && typeof state.isMaximized === 'boolean') {
+        if (state && typeof state.isMaximized === "boolean") {
           updateMaximizeIcon(state.isMaximized);
         }
       });
     }
     if (window.braveAPI.isMaximized) {
-      window.braveAPI.isMaximized().then((isMax) => {
-        updateMaximizeIcon(isMax);
-      }).catch(() => {});
+      window.braveAPI
+        .isMaximized()
+        .then((isMax) => {
+          updateMaximizeIcon(isMax);
+        })
+        .catch(() => {});
     }
   }
 }
 
 initWindowControls();
 
-// ==========================================
-// VECTOR SVG ICON SYSTEM (Milestone 1 Standardized)
-// ==========================================
-
-// 1. Authentic Brave Lion Shield Vector SVG (16x16px, dual gradient, 2770x2770 viewBox)
+// Ícono del Escudo Brave con logo oficial
 const BRAVE_SHIELD_SVG = `
-  <svg class="tab-shield-svg" width="16" height="16" viewBox="0 0 2770 2770" style="vertical-align: middle; display: block; pointer-events: none;">
-    <defs>
-      <linearGradient id="tab-shield-grad-1" y1="51%" y2="51%">
-        <stop offset="0.4" stop-color="#ff5500"/>
-        <stop offset="0.6" stop-color="#ff2000"/>
-      </linearGradient>
-      <linearGradient id="tab-shield-grad-2" x1="2%" y1="51%" y2="51%">
-        <stop offset="0" stop-color="#ff452a"/>
-        <stop offset="1" stop-color="#ff2000"/>
-      </linearGradient>
-    </defs>
-    <path fill="url(#tab-shield-grad-1)" d="M2395 723l60-147-170-176c-92-92-288-38-288-38l-222-252H992L769 363s-196-53-288 37L311 575l60 147-75 218 250 953c52 204 87 283 234 387l457 310c44 27 98 74 147 74s103-47 147-74l457-310c147-104 182-183 234-387l250-953z"/>
-    <path fill="#ffffff" d="M1935 524s287 347 287 420c0 75-36 94-72 133l-215 230c-20 20-63 54-38 113 25 60 60 134 20 210-40 77-110 128-155 120a820 820 0 01-190-90c-38-25-160-126-160-165s126-110 150-124c23-16 130-78 132-102s2-30-30-90-88-140-80-192c10-52 100-80 167-105l207-78c16-8 12-15-36-20-48-4-183-22-244-5s-163 43-173 57c-8 14-16 14-7 62l58 315c4 40 12 67-30 77-44 10-117 27-142 27s-99-17-142-27-35-37-30-77c4-40 48-268 57-315 10-48 1-48-7-62-10-14-113-40-174-57-60-17-196 1-244 6-48 4-52 10-36 20l207 77c66 25 158 53 167 105 10 53-47 132-80 192s-32 66-30 90 110 86 132 102c24 15 150 85 150 124s-119 140-159 165a820 820 0 01-190 90c-45 8-115-43-156-120-40-76-4-150 20-210 25-60-17-92-38-113l-215-230c-35-37-71-57-71-131s287-420 287-420l273 44c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47zm-215 1328c18 10 7 32-10 44l-254 198c-20 20-52 50-73 50s-52-30-73-50a13200 13200 0 00-255-198c-16-12-27-33-10-44l150-80a870 870 0 01188-73c15 0 110 34 187 73l150 80z"/>
-    <path fill="url(#tab-shield-grad-2)" d="M1999 363l-224-253H992L769 363s-196-53-288 37c0 0 260-23 350 123l276 47c32 0 103-27 168-50 65-20 110-22 110-22s44 0 110 22 136 50 168 50c33 0 275-47 275-47 90-146 350-123 350-123-92-92-288-38-288-38"/>
-  </svg>
+  <img class="tab-shield-img" src="logo.png" width="16" height="16" alt="Brave" style="vertical-align: middle; object-fit: contain; display: block; pointer-events: none;">
 `;
 
-// 2. Tab Close Button (10x10px, 2px stroke, rounded ends)
-const TAB_CLOSE_SVG = `<svg class="tab-close-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-
-// 3. Audio Playing Indicator (12x12px, 1.8px stroke, filled speaker + sound waves)
-const TAB_AUDIO_PLAYING_SVG = `<svg class="tab-audio-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg><span class="sr-only">🔊</span>`;
-
-// 4. Audio Muted Indicator (12x12px, 1.8px stroke, filled speaker + mute cross)
-const TAB_AUDIO_MUTED_SVG = `<svg class="tab-audio-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: block; pointer-events: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg><span class="sr-only">🔇</span>`;
-
-// 5. Tab Sleep Badge (Crescent Moon, 11x11px, fill currentColor)
-const TAB_SLEEP_SVG = `<svg class="tab-sleep-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align: -1px; margin-right: 4px; display: inline-block; pointer-events: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span class="sr-only">🌙</span>`;
-
 const RELOAD_SVG = `
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="23 4 23 10 17 10"></polyline>
     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
   </svg>
 `;
 
 const STOP_SVG = `
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
 `;
 
 const LOCK_SVG_SECURE = `
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
   </svg>
 `;
 
 const LOCK_SVG_INSECURE = `
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fb542b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fb542b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
     <line x1="12" y1="9" x2="12" y2="13"></line>
     <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -193,7 +172,7 @@ const LOCK_SVG_INSECURE = `
 `;
 
 const LOCK_SVG_BRAVE = `
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
   </svg>
 `;
@@ -208,59 +187,98 @@ function resolveInternalUrl(fileName) {
 }
 
 // Configuración de URLs internas
-const ntpUrl = window.braveAPI && window.braveAPI.getNtpUrl ? window.braveAPI.getNtpUrl() : resolveInternalUrl('ntp.html');
-const settingsUrl = window.braveAPI && window.braveAPI.getSettingsUrl ? window.braveAPI.getSettingsUrl() : resolveInternalUrl('settings.html');
-const historyUrl = window.braveAPI && window.braveAPI.getHistoryUrl ? window.braveAPI.getHistoryUrl() : resolveInternalUrl('history.html');
-const downloadsUrl = window.braveAPI && window.braveAPI.getDownloadsUrl ? window.braveAPI.getDownloadsUrl() : resolveInternalUrl('downloads.html');
-const adblockUrl = window.braveAPI && window.braveAPI.getAdblockUrl ? window.braveAPI.getAdblockUrl() : resolveInternalUrl('adblock.html');
-const playlistUrl = window.braveAPI && window.braveAPI.getPlaylistUrl ? window.braveAPI.getPlaylistUrl() : resolveInternalUrl('playlist.html');
-const extensionsUrl = window.braveAPI && window.braveAPI.getExtensionsUrl ? window.braveAPI.getExtensionsUrl() : resolveInternalUrl('extensions.html');
-const bookmarksUrl = window.braveAPI && window.braveAPI.getBookmarksUrl ? window.braveAPI.getBookmarksUrl() : resolveInternalUrl('bookmarks.html');
-const versionUrl = window.braveAPI && window.braveAPI.getVersionUrl ? window.braveAPI.getVersionUrl() : resolveInternalUrl('version.html');
-const errorUrl = window.braveAPI && window.braveAPI.getErrorUrl ? window.braveAPI.getErrorUrl() : resolveInternalUrl('error.html');
-const welcomeUrl = window.braveAPI && window.braveAPI.getWelcomeUrl ? window.braveAPI.getWelcomeUrl() : resolveInternalUrl('welcome.html');
-const componentsUrl = window.braveAPI && window.braveAPI.getComponentsUrl ? window.braveAPI.getComponentsUrl() : resolveInternalUrl('components.html');
-const webstoreUrl = resolveInternalUrl('webstore.html');
+const ntpUrl =
+  window.braveAPI && window.braveAPI.getNtpUrl
+    ? window.braveAPI.getNtpUrl()
+    : resolveInternalUrl("ntp.html");
+const settingsUrl =
+  window.braveAPI && window.braveAPI.getSettingsUrl
+    ? window.braveAPI.getSettingsUrl()
+    : resolveInternalUrl("settings.html");
+const historyUrl =
+  window.braveAPI && window.braveAPI.getHistoryUrl
+    ? window.braveAPI.getHistoryUrl()
+    : resolveInternalUrl("history.html");
+const downloadsUrl =
+  window.braveAPI && window.braveAPI.getDownloadsUrl
+    ? window.braveAPI.getDownloadsUrl()
+    : resolveInternalUrl("downloads.html");
+const adblockUrl =
+  window.braveAPI && window.braveAPI.getAdblockUrl
+    ? window.braveAPI.getAdblockUrl()
+    : resolveInternalUrl("adblock.html");
+const playlistUrl =
+  window.braveAPI && window.braveAPI.getPlaylistUrl
+    ? window.braveAPI.getPlaylistUrl()
+    : resolveInternalUrl("playlist.html");
+const extensionsUrl =
+  window.braveAPI && window.braveAPI.getExtensionsUrl
+    ? window.braveAPI.getExtensionsUrl()
+    : resolveInternalUrl("extensions.html");
+const bookmarksUrl =
+  window.braveAPI && window.braveAPI.getBookmarksUrl
+    ? window.braveAPI.getBookmarksUrl()
+    : resolveInternalUrl("bookmarks.html");
+const versionUrl =
+  window.braveAPI && window.braveAPI.getVersionUrl
+    ? window.braveAPI.getVersionUrl()
+    : resolveInternalUrl("version.html");
+const componentsUrl =
+  window.braveAPI && window.braveAPI.getComponentsUrl
+    ? window.braveAPI.getComponentsUrl()
+    : resolveInternalUrl("components.html");
+const webstoreUrl = resolveInternalUrl("webstore.html");
 
 // Detección de modo Tor o Privado en la ventana
 if (window.braveAPI) {
   if (window.braveAPI.isTorMode && window.braveAPI.isTorMode()) {
-    document.body.classList.add('tor-mode');
+    document.body.classList.add("tor-mode");
   } else if (window.braveAPI.isPrivateMode && window.braveAPI.isPrivateMode()) {
-    document.body.classList.add('private-mode');
+    document.body.classList.add("private-mode");
   }
 }
 
-let currentSearchEngine = localStorage.getItem('brave_setting_engine') || 'brave';
+let currentSearchEngine =
+  localStorage.getItem("brave_setting_engine") || "brave";
 
 function getSearchEngineQueryUrl(query) {
-  const engine = currentSearchEngine || localStorage.getItem('brave_setting_engine') || 'brave';
+  const engine =
+    currentSearchEngine ||
+    localStorage.getItem("brave_setting_engine") ||
+    "brave";
   const q = encodeURIComponent(query);
   switch (engine) {
-    case 'google':
+    case "google":
       return `https://www.google.com/search?q=${q}`;
-    case 'duckduckgo':
+    case "duckduckgo":
       return `https://duckduckgo.com/?q=${q}`;
-    case 'bing':
+    case "bing":
       return `https://www.bing.com/search?q=${q}`;
-    case 'qwant':
+    case "qwant":
       return `https://www.qwant.com/?q=${q}`;
-    case 'brave':
+    case "brave":
     default:
       return `https://search.brave.com/search?q=${q}`;
   }
 }
 
 function getSearchEngineName() {
-  const engine = currentSearchEngine || localStorage.getItem('brave_setting_engine') || 'brave';
+  const engine =
+    currentSearchEngine ||
+    localStorage.getItem("brave_setting_engine") ||
+    "brave";
   switch (engine) {
-    case 'google': return 'Google';
-    case 'duckduckgo': return 'DuckDuckGo';
-    case 'bing': return 'Bing';
-    case 'qwant': return 'Qwant';
-    case 'brave':
+    case "google":
+      return "Google";
+    case "duckduckgo":
+      return "DuckDuckGo";
+    case "bing":
+      return "Bing";
+    case "qwant":
+      return "Qwant";
+    case "brave":
     default:
-      return 'Brave Search';
+      return "Brave Search";
   }
 }
 
@@ -277,68 +295,91 @@ const closedTabsStack = [];
 
 // Grupos de pestañas predefinidos
 const TAB_GROUPS = {
-  'group-orange': { id: 'group-orange', name: 'Trabajo', color: 'orange', collapsed: false },
-  'group-purple': { id: 'group-purple', name: 'Investigación', color: 'purple', collapsed: false },
-  'group-blue': { id: 'group-blue', name: 'Multimedia', color: 'blue', collapsed: false },
+  "group-orange": {
+    id: "group-orange",
+    name: "Trabajo",
+    color: "orange",
+    collapsed: false,
+  },
+  "group-purple": {
+    id: "group-purple",
+    name: "Investigación",
+    color: "purple",
+    collapsed: false,
+  },
+  "group-blue": {
+    id: "group-blue",
+    name: "Multimedia",
+    color: "blue",
+    collapsed: false,
+  },
 };
 
 // ==========================================
 // 1. MEDIDOR DE BATERÍA Y MODO AHORRO INTELIGENTE (Smart Energy Saver)
 // ==========================================
 let isEnergySaverActive = false;
-let autoBatterySaverEnabled = localStorage.getItem('brave_battery_auto_saver') !== 'false';
+let autoBatterySaverEnabled =
+  localStorage.getItem("brave_battery_auto_saver") !== "false";
 
-const batteryPopup = document.getElementById('battery-popup');
-const batteryPopupLevel = document.getElementById('battery-popup-level');
-const batteryPopupStatus = document.getElementById('battery-popup-status');
-const batterySaverToggle = document.getElementById('battery-saver-toggle');
-const batteryAutoToggle = document.getElementById('battery-auto-toggle');
+const batteryPopup = document.getElementById("battery-popup");
+const batteryPopupLevel = document.getElementById("battery-popup-level");
+const batteryPopupStatus = document.getElementById("battery-popup-status");
+const batterySaverToggle = document.getElementById("battery-saver-toggle");
+const batteryAutoToggle = document.getElementById("battery-auto-toggle");
 
 function initBatteryMonitoring() {
   if (batteryAutoToggle) {
     batteryAutoToggle.checked = autoBatterySaverEnabled;
-    batteryAutoToggle.addEventListener('change', () => {
+    batteryAutoToggle.addEventListener("change", () => {
       autoBatterySaverEnabled = batteryAutoToggle.checked;
-      localStorage.setItem('brave_battery_auto_saver', String(autoBatterySaverEnabled));
+      localStorage.setItem(
+        "brave_battery_auto_saver",
+        String(autoBatterySaverEnabled),
+      );
     });
   }
 
   if (batterySaverToggle) {
-    batterySaverToggle.addEventListener('change', () => {
+    batterySaverToggle.addEventListener("change", () => {
       activateEnergySaver(batterySaverToggle.checked, false);
     });
   }
 
-  if ('getBattery' in navigator) {
-    navigator.getBattery().then((battery) => {
-      function updateBatteryUI() {
-        const level = Math.round(battery.level * 100);
-        const icon = battery.charging ? '⚡' : '🔋';
-        if (batteryIndicator) batteryIndicator.textContent = `${icon} ${level}%`;
-        if (batteryPopupLevel) batteryPopupLevel.textContent = `${level}%`;
-        if (batteryPopupStatus) {
-          batteryPopupStatus.textContent = battery.charging
-            ? 'Conectado a la corriente (cargando)'
-            : 'En batería';
-        }
-
-        if (level <= 20 && !battery.charging) {
-          if (batteryIndicator) batteryIndicator.classList.add('low');
-          if (batteryPopup) batteryPopup.classList.add('low');
-          if (autoBatterySaverEnabled && !isEnergySaverActive) {
-            activateEnergySaver(true, true);
+  if ("getBattery" in navigator) {
+    navigator
+      .getBattery()
+      .then((battery) => {
+        function updateBatteryUI() {
+          const level = Math.round(battery.level * 100);
+          const icon = battery.charging ? "⚡" : "🔋";
+          if (batteryIndicator)
+            batteryIndicator.textContent = `${icon} ${level}%`;
+          if (batteryPopupLevel) batteryPopupLevel.textContent = `${level}%`;
+          if (batteryPopupStatus) {
+            batteryPopupStatus.textContent = battery.charging
+              ? "Conectado a la corriente (cargando)"
+              : "En batería";
           }
-        } else {
-          if (batteryIndicator) batteryIndicator.classList.remove('low');
-          if (batteryPopup) batteryPopup.classList.remove('low');
+
+          if (level <= 20 && !battery.charging) {
+            if (batteryIndicator) batteryIndicator.classList.add("low");
+            if (batteryPopup) batteryPopup.classList.add("low");
+            if (autoBatterySaverEnabled && !isEnergySaverActive) {
+              activateEnergySaver(true, true);
+            }
+          } else {
+            if (batteryIndicator) batteryIndicator.classList.remove("low");
+            if (batteryPopup) batteryPopup.classList.remove("low");
+          }
         }
-      }
-      updateBatteryUI();
-      battery.addEventListener('levelchange', updateBatteryUI);
-      battery.addEventListener('chargingchange', updateBatteryUI);
-    }).catch(() => {
-      if (batteryIndicator) batteryIndicator.textContent = '🔋 100%';
-    });
+        updateBatteryUI();
+        battery.addEventListener("levelchange", updateBatteryUI);
+        battery.addEventListener("chargingchange", updateBatteryUI);
+      })
+      .catch(() => {
+        if (batteryIndicator) batteryIndicator.textContent = "🔋 100%";
+      });
   }
 }
 
@@ -347,38 +388,43 @@ function activateEnergySaver(enable, wasAuto = false) {
   if (batterySaverToggle) batterySaverToggle.checked = enable;
 
   if (isEnergySaverActive) {
-    document.body.classList.add('energy-saver-active');
+    document.body.classList.add("energy-saver-active");
     if (batteryIndicator) {
-      batteryIndicator.title = 'Modo Ahorro de Energía (Activo) - Suspende pestañas inactivas para extender la batería';
-      batteryIndicator.style.borderColor = 'var(--brave-orange)';
+      batteryIndicator.title =
+        "Modo Ahorro de Energía (Activo) - Suspende pestañas inactivas para extender la batería";
+      batteryIndicator.style.borderColor = "var(--brave-orange)";
     }
     // Optimizar y suspender pestañas en segundo plano
     tabs.forEach((t) => {
       if (t.id !== activeTabId && t.webviewEl) {
-        t.webviewEl.executeJavaScript(`
+        t.webviewEl
+          .executeJavaScript(`
           if (!window.__braveSaverActive) {
             window.__braveSaverActive = true;
           }
-        `).catch(() => {});
+        `)
+          .catch(() => {});
       }
     });
 
     if (wasAuto) {
-      showGlobalToast('🔋 Modo Ahorro activado automáticamente (<20% batería). Pestañas optimizadas.');
+      showGlobalToast(
+        "🔋 Modo Ahorro activado automáticamente (<20% batería). Pestañas optimizadas.",
+      );
     }
   } else {
-    document.body.classList.remove('energy-saver-active');
+    document.body.classList.remove("energy-saver-active");
     if (batteryIndicator) {
-      batteryIndicator.title = 'Estado de batería y modo ahorro';
-      batteryIndicator.style.borderColor = '';
+      batteryIndicator.title = "Estado de batería y modo ahorro";
+      batteryIndicator.style.borderColor = "";
     }
   }
 }
 
 if (batteryIndicator) {
-  batteryIndicator.addEventListener('click', (e) => {
+  batteryIndicator.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (batteryPopup) batteryPopup.classList.toggle('open');
+    if (batteryPopup) batteryPopup.classList.toggle("open");
   });
 }
 
@@ -388,19 +434,22 @@ initBatteryMonitoring();
 // 2. SISTEMA DE MARCADORES (Ctrl + Shift + B)
 // ==========================================
 const DEFAULT_BOOKMARKS = [
-  { title: 'Brave Search', url: 'https://search.brave.com', icon: '🦁' },
-  { title: 'YouTube', url: 'https://www.youtube.com', icon: '▶️' },
-  { title: 'GitHub', url: 'https://github.com', icon: '🐙' },
-  { title: 'Wikipedia', url: 'https://www.wikipedia.org', icon: '📖' },
-  { title: 'Reddit', url: 'https://www.reddit.com', icon: '🤖' },
-  { title: 'Brave Sync', url: 'brave://sync', icon: '🔄' },
+  { title: "Brave Search", url: "https://search.brave.com", icon: "🦁" },
+  { title: "YouTube", url: "https://www.youtube.com", icon: "▶️" },
+  { title: "GitHub", url: "https://github.com", icon: "🐙" },
+  { title: "Wikipedia", url: "https://www.wikipedia.org", icon: "📖" },
+  { title: "Reddit", url: "https://www.reddit.com", icon: "🤖" },
+  { title: "Brave Sync", url: "brave://sync", icon: "🔄" },
 ];
 
 function getStoredBookmarks() {
   try {
-    const raw = localStorage.getItem('brave_bookmarks');
+    const raw = localStorage.getItem("brave_bookmarks");
     if (!raw) {
-      localStorage.setItem('brave_bookmarks', JSON.stringify(DEFAULT_BOOKMARKS));
+      localStorage.setItem(
+        "brave_bookmarks",
+        JSON.stringify(DEFAULT_BOOKMARKS),
+      );
       return DEFAULT_BOOKMARKS;
     }
     return JSON.parse(raw);
@@ -410,40 +459,40 @@ function getStoredBookmarks() {
 }
 
 function saveBookmarks(list) {
-  localStorage.setItem('brave_bookmarks', JSON.stringify(list));
+  localStorage.setItem("brave_bookmarks", JSON.stringify(list));
   renderBookmarks();
 }
 
 // Precarga y Pre-renderizado Especulativo (Speculative Prerendering / DNS & TLS Warmup)
 function speculativeWarmup(targetUrl) {
-  if (!targetUrl || !targetUrl.startsWith('http')) return;
+  if (!targetUrl || !targetUrl.startsWith("http")) return;
   try {
     const origin = new URL(targetUrl).origin;
     if (document.querySelector(`link[data-warmup="${origin}"]`)) return;
 
-    const dnsPrefetch = document.createElement('link');
-    dnsPrefetch.rel = 'dns-prefetch';
+    const dnsPrefetch = document.createElement("link");
+    dnsPrefetch.rel = "dns-prefetch";
     dnsPrefetch.href = origin;
-    dnsPrefetch.setAttribute('data-warmup', origin);
+    dnsPrefetch.setAttribute("data-warmup", origin);
     document.head.appendChild(dnsPrefetch);
 
-    const preconnect = document.createElement('link');
-    preconnect.rel = 'preconnect';
+    const preconnect = document.createElement("link");
+    preconnect.rel = "preconnect";
     preconnect.href = origin;
-    preconnect.crossOrigin = 'anonymous';
-    preconnect.setAttribute('data-warmup', origin);
+    preconnect.crossOrigin = "anonymous";
+    preconnect.setAttribute("data-warmup", origin);
     document.head.appendChild(preconnect);
   } catch {}
 }
 
 function escapeHtml(str) {
-  if (!str) return '';
+  if (!str) return "";
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 // ==========================================
@@ -451,9 +500,9 @@ function escapeHtml(str) {
 // Permite que menús contextuales, popups y modales reciban clics sin que los webviews los capturen
 // ==========================================
 function setWebviewsInteractive(interactive) {
-  const val = interactive ? 'auto' : 'none';
-  document.querySelectorAll('.webview-instance').forEach((w) => {
-    if (!w.classList.contains('hidden')) {
+  const val = interactive ? "auto" : "none";
+  document.querySelectorAll(".webview-instance").forEach((w) => {
+    if (!w.classList.contains("hidden")) {
       w.style.pointerEvents = val;
     }
   });
@@ -462,7 +511,7 @@ function setWebviewsInteractive(interactive) {
 // ==========================================
 // BARRA DE PROGRESO DE CARGA DE PÁGINA (Chromium Orange Line)
 // ==========================================
-const pageLoadingBar = document.getElementById('page-loading-bar');
+const pageLoadingBar = document.getElementById("page-loading-bar");
 let loadingBarFinishTimer = null;
 
 function showPageLoadingBar() {
@@ -471,23 +520,23 @@ function showPageLoadingBar() {
     clearTimeout(loadingBarFinishTimer);
     loadingBarFinishTimer = null;
   }
-  pageLoadingBar.classList.remove('finishing');
-  pageLoadingBar.style.width = '0%';
-  pageLoadingBar.style.opacity = '1';
+  pageLoadingBar.classList.remove("finishing");
+  pageLoadingBar.style.width = "0%";
+  pageLoadingBar.style.opacity = "1";
   void pageLoadingBar.offsetWidth;
-  pageLoadingBar.classList.add('loading');
+  pageLoadingBar.classList.add("loading");
 }
 
 function finishPageLoadingBar() {
   if (!pageLoadingBar) return;
-  pageLoadingBar.classList.remove('loading');
-  pageLoadingBar.classList.add('finishing');
+  pageLoadingBar.classList.remove("loading");
+  pageLoadingBar.classList.add("finishing");
   if (loadingBarFinishTimer) clearTimeout(loadingBarFinishTimer);
   loadingBarFinishTimer = setTimeout(() => {
-    pageLoadingBar.style.opacity = '0';
+    pageLoadingBar.style.opacity = "0";
     setTimeout(() => {
-      pageLoadingBar.classList.remove('finishing');
-      pageLoadingBar.style.width = '0%';
+      pageLoadingBar.classList.remove("finishing");
+      pageLoadingBar.style.width = "0%";
     }, 250);
   }, 220);
 }
@@ -495,23 +544,27 @@ function finishPageLoadingBar() {
 function hidePageLoadingBar() {
   if (!pageLoadingBar) return;
   if (loadingBarFinishTimer) clearTimeout(loadingBarFinishTimer);
-  pageLoadingBar.classList.remove('loading', 'finishing');
-  pageLoadingBar.style.opacity = '0';
-  pageLoadingBar.style.width = '0%';
+  pageLoadingBar.classList.remove("loading", "finishing");
+  pageLoadingBar.style.opacity = "0";
+  pageLoadingBar.style.width = "0%";
 }
 
 // ==========================================
 // DROPDOWN DE CARPETA DE MARCADORES
 // ==========================================
-const bookmarkFolderDropdown = document.getElementById('bookmark-folder-dropdown');
-const folderDropdownItems = document.getElementById('folder-dropdown-items');
-const folderDropdownOpenAll = document.getElementById('folder-dropdown-open-all');
-let activeDropdownFolderName = '';
+const bookmarkFolderDropdown = document.getElementById(
+  "bookmark-folder-dropdown",
+);
+const folderDropdownItems = document.getElementById("folder-dropdown-items");
+const folderDropdownOpenAll = document.getElementById(
+  "folder-dropdown-open-all",
+);
+let activeDropdownFolderName = "";
 
 function closeBookmarkFolderDropdown() {
   if (bookmarkFolderDropdown) {
-    bookmarkFolderDropdown.classList.remove('open');
-    bookmarkFolderDropdown.style.display = 'none';
+    bookmarkFolderDropdown.classList.remove("open");
+    bookmarkFolderDropdown.style.display = "none";
   }
   setWebviewsInteractive(true);
 }
@@ -522,20 +575,21 @@ function openBookmarkFolderDropdown(folderName, chipEl) {
   const list = getStoredBookmarks();
   const folderBookmarks = list.filter((b) => b.folder === folderName);
 
-  folderDropdownItems.innerHTML = '';
+  folderDropdownItems.innerHTML = "";
   if (folderBookmarks.length === 0) {
-    const emptyEl = document.createElement('div');
-    emptyEl.style.cssText = 'padding: 8px 16px; font-size: 12px; color: var(--text-muted); font-style: italic;';
-    emptyEl.textContent = '(Carpeta vacía)';
+    const emptyEl = document.createElement("div");
+    emptyEl.style.cssText =
+      "padding: 8px 16px; font-size: 12px; color: var(--text-muted); font-style: italic;";
+    emptyEl.textContent = "(Carpeta vacía)";
     folderDropdownItems.appendChild(emptyEl);
   } else {
     folderBookmarks.forEach((b) => {
-      const item = document.createElement('div');
-      item.className = 'folder-dropdown-item';
-      let iconHtml = `<span style="font-size: 13px;">${b.icon || '🌐'}</span>`;
+      const item = document.createElement("div");
+      item.className = "folder-dropdown-item";
+      let iconHtml = `<span style="font-size: 13px;">${b.icon || "🌐"}</span>`;
       if (b.favicon) {
         iconHtml = `<img src="${escapeHtml(b.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
-      } else if (b.url && b.url.startsWith('http')) {
+      } else if (b.url && b.url.startsWith("http")) {
         try {
           const u = new URL(b.url);
           iconHtml = `<img src="https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
@@ -547,7 +601,7 @@ function openBookmarkFolderDropdown(folderName, chipEl) {
         <span class="folder-dropdown-title">${escapeHtml(b.title)}</span>
       `;
 
-      item.addEventListener('click', (e) => {
+      item.addEventListener("click", (e) => {
         e.preventDefault();
         closeBookmarkFolderDropdown();
         if (e.ctrlKey || e.metaKey) {
@@ -564,19 +618,23 @@ function openBookmarkFolderDropdown(folderName, chipEl) {
   const rect = chipEl.getBoundingClientRect();
   bookmarkFolderDropdown.style.left = `${Math.max(8, rect.left)}px`;
   bookmarkFolderDropdown.style.top = `${rect.bottom + 4}px`;
-  bookmarkFolderDropdown.style.display = 'block';
-  bookmarkFolderDropdown.classList.add('open');
+  bookmarkFolderDropdown.style.display = "block";
+  bookmarkFolderDropdown.classList.add("open");
   setWebviewsInteractive(false);
 }
 
 if (folderDropdownOpenAll) {
-  folderDropdownOpenAll.addEventListener('click', () => {
+  folderDropdownOpenAll.addEventListener("click", () => {
     if (!activeDropdownFolderName) return;
     const list = getStoredBookmarks();
-    const folderBookmarks = list.filter((b) => b.folder === activeDropdownFolderName);
+    const folderBookmarks = list.filter(
+      (b) => b.folder === activeDropdownFolderName,
+    );
     if (folderBookmarks.length > 0) {
       folderBookmarks.forEach((b) => createTab(b.url));
-      showGlobalToast(`✓ ${folderBookmarks.length} pestañas abiertas de "${activeDropdownFolderName}"`);
+      showGlobalToast(
+        `✓ ${folderBookmarks.length} pestañas abiertas de "${activeDropdownFolderName}"`,
+      );
     }
     closeBookmarkFolderDropdown();
   });
@@ -585,14 +643,14 @@ if (folderDropdownOpenAll) {
 // ==========================================
 // POPUP DE HISTORIAL DE SESIÓN (Atrás / Adelante)
 // ==========================================
-const navHistoryPopup = document.getElementById('nav-history-popup');
-const navHistoryItems = document.getElementById('nav-history-items');
-const navHistoryFull = document.getElementById('nav-history-full');
+const navHistoryPopup = document.getElementById("nav-history-popup");
+const navHistoryItems = document.getElementById("nav-history-items");
+const navHistoryFull = document.getElementById("nav-history-full");
 
 function closeNavHistoryPopup() {
   if (navHistoryPopup) {
-    navHistoryPopup.classList.remove('open');
-    navHistoryPopup.style.display = 'none';
+    navHistoryPopup.classList.remove("open");
+    navHistoryPopup.style.display = "none";
   }
   setWebviewsInteractive(true);
 }
@@ -602,44 +660,52 @@ function openNavHistoryPopup(btnEl) {
   const tab = getActiveTab();
   if (!tab) return;
 
-  const history = tab.navHistory && tab.navHistory.length > 0
-    ? tab.navHistory
-    : [{ url: tab.url || ntpUrl, title: tab.title || 'Nueva pestaña' }];
+  const history =
+    tab.navHistory && tab.navHistory.length > 0
+      ? tab.navHistory
+      : [{ url: tab.url || ntpUrl, title: tab.title || "Nueva pestaña" }];
 
-  const curIdx = tab.navHistoryIndex !== undefined ? tab.navHistoryIndex : history.length - 1;
-  navHistoryItems.innerHTML = '';
+  const curIdx =
+    tab.navHistoryIndex !== undefined
+      ? tab.navHistoryIndex
+      : history.length - 1;
+  navHistoryItems.innerHTML = "";
 
-  history.slice().reverse().forEach((item, revIdx) => {
-    const realIdx = history.length - 1 - revIdx;
-    const isCurrent = realIdx === curIdx;
-    const itemEl = document.createElement('div');
-    itemEl.className = 'nav-history-item' + (isCurrent ? ' nav-history-item-current' : '');
+  history
+    .slice()
+    .reverse()
+    .forEach((item, revIdx) => {
+      const realIdx = history.length - 1 - revIdx;
+      const isCurrent = realIdx === curIdx;
+      const itemEl = document.createElement("div");
+      itemEl.className =
+        "nav-history-item" + (isCurrent ? " nav-history-item-current" : "");
 
-    let iconHtml = `<span style="font-size: 13px;">🌐</span>`;
-    if (item.favicon) {
-      iconHtml = `<img src="${escapeHtml(item.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
-    }
+      let iconHtml = `<span style="font-size: 13px;">🌐</span>`;
+      if (item.favicon) {
+        iconHtml = `<img src="${escapeHtml(item.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span>🌐</span>'">`;
+      }
 
-    itemEl.innerHTML = `
+      itemEl.innerHTML = `
       ${iconHtml}
       <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 300px;">${escapeHtml(item.title || item.url)}</span>
     `;
 
-    itemEl.addEventListener('click', () => {
-      closeNavHistoryPopup();
-      if (!isCurrent) {
-        navigateTo(item.url);
-      }
-    });
+      itemEl.addEventListener("click", () => {
+        closeNavHistoryPopup();
+        if (!isCurrent) {
+          navigateTo(item.url);
+        }
+      });
 
-    navHistoryItems.appendChild(itemEl);
-  });
+      navHistoryItems.appendChild(itemEl);
+    });
 
   const rect = btnEl.getBoundingClientRect();
   navHistoryPopup.style.left = `${Math.max(8, rect.left)}px`;
   navHistoryPopup.style.top = `${rect.bottom + 6}px`;
-  navHistoryPopup.style.display = 'block';
-  navHistoryPopup.classList.add('open');
+  navHistoryPopup.style.display = "block";
+  navHistoryPopup.classList.add("open");
   setWebviewsInteractive(false);
 }
 
@@ -647,12 +713,12 @@ function attachNavHistoryEvents(btn) {
   if (!btn) return;
   let pressTimer = null;
 
-  btn.addEventListener('contextmenu', (e) => {
+  btn.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     openNavHistoryPopup(btn);
   });
 
-  btn.addEventListener('mousedown', (e) => {
+  btn.addEventListener("mousedown", (e) => {
     if (e.button === 0) {
       pressTimer = setTimeout(() => {
         openNavHistoryPopup(btn);
@@ -667,15 +733,15 @@ function attachNavHistoryEvents(btn) {
     }
   };
 
-  btn.addEventListener('mouseup', clearTimer);
-  btn.addEventListener('mouseleave', clearTimer);
+  btn.addEventListener("mouseup", clearTimer);
+  btn.addEventListener("mouseleave", clearTimer);
 }
 
 attachNavHistoryEvents(btnBack);
 attachNavHistoryEvents(btnForward);
 
 if (navHistoryFull) {
-  navHistoryFull.addEventListener('click', () => {
+  navHistoryFull.addEventListener("click", () => {
     closeNavHistoryPopup();
     createTab(historyUrl);
   });
@@ -686,21 +752,24 @@ let draggedBarBookmarkIndex = -1;
 
 function renderBookmarks() {
   if (!bookmarksList) return;
-  bookmarksList.innerHTML = '';
+  bookmarksList.innerHTML = "";
   const list = getStoredBookmarks();
 
   // 1. Renderizar Carpetas en la Barra de Marcadores
   let customFolders = [];
   try {
-    customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+    customFolders = JSON.parse(
+      localStorage.getItem("brave_bookmark_folders") ||
+        '["Favoritos", "Trabajo"]',
+    );
   } catch {
-    customFolders = ['Favoritos', 'Trabajo'];
+    customFolders = ["Favoritos", "Trabajo"];
   }
 
   customFolders.forEach((folderName) => {
     const folderBookmarks = list.filter((b) => b.folder === folderName);
-    const chip = document.createElement('div');
-    chip.className = 'bookmark-chip bookmark-folder-chip';
+    const chip = document.createElement("div");
+    chip.className = "bookmark-chip bookmark-folder-chip";
     chip.title = `Carpeta: ${folderName} (${folderBookmarks.length} marcadores)\nClic: desplegar • Rueda: abrir todos`;
     chip.innerHTML = `
       <span class="bookmark-chip-icon" style="font-size: 13px;">📁</span>
@@ -708,21 +777,23 @@ function renderBookmarks() {
       <span style="font-size: 9px; opacity: 0.6; margin-left: 2px;">▾</span>
     `;
 
-    chip.addEventListener('click', (e) => {
+    chip.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       openBookmarkFolderDropdown(folderName, chip);
     });
 
-    chip.addEventListener('auxclick', (e) => {
+    chip.addEventListener("auxclick", (e) => {
       if (e.button === 1) {
         e.preventDefault();
         folderBookmarks.forEach((b) => createTab(b.url));
-        showGlobalToast(`✓ ${folderBookmarks.length} pestañas abiertas de "${folderName}"`);
+        showGlobalToast(
+          `✓ ${folderBookmarks.length} pestañas abiertas de "${folderName}"`,
+        );
       }
     });
 
-    chip.addEventListener('contextmenu', (e) => {
+    chip.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       e.stopPropagation();
       openBarContextMenu(-1, e.clientX, e.clientY);
@@ -732,21 +803,21 @@ function renderBookmarks() {
   });
 
   // 2. Renderizar Marcadores de la Barra
-  const barBookmarks = list.filter((b) => !b.folder || b.folder === 'bar');
+  const barBookmarks = list.filter((b) => !b.folder || b.folder === "bar");
 
   barBookmarks.forEach((b) => {
     const realIdx = list.indexOf(b);
-    const chip = document.createElement('div');
-    chip.className = 'bookmark-chip';
+    const chip = document.createElement("div");
+    chip.className = "bookmark-chip";
     chip.draggable = true;
-    chip.setAttribute('data-idx', realIdx);
+    chip.setAttribute("data-idx", realIdx);
     chip.title = `${b.title} (${b.url})\nClic: abrir • Rueda: nueva pestaña • Clic derecho: editar y opciones`;
 
     // Si tiene favicon real o ícono predeterminado
-    let iconHtml = `<span class="bookmark-chip-icon">${b.icon || '🌐'}</span>`;
+    let iconHtml = `<span class="bookmark-chip-icon">${b.icon || "🌐"}</span>`;
     if (b.favicon) {
       iconHtml = `<img class="bookmark-chip-icon" src="${escapeHtml(b.favicon)}" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span class=\\'bookmark-chip-icon\\'>🌐</span>'">`;
-    } else if (b.url && b.url.startsWith('http')) {
+    } else if (b.url && b.url.startsWith("http")) {
       try {
         const u = new URL(b.url);
         iconHtml = `<img class="bookmark-chip-icon" src="https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32" width="14" height="14" style="object-fit:contain;border-radius:2px;" onerror="this.outerHTML='<span class=\\'bookmark-chip-icon\\'>🌐</span>'">`;
@@ -760,16 +831,16 @@ function renderBookmarks() {
 
     // Precarga especulativa al pasar el cursor (hover > 120ms)
     let warmupTimer = null;
-    chip.addEventListener('mouseenter', () => {
+    chip.addEventListener("mouseenter", () => {
       warmupTimer = setTimeout(() => {
         speculativeWarmup(b.url);
       }, 120);
     });
-    chip.addEventListener('mouseleave', () => {
+    chip.addEventListener("mouseleave", () => {
       if (warmupTimer) clearTimeout(warmupTimer);
     });
 
-    chip.addEventListener('click', (e) => {
+    chip.addEventListener("click", (e) => {
       e.preventDefault();
       if (e.ctrlKey || e.metaKey) {
         createTab(b.url);
@@ -778,7 +849,7 @@ function renderBookmarks() {
       }
     });
 
-    chip.addEventListener('auxclick', (e) => {
+    chip.addEventListener("auxclick", (e) => {
       if (e.button === 1) {
         e.preventDefault();
         createTab(b.url);
@@ -786,48 +857,49 @@ function renderBookmarks() {
     });
 
     // Menú contextual nativo editable al clic derecho
-    chip.addEventListener('contextmenu', (e) => {
+    chip.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       e.stopPropagation();
       openBarContextMenu(realIdx, e.clientX, e.clientY);
     });
 
     // Drag & Drop para reordenar en la barra de marcadores
-    chip.addEventListener('dragstart', (e) => {
+    chip.addEventListener("dragstart", (e) => {
       draggedBarBookmarkIndex = realIdx;
-      chip.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', realIdx);
+      chip.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", realIdx);
     });
 
-    chip.addEventListener('dragend', () => {
-      chip.classList.remove('dragging');
-      document.querySelectorAll('.bookmark-chip').forEach((c) => {
-        c.classList.remove('drag-over-left', 'drag-over-right');
+    chip.addEventListener("dragend", () => {
+      chip.classList.remove("dragging");
+      document.querySelectorAll(".bookmark-chip").forEach((c) => {
+        c.classList.remove("drag-over-left", "drag-over-right");
       });
     });
 
-    chip.addEventListener('dragover', (e) => {
+    chip.addEventListener("dragover", (e) => {
       e.preventDefault();
       if (draggedBarBookmarkIndex === realIdx) return;
       const rect = chip.getBoundingClientRect();
       const midX = rect.left + rect.width / 2;
-      chip.classList.remove('drag-over-left', 'drag-over-right');
-      if (e.clientX < midX) chip.classList.add('drag-over-left');
-      else chip.classList.add('drag-over-right');
+      chip.classList.remove("drag-over-left", "drag-over-right");
+      if (e.clientX < midX) chip.classList.add("drag-over-left");
+      else chip.classList.add("drag-over-right");
     });
 
-    chip.addEventListener('dragleave', () => {
-      chip.classList.remove('drag-over-left', 'drag-over-right');
+    chip.addEventListener("dragleave", () => {
+      chip.classList.remove("drag-over-left", "drag-over-right");
     });
 
-    chip.addEventListener('drop', (e) => {
+    chip.addEventListener("drop", (e) => {
       e.preventDefault();
-      chip.classList.remove('drag-over-left', 'drag-over-right');
-      if (draggedBarBookmarkIndex < 0 || draggedBarBookmarkIndex === realIdx) return;
+      chip.classList.remove("drag-over-left", "drag-over-right");
+      if (draggedBarBookmarkIndex < 0 || draggedBarBookmarkIndex === realIdx)
+        return;
 
       const rect = chip.getBoundingClientRect();
-      const insertBefore = e.clientX < (rect.left + rect.width / 2);
+      const insertBefore = e.clientX < rect.left + rect.width / 2;
 
       const itemToMove = list.splice(draggedBarBookmarkIndex, 1)[0];
       let targetIdx = list.indexOf(b);
@@ -835,7 +907,7 @@ function renderBookmarks() {
 
       list.splice(targetIdx, 0, itemToMove);
       saveBookmarks(list);
-      showGlobalToast('✓ Barra de marcadores reordenada');
+      showGlobalToast("✓ Barra de marcadores reordenada");
     });
 
     bookmarksList.appendChild(chip);
@@ -848,27 +920,38 @@ function renderBookmarks() {
 const renderBookmarksBar = renderBookmarks;
 
 // Menú contextual de la barra de marcadores
-const bmBarCtxMenu = document.getElementById('bm-bar-context-menu');
-const bmBarEditModal = document.getElementById('bm-bar-edit-modal');
-const bmBarEditName = document.getElementById('bm-bar-edit-name');
-const bmBarEditUrl = document.getElementById('bm-bar-edit-url');
+const bmBarCtxMenu = document.getElementById("bm-bar-context-menu");
+const bmBarEditModal = document.getElementById("bm-bar-edit-modal");
+const bmBarEditName = document.getElementById("bm-bar-edit-name");
+const bmBarEditUrl = document.getElementById("bm-bar-edit-url");
 
 function closeBarContextMenu() {
   if (bmBarCtxMenu) {
-    bmBarCtxMenu.classList.remove('open');
-    bmBarCtxMenu.style.display = 'none';
+    bmBarCtxMenu.classList.remove("open");
+    bmBarCtxMenu.style.display = "none";
   }
   setWebviewsInteractive(true);
 }
 
-document.addEventListener('click', (e) => {
+document.addEventListener("click", (e) => {
   if (bmBarCtxMenu && !bmBarCtxMenu.contains(e.target)) {
     closeBarContextMenu();
   }
-  if (bookmarkFolderDropdown && !bookmarkFolderDropdown.contains(e.target) && !e.target.closest('.bookmark-folder-chip')) {
+  if (
+    bookmarkFolderDropdown &&
+    !bookmarkFolderDropdown.contains(e.target) &&
+    !e.target.closest(".bookmark-folder-chip")
+  ) {
     closeBookmarkFolderDropdown();
   }
-  if (navHistoryPopup && !navHistoryPopup.contains(e.target) && e.target !== btnBack && e.target !== btnForward && !btnBack.contains(e.target) && !btnForward.contains(e.target)) {
+  if (
+    navHistoryPopup &&
+    !navHistoryPopup.contains(e.target) &&
+    e.target !== btnBack &&
+    e.target !== btnForward &&
+    !btnBack.contains(e.target) &&
+    !btnForward.contains(e.target)
+  ) {
     closeNavHistoryPopup();
   }
 });
@@ -880,36 +963,42 @@ function openBarContextMenu(idx, x, y) {
   const isBookmarkItem = idx >= 0 && !!list[idx];
 
   // Alternar visibilidad de opciones específicas del marcador vs opciones generales de la barra
-  const specificItems = bmBarCtxMenu.querySelectorAll('.bm-specific');
+  const specificItems = bmBarCtxMenu.querySelectorAll(".bm-specific");
   specificItems.forEach((el) => {
     if (isBookmarkItem) {
-      el.classList.remove('hidden');
-      el.style.display = '';
+      el.classList.remove("hidden");
+      el.style.display = "";
     } else {
-      el.classList.add('hidden');
-      el.style.display = 'none';
+      el.classList.add("hidden");
+      el.style.display = "none";
     }
   });
 
-  const addLabel = document.getElementById('bm-ctx-add-label');
+  const addLabel = document.getElementById("bm-ctx-add-label");
   if (addLabel) {
-    addLabel.textContent = isBookmarkItem ? 'Añadir marcador...' : 'Añadir nuevo marcador a la barra...';
+    addLabel.textContent = isBookmarkItem
+      ? "Añadir marcador..."
+      : "Añadir nuevo marcador a la barra...";
   }
 
-  const toggleBarLabel = document.getElementById('bm-ctx-toggle-bar-label');
+  const toggleBarLabel = document.getElementById("bm-ctx-toggle-bar-label");
   if (toggleBarLabel) {
-    const isHidden = bookmarksBar && bookmarksBar.classList.contains('hidden');
-    toggleBarLabel.textContent = isHidden ? 'Mostrar barra de marcadores' : 'Ocultar barra de marcadores';
+    const isHidden = bookmarksBar && bookmarksBar.classList.contains("hidden");
+    toggleBarLabel.textContent = isHidden
+      ? "Mostrar barra de marcadores"
+      : "Ocultar barra de marcadores";
   }
 
-  bmBarCtxMenu.style.display = 'block';
-  bmBarCtxMenu.classList.add('open');
+  bmBarCtxMenu.style.display = "block";
+  bmBarCtxMenu.classList.add("open");
 
   const rect = bmBarCtxMenu.getBoundingClientRect();
   let left = x;
   let top = y;
-  if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 8;
-  if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 8;
+  if (left + rect.width > window.innerWidth)
+    left = window.innerWidth - rect.width - 8;
+  if (top + rect.height > window.innerHeight)
+    top = window.innerHeight - rect.height - 8;
   bmBarCtxMenu.style.left = `${Math.max(8, left)}px`;
   bmBarCtxMenu.style.top = `${Math.max(8, top)}px`;
   setWebviewsInteractive(false);
@@ -917,17 +1006,17 @@ function openBarContextMenu(idx, x, y) {
 
 // Clic derecho en espacio vacío de la barra de marcadores
 if (bookmarksBar) {
-  bookmarksBar.addEventListener('contextmenu', (e) => {
-    if (e.target.closest('.bookmark-chip')) return;
+  bookmarksBar.addEventListener("contextmenu", (e) => {
+    if (e.target.closest(".bookmark-chip")) return;
     e.preventDefault();
     openBarContextMenu(-1, e.clientX, e.clientY);
   });
 }
 
 // Acciones del menú contextual de la barra
-const ctxOpenNewTab = document.getElementById('bm-ctx-open-newtab');
+const ctxOpenNewTab = document.getElementById("bm-ctx-open-newtab");
 if (ctxOpenNewTab) {
-  ctxOpenNewTab.addEventListener('click', () => {
+  ctxOpenNewTab.addEventListener("click", () => {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
       createTab(list[activeBarBookmarkIndex].url);
@@ -937,9 +1026,9 @@ if (ctxOpenNewTab) {
   });
 }
 
-const ctxOpenWindow = document.getElementById('bm-ctx-open-window');
+const ctxOpenWindow = document.getElementById("bm-ctx-open-window");
 if (ctxOpenWindow) {
-  ctxOpenWindow.addEventListener('click', () => {
+  ctxOpenWindow.addEventListener("click", () => {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
       const u = list[activeBarBookmarkIndex].url;
@@ -953,9 +1042,9 @@ if (ctxOpenWindow) {
   });
 }
 
-const ctxOpenPrivate = document.getElementById('bm-ctx-open-private');
+const ctxOpenPrivate = document.getElementById("bm-ctx-open-private");
 if (ctxOpenPrivate) {
-  ctxOpenPrivate.addEventListener('click', () => {
+  ctxOpenPrivate.addEventListener("click", () => {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
       const u = list[activeBarBookmarkIndex].url;
@@ -967,19 +1056,23 @@ if (ctxOpenPrivate) {
   });
 }
 
-const ctxEdit = document.getElementById('bm-ctx-edit');
+const ctxEdit = document.getElementById("bm-ctx-edit");
 if (ctxEdit) {
-  ctxEdit.addEventListener('click', () => {
+  ctxEdit.addEventListener("click", () => {
     const list = getStoredBookmarks();
-    if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex] && bmBarEditModal) {
+    if (
+      activeBarBookmarkIndex >= 0 &&
+      list[activeBarBookmarkIndex] &&
+      bmBarEditModal
+    ) {
       const b = list[activeBarBookmarkIndex];
-      const modalIcon = document.getElementById('bm-bar-modal-icon');
-      const modalTitle = document.getElementById('bm-bar-modal-title');
-      if (modalIcon) modalIcon.textContent = '✏️';
-      if (modalTitle) modalTitle.textContent = 'Editar marcador';
-      bmBarEditName.value = b.title || '';
-      bmBarEditUrl.value = b.url || '';
-      bmBarEditModal.classList.add('open');
+      const modalIcon = document.getElementById("bm-bar-modal-icon");
+      const modalTitle = document.getElementById("bm-bar-modal-title");
+      if (modalIcon) modalIcon.textContent = "✏️";
+      if (modalTitle) modalTitle.textContent = "Editar marcador";
+      bmBarEditName.value = b.title || "";
+      bmBarEditUrl.value = b.url || "";
+      bmBarEditModal.classList.add("open");
       setWebviewsInteractive(false);
       bmBarEditName.focus();
     }
@@ -987,46 +1080,50 @@ if (ctxEdit) {
   });
 }
 
-const btnCancelBarEdit = document.getElementById('btn-cancel-bar-edit');
+const btnCancelBarEdit = document.getElementById("btn-cancel-bar-edit");
 if (btnCancelBarEdit) {
-  btnCancelBarEdit.addEventListener('click', () => {
-    if (bmBarEditModal) bmBarEditModal.classList.remove('open');
+  btnCancelBarEdit.addEventListener("click", () => {
+    if (bmBarEditModal) bmBarEditModal.classList.remove("open");
     setWebviewsInteractive(true);
   });
 }
 
-const btnSaveBarEdit = document.getElementById('btn-save-bar-edit');
+const btnSaveBarEdit = document.getElementById("btn-save-bar-edit");
 if (btnSaveBarEdit) {
-  btnSaveBarEdit.addEventListener('click', () => {
+  btnSaveBarEdit.addEventListener("click", () => {
     const list = getStoredBookmarks();
-    const newTitle = bmBarEditName.value.trim() || 'Marcador';
+    const newTitle = bmBarEditName.value.trim() || "Marcador";
     let newUrl = bmBarEditUrl.value.trim();
     if (!newUrl) {
-      showGlobalToast('Por favor escribe una URL válida');
+      showGlobalToast("Por favor escribe una URL válida");
       return;
     }
-    if (!/^https?:\/\//i.test(newUrl) && !newUrl.startsWith('brave://') && !newUrl.startsWith('file://')) {
-      newUrl = 'https://' + newUrl;
+    if (
+      !/^https?:\/\//i.test(newUrl) &&
+      !newUrl.startsWith("brave://") &&
+      !newUrl.startsWith("file://")
+    ) {
+      newUrl = "https://" + newUrl;
     }
 
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
       list[activeBarBookmarkIndex].title = newTitle;
       list[activeBarBookmarkIndex].url = newUrl;
       saveBookmarks(list);
-      showGlobalToast('✓ Marcador editado correctamente');
+      showGlobalToast("✓ Marcador editado correctamente");
     } else {
-      list.push({ title: newTitle, url: newUrl, folder: 'bar' });
+      list.push({ title: newTitle, url: newUrl, folder: "bar" });
       saveBookmarks(list);
       showGlobalToast(`✓ Marcador "${newTitle}" añadido a la barra`);
     }
-    if (bmBarEditModal) bmBarEditModal.classList.remove('open');
+    if (bmBarEditModal) bmBarEditModal.classList.remove("open");
     setWebviewsInteractive(true);
   });
 }
 
-const ctxDelete = document.getElementById('bm-ctx-delete');
+const ctxDelete = document.getElementById("bm-ctx-delete");
 if (ctxDelete) {
-  ctxDelete.addEventListener('click', () => {
+  ctxDelete.addEventListener("click", () => {
     const list = getStoredBookmarks();
     if (activeBarBookmarkIndex >= 0 && list[activeBarBookmarkIndex]) {
       const title = list[activeBarBookmarkIndex].title;
@@ -1038,23 +1135,27 @@ if (ctxDelete) {
   });
 }
 
-const ctxAddPage = document.getElementById('bm-ctx-add-page');
+const ctxAddPage = document.getElementById("bm-ctx-add-page");
 if (ctxAddPage) {
-  ctxAddPage.addEventListener('click', () => {
+  ctxAddPage.addEventListener("click", () => {
     closeBarContextMenu();
     if (bmBarEditModal) {
-      const modalIcon = document.getElementById('bm-bar-modal-icon');
-      const modalTitle = document.getElementById('bm-bar-modal-title');
-      if (modalIcon) modalIcon.textContent = '➕';
-      if (modalTitle) modalTitle.textContent = 'Añadir marcador a la barra';
+      const modalIcon = document.getElementById("bm-bar-modal-icon");
+      const modalTitle = document.getElementById("bm-bar-modal-title");
+      if (modalIcon) modalIcon.textContent = "➕";
+      if (modalTitle) modalTitle.textContent = "Añadir marcador a la barra";
 
       const tab = getActiveTab();
-      const hasValidTab = tab && tab.url && !tab.url.includes('ntp.html') && !tab.url.startsWith('about:');
-      bmBarEditName.value = hasValidTab ? (tab.title || '') : '';
-      bmBarEditUrl.value = hasValidTab ? tab.url : 'https://';
+      const hasValidTab =
+        tab &&
+        tab.url &&
+        !tab.url.includes("ntp.html") &&
+        !tab.url.startsWith("about:");
+      bmBarEditName.value = hasValidTab ? tab.title || "" : "";
+      bmBarEditUrl.value = hasValidTab ? tab.url : "https://";
 
       activeBarBookmarkIndex = -1;
-      bmBarEditModal.classList.add('open');
+      bmBarEditModal.classList.add("open");
       setWebviewsInteractive(false);
       if (bmBarEditName.value) {
         bmBarEditUrl.focus();
@@ -1065,21 +1166,27 @@ if (ctxAddPage) {
   });
 }
 
-const ctxAddFolder = document.getElementById('bm-ctx-add-folder');
+const ctxAddFolder = document.getElementById("bm-ctx-add-folder");
 if (ctxAddFolder) {
-  ctxAddFolder.addEventListener('click', () => {
+  ctxAddFolder.addEventListener("click", () => {
     closeBarContextMenu();
-    const folderName = prompt('Nombre de la nueva carpeta de marcadores:', 'Nueva carpeta');
+    const folderName = prompt(
+      "Nombre de la nueva carpeta de marcadores:",
+      "Nueva carpeta",
+    );
     if (folderName && folderName.trim()) {
       let folders = [];
       try {
-        folders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+        folders = JSON.parse(
+          localStorage.getItem("brave_bookmark_folders") ||
+            '["Favoritos", "Trabajo"]',
+        );
       } catch {
-        folders = ['Favoritos', 'Trabajo'];
+        folders = ["Favoritos", "Trabajo"];
       }
       if (!folders.includes(folderName.trim())) {
         folders.push(folderName.trim());
-        localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
+        localStorage.setItem("brave_bookmark_folders", JSON.stringify(folders));
         renderBookmarks();
         showGlobalToast(`✓ Carpeta "${folderName.trim()}" creada en la barra`);
       }
@@ -1087,17 +1194,17 @@ if (ctxAddFolder) {
   });
 }
 
-const ctxManager = document.getElementById('bm-ctx-manager');
+const ctxManager = document.getElementById("bm-ctx-manager");
 if (ctxManager) {
-  ctxManager.addEventListener('click', () => {
+  ctxManager.addEventListener("click", () => {
     closeBarContextMenu();
     createTab(bookmarksUrl);
   });
 }
 
-const ctxToggleBar = document.getElementById('bm-ctx-toggle-bar');
+const ctxToggleBar = document.getElementById("bm-ctx-toggle-bar");
 if (ctxToggleBar) {
-  ctxToggleBar.addEventListener('click', () => {
+  ctxToggleBar.addEventListener("click", () => {
     closeBarContextMenu();
     toggleBookmarksBar();
   });
@@ -1105,46 +1212,49 @@ if (ctxToggleBar) {
 
 function toggleBookmarksBar(force) {
   if (!bookmarksBar) return;
-  const shouldHide = typeof force === 'boolean' ? !force : !bookmarksBar.classList.contains('hidden');
+  const shouldHide =
+    typeof force === "boolean"
+      ? !force
+      : !bookmarksBar.classList.contains("hidden");
   if (shouldHide) {
-    bookmarksBar.classList.add('hidden');
-    localStorage.setItem('brave_bookmarks_bar_visible', 'false');
+    bookmarksBar.classList.add("hidden");
+    localStorage.setItem("brave_bookmarks_bar_visible", "false");
   } else {
-    bookmarksBar.classList.remove('hidden');
-    localStorage.setItem('brave_bookmarks_bar_visible', 'true');
+    bookmarksBar.classList.remove("hidden");
+    localStorage.setItem("brave_bookmarks_bar_visible", "true");
   }
 }
 
 // ==========================================
 // ESTRELLA DE MARCADORES (OMNIBOX STAR & POPOVER)
 // ==========================================
-const btnStar = document.getElementById('btn-star');
-const bmPopup = document.getElementById('bookmark-edit-popup');
-const bmPopupHeading = document.getElementById('bm-popup-heading');
-const bmPopupName = document.getElementById('bm-popup-name');
-const bmPopupFolder = document.getElementById('bm-popup-folder');
-const btnCloseBmPopup = document.getElementById('btn-close-bm-popup');
-const btnBmPopupRemove = document.getElementById('btn-bm-popup-remove');
-const btnBmPopupDone = document.getElementById('btn-bm-popup-done');
+const btnStar = document.getElementById("btn-star");
+const bmPopup = document.getElementById("bookmark-edit-popup");
+const bmPopupHeading = document.getElementById("bm-popup-heading");
+const bmPopupName = document.getElementById("bm-popup-name");
+const bmPopupFolder = document.getElementById("bm-popup-folder");
+const btnCloseBmPopup = document.getElementById("btn-close-bm-popup");
+const btnBmPopupRemove = document.getElementById("btn-bm-popup-remove");
+const btnBmPopupDone = document.getElementById("btn-bm-popup-done");
 
 function updateBookmarkStarState() {
   if (!btnStar) return;
   const tab = getActiveTab();
-  if (!tab || !tab.url || tab.url.includes('ntp.html')) {
-    btnStar.classList.remove('active');
+  if (!tab || !tab.url || tab.url.includes("ntp.html")) {
+    btnStar.classList.remove("active");
     btnStar.disabled = true;
     return;
   }
   btnStar.disabled = false;
   const list = getStoredBookmarks();
   const isBookmarked = list.some((b) => b.url === tab.url);
-  btnStar.classList.toggle('active', isBookmarked);
+  btnStar.classList.toggle("active", isBookmarked);
 }
 
 function openBookmarkPopup(isNew) {
   if (!bmPopup) return;
   const tab = getActiveTab();
-  if (!tab || !tab.url || tab.url.includes('ntp.html')) return;
+  if (!tab || !tab.url || tab.url.includes("ntp.html")) return;
 
   const list = getStoredBookmarks();
   const existing = list.find((b) => b.url === tab.url);
@@ -1152,41 +1262,44 @@ function openBookmarkPopup(isNew) {
   // Poblar carpetas disponibles
   let customFolders = [];
   try {
-    customFolders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+    customFolders = JSON.parse(
+      localStorage.getItem("brave_bookmark_folders") ||
+        '["Favoritos", "Trabajo"]',
+    );
   } catch {
-    customFolders = ['Favoritos', 'Trabajo'];
+    customFolders = ["Favoritos", "Trabajo"];
   }
 
   bmPopupFolder.innerHTML = `
     <option value="bar">Barra de marcadores</option>
     <option value="other">Otros marcadores</option>
-    ${customFolders.map((f) => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('')}
+    ${customFolders.map((f) => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("")}
   `;
 
   if (existing) {
-    bmPopupHeading.textContent = 'Editar marcador';
-    bmPopupName.value = existing.title || tab.title || '';
-    bmPopupFolder.value = existing.folder || 'bar';
+    bmPopupHeading.textContent = "Editar marcador";
+    bmPopupName.value = existing.title || tab.title || "";
+    bmPopupFolder.value = existing.folder || "bar";
   } else {
-    bmPopupHeading.textContent = 'Marcador añadido';
-    bmPopupName.value = tab.title || 'Nueva página';
-    bmPopupFolder.value = 'bar';
+    bmPopupHeading.textContent = "Marcador añadido";
+    bmPopupName.value = tab.title || "Nueva página";
+    bmPopupFolder.value = "bar";
   }
 
-  bmPopup.classList.add('open');
+  bmPopup.classList.add("open");
   bmPopupName.focus();
   bmPopupName.select();
 }
 
 function closeBookmarkPopup() {
-  if (bmPopup) bmPopup.classList.remove('open');
+  if (bmPopup) bmPopup.classList.remove("open");
 }
 
 if (btnStar) {
-  btnStar.addEventListener('click', (e) => {
+  btnStar.addEventListener("click", (e) => {
     e.stopPropagation();
     const tab = getActiveTab();
-    if (!tab || !tab.url || tab.url.includes('ntp.html')) return;
+    if (!tab || !tab.url || tab.url.includes("ntp.html")) return;
 
     const list = getStoredBookmarks();
     const existing = list.find((b) => b.url === tab.url);
@@ -1194,9 +1307,9 @@ if (btnStar) {
     if (!existing) {
       // Guardar de inmediato y abrir editor
       const newBm = {
-        title: tab.title || 'Nueva página',
+        title: tab.title || "Nueva página",
         url: tab.url,
-        folder: 'bar',
+        folder: "bar",
         favicon: tab.favicon || null,
       };
       list.push(newBm);
@@ -1210,48 +1323,60 @@ if (btnStar) {
 }
 
 if (btnCloseBmPopup) {
-  btnCloseBmPopup.addEventListener('click', closeBookmarkPopup);
+  btnCloseBmPopup.addEventListener("click", closeBookmarkPopup);
 }
 
 if (btnBmPopupRemove) {
-  btnBmPopupRemove.addEventListener('click', () => {
+  btnBmPopupRemove.addEventListener("click", () => {
     const tab = getActiveTab();
     if (tab && tab.url) {
       let list = getStoredBookmarks();
       list = list.filter((b) => b.url !== tab.url);
       saveBookmarks(list);
-      showGlobalToast('✓ Marcador eliminado');
+      showGlobalToast("✓ Marcador eliminado");
     }
     closeBookmarkPopup();
   });
 }
 
 if (btnBmPopupDone) {
-  btnBmPopupDone.addEventListener('click', () => {
+  btnBmPopupDone.addEventListener("click", () => {
     const tab = getActiveTab();
     if (tab && tab.url) {
       const list = getStoredBookmarks();
       const existing = list.find((b) => b.url === tab.url);
-      const newTitle = bmPopupName.value.trim() || tab.title || 'Marcador';
-      const newFolder = bmPopupFolder.value || 'bar';
+      const newTitle = bmPopupName.value.trim() || tab.title || "Marcador";
+      const newFolder = bmPopupFolder.value || "bar";
 
       if (existing) {
         existing.title = newTitle;
         existing.folder = newFolder;
         if (tab.favicon && !existing.favicon) existing.favicon = tab.favicon;
       } else {
-        list.push({ title: newTitle, url: tab.url, folder: newFolder, favicon: tab.favicon || null });
+        list.push({
+          title: newTitle,
+          url: tab.url,
+          folder: newFolder,
+          favicon: tab.favicon || null,
+        });
       }
       saveBookmarks(list);
-      showGlobalToast(`✓ Marcador actualizado en "${newFolder === 'bar' ? 'Barra de marcadores' : newFolder}"`);
+      showGlobalToast(
+        `✓ Marcador actualizado en "${newFolder === "bar" ? "Barra de marcadores" : newFolder}"`,
+      );
     }
     closeBookmarkPopup();
   });
 }
 
 // Cerrar popup al pulsar fuera
-document.addEventListener('click', (e) => {
-  if (bmPopup && bmPopup.classList.contains('open') && !e.target.closest('#bookmark-edit-popup') && !e.target.closest('#btn-star')) {
+document.addEventListener("click", (e) => {
+  if (
+    bmPopup &&
+    bmPopup.classList.contains("open") &&
+    !e.target.closest("#bookmark-edit-popup") &&
+    !e.target.closest("#btn-star")
+  ) {
     closeBookmarkPopup();
   }
 });
@@ -1259,10 +1384,10 @@ document.addEventListener('click', (e) => {
 function addCurrentPageToBookmarks() {
   const tab = getActiveTab();
   if (!tab) return;
-  const title = tab.title || 'Nueva página';
+  const title = tab.title || "Nueva página";
   const url = tab.url;
-  if (!url || url.includes('ntp.html')) {
-    showGlobalToast('Esta página no se puede añadir a marcadores.');
+  if (!url || url.includes("ntp.html")) {
+    showGlobalToast("Esta página no se puede añadir a marcadores.");
     return;
   }
   const list = getStoredBookmarks();
@@ -1272,14 +1397,14 @@ function addCurrentPageToBookmarks() {
     return;
   }
 
-  list.push({ title, url, folder: 'bar', favicon: tab.favicon || null });
+  list.push({ title, url, folder: "bar", favicon: tab.favicon || null });
   saveBookmarks(list);
   showGlobalToast(`★ Marcador guardado en la barra: ${title}`);
   openBookmarkPopup(true);
 }
 
-if (localStorage.getItem('brave_bookmarks_bar_visible') === 'false') {
-  if (bookmarksBar) bookmarksBar.classList.add('hidden');
+if (localStorage.getItem("brave_bookmarks_bar_visible") === "false") {
+  if (bookmarksBar) bookmarksBar.classList.add("hidden");
 }
 renderBookmarks();
 
@@ -1290,24 +1415,75 @@ let currentSuggestions = [];
 let selectedSuggestionIndex = -1;
 
 const INTERNAL_PAGES = [
-  { title: 'Configuración de Brave', url: 'brave://settings', icon: '🛡️', badge: 'Brave' },
-  { title: 'Gestor de Marcadores', url: 'brave://bookmarks', icon: '🔖', badge: 'Brave' },
-  { title: 'Historial de navegación', url: 'brave://history', icon: '🕒', badge: 'Brave' },
-  { title: 'Descargas', url: 'brave://downloads', icon: '📥', badge: 'Brave' },
-  { title: 'Brave Sync (25 palabras)', url: 'brave://sync', icon: '🔄', badge: 'Brave' },
-  { title: 'Filtros y Reglas Adblock', url: 'brave://adblock', icon: '🛡️', badge: 'Brave' },
-  { title: 'Brave Playlist', url: 'brave://playlist', icon: '📑', badge: 'Brave' },
-  { title: 'Extensiones de Brave', url: 'brave://extensions', icon: '🧩', badge: 'Brave' },
-  { title: 'Versión del Sistema y Diagnóstico', url: 'brave://version', icon: '🦁', badge: 'Brave' },
-  { title: 'Bienvenida y Primer Inicio', url: 'brave://welcome', icon: '🦁', badge: 'Brave' },
-  { title: 'Componentes y Módulos de Protección', url: 'brave://components', icon: '🧩', badge: 'Brave' },
-  { title: 'Nueva Pestaña', url: 'brave://newtab', icon: '🦁', badge: 'Brave' },
+  {
+    title: "Configuración de Brave",
+    url: "brave://settings",
+    icon: "🛡️",
+    badge: "Brave",
+  },
+  {
+    title: "Gestor de Marcadores",
+    url: "brave://bookmarks",
+    icon: "🔖",
+    badge: "Brave",
+  },
+  {
+    title: "Historial de navegación",
+    url: "brave://history",
+    icon: "🕒",
+    badge: "Brave",
+  },
+  { title: "Descargas", url: "brave://downloads", icon: "📥", badge: "Brave" },
+  {
+    title: "Brave Sync (25 palabras)",
+    url: "brave://sync",
+    icon: "🔄",
+    badge: "Brave",
+  },
+  {
+    title: "Filtros y Reglas Adblock",
+    url: "brave://adblock",
+    icon: "🛡️",
+    badge: "Brave",
+  },
+  {
+    title: "Brave Playlist",
+    url: "brave://playlist",
+    icon: "📑",
+    badge: "Brave",
+  },
+  {
+    title: "Extensiones de Brave",
+    url: "brave://extensions",
+    icon: "🧩",
+    badge: "Brave",
+  },
+  {
+    title: "Versión del Sistema y Diagnóstico",
+    url: "brave://version",
+    icon: "🦁",
+    badge: "Brave",
+  },
+  {
+    title: "Componentes y Módulos de Protección",
+    url: "brave://components",
+    icon: "🧩",
+    badge: "Brave",
+  },
+  { title: "Nueva Pestaña", url: "brave://newtab", icon: "🦁", badge: "Brave" },
 ];
+
+let currentSuggestAbortController = null;
+let currentOmniboxQuery = "";
 
 function closeSuggestions() {
   if (!omniboxSuggestions) return;
-  omniboxSuggestions.classList.remove('open');
-  omniboxSuggestions.innerHTML = '';
+  if (currentSuggestAbortController) {
+    currentSuggestAbortController.abort();
+    currentSuggestAbortController = null;
+  }
+  omniboxSuggestions.classList.remove("open");
+  omniboxSuggestions.innerHTML = "";
   currentSuggestions = [];
   selectedSuggestionIndex = -1;
 }
@@ -1325,6 +1501,7 @@ function highlightMatch(text, query) {
 
 function updateOmniboxSuggestions(query) {
   if (!omniboxSuggestions) return;
+  currentOmniboxQuery = query;
   const q = query.trim().toLowerCase();
   if (!q) {
     closeSuggestions();
@@ -1334,18 +1511,32 @@ function updateOmniboxSuggestions(query) {
   const results = [];
 
   // Atajos de Búsqueda Avanzada de Brave (@history, @bookmarks, @settings, @components)
-  if (q.startsWith('@h') || q.startsWith('@hist') || q.startsWith('@b') || q.startsWith('@m') || q.startsWith('@s') || q.startsWith('@c')) {
-    if (q.startsWith('@history') || q.startsWith('@historial')) {
-      const term = q.replace(/^@(history|historial)\s*/i, '').trim();
+  if (
+    q.startsWith("@h") ||
+    q.startsWith("@hist") ||
+    q.startsWith("@b") ||
+    q.startsWith("@m") ||
+    q.startsWith("@s") ||
+    q.startsWith("@c")
+  ) {
+    if (q.startsWith("@history") || q.startsWith("@historial")) {
+      const term = q.replace(/^@(history|historial)\s*/i, "").trim();
       const list = getHistoryList();
-      const matched = list.filter(h => !term || (h.title && h.title.toLowerCase().includes(term)) || (h.url && h.url.toLowerCase().includes(term))).slice(0, 7);
-      matched.forEach(h => {
+      const matched = list
+        .filter(
+          (h) =>
+            !term ||
+            (h.title && h.title.toLowerCase().includes(term)) ||
+            (h.url && h.url.toLowerCase().includes(term)),
+        )
+        .slice(0, 7);
+      matched.forEach((h) => {
         results.push({
-          type: 'history',
+          type: "history",
           title: h.title || h.url,
           url: h.url,
-          icon: '🕒',
-          badge: 'Historial',
+          icon: "🕒",
+          badge: "Historial",
           actionUrl: h.url,
         });
       });
@@ -1354,17 +1545,24 @@ function updateOmniboxSuggestions(query) {
         renderSuggestionsList(query);
         return;
       }
-    } else if (q.startsWith('@bookmarks') || q.startsWith('@marcadores')) {
-      const term = q.replace(/^@(bookmarks|marcadores)\s*/i, '').trim();
+    } else if (q.startsWith("@bookmarks") || q.startsWith("@marcadores")) {
+      const term = q.replace(/^@(bookmarks|marcadores)\s*/i, "").trim();
       const list = getStoredBookmarks();
-      const matched = list.filter(b => !term || (b.title && b.title.toLowerCase().includes(term)) || (b.url && b.url.toLowerCase().includes(term))).slice(0, 7);
-      matched.forEach(b => {
+      const matched = list
+        .filter(
+          (b) =>
+            !term ||
+            (b.title && b.title.toLowerCase().includes(term)) ||
+            (b.url && b.url.toLowerCase().includes(term)),
+        )
+        .slice(0, 7);
+      matched.forEach((b) => {
         results.push({
-          type: 'bookmark',
+          type: "bookmark",
           title: b.title,
           url: b.url,
-          icon: b.icon || '🔖',
-          badge: 'Marcador',
+          icon: b.icon || "🔖",
+          badge: "Marcador",
           actionUrl: b.url,
         });
       });
@@ -1373,26 +1571,26 @@ function updateOmniboxSuggestions(query) {
         renderSuggestionsList(query);
         return;
       }
-    } else if (q.startsWith('@settings') || q.startsWith('@configuracion')) {
+    } else if (q.startsWith("@settings") || q.startsWith("@configuracion")) {
       results.push({
-        type: 'internal',
-        title: 'Abrir Configuración de Brave',
-        url: 'brave://settings',
-        icon: '🛡️',
-        badge: 'Brave',
-        actionUrl: 'brave://settings',
+        type: "internal",
+        title: "Abrir Configuración de Brave",
+        url: "brave://settings",
+        icon: "🛡️",
+        badge: "Brave",
+        actionUrl: "brave://settings",
       });
       currentSuggestions = results;
       renderSuggestionsList(query);
       return;
-    } else if (q.startsWith('@components')) {
+    } else if (q.startsWith("@components")) {
       results.push({
-        type: 'internal',
-        title: 'Componentes y Módulos de Protección',
-        url: 'brave://components',
-        icon: '🧩',
-        badge: 'Brave',
-        actionUrl: 'brave://components',
+        type: "internal",
+        title: "Componentes y Módulos de Protección",
+        url: "brave://components",
+        icon: "🧩",
+        badge: "Brave",
+        actionUrl: "brave://components",
       });
       currentSuggestions = results;
       renderSuggestionsList(query);
@@ -1401,39 +1599,74 @@ function updateOmniboxSuggestions(query) {
   }
 
   // Detección nativa de "Tab to Search" para motores de búsqueda comunes
-  if (q === 'youtube.com' || q === 'wikipedia.org' || q === 'github.com' || q === 'google.com' || q === 'duckduckgo.com') {
-    let service = 'YouTube';
-    let bang = ':yt ';
-    if (q.includes('wikipedia')) { service = 'Wikipedia'; bang = ':w '; }
-    if (q.includes('github')) { service = 'GitHub'; bang = ':gh '; }
-    if (q.includes('google')) { service = 'Google'; bang = ':g '; }
-    if (q.includes('duckduckgo')) { service = 'DuckDuckGo'; bang = ':ddg '; }
+  if (
+    q === "youtube.com" ||
+    q === "wikipedia.org" ||
+    q === "github.com" ||
+    q === "google.com" ||
+    q === "duckduckgo.com"
+  ) {
+    let service = "YouTube";
+    let bang = ":yt ";
+    if (q.includes("wikipedia")) {
+      service = "Wikipedia";
+      bang = ":w ";
+    }
+    if (q.includes("github")) {
+      service = "GitHub";
+      bang = ":gh ";
+    }
+    if (q.includes("google")) {
+      service = "Google";
+      bang = ":g ";
+    }
+    if (q.includes("duckduckgo")) {
+      service = "DuckDuckGo";
+      bang = ":ddg ";
+    }
 
     results.push({
-      type: 'tab-search',
+      type: "tab-search",
       title: `Buscar en ${service} [Presiona Tab]`,
       url: `Escribe Tab para buscar en ${service}`,
-      icon: '🔍',
-      badge: 'Tab to Search',
+      icon: "🔍",
+      badge: "Tab to Search",
       actionUrl: bang,
     });
   }
 
   // Soporte de prefijos de búsqueda rápida (Custom Search Bangs)
-  if (q.startsWith(':yt ') || q.startsWith(':w ') || q.startsWith(':g ') || q.startsWith(':gh ') || q.startsWith(':d ')) {
-    let service = 'Brave Search';
-    let icon = '🔍';
+  if (
+    q.startsWith(":yt ") ||
+    q.startsWith(":w ") ||
+    q.startsWith(":g ") ||
+    q.startsWith(":gh ") ||
+    q.startsWith(":d ")
+  ) {
+    let service = "Brave Search";
+    let icon = "🔍";
     let term = q.substring(3).trim();
-    if (q.startsWith(':gh ')) term = q.substring(4).trim();
+    if (q.startsWith(":gh ")) term = q.substring(4).trim();
 
-    if (q.startsWith(':yt ')) { service = 'YouTube'; icon = '▶️'; }
-    else if (q.startsWith(':w ')) { service = 'Wikipedia'; icon = '📖'; }
-    else if (q.startsWith(':g ')) { service = 'Google'; icon = '🌐'; }
-    else if (q.startsWith(':gh ')) { service = 'GitHub'; icon = '🐙'; }
-    else if (q.startsWith(':d ')) { service = 'DuckDuckGo'; icon = '🦆'; }
+    if (q.startsWith(":yt ")) {
+      service = "YouTube";
+      icon = "▶️";
+    } else if (q.startsWith(":w ")) {
+      service = "Wikipedia";
+      icon = "📖";
+    } else if (q.startsWith(":g ")) {
+      service = "Google";
+      icon = "🌐";
+    } else if (q.startsWith(":gh ")) {
+      service = "GitHub";
+      icon = "🐙";
+    } else if (q.startsWith(":d ")) {
+      service = "DuckDuckGo";
+      icon = "🦆";
+    }
 
     results.push({
-      type: 'bang',
+      type: "bang",
       title: `Buscar "${term}" en ${service}`,
       url: `Búsqueda directa rápida en ${service}`,
       icon,
@@ -1447,9 +1680,12 @@ function updateOmniboxSuggestions(query) {
 
   // 1. Coincidencias con Páginas Internas de Brave
   INTERNAL_PAGES.forEach((item) => {
-    if (item.url.toLowerCase().includes(q) || item.title.toLowerCase().includes(q)) {
+    if (
+      item.url.toLowerCase().includes(q) ||
+      item.title.toLowerCase().includes(q)
+    ) {
       results.push({
-        type: 'internal',
+        type: "internal",
         title: item.title,
         url: item.url,
         icon: item.icon,
@@ -1464,11 +1700,11 @@ function updateOmniboxSuggestions(query) {
   bookmarks.forEach((b) => {
     if (b.title.toLowerCase().includes(q) || b.url.toLowerCase().includes(q)) {
       results.push({
-        type: 'bookmark',
+        type: "bookmark",
         title: b.title,
         url: b.url,
-        icon: b.icon || '★',
-        badge: 'Marcador',
+        icon: b.icon || "★",
+        badge: "Marcador",
         actionUrl: b.url,
       });
     }
@@ -1476,18 +1712,23 @@ function updateOmniboxSuggestions(query) {
 
   // 3. Coincidencias con Historial Local
   try {
-    const history = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+    const history = JSON.parse(
+      localStorage.getItem("brave_browser_history") || "[]",
+    );
     let count = 0;
     for (const h of history) {
       if (count >= 3) break;
-      if (h.title.toLowerCase().includes(q) || h.url.toLowerCase().includes(q)) {
+      if (
+        h.title.toLowerCase().includes(q) ||
+        h.url.toLowerCase().includes(q)
+      ) {
         if (!results.some((r) => r.actionUrl === h.url)) {
           results.push({
-            type: 'history',
+            type: "history",
             title: h.title,
             url: h.url,
-            icon: '🕒',
-            badge: 'Historial',
+            icon: "🕒",
+            badge: "Historial",
             actionUrl: h.url,
           });
           count++;
@@ -1497,69 +1738,74 @@ function updateOmniboxSuggestions(query) {
   } catch {}
 
   // 4. Sugerencia Principal según Motor Configurado o Atajos !bangs
-  if (q.startsWith(':g ') || q.startsWith('!g ')) {
-    const text = query.replace(/^[:!]g\s+/i, '');
+  if (q.startsWith(":g ") || q.startsWith("!g ")) {
+    const text = query.replace(/^[:!]g\s+/i, "");
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar en Google: "${text}"`,
       url: `https://www.google.com/search?q=${encodeURIComponent(text)}`,
-      icon: '🔍',
-      badge: '!g (Google)',
+      icon: "🔍",
+      badge: "!g (Google)",
       actionUrl: `https://www.google.com/search?q=${encodeURIComponent(text)}`,
       searchTerm: text,
     });
-  } else if (q.startsWith(':yt ') || q.startsWith('!yt ')) {
-    const text = query.replace(/^[:!]yt\s+/i, '');
+  } else if (q.startsWith(":yt ") || q.startsWith("!yt ")) {
+    const text = query.replace(/^[:!]yt\s+/i, "");
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar en YouTube: "${text}"`,
       url: `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`,
-      icon: '▶️',
-      badge: '!yt (YouTube)',
+      icon: "▶️",
+      badge: "!yt (YouTube)",
       actionUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`,
       searchTerm: text,
     });
-  } else if (q.startsWith(':w ') || q.startsWith('!w ')) {
-    const text = query.replace(/^[:!]w\s+/i, '');
+  } else if (q.startsWith(":w ") || q.startsWith("!w ")) {
+    const text = query.replace(/^[:!]w\s+/i, "");
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar en Wikipedia: "${text}"`,
       url: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(text)}`,
-      icon: '📖',
-      badge: '!w (Wikipedia)',
+      icon: "📖",
+      badge: "!w (Wikipedia)",
       actionUrl: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(text)}`,
       searchTerm: text,
     });
-  } else if (q.startsWith(':gh ') || q.startsWith('!gh ')) {
-    const text = query.replace(/^[:!]gh\s+/i, '');
+  } else if (q.startsWith(":gh ") || q.startsWith("!gh ")) {
+    const text = query.replace(/^[:!]gh\s+/i, "");
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar en GitHub: "${text}"`,
       url: `https://github.com/search?q=${encodeURIComponent(text)}`,
-      icon: '🐙',
-      badge: '!gh (GitHub)',
+      icon: "🐙",
+      badge: "!gh (GitHub)",
       actionUrl: `https://github.com/search?q=${encodeURIComponent(text)}`,
       searchTerm: text,
     });
-  } else if (q.startsWith(':ddg ') || q.startsWith('!ddg ') || q.startsWith(':d ') || q.startsWith('!d ')) {
-    const text = query.replace(/^[:!](ddg|d)\s+/i, '');
+  } else if (
+    q.startsWith(":ddg ") ||
+    q.startsWith("!ddg ") ||
+    q.startsWith(":d ") ||
+    q.startsWith("!d ")
+  ) {
+    const text = query.replace(/^[:!](ddg|d)\s+/i, "");
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar en DuckDuckGo: "${text}"`,
       url: `https://duckduckgo.com/?q=${encodeURIComponent(text)}`,
-      icon: '🦆',
-      badge: '!ddg (DuckDuckGo)',
+      icon: "🦆",
+      badge: "!ddg (DuckDuckGo)",
       actionUrl: `https://duckduckgo.com/?q=${encodeURIComponent(text)}`,
       searchTerm: text,
     });
-  } else if (q.startsWith(':b ') || q.startsWith('!b ')) {
-    const text = query.replace(/^[:!]b\s+/i, '');
+  } else if (q.startsWith(":b ") || q.startsWith("!b ")) {
+    const text = query.replace(/^[:!]b\s+/i, "");
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar en Brave Search: "${text}"`,
       url: `https://search.brave.com/search?q=${encodeURIComponent(text)}`,
-      icon: '🦁',
-      badge: '!b (Brave)',
+      icon: "🦁",
+      badge: "!b (Brave)",
       actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(text)}`,
       searchTerm: text,
     });
@@ -1567,33 +1813,57 @@ function updateOmniboxSuggestions(query) {
     const curEngineName = getSearchEngineName();
     const curEngineUrl = getSearchEngineQueryUrl(query);
     results.unshift({
-      type: 'search',
+      type: "search",
       title: `Buscar "${query}" en ${curEngineName}`,
       url: curEngineUrl,
-      icon: '🔍',
+      icon: "🔍",
       badge: curEngineName,
       actionUrl: curEngineUrl,
       searchTerm: query,
     });
   }
 
+  // Coincidencias con Pestañas Abiertas (Cambiar a pestaña)
+  if (Array.isArray(tabs)) {
+    tabs.forEach((t) => {
+      if (t.id !== activeTabId && t.title && t.url) {
+        if (
+          t.title.toLowerCase().includes(q) ||
+          t.url.toLowerCase().includes(q)
+        ) {
+          if (!results.some((r) => r.type === "tab" && r.actionUrl === t.id)) {
+            results.push({
+              type: "tab",
+              title: t.title,
+              url: `Pestaña abierta: ${t.url}`,
+              icon: "📑",
+              badge: "Pestaña",
+              actionUrl: t.id,
+              isTabSwitch: true,
+            });
+          }
+        }
+      }
+    });
+  }
+
   // 5. Sugerencias Complementarias
-  if (!q.includes('.') && !q.startsWith('brave://') && !q.startsWith('http')) {
+  if (!q.includes(".") && !q.startsWith("brave://") && !q.startsWith("http")) {
     results.push({
-      type: 'search',
+      type: "search",
       title: `${query} en Wikipedia`,
       url: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`,
-      icon: '📖',
-      badge: 'Wikipedia',
+      icon: "📖",
+      badge: "Wikipedia",
       actionUrl: `https://es.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`,
       searchTerm: `${query} wikipedia`,
     });
     results.push({
-      type: 'search',
+      type: "search",
       title: `${query} en YouTube`,
       url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
-      icon: '▶️',
-      badge: 'YouTube',
+      icon: "▶️",
+      badge: "YouTube",
       actionUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
       searchTerm: `${query} youtube`,
     });
@@ -1604,19 +1874,73 @@ function updateOmniboxSuggestions(query) {
 
   if (currentSuggestions.length === 0) {
     closeSuggestions();
-    return;
+  } else {
+    renderSuggestionsList(query);
   }
 
-  renderSuggestionsList(query);
+  // 6. Consulta en Vivo a Brave Search Suggest API (https://search.brave.com/api/suggest?q=)
+  if (
+    !q.startsWith("@") &&
+    !q.startsWith(":") &&
+    !q.startsWith("!") &&
+    !q.startsWith("brave://") &&
+    q.length >= 1
+  ) {
+    if (currentSuggestAbortController) {
+      currentSuggestAbortController.abort();
+    }
+    currentSuggestAbortController = new AbortController();
+
+    const fetchUrl = `https://search.brave.com/api/suggest?q=${encodeURIComponent(query.trim())}`;
+    fetch(fetchUrl, { signal: currentSuggestAbortController.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error("Suggest HTTP " + res.status);
+        return res.json();
+      })
+      .then((data) => {
+        // Formato estándar OpenSearch: [query, [suggestions...]]
+        if (Array.isArray(data) && Array.isArray(data[1])) {
+          const apiSuggestions = data[1];
+          const blended = [...results];
+          let insertIdx = 1;
+          for (const s of apiSuggestions) {
+            if (
+              !blended.some(
+                (r) =>
+                  (r.searchTerm &&
+                    r.searchTerm.toLowerCase() === s.toLowerCase()) ||
+                  r.title.toLowerCase() === s.toLowerCase(),
+              )
+            ) {
+              blended.splice(insertIdx++, 0, {
+                type: "search",
+                title: s,
+                url: `https://search.brave.com/search?q=${encodeURIComponent(s)}`,
+                icon: "🦁",
+                badge: "Brave Search",
+                actionUrl: `https://search.brave.com/search?q=${encodeURIComponent(s)}`,
+                searchTerm: s,
+              });
+            }
+            if (insertIdx >= 6) break;
+          }
+          currentSuggestions = blended.slice(0, 8);
+          renderSuggestionsList(query);
+        }
+      })
+      .catch(() => {
+        // Fallback silencioso si no hay conexión o se canceló
+      });
+  }
 }
 
 function renderSuggestionsList(query) {
-  omniboxSuggestions.innerHTML = '';
+  omniboxSuggestions.innerHTML = "";
   currentSuggestions.forEach((item, index) => {
-    const el = document.createElement('div');
-    el.className = 'suggestion-item';
-    if (index === selectedSuggestionIndex) el.classList.add('selected');
-    el.setAttribute('data-index', String(index));
+    const el = document.createElement("div");
+    el.className = "suggestion-item";
+    if (index === selectedSuggestionIndex) el.classList.add("selected");
+    el.setAttribute("data-index", String(index));
     el.innerHTML = `
       <span class="suggestion-icon">${item.icon}</span>
       <div class="suggestion-text">
@@ -1626,69 +1950,85 @@ function renderSuggestionsList(query) {
       <span class="suggestion-badge">${item.badge}</span>
     `;
 
-    el.addEventListener('mouseenter', () => {
-      if (item.actionUrl) speculativeWarmup(item.actionUrl);
+    el.addEventListener("mouseenter", () => {
+      if (item.actionUrl && !item.isTabSwitch)
+        speculativeWarmup(item.actionUrl);
     });
 
-    el.addEventListener('mousedown', (e) => {
+    el.addEventListener("mousedown", (e) => {
       e.preventDefault();
-      navigateTo(item.actionUrl);
+      if (item.isTabSwitch) {
+        switchTab(item.actionUrl);
+      } else {
+        navigateTo(item.actionUrl);
+      }
       closeSuggestions();
     });
 
     omniboxSuggestions.appendChild(el);
   });
 
-  omniboxSuggestions.classList.add('open');
+  omniboxSuggestions.classList.add("open");
 }
 
 function selectSuggestion(index, updateInput = true) {
   if (currentSuggestions.length === 0) return;
   selectedSuggestionIndex = index;
 
-  const items = omniboxSuggestions.querySelectorAll('.suggestion-item');
+  const items = omniboxSuggestions.querySelectorAll(".suggestion-item");
   items.forEach((it, idx) => {
     if (idx === selectedSuggestionIndex) {
-      it.classList.add('selected');
-      it.scrollIntoView({ block: 'nearest' });
+      it.classList.add("selected");
+      it.scrollIntoView({ block: "nearest" });
       if (updateInput) {
         const item = currentSuggestions[idx];
-        if (item.type === 'internal' || item.type === 'bookmark' || item.type === 'history') {
+        if (
+          item.type === "internal" ||
+          item.type === "bookmark" ||
+          item.type === "history"
+        ) {
           urlInput.value = item.url;
         } else if (item.searchTerm) {
           urlInput.value = item.searchTerm;
         } else {
-          urlInput.value = item.title.replace(/^Buscar (?:en [^:]+:\s*)?"|"[^"]*$/g, '').trim() || item.url;
+          urlInput.value =
+            item.title
+              .replace(/^Buscar (?:en [^:]+:\s*)?"|"[^"]*$/g, "")
+              .trim() || item.url;
         }
       }
     } else {
-      it.classList.remove('selected');
+      it.classList.remove("selected");
     }
   });
+
+  if (selectedSuggestionIndex === -1 && updateInput && currentOmniboxQuery) {
+    urlInput.value = currentOmniboxQuery;
+  }
 }
 
 let omniboxDebounceTimer = null;
-urlInput.addEventListener('input', () => {
+urlInput.addEventListener("input", () => {
   clearTimeout(omniboxDebounceTimer);
   omniboxDebounceTimer = setTimeout(() => {
     updateOmniboxSuggestions(urlInput.value);
   }, 40);
 });
 
-urlInput.addEventListener('focus', () => {
+urlInput.addEventListener("focus", () => {
   urlInput.select();
   if (urlInput.value.trim()) {
     updateOmniboxSuggestions(urlInput.value);
   }
 });
 
-urlInput.addEventListener('click', () => {
+urlInput.addEventListener("click", () => {
   if (document.activeElement === urlInput) {
     urlInput.select();
   }
 });
 
-urlInput.addEventListener('blur', () => {
+urlInput.addEventListener("blur", () => {
   setTimeout(closeSuggestions, 160);
 });
 
@@ -1698,39 +2038,49 @@ urlInput.addEventListener('blur', () => {
 function extractDomain(url) {
   try {
     const u = new URL(url);
-    if (u.protocol === 'file:') {
-      if (url.includes('settings.html')) return 'Configuración';
-      if (url.includes('history.html')) return 'Historial';
-      if (url.includes('downloads.html')) return 'Descargas';
-      if (url.includes('bookmarks.html')) return 'Marcadores';
-      if (url.includes('version.html')) return 'Acerca de Brave';
-      if (url.includes('welcome.html')) return 'Bienvenida';
-      if (url.includes('adblock.html')) return 'Adblock';
-      if (url.includes('playlist.html')) return 'Playlist';
-      if (url.includes('extensions.html')) return 'Extensiones';
-      if (url.includes('components.html')) return 'Componentes';
-      return 'Nueva Pestaña';
+    if (u.protocol === "file:") {
+      if (url.includes("settings.html")) return "Configuración";
+      if (url.includes("history.html")) return "Historial";
+      if (url.includes("downloads.html")) return "Descargas";
+      if (url.includes("bookmarks.html")) return "Marcadores";
+      if (url.includes("version.html")) return "Acerca de Brave";
+      if (url.includes("adblock.html")) return "Adblock";
+      if (url.includes("playlist.html")) return "Playlist";
+      if (url.includes("extensions.html")) return "Extensiones";
+      if (url.includes("components.html")) return "Componentes";
+      return "Nueva Pestaña";
     }
     return u.hostname.toLowerCase();
   } catch {
-    return '';
+    return "";
   }
 }
 
 function isCurrentWindowPrivate() {
-  if (document.body.classList.contains('private-mode') || document.body.classList.contains('tor-mode')) return true;
-  if (window.braveAPI && ((window.braveAPI.isPrivateMode && window.braveAPI.isPrivateMode()) || (window.braveAPI.isTorMode && window.braveAPI.isTorMode()))) return true;
+  if (
+    document.body.classList.contains("private-mode") ||
+    document.body.classList.contains("tor-mode")
+  )
+    return true;
+  if (
+    window.braveAPI &&
+    ((window.braveAPI.isPrivateMode && window.braveAPI.isPrivateMode()) ||
+      (window.braveAPI.isTorMode && window.braveAPI.isTorMode()))
+  )
+    return true;
   return false;
 }
 
 function recordHistory(url, title) {
-  if (!url || url.startsWith('file:') || url.startsWith('about:')) return;
+  if (!url || url.startsWith("file:") || url.startsWith("about:")) return;
   // Nunca registrar historial en modo Privado o Tor
   if (isCurrentWindowPrivate()) return;
   try {
-    const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+    const list = JSON.parse(
+      localStorage.getItem("brave_browser_history") || "[]",
+    );
     const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
     if (list.length > 0 && list[0].url === url) return;
     const historyId = `hist_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     list.unshift({
@@ -1742,18 +2092,21 @@ function recordHistory(url, title) {
       domain: extractDomain(url),
     });
     if (list.length > 500) list.pop();
-    localStorage.setItem('brave_browser_history', JSON.stringify(list));
+    localStorage.setItem("brave_browser_history", JSON.stringify(list));
   } catch {}
 }
 
 function updateHistoryTitle(url, title) {
-  if (!url || !title || title === 'Nueva pestaña' || isCurrentWindowPrivate()) return;
+  if (!url || !title || title === "Nueva pestaña" || isCurrentWindowPrivate())
+    return;
   try {
-    const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
+    const list = JSON.parse(
+      localStorage.getItem("brave_browser_history") || "[]",
+    );
     const item = list.find((h) => h.url === url);
     if (item && item.title !== title) {
       item.title = title;
-      localStorage.setItem('brave_browser_history', JSON.stringify(list));
+      localStorage.setItem("brave_browser_history", JSON.stringify(list));
     }
   } catch {}
 }
@@ -1761,57 +2114,62 @@ function updateHistoryTitle(url, title) {
 function resolveBraveUrl(url) {
   if (!url) return ntpUrl;
   const lower = String(url).trim().toLowerCase();
-  if (lower === 'brave://bookmarks' || lower === 'about:bookmarks' || lower === 'chrome://bookmarks') return bookmarksUrl;
-  if (lower === 'brave://history' || lower === 'about:history' || lower === 'chrome://history') return historyUrl;
-  if (lower === 'brave://settings' || lower === 'about:settings' || lower === 'chrome://settings') return settingsUrl;
-  if (lower === 'brave://downloads' || lower === 'about:downloads' || lower === 'chrome://downloads') return downloadsUrl;
-  if (lower === 'brave://extensions' || lower === 'about:extensions' || lower === 'chrome://extensions') return extensionsUrl;
-  if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') return versionUrl;
-  if (lower === 'brave://error' || lower === 'about:error') return errorUrl;
-  if (lower === 'brave://welcome' || lower === 'about:welcome') return welcomeUrl;
-  if (lower === 'brave://adblock') return adblockUrl;
-  if (lower === 'brave://playlist' || lower === 'about:playlist') return playlistUrl;
-  if (lower === 'brave://components' || lower === 'about:components') return componentsUrl;
-  if (lower === 'brave://newtab' || lower === 'about:newtab' || lower === 'about:blank') return ntpUrl;
-  if (lower === 'brave://sync') return settingsUrl + '#sync';
-  if (lower === 'brave://shields') return settingsUrl + '#shields';
-  if (lower === 'brave://privacy') return settingsUrl + '#privacy';
-  if (lower === 'brave://autofill' || lower === 'brave://passwords') return settingsUrl + '#autofill';
-  if (lower === 'brave://appearance') return settingsUrl + '#appearance';
-  if (lower === 'brave://startup') return settingsUrl + '#startup';
-  if (lower === 'brave://search') return settingsUrl + '#search';
+  if (
+    lower === "brave://bookmarks" ||
+    lower === "about:bookmarks" ||
+    lower === "chrome://bookmarks"
+  )
+    return bookmarksUrl;
+  if (
+    lower === "brave://history" ||
+    lower === "about:history" ||
+    lower === "chrome://history"
+  )
+    return historyUrl;
+  if (
+    lower === "brave://settings" ||
+    lower === "about:settings" ||
+    lower === "chrome://settings"
+  )
+    return settingsUrl;
+  if (
+    lower === "brave://downloads" ||
+    lower === "about:downloads" ||
+    lower === "chrome://downloads"
+  )
+    return downloadsUrl;
+  if (
+    lower === "brave://extensions" ||
+    lower === "about:extensions" ||
+    lower === "chrome://extensions"
+  )
+    return extensionsUrl;
+  if (
+    lower === "brave://version" ||
+    lower === "about:version" ||
+    lower === "chrome://version"
+  )
+    return versionUrl;
+  if (lower === "brave://adblock") return adblockUrl;
+  if (lower === "brave://playlist" || lower === "about:playlist")
+    return playlistUrl;
+  if (lower === "brave://components" || lower === "about:components")
+    return componentsUrl;
+  if (
+    lower === "brave://newtab" ||
+    lower === "about:newtab" ||
+    lower === "about:blank"
+  )
+    return ntpUrl;
+  if (lower === "brave://sync") return settingsUrl + "#sync";
+  if (lower === "brave://shields") return settingsUrl + "#shields";
+  if (lower === "brave://privacy") return settingsUrl + "#privacy";
+  if (lower === "brave://autofill" || lower === "brave://passwords")
+    return settingsUrl + "#autofill";
+  if (lower === "brave://appearance") return settingsUrl + "#appearance";
+  if (lower === "brave://startup") return settingsUrl + "#startup";
+  if (lower === "brave://search") return settingsUrl + "#search";
   return url;
-}
-
-// Origin verification and page scoping helpers for guest webview isolation
-function isInternalWebviewOrigin(webviewEl) {
-  try {
-    const urlStr = (webviewEl && typeof webviewEl.getURL === 'function') ? webviewEl.getURL() : '';
-    if (!urlStr) return false;
-    const parsed = new URL(urlStr);
-    // Must be internal file:// scheme pointing to the app's ui directory
-    // or an internal brave:// / chrome-extension:// scheme
-    if (parsed.protocol === 'file:') {
-      const normalizedPath = parsed.pathname.replace(/\\/g, '/').toLowerCase();
-      return normalizedPath.includes('/brave-desktop/ui/') || normalizedPath.includes('/ui/');
-    }
-    return parsed.protocol === 'chrome-extension:' || parsed.protocol === 'brave:';
-  } catch {
-    return false;
-  }
-}
-
-function getInternalPageName(webviewEl) {
-  try {
-    const urlStr = (webviewEl && typeof webviewEl.getURL === 'function') ? webviewEl.getURL() : '';
-    if (!urlStr) return '';
-    const parsed = new URL(urlStr);
-    const pathname = parsed.pathname.toLowerCase().replace(/\\/g, '/');
-    const filename = pathname.split('/').pop() || '';
-    return filename;
-  } catch {
-    return '';
-  }
 }
 
 function createTab(initialUrl = ntpUrl, options = {}) {
@@ -1819,38 +2177,43 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   const id = `tab-${tabCounter}`;
 
   // Elemento Pestaña en la barra
-  const tabEl = document.createElement('div');
-  tabEl.className = 'tab';
+  const tabEl = document.createElement("div");
+  tabEl.className = "tab tab-opening";
   tabEl.id = `tab-el-${id}`;
   tabEl.draggable = true;
   tabEl.innerHTML = `
     <span class="tab-icon">${BRAVE_SHIELD_SVG}</span>
     <span class="tab-throbber" title="Cargando...">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-        <path d="M12 3a9 9 0 0 1 9 9" stroke="#fb542b" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.2)" stroke-width="2.5"/>
+        <path d="M12 3a9 9 0 0 1 9 9" stroke="#fb542b" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
     </span>
     <span class="tab-title">Nueva pestaña</span>
-    <span class="tab-audio-icon" title="Silenciar pestaña">${TAB_AUDIO_PLAYING_SVG}</span>
-    <span class="tab-close" title="Cerrar pestaña (Ctrl+W)">${TAB_CLOSE_SVG}</span>
+    <span class="tab-audio-icon" title="Silenciar pestaña">🔊</span>
+    <span class="tab-close" title="Cerrar pestaña (Ctrl+W)">✕</span>
   `;
 
   // Elemento Webview independiente con partición adecuada (persistente en modo normal, efímera en Privado/Tor/Invitado)
-  const sessionPartition = (window.braveAPI && window.braveAPI.getSessionPartition)
-    ? window.braveAPI.getSessionPartition()
-    : 'persist:brave_default';
+  const sessionPartition =
+    window.braveAPI && window.braveAPI.getSessionPartition
+      ? window.braveAPI.getSessionPartition()
+      : "persist:brave_default";
 
   const isLazy = !!options.lazy;
-  const initialTitle = options.title || 'Nueva pestaña';
+  const initialTitle = options.title || "Nueva pestaña";
   const targetInitialUrl = resolveBraveUrl(initialUrl);
 
-  const webviewEl = document.createElement('webview');
-  webviewEl.className = 'webview-instance';
+  const webviewEl = document.createElement("webview");
+  webviewEl.className = "webview-instance";
   webviewEl.id = `webview-${id}`;
-  webviewEl.setAttribute('allowpopups', '');
-  webviewEl.setAttribute('partition', sessionPartition);
-  webviewEl.src = isLazy ? 'about:blank' : targetInitialUrl;
+  webviewEl.setAttribute("allowpopups", "");
+  webviewEl.setAttribute("partition", sessionPartition);
+  webviewEl.setAttribute(
+    "webpreferences",
+    "contextIsolation=yes,nodeIntegration=no,sandbox=yes",
+  );
+  webviewEl.src = isLazy ? "about:blank" : targetInitialUrl;
 
   const tabData = {
     id,
@@ -1876,135 +2239,217 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   };
 
   if (isLazy) {
-    tabEl.classList.add('sleeping');
-    const titleEl = tabEl.querySelector('.tab-title');
+    tabEl.classList.add("sleeping");
+    const titleEl = tabEl.querySelector(".tab-title");
     if (titleEl) {
-      titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(initialTitle);
+      titleEl.innerHTML =
+        `<span class="tab-sleep-badge">🌙</span> ` + escapeHtml(initialTitle);
     }
   }
 
   tabs.push(tabData);
   tabBar.appendChild(tabEl);
   browserContent.appendChild(webviewEl);
+  requestAnimationFrame(() => {
+    tabEl.classList.remove("tab-opening");
+  });
 
   if (tabData.isPinned) {
     applyTabPinnedState(tabData, true);
   }
   if (tabData.groupId) {
-    const col = String(tabData.groupId).replace('group-', '');
+    const col = String(tabData.groupId).replace("group-", "");
     tabEl.classList.add(`in-group-${col}`);
   }
 
   // --- Hover Card (Tarjeta Flotante de Uso de RAM) ---
-  tabEl.addEventListener('mouseenter', () => {
+  tabEl.addEventListener("mouseenter", () => {
     hoverTimer = setTimeout(() => {
       showTabHoverCard(tabData, tabEl);
     }, 320);
   });
 
-  tabEl.addEventListener('mouseleave', () => {
+  tabEl.addEventListener("mouseleave", () => {
     clearTimeout(hoverTimer);
     hideTabHoverCard();
   });
 
-  // --- Drag and Drop para Reordenamiento de Pestañas ---
-  tabEl.addEventListener('dragstart', (e) => {
+  // --- Drag and Drop para Reordenamiento de Pestañas con Física Fluida 60fps y Tear-off ---
+  tabEl.addEventListener("dragstart", (e) => {
     draggedTabId = id;
-    tabEl.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', id);
+    tabEl.classList.add("is-dragging");
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
   });
 
-  tabEl.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    if (draggedTabId === id) return;
-    const rect = tabEl.getBoundingClientRect();
-    const midX = rect.left + rect.width / 2;
-    tabEl.classList.remove('drag-over-left', 'drag-over-right');
-    if (e.clientX < midX) {
-      tabEl.classList.add('drag-over-left');
+  tabEl.addEventListener("drag", (e) => {
+    if (!draggedTabId || draggedTabId !== id || !e.clientX) return;
+    const tabBarRect = tabBar.getBoundingClientRect();
+
+    // Auto-scroll fluido al arrastrar cerca de los bordes
+    if (e.clientX < tabBarRect.left + 50) {
+      tabBar.scrollLeft -= 14;
+    } else if (e.clientX > tabBarRect.right - 50) {
+      tabBar.scrollLeft += 14;
+    }
+
+    // Protocolo de Desprendimiento de Ventana (Window Tear-off Protocol)
+    const isTearOff =
+      e.clientY > tabBarRect.bottom + 50 || e.clientY < tabBarRect.top - 25;
+    const tearoffBanner = document.getElementById("tearoff-banner");
+    if (isTearOff && tabs.length > 1) {
+      tabEl.classList.add("is-tearing-off");
+      if (tearoffBanner) tearoffBanner.classList.add("visible");
     } else {
-      tabEl.classList.add('drag-over-right');
+      tabEl.classList.remove("is-tearing-off");
+      if (tearoffBanner) tearoffBanner.classList.remove("visible");
     }
   });
 
-  tabEl.addEventListener('dragleave', () => {
-    tabEl.classList.remove('drag-over-left', 'drag-over-right');
-  });
-
-  tabEl.addEventListener('drop', (e) => {
+  tabEl.addEventListener("dragover", (e) => {
     e.preventDefault();
-    tabEl.classList.remove('drag-over-left', 'drag-over-right');
     if (!draggedTabId || draggedTabId === id) return;
+    e.dataTransfer.dropEffect = "move";
 
+    const tabBarRect = tabBar.getBoundingClientRect();
     const fromIdx = tabs.findIndex((t) => t.id === draggedTabId);
-    const toIdx = tabs.findIndex((t) => t.id === id);
-    if (fromIdx === -1 || toIdx === -1) return;
+    const tabWidth = tabEl.getBoundingClientRect().width || 180;
+    const relativeX = e.clientX - tabBarRect.left + tabBar.scrollLeft;
+    let targetIdx = Math.floor(relativeX / tabWidth);
+    targetIdx = Math.max(0, Math.min(tabs.length - 1, targetIdx));
 
-    const [movedTab] = tabs.splice(fromIdx, 1);
-    tabs.splice(toIdx, 0, movedTab);
-    reorderTabBarElements();
+    // Desplazamiento dinámico (transform translate) en pestañas hermanas (60fps)
+    tabs.forEach((t, idx) => {
+      if (t.id === draggedTabId) return;
+      t.tabEl.classList.add("is-shifting");
+      if (fromIdx < targetIdx && idx > fromIdx && idx <= targetIdx) {
+        t.tabEl.style.transform = `translateX(-${tabWidth}px)`;
+      } else if (fromIdx > targetIdx && idx >= targetIdx && idx < fromIdx) {
+        t.tabEl.style.transform = `translateX(${tabWidth}px)`;
+      } else {
+        t.tabEl.style.transform = "";
+      }
+    });
   });
 
-  tabEl.addEventListener('dragend', () => {
-    tabEl.classList.remove('dragging', 'drag-over-left', 'drag-over-right');
+  tabEl.addEventListener("dragleave", () => {
+    // Mantener transform activo en dragover continuo
+  });
+
+  tabEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const tearoffBanner = document.getElementById("tearoff-banner");
+    if (tearoffBanner) tearoffBanner.classList.remove("visible");
+    tabEl.classList.remove("is-dragging", "is-tearing-off");
+
+    tabs.forEach((t) => {
+      t.tabEl.classList.remove("is-shifting");
+      t.tabEl.style.transform = "";
+    });
+
+    if (!draggedTabId) return;
+
+    const tabBarRect = tabBar.getBoundingClientRect();
+    const isTearOff =
+      e.clientY > tabBarRect.bottom + 50 || e.clientY < tabBarRect.top - 25;
+
+    if (isTearOff && tabs.length > 1) {
+      // Protocolo Window Tear-off
+      const tabToDetach = tabs.find((t) => t.id === draggedTabId);
+      if (tabToDetach && window.braveAPI && window.braveAPI.openWindow) {
+        window.braveAPI.openWindow(tabToDetach.url);
+        closeTab(draggedTabId);
+      }
+    } else {
+      const fromIdx = tabs.findIndex((t) => t.id === draggedTabId);
+      const toIdx = tabs.findIndex((t) => t.id === id);
+      if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
+        const [movedTab] = tabs.splice(fromIdx, 1);
+        tabs.splice(toIdx, 0, movedTab);
+        reorderTabBarElements();
+      }
+    }
+    draggedTabId = null;
+  });
+
+  tabEl.addEventListener("dragend", (e) => {
+    const tearoffBanner = document.getElementById("tearoff-banner");
+    if (tearoffBanner) tearoffBanner.classList.remove("visible");
+    tabEl.classList.remove("is-dragging", "is-tearing-off");
+
+    tabs.forEach((t) => {
+      t.tabEl.classList.remove("is-shifting");
+      t.tabEl.style.transform = "";
+    });
+
+    const tabBarRect = tabBar.getBoundingClientRect();
+    const isTearOff =
+      e.clientY > tabBarRect.bottom + 50 || e.clientY < tabBarRect.top - 25;
+    if (isTearOff && tabs.length > 1 && draggedTabId) {
+      const tabToDetach = tabs.find((t) => t.id === draggedTabId);
+      if (tabToDetach && window.braveAPI && window.braveAPI.openWindow) {
+        window.braveAPI.openWindow(tabToDetach.url);
+        closeTab(draggedTabId);
+      }
+    }
     draggedTabId = null;
   });
 
   // --- Clic Derecho Contextual en Pestaña ---
-  tabEl.addEventListener('contextmenu', (e) => {
+  tabEl.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     e.stopPropagation();
     openTabContextMenu(e.clientX, e.clientY, id);
   });
 
   // --- Control de Audio y Silenciado ---
-  const audioBtn = tabEl.querySelector('.tab-audio-icon');
+  const audioBtn = tabEl.querySelector(".tab-audio-icon");
 
   function updateTabAudioUI() {
     const hasAudio = !!(tabData.isMuted || tabData.isAudible);
-    tabEl.classList.toggle('has-audio', hasAudio);
+    tabEl.classList.toggle("has-audio", hasAudio);
 
     if (tabData.isMuted) {
-      audioBtn.style.display = 'inline-flex';
-      audioBtn.innerHTML = TAB_AUDIO_MUTED_SVG;
-      audioBtn.title = 'Reactivar sonido de la pestaña';
-      audioBtn.classList.add('muted');
+      audioBtn.style.display = "inline-flex";
+      audioBtn.textContent = "🔇";
+      audioBtn.title = "Reactivar sonido de la pestaña";
+      audioBtn.classList.add("muted");
     } else if (tabData.isAudible) {
-      audioBtn.style.display = 'inline-flex';
-      audioBtn.innerHTML = TAB_AUDIO_PLAYING_SVG;
-      audioBtn.title = 'Silenciar pestaña';
-      audioBtn.classList.remove('muted');
+      audioBtn.style.display = "inline-flex";
+      audioBtn.textContent = "🔊";
+      audioBtn.title = "Silenciar pestaña";
+      audioBtn.classList.remove("muted");
     } else {
-      audioBtn.style.display = 'none';
+      audioBtn.style.display = "none";
     }
     updateGlobalMediaMenu();
   }
 
-  audioBtn.addEventListener('click', (e) => {
+  audioBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     tabData.isMuted = !tabData.isMuted;
     webviewEl.setAudioMuted(tabData.isMuted);
     updateTabAudioUI();
   });
 
-  audioBtn.addEventListener('auxclick', (e) => {
+  audioBtn.addEventListener("auxclick", (e) => {
     e.stopPropagation();
   });
 
   // Detección nativa de eventos multimedia del Webview
-  webviewEl.addEventListener('media-started-playing', () => {
+  webviewEl.addEventListener("media-started-playing", () => {
     tabData.isAudible = true;
     updateTabAudioUI();
   });
 
-  webviewEl.addEventListener('media-paused', () => {
+  webviewEl.addEventListener("media-paused", () => {
     tabData.isAudible = false;
     updateTabAudioUI();
   });
 
   // Clic izquierdo para cambiar de pestaña o cerrar
-  tabEl.addEventListener('click', (e) => {
-    if (e.target.classList.contains('tab-close')) {
+  tabEl.addEventListener("click", (e) => {
+    if (e.target.classList.contains("tab-close")) {
       closeTab(id);
     } else {
       switchTab(id);
@@ -2012,7 +2457,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   });
 
   // Clic con rueda del ratón (Middle-click) para cerrar inmediatamente
-  tabEl.addEventListener('auxclick', (e) => {
+  tabEl.addEventListener("auxclick", (e) => {
     if (e.button === 1 && !tabData.isPinned) {
       e.preventDefault();
       e.stopPropagation();
@@ -2021,48 +2466,54 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   });
 
   // Detección de foco e interacción en Vista Dividida (Split View)
-  webviewEl.addEventListener('focus', () => {
+  webviewEl.addEventListener("focus", () => {
     closeBarContextMenu();
-    if (isSplitViewActive && activeTabId !== id && typeof switchSplitFocus === 'function') {
+    if (
+      isSplitViewActive &&
+      activeTabId !== id &&
+      typeof switchSplitFocus === "function"
+    ) {
       switchSplitFocus(id);
     }
   });
 
   // Soporte de pellizcar para zoom (Trackpad Pinch-to-zoom) y Ctrl + Rueda del ratón
-  webviewEl.addEventListener('wheel', (e) => {
-    if (e.ctrlKey) {
-      e.preventDefault();
-      const curZoom = tabData.zoomFactor || 1.0;
-      let targetZoom = curZoom;
-      if (e.deltaY < 0) {
-        targetZoom = Math.min(3.0, curZoom + 0.05);
-      } else if (e.deltaY > 0) {
-        targetZoom = Math.max(0.3, curZoom - 0.05);
+  webviewEl.addEventListener(
+    "wheel",
+    (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const curZoom = tabData.zoomFactor || 1.0;
+        let targetZoom = curZoom;
+        if (e.deltaY < 0) {
+          targetZoom = Math.min(3.0, curZoom + 0.05);
+        } else if (e.deltaY > 0) {
+          targetZoom = Math.max(0.3, curZoom - 0.05);
+        }
+        applyCurrentTabZoom(targetZoom, true);
       }
-      applyCurrentTabZoom(targetZoom, true);
-    }
-  }, { passive: false });
+    },
+    { passive: false },
+  );
 
   // Eventos de estado de navegación del Webview
-  webviewEl.addEventListener('did-start-loading', () => {
+  webviewEl.addEventListener("did-start-loading", () => {
     tabData.isLoading = true;
-    tabEl.classList.add('loading');
+    tabEl.classList.add("loading");
     if (activeTabId === id) {
       btnReload.innerHTML = STOP_SVG;
-      btnReload.title = 'Detener carga (Esc)';
-      btnReload.setAttribute('data-state', 'stop');
+      btnReload.title = "Detener carga (Esc)";
       hideWaybackBar();
       showPageLoadingBar();
     }
   });
 
-  webviewEl.addEventListener('did-stop-loading', () => {
+  webviewEl.addEventListener("did-stop-loading", () => {
     tabData.isLoading = false;
-    tabEl.classList.remove('loading');
+    tabEl.classList.remove("loading");
     if (activeTabId === id) {
       btnReload.innerHTML = RELOAD_SVG;
-      btnReload.title = 'Recargar (Ctrl+R)';
-      btnReload.setAttribute('data-state', 'reload');
+      btnReload.title = "Recargar (Ctrl+R)";
       updateNavControls();
       finishPageLoadingBar();
     }
@@ -2081,109 +2532,126 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     // Captura de miniatura visual para la tarjeta flotante (Hover Card Thumbnail)
     setTimeout(() => {
       updateTabThumbnail(tabData);
-      if (typeof saveCurrentSession === 'function') saveCurrentSession();
+      if (typeof saveCurrentSession === "function") saveCurrentSession();
     }, 600);
   });
 
-  webviewEl.addEventListener('page-title-updated', (e) => {
-    let t = e.title || 'Nueva pestaña';
-    if (t.toLowerCase() === 'nueva pestaña' || t.toLowerCase() === 'new tab' || t === 'about:blank') {
-      t = 'Nueva pestaña';
+  webviewEl.addEventListener("page-title-updated", (e) => {
+    let t = e.title || "Nueva pestaña";
+    if (
+      t.toLowerCase() === "nueva pestaña" ||
+      t.toLowerCase() === "new tab" ||
+      t === "about:blank"
+    ) {
+      t = "Nueva pestaña";
     }
     tabData.title = t;
-    if (tabData.navHistory && tabData.navHistoryIndex >= 0 && tabData.navHistory[tabData.navHistoryIndex]) {
+    if (
+      tabData.navHistory &&
+      tabData.navHistoryIndex >= 0 &&
+      tabData.navHistory[tabData.navHistoryIndex]
+    ) {
       tabData.navHistory[tabData.navHistoryIndex].title = t;
     }
     updateHistoryTitle(tabData.url, t);
-    const titleEl = tabEl.querySelector('.tab-title');
+    const titleEl = tabEl.querySelector(".tab-title");
     if (titleEl) {
-      if (tabData.isSleeping) {
-        titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(tabData.title);
-      } else {
-        titleEl.textContent = tabData.title;
-      }
+      titleEl.textContent = tabData.isSleeping
+        ? `🌙 ${tabData.title}`
+        : tabData.title;
     }
     if (activeTabId === id) {
       document.title = `${tabData.title} - Brave Browser`;
     }
   });
 
-  webviewEl.addEventListener('page-favicon-updated', (e) => {
-    const iconContainer = tabEl.querySelector('.tab-icon');
+  webviewEl.addEventListener("page-favicon-updated", (e) => {
+    const iconContainer = tabEl.querySelector(".tab-icon");
     if (!iconContainer) return;
 
-    if (e.favicons && e.favicons.length > 0 && !tabData.url.includes('ntp.html')) {
+    if (
+      e.favicons &&
+      e.favicons.length > 0 &&
+      !tabData.url.includes("ntp.html")
+    ) {
       tabData.favicon = e.favicons[0];
-      if (tabData.navHistory && tabData.navHistoryIndex >= 0 && tabData.navHistory[tabData.navHistoryIndex]) {
+      if (
+        tabData.navHistory &&
+        tabData.navHistoryIndex >= 0 &&
+        tabData.navHistory[tabData.navHistoryIndex]
+      ) {
         tabData.navHistory[tabData.navHistoryIndex].favicon = e.favicons[0];
       }
-      const img = document.createElement('img');
+      const img = document.createElement("img");
       img.src = e.favicons[0];
       img.width = 16;
       img.height = 16;
-      img.style.borderRadius = '2px';
+      img.style.borderRadius = "2px";
       img.onerror = () => {
         iconContainer.innerHTML = BRAVE_SHIELD_SVG;
       };
-      iconContainer.innerHTML = '';
+      iconContainer.innerHTML = "";
       iconContainer.appendChild(img);
     } else {
       iconContainer.innerHTML = BRAVE_SHIELD_SVG;
     }
   });
 
-  webviewEl.addEventListener('did-fail-load', (e) => {
+  webviewEl.addEventListener("did-fail-load", (e) => {
     tabData.isLoading = false;
-    tabEl.classList.remove('loading');
+    tabEl.classList.remove("loading");
     if (activeTabId === id) {
       btnReload.innerHTML = RELOAD_SVG;
-      btnReload.title = 'Recargar (Ctrl+R)';
-      btnReload.setAttribute('data-state', 'reload');
       finishPageLoadingBar();
     }
-
-    const failedUrl = (e.validatedURL && e.validatedURL.trim()) ? e.validatedURL : (tabData.url || webviewEl.src || initialUrl);
-    const isErrorPage = (failedUrl && failedUrl.includes('error.html')) || (webviewEl.src && webviewEl.src.includes('error.html'));
-
-    if (e.errorCode !== -3 && !isErrorPage) {
-      if (initialUrl.includes('ntp.html') && webviewEl.src !== ntpUrl) {
-        console.warn('[Brave-Replica] Webview falló, recargando con ntpUrl absoluto:', ntpUrl);
-        webviewEl.src = ntpUrl;
-        return;
+    if (
+      e.errorCode !== -3 &&
+      initialUrl.includes("ntp.html") &&
+      webviewEl.src !== ntpUrl
+    ) {
+      console.warn(
+        "[Brave-Replica] Webview falló, recargando con ntpUrl absoluto:",
+        ntpUrl,
+      );
+      webviewEl.src = ntpUrl;
+    } else if (
+      tabData.url &&
+      tabData.url.includes("youtube.com") &&
+      (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102)
+    ) {
+      console.warn(
+        "[YouTube Recovery] Error de conexión transitorio en YouTube, autorecuperando...",
+      );
+      setTimeout(() => webviewEl.reload(), 400);
+    } else if (
+      tabData.url &&
+      (e.errorCode === -105 ||
+        e.errorCode === -106 ||
+        e.errorCode === -102 ||
+        e.errorCode === -101 ||
+        e.errorCode === -501)
+    ) {
+      if (activeTabId === id) {
+        showWaybackBar(tabData.url);
       }
-
-      if (tabData.url && tabData.url.includes('youtube.com') && (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102)) {
-        console.warn('[YouTube Recovery] Error de conexión transitorio en YouTube, autorecuperando...');
-        setTimeout(() => webviewEl.reload(), 400);
-        return;
-      }
-
-      if (tabData.url && (e.errorCode === -105 || e.errorCode === -106 || e.errorCode === -102 || e.errorCode === -101 || e.errorCode === -501)) {
-        if (activeTabId === id) {
-          showWaybackBar(tabData.url);
-        }
-      }
-
-      const errCodeStr = e.errorDescription || (typeof e.errorCode === 'number' ? `ERR_CODE_${e.errorCode}` : 'ERR_INTERNET_DISCONNECTED');
-      const targetErrorPageUrl = `${errorUrl}?url=${encodeURIComponent(failedUrl)}&code=${encodeURIComponent(errCodeStr)}`;
-      
-      console.warn(`[Brave-Network-Error] Redirigiendo a página de error interna: ${failedUrl} (${errCodeStr})`);
-      webviewEl.src = targetErrorPageUrl;
     }
   });
 
-  webviewEl.addEventListener('found-in-page', (e) => {
+  webviewEl.addEventListener("found-in-page", (e) => {
     if (activeTabId === id) {
-      const countEl = document.getElementById('find-in-page-count');
+      const countEl = document.getElementById("find-in-page-count");
       if (countEl) {
-        countEl.textContent = e.result.matches > 0 ? `${e.result.activeMatchOrdinal} de ${e.result.matches}` : '0/0';
+        countEl.textContent =
+          e.result.matches > 0
+            ? `${e.result.activeMatchOrdinal} de ${e.result.matches}`
+            : "0/0";
       }
     }
   });
 
-  webviewEl.addEventListener('did-navigate', (e) => {
+  webviewEl.addEventListener("did-navigate", (e) => {
     // Si la pestaña está hibernada (Memory Saver), no sobreescribir la URL real con about:blank
-    if (tabData.isSleeping && (e.url === 'about:blank' || !e.url)) {
+    if (tabData.isSleeping && (e.url === "about:blank" || !e.url)) {
       return;
     }
 
@@ -2203,13 +2671,21 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     }
     const lastEntry = tabData.navHistory[tabData.navHistoryIndex];
     if (!lastEntry || lastEntry.url !== e.url) {
-      if (tabData.navHistoryIndex >= 0 && tabData.navHistoryIndex < tabData.navHistory.length - 1) {
-        tabData.navHistory = tabData.navHistory.slice(0, tabData.navHistoryIndex + 1);
+      if (
+        tabData.navHistoryIndex >= 0 &&
+        tabData.navHistoryIndex < tabData.navHistory.length - 1
+      ) {
+        tabData.navHistory = tabData.navHistory.slice(
+          0,
+          tabData.navHistoryIndex + 1,
+        );
       }
       tabData.navHistory.push({
         url: e.url,
-        title: tabData.title || (e.url.includes('ntp.html') ? 'Nueva pestaña' : e.url),
-        favicon: tabData.favicon || ''
+        title:
+          tabData.title ||
+          (e.url.includes("ntp.html") ? "Nueva pestaña" : e.url),
+        favicon: tabData.favicon || "",
       });
       tabData.navHistoryIndex = tabData.navHistory.length - 1;
     }
@@ -2228,7 +2704,10 @@ function createTab(initialUrl = ntpUrl, options = {}) {
       updateOmniboxForUrl(e.url);
       queryShieldsStatus(tabData.domain);
       // Detección de errores HTTP 404/500 para rescate con Wayback Machine
-      if (e.httpResponseCode && [404, 408, 410, 451, 500, 502, 503, 504].includes(e.httpResponseCode)) {
+      if (
+        e.httpResponseCode &&
+        [404, 408, 410, 451, 500, 502, 503, 504].includes(e.httpResponseCode)
+      ) {
         showWaybackBar(e.url);
       } else {
         hideWaybackBar();
@@ -2240,7 +2719,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     }, 800);
   });
 
-  webviewEl.addEventListener('did-navigate-in-page', (e) => {
+  webviewEl.addEventListener("did-navigate-in-page", (e) => {
     tabData.url = e.url;
     tabData.savedUrl = e.url;
     if (activeTabId === id) {
@@ -2248,15 +2727,15 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     }
   });
 
-  webviewEl.addEventListener('new-window', (e) => {
-    const isBg = e.disposition === 'background-tab';
+  webviewEl.addEventListener("new-window", (e) => {
+    const isBg = e.disposition === "background-tab";
     createTab(e.url, { background: isBg });
   });
 
   // Inyección de API bridge para todas las páginas internas (brave://...)
-  webviewEl.addEventListener('dom-ready', () => {
-    const curUrl = webviewEl.getURL() || '';
-    if (curUrl.startsWith('file://')) {
+  webviewEl.addEventListener("dom-ready", () => {
+    const curUrl = webviewEl.getURL() || "";
+    if (curUrl.startsWith("file://")) {
       const bridgeScript = `
         (function() {
           if (window.__brave_bridge_injected) return;
@@ -2343,7 +2822,7 @@ function createTab(initialUrl = ntpUrl, options = {}) {
         })();
       `;
       webviewEl.executeJavaScript(bridgeScript).catch(() => {});
-    } else if (!curUrl.startsWith('file://')) {
+    } else if (!curUrl.startsWith("file://")) {
       // Inyección de interceptor de formularios de contraseña
       const pwDetectorScript = `
         (function() {
@@ -2366,9 +2845,13 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
       // Autofill de credenciales guardadas para el dominio actual
       try {
-        const savedPwList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
-        const curDomain = tabData.domain ? tabData.domain.toLowerCase() : '';
-        const match = savedPwList.find((p) => p.domain && curDomain && p.domain.toLowerCase() === curDomain);
+        const savedPwList = JSON.parse(
+          localStorage.getItem("brave_passwords") || "[]",
+        );
+        const curDomain = tabData.domain ? tabData.domain.toLowerCase() : "";
+        const match = savedPwList.find(
+          (p) => p.domain && curDomain && p.domain.toLowerCase() === curDomain,
+        );
         if (match) {
           const autofillScript = `
             (function() {
@@ -2394,7 +2877,9 @@ function createTab(initialUrl = ntpUrl, options = {}) {
 
       // Autofill de Perfil Personal de Contacto y Dirección
       try {
-        const savedProf = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
+        const savedProf = JSON.parse(
+          localStorage.getItem("brave_autofill_profile") || "{}",
+        );
         if (savedProf.name || savedProf.email || savedProf.address) {
           const profileScript = `
             (function() {
@@ -2438,387 +2923,230 @@ function createTab(initialUrl = ntpUrl, options = {}) {
     }
   });
 
-  webviewEl.addEventListener('console-message', async (e) => {
-    const msg = typeof e.message === 'string' ? e.message : '';
-    if (!msg) return;
-
-    const isPwSubmit = msg.startsWith('__BRAVE_PW_SUBMIT__:');
-    const isRpc = msg.startsWith('__BRAVE_RPC__:');
-
-    if (!isPwSubmit && !isRpc) {
-      return;
-    }
-
-    // Origin verification guard: drop messages from untrusted origins
-    if (!isInternalWebviewOrigin(webviewEl)) {
-      return;
-    }
-
-    if (isPwSubmit) {
+  webviewEl.addEventListener("console-message", async (e) => {
+    if (e.message && e.message.startsWith("__BRAVE_PW_SUBMIT__:")) {
       try {
-        const data = JSON.parse(msg.slice(20));
+        const data = JSON.parse(e.message.slice(20));
         promptSavePassword(tabData, data.username, data.password);
       } catch {}
       return;
     }
 
-    if (isRpc) {
+    if (e.message && e.message.startsWith("__BRAVE_RPC__:")) {
       try {
-        const payload = JSON.parse(msg.slice(14));
+        const payload = JSON.parse(e.message.slice(14));
         const { callId, action, args = [] } = payload;
         let result = null;
         let handled = true;
-        const pageName = getInternalPageName(webviewEl);
-        const curUrl = (webviewEl && typeof webviewEl.getURL === 'function') ? (webviewEl.getURL() || '').toLowerCase() : '';
-        const isExtensionPage = ['extensions.html', 'webstore.html'].includes(pageName) ||
-          curUrl.includes('extensions.html') ||
-          curUrl.includes('webstore.html');
 
-        if (action === 'getDownloads') {
-          if (pageName === 'downloads.html') {
-            result = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-          } else {
-            handled = false;
+        if (action === "getDownloads") {
+          result = JSON.parse(localStorage.getItem("brave_downloads") || "[]");
+        } else if (action === "clearDownloads") {
+          localStorage.removeItem("brave_downloads");
+          result = true;
+        } else if (action === "deleteDownload") {
+          const dlId = args[0];
+          const list = JSON.parse(
+            localStorage.getItem("brave_downloads") || "[]",
+          );
+          const filtered = list.filter((item) => item.id !== dlId);
+          localStorage.setItem("brave_downloads", JSON.stringify(filtered));
+          result = true;
+        } else if (action === "getHistory") {
+          result = JSON.parse(
+            localStorage.getItem("brave_browser_history") || "[]",
+          );
+        } else if (action === "clearHistory") {
+          localStorage.removeItem("brave_browser_history");
+          result = true;
+        } else if (action === "deleteHistoryItem") {
+          const target = args[0];
+          const list = JSON.parse(
+            localStorage.getItem("brave_browser_history") || "[]",
+          );
+          let filtered = list;
+          if (typeof target === "string") {
+            filtered = list.filter(
+              (item) => item.id !== target && item.url !== target,
+            );
+          } else if (
+            typeof target === "number" &&
+            target >= 0 &&
+            target < list.length
+          ) {
+            list.splice(target, 1);
+            filtered = list;
           }
-        } else if (action === 'clearDownloads') {
-          if (pageName === 'downloads.html') {
-            localStorage.removeItem('brave_downloads');
-            result = true;
+          localStorage.setItem(
+            "brave_browser_history",
+            JSON.stringify(filtered),
+          );
+          result = true;
+        } else if (action === "createTab") {
+          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
+          createTab(targetUrl);
+          result = true;
+        } else if (action === "openWindow") {
+          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
+          if (window.braveAPI && window.braveAPI.openWindow) {
+            window.braveAPI.openWindow(targetUrl);
           } else {
-            handled = false;
-          }
-        } else if (action === 'deleteDownload') {
-          if (pageName === 'downloads.html') {
-            const dlId = args[0];
-            const list = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-            const filtered = list.filter((item) => item.id !== dlId);
-            localStorage.setItem('brave_downloads', JSON.stringify(filtered));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'openDownloadsFolder') {
-          if (pageName === 'downloads.html' && window.braveAPI && window.braveAPI.openDownloadsFolder) {
-            result = await window.braveAPI.openDownloadsFolder();
-          } else {
-            handled = false;
-          }
-        } else if (action === 'showItemInFolder') {
-          if (pageName === 'downloads.html' && window.braveAPI && window.braveAPI.showItemInFolder) {
-            result = await window.braveAPI.showItemInFolder(args[0]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'cancelDownload') {
-          if (pageName === 'downloads.html' && window.braveAPI && window.braveAPI.cancelDownload) {
-            result = await window.braveAPI.cancelDownload(args[0]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'openPath') {
-          if (pageName === 'downloads.html') {
-            const requestedPath = args[0];
-            const downloadsList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
-            const isKnownDownload = downloadsList.some((d) => d.savePath === requestedPath || d.path === requestedPath || d.filename === requestedPath);
-            if (isKnownDownload && window.braveAPI && window.braveAPI.openPath) {
-              result = await window.braveAPI.openPath(requestedPath);
-            } else {
-              result = { success: false, error: 'Ruta no autorizada en historial de descargas' };
-            }
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getHistory') {
-          if (['history.html', 'settings.html', 'ntp.html'].includes(pageName)) {
-            result = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
-          } else {
-            handled = false;
-          }
-        } else if (action === 'clearHistory') {
-          if (['history.html', 'settings.html'].includes(pageName)) {
-            localStorage.removeItem('brave_browser_history');
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'deleteHistoryItem') {
-          if (['history.html', 'settings.html'].includes(pageName)) {
-            const target = args[0];
-            const list = JSON.parse(localStorage.getItem('brave_browser_history') || '[]');
-            let filtered = list;
-            if (typeof target === 'string') {
-              filtered = list.filter((item) => item.id !== target && item.url !== target);
-            } else if (typeof target === 'number' && target >= 0 && target < list.length) {
-              list.splice(target, 1);
-              filtered = list;
-            }
-            localStorage.setItem('brave_browser_history', JSON.stringify(filtered));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'createTab') {
-          const rawUrl = args[0] || ntpUrl;
-          const targetUrl = resolveBraveUrl(rawUrl);
-          if (!/^javascript:/i.test(targetUrl)) {
             createTab(targetUrl);
-            result = true;
-          } else {
-            handled = false;
           }
-        } else if (action === 'openWindow') {
+          result = true;
+        } else if (action === "openPrivateWindow") {
           const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
-          if (!/^javascript:/i.test(targetUrl)) {
-            if (window.braveAPI && window.braveAPI.openWindow) {
-              window.braveAPI.openWindow(targetUrl);
-            } else {
-              createTab(targetUrl);
-            }
-            result = true;
+          if (window.braveAPI && window.braveAPI.openPrivateWindow) {
+            window.braveAPI.openPrivateWindow(targetUrl);
           } else {
-            handled = false;
+            createTab(targetUrl);
           }
-        } else if (action === 'openPrivateWindow') {
-          const targetUrl = resolveBraveUrl(args[0] || ntpUrl);
-          if (!/^javascript:/i.test(targetUrl)) {
-            if (window.braveAPI && window.braveAPI.openPrivateWindow) {
-              window.braveAPI.openPrivateWindow(targetUrl);
-            } else {
-              createTab(targetUrl);
-            }
-            result = true;
+          result = true;
+        } else if (action === "getBookmarks") {
+          result = JSON.parse(localStorage.getItem("brave_bookmarks") || "[]");
+        } else if (action === "saveBookmarks") {
+          const newList = args[0] || [];
+          localStorage.setItem("brave_bookmarks", JSON.stringify(newList));
+          renderBookmarks();
+          updateBookmarkStarState();
+          result = true;
+        } else if (action === "getBookmarkFolders") {
+          result = JSON.parse(
+            localStorage.getItem("brave_bookmark_folders") ||
+              '["Favoritos", "Trabajo"]',
+          );
+        } else if (action === "saveBookmarkFolders") {
+          const folders = args[0] || ["Favoritos", "Trabajo"];
+          localStorage.setItem(
+            "brave_bookmark_folders",
+            JSON.stringify(folders),
+          );
+          result = true;
+        } else if (action === "getPasswords") {
+          result = JSON.parse(localStorage.getItem("brave_passwords") || "[]");
+        } else if (action === "savePasswords") {
+          const pwList = args[0] || [];
+          localStorage.setItem("brave_passwords", JSON.stringify(pwList));
+          result = true;
+        } else if (action === "deletePassword") {
+          const [d, u] = args;
+          const pwList = JSON.parse(
+            localStorage.getItem("brave_passwords") || "[]",
+          );
+          const filtered = pwList.filter(
+            (p) => !(p.domain === d && p.username === u),
+          );
+          localStorage.setItem("brave_passwords", JSON.stringify(filtered));
+          result = true;
+        } else if (action === "clearPasswords") {
+          localStorage.removeItem("brave_passwords");
+          result = true;
+        } else if (action === "getPlaylist") {
+          result = JSON.parse(
+            localStorage.getItem("brave_playlist_items") || "[]",
+          );
+        } else if (action === "savePlaylist") {
+          const pl = args[0] || [];
+          localStorage.setItem("brave_playlist_items", JSON.stringify(pl));
+          result = true;
+        } else if (action === "deletePlaylistItem") {
+          const plId = args[0];
+          const pl = JSON.parse(
+            localStorage.getItem("brave_playlist_items") || "[]",
+          );
+          const filtered = pl.filter(
+            (item) => item.id !== plId && item.url !== plId,
+          );
+          localStorage.setItem(
+            "brave_playlist_items",
+            JSON.stringify(filtered),
+          );
+          result = true;
+        } else if (action === "clearPlaylist") {
+          localStorage.removeItem("brave_playlist_items");
+          result = true;
+        } else if (action === "getProfile") {
+          result = JSON.parse(
+            localStorage.getItem("brave_autofill_profile") || "{}",
+          );
+        } else if (action === "saveProfile") {
+          localStorage.setItem(
+            "brave_autofill_profile",
+            JSON.stringify(args[0] || {}),
+          );
+          result = true;
+        } else if (action === "getSettings") {
+          result = {
+            theme: localStorage.getItem("brave_theme") || "dark",
+            accent: localStorage.getItem("brave_accent") || "orange",
+            searchEngine:
+              localStorage.getItem("brave_setting_engine") || "brave",
+            shieldsLevel:
+              localStorage.getItem("brave_setting_level") || "standard",
+            farbling:
+              localStorage.getItem("brave_setting_farbling") !== "false",
+            queryStrip: localStorage.getItem("brave_setting_query") !== "false",
+            tabSnooze: localStorage.getItem("brave_tab_snooze") || "30",
+            startupMode:
+              localStorage.getItem("brave_startup_mode") || "continue",
+            syncPhrase: localStorage.getItem("brave_sync_phrase") || "",
+          };
+        } else if (action === "updateSetting") {
+          const [key, val] = args;
+          localStorage.setItem(key, String(val));
+          if (key === "brave_theme" && typeof applyTheme === "function")
+            applyTheme(val);
+          if (key === "brave_accent" && typeof applyAccent === "function")
+            applyAccent(val);
+          if (key === "brave_setting_engine") currentSearchEngine = val;
+          if (window.braveAPI && window.braveAPI.updateBackendSetting) {
+            window.braveAPI.updateBackendSetting(key, val);
+          }
+          result = true;
+        } else if (action === "clearBrowsingData") {
+          const opts = args[0] || {};
+          const dTypes = opts.dataTypes || [];
+          if (dTypes.includes("history")) {
+            localStorage.removeItem("brave_browser_history");
+          }
+          if (dTypes.includes("storage") || dTypes.includes("cookies")) {
+            try {
+              Object.keys(localStorage).forEach((k) => {
+                if (k.startsWith("brave_perms_")) {
+                  localStorage.removeItem(k);
+                }
+              });
+            } catch {}
+          }
+          if (window.braveAPI && window.braveAPI.clearBrowsingData) {
+            result = await window.braveAPI.clearBrowsingData(opts);
           } else {
-            handled = false;
+            result = { success: true };
           }
-        } else if (action === 'getBookmarks') {
-          if (['bookmarks.html', 'ntp.html', 'settings.html', 'welcome.html'].includes(pageName)) {
-            result = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
-          } else {
-            handled = false;
-          }
-        } else if (action === 'saveBookmarks') {
-          if (['bookmarks.html', 'welcome.html'].includes(pageName)) {
-            const newList = args[0] || [];
-            localStorage.setItem('brave_bookmarks', JSON.stringify(newList));
-            renderBookmarks();
-            updateBookmarkStarState();
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getBookmarkFolders') {
-          if (['bookmarks.html', 'settings.html'].includes(pageName)) {
-            result = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
-          } else {
-            handled = false;
-          }
-        } else if (action === 'saveBookmarkFolders') {
-          if (pageName === 'bookmarks.html') {
-            const folders = args[0] || ['Favoritos', 'Trabajo'];
-            localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getPasswords') {
-          if (pageName === 'settings.html') {
-            result = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
-          } else {
-            handled = false;
-          }
-        } else if (action === 'savePasswords') {
-          if (pageName === 'settings.html') {
-            const pwList = args[0] || [];
-            localStorage.setItem('brave_passwords', JSON.stringify(pwList));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'deletePassword') {
-          if (pageName === 'settings.html') {
-            const [d, u] = args;
-            const pwList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
-            const filtered = pwList.filter((p) => !(p.domain === d && p.username === u));
-            localStorage.setItem('brave_passwords', JSON.stringify(filtered));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'clearPasswords') {
-          if (pageName === 'settings.html') {
-            localStorage.removeItem('brave_passwords');
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getPlaylist') {
-          if (pageName === 'playlist.html') {
-            result = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
-          } else {
-            handled = false;
-          }
-        } else if (action === 'savePlaylist') {
-          if (pageName === 'playlist.html') {
-            const pl = args[0] || [];
-            localStorage.setItem('brave_playlist_items', JSON.stringify(pl));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'deletePlaylistItem') {
-          if (pageName === 'playlist.html') {
-            const plId = args[0];
-            const pl = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
-            const filtered = pl.filter((item) => item.id !== plId && item.url !== plId);
-            localStorage.setItem('brave_playlist_items', JSON.stringify(filtered));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'clearPlaylist') {
-          if (pageName === 'playlist.html') {
-            localStorage.removeItem('brave_playlist_items');
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getProfile') {
-          if (pageName === 'settings.html') {
-            result = JSON.parse(localStorage.getItem('brave_autofill_profile') || '{}');
-          } else {
-            handled = false;
-          }
-        } else if (action === 'saveProfile') {
-          if (pageName === 'settings.html') {
-            localStorage.setItem('brave_autofill_profile', JSON.stringify(args[0] || {}));
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getSettings') {
-          if (['settings.html', 'ntp.html', 'welcome.html'].includes(pageName)) {
-            result = {
-              theme: localStorage.getItem('brave_theme') || 'dark',
-              accent: localStorage.getItem('brave_accent') || 'orange',
-              searchEngine: localStorage.getItem('brave_setting_engine') || 'brave',
-              shieldsLevel: localStorage.getItem('brave_setting_level') || 'standard',
-              farbling: localStorage.getItem('brave_setting_farbling') !== 'false',
-              queryStrip: localStorage.getItem('brave_setting_query') !== 'false',
-              scriptsBlocked: localStorage.getItem('brave_setting_scripts') !== 'false',
-              tabSnooze: localStorage.getItem('brave_tab_snooze') || '30',
-              startupMode: localStorage.getItem('brave_startup_mode') || 'continue',
-              syncPhrase: localStorage.getItem('brave_sync_phrase') || '',
-            };
-          } else {
-            handled = false;
-          }
-        } else if (action === 'updateSetting') {
-          if (['settings.html', 'welcome.html'].includes(pageName)) {
-            const [key, val] = args;
-            localStorage.setItem(key, String(val));
-            if (key === 'brave_theme' && typeof applyTheme === 'function') applyTheme(val);
-            if (key === 'brave_accent' && typeof applyAccent === 'function') applyAccent(val);
-            if (key === 'brave_setting_engine') currentSearchEngine = val;
-            if (window.braveAPI && window.braveAPI.updateBackendSetting) {
-              window.braveAPI.updateBackendSetting(key, val);
-            }
-            result = true;
-          } else {
-            handled = false;
-          }
-        } else if (action === 'clearBrowsingData') {
-          if (['settings.html', 'history.html'].includes(pageName)) {
-            const opts = args[0] || {};
-            const dTypes = opts.dataTypes || [];
-            if (dTypes.includes('history')) {
-              localStorage.removeItem('brave_browser_history');
-            }
-            if (dTypes.includes('storage') || dTypes.includes('cookies')) {
-              try {
-                Object.keys(localStorage).forEach((k) => {
-                  if (k.startsWith('brave_perms_')) {
-                    localStorage.removeItem(k);
-                  }
-                });
-              } catch {}
-            }
-            if (window.braveAPI && window.braveAPI.clearBrowsingData) {
-              result = await window.braveAPI.clearBrowsingData(opts);
-            } else {
-              result = { success: true };
-            }
-          } else {
-            handled = false;
-          }
-        } else if (action === 'syncCustomRules') {
-          if (pageName === 'adblock.html' && window.braveAPI && window.braveAPI.syncCustomRules) {
-            result = await window.braveAPI.syncCustomRules(args[0]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'listExtensions') {
-          if (isExtensionPage && window.braveAPI && window.braveAPI.listExtensions) {
-            result = await window.braveAPI.listExtensions();
-          } else {
-            handled = false;
-          }
-        } else if (action === 'toggleExtension') {
-          if (isExtensionPage && window.braveAPI && window.braveAPI.toggleExtension) {
-            result = await window.braveAPI.toggleExtension(args[0], args[1]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'removeExtension') {
-          if (isExtensionPage && window.braveAPI && window.braveAPI.removeExtension) {
-            result = await window.braveAPI.removeExtension(args[0]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'loadUnpackedExtension') {
-          if (isExtensionPage && window.braveAPI && window.braveAPI.loadUnpackedExtension) {
-            result = await window.braveAPI.loadUnpackedExtension();
-          } else {
-            handled = false;
-          }
-        } else if (action === 'installPresetExtension') {
-          if (isExtensionPage && window.braveAPI && window.braveAPI.installPresetExtension) {
-            result = await window.braveAPI.installPresetExtension(args[0]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'downloadStoreExtension') {
-          if (isExtensionPage && window.braveAPI && window.braveAPI.downloadStoreExtension) {
-            result = await window.braveAPI.downloadStoreExtension(args[0]);
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getVersionInfo') {
-          if (pageName === 'version.html' && window.braveAPI && window.braveAPI.getVersionInfo) {
-            result = await window.braveAPI.getVersionInfo();
-          } else {
-            handled = false;
-          }
-        } else if (action === 'getSavingsStats') {
-          if (['ntp.html', 'version.html'].includes(pageName) && window.braveAPI && window.braveAPI.getSavingsStats) {
-            result = await window.braveAPI.getSavingsStats();
-          } else {
-            handled = false;
-          }
+        } else if (
+          window.braveAPI &&
+          typeof window.braveAPI[action] === "function"
+        ) {
+          result = await window.braveAPI[action](...args);
         } else {
           handled = false;
         }
 
         if (handled) {
-          webviewEl.executeJavaScript(
-            `window.__brave_rpc_respond && window.__brave_rpc_respond(${JSON.stringify(callId)}, true, ${JSON.stringify(result)});`
-          ).catch(() => {});
+          webviewEl
+            .executeJavaScript(
+              `window.__brave_rpc_respond && window.__brave_rpc_respond(${JSON.stringify(callId)}, true, ${JSON.stringify(result)});`,
+            )
+            .catch(() => {});
         } else {
-          webviewEl.executeJavaScript(
-            `window.__brave_rpc_respond && window.__brave_rpc_respond(${JSON.stringify(callId)}, false, null, "Acción no disponible");`
-          ).catch(() => {});
+          webviewEl
+            .executeJavaScript(
+              `window.__brave_rpc_respond && window.__brave_rpc_respond(${JSON.stringify(callId)}, false, null, "Acción no disponible");`,
+            )
+            .catch(() => {});
         }
       } catch (rpcErr) {
-        console.error('[Brave Bridge] Error en RPC:', rpcErr);
+        console.error("[Brave Bridge] Error en RPC:", rpcErr);
       }
     }
   });
@@ -2826,37 +3154,40 @@ function createTab(initialUrl = ntpUrl, options = {}) {
   if (!options.background) {
     switchTab(id);
   } else {
-    tabData.webviewEl.classList.add('hidden');
-    tabData.webviewEl.style.visibility = 'hidden';
-    tabData.webviewEl.style.opacity = '0';
-    tabData.webviewEl.style.pointerEvents = 'none';
-    tabData.webviewEl.style.zIndex = '0';
-    tabData.webviewEl.style.top = '-99999px';
-    tabData.webviewEl.style.left = '-99999px';
+    tabData.webviewEl.classList.add("hidden");
+    tabData.webviewEl.style.visibility = "hidden";
+    tabData.webviewEl.style.opacity = "0";
+    tabData.webviewEl.style.pointerEvents = "none";
+    tabData.webviewEl.style.zIndex = "0";
+    tabData.webviewEl.style.top = "-99999px";
+    tabData.webviewEl.style.left = "-99999px";
     throttleBackgroundTab(tabData);
   }
   return tabData;
 }
 
-window.addEventListener('brave:create-tab', (e) => {
-  const targetUrl = e.detail && e.detail.url ? resolveBraveUrl(e.detail.url) : ntpUrl;
+window.addEventListener("brave:create-tab", (e) => {
+  const targetUrl =
+    e.detail && e.detail.url ? resolveBraveUrl(e.detail.url) : ntpUrl;
   createTab(targetUrl);
 });
 
 function applyTabPinnedState(tabData, isPinned) {
   tabData.isPinned = isPinned;
   if (isPinned) {
-    tabData.tabEl.classList.add('pinned');
-    tabData.tabEl.title = tabData.title || 'Pestaña fijada';
+    tabData.tabEl.classList.add("pinned");
+    tabData.tabEl.title = tabData.title || "Pestaña fijada";
   } else {
-    tabData.tabEl.classList.remove('pinned');
-    tabData.tabEl.title = '';
+    tabData.tabEl.classList.remove("pinned");
+    tabData.tabEl.title = "";
   }
   reorderTabBarElements();
   if (!isCurrentWindowPrivate()) {
     try {
-      const pinnedList = tabs.filter((t) => t.isPinned).map((t) => ({ url: t.url, title: t.title }));
-      localStorage.setItem('brave_pinned_tabs', JSON.stringify(pinnedList));
+      const pinnedList = tabs
+        .filter((t) => t.isPinned)
+        .map((t) => ({ url: t.url, title: t.title }));
+      localStorage.setItem("brave_pinned_tabs", JSON.stringify(pinnedList));
     } catch {}
   }
 }
@@ -2878,22 +3209,33 @@ function reorderTabBarElements() {
 // CACHÉ INSTANTÁNEO ATRÁS / ADELANTE (BFCache)
 // ==========================================
 function saveCurrentTabScrollState(tabData) {
-  if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function' || !tabData.url || tabData.url.startsWith('file:') || tabData.url.startsWith('about:')) return;
-  tabData.webviewEl.executeJavaScript('({ x: window.scrollX || 0, y: window.scrollY || 0 })').then((pos) => {
-    if (pos && typeof pos.x === 'number') {
-      tabData.bfCache.set(tabData.url, {
-        scrollX: pos.x,
-        scrollY: pos.y,
-        title: tabData.title,
-        timestamp: Date.now()
-      });
-      // Limitar a máximo 20 entradas en memoria por pestaña (LRU básico)
-      if (tabData.bfCache.size > 20) {
-        const oldestKey = tabData.bfCache.keys().next().value;
-        if (oldestKey) tabData.bfCache.delete(oldestKey);
+  if (
+    !tabData ||
+    !tabData.webviewEl ||
+    typeof tabData.webviewEl.executeJavaScript !== "function" ||
+    !tabData.url ||
+    tabData.url.startsWith("file:") ||
+    tabData.url.startsWith("about:")
+  )
+    return;
+  tabData.webviewEl
+    .executeJavaScript("({ x: window.scrollX || 0, y: window.scrollY || 0 })")
+    .then((pos) => {
+      if (pos && typeof pos.x === "number") {
+        tabData.bfCache.set(tabData.url, {
+          scrollX: pos.x,
+          scrollY: pos.y,
+          title: tabData.title,
+          timestamp: Date.now(),
+        });
+        // Limitar a máximo 20 entradas en memoria por pestaña (LRU básico)
+        if (tabData.bfCache.size > 20) {
+          const oldestKey = tabData.bfCache.keys().next().value;
+          if (oldestKey) tabData.bfCache.delete(oldestKey);
+        }
       }
-    }
-  }).catch(() => {});
+    })
+    .catch(() => {});
 }
 
 function restoreTabBFCache(tabData, targetUrl) {
@@ -2901,15 +3243,27 @@ function restoreTabBFCache(tabData, targetUrl) {
   const cached = tabData.bfCache.get(targetUrl);
   if (!cached) return;
 
-  if (cached.title && cached.title !== 'Página Web' && cached.title !== 'Nueva pestaña') {
+  if (
+    cached.title &&
+    cached.title !== "Página Web" &&
+    cached.title !== "Nueva pestaña"
+  ) {
     tabData.title = cached.title;
-    const titleEl = tabData.tabEl.querySelector('.tab-title');
+    const titleEl = tabData.tabEl.querySelector(".tab-title");
     if (titleEl) titleEl.textContent = cached.title;
   }
 
   setTimeout(() => {
-    if (tabData && tabData.webviewEl && typeof tabData.webviewEl.executeJavaScript === 'function') {
-      tabData.webviewEl.executeJavaScript(`window.scrollTo(${cached.scrollX}, ${cached.scrollY});`).catch(() => {});
+    if (
+      tabData &&
+      tabData.webviewEl &&
+      typeof tabData.webviewEl.executeJavaScript === "function"
+    ) {
+      tabData.webviewEl
+        .executeJavaScript(
+          `window.scrollTo(${cached.scrollX}, ${cached.scrollY});`,
+        )
+        .catch(() => {});
     }
   }, 80);
 }
@@ -2918,29 +3272,38 @@ function restoreTabBFCache(tabData, targetUrl) {
 // SUPRESIÓN Y REPOSO EN SEGUNDO PLANO (Background Throttling)
 // ==========================================
 function throttleBackgroundTab(tabData) {
-  if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function' || tabData.isAudible) return;
-  try {
-    if (!tabData.webviewEl.isConnected) return;
-    tabData.webviewEl.executeJavaScript(`
-      if (!window.__brave_throttled__) {
-        window.__brave_throttled__ = true;
-        document.body && document.body.setAttribute('data-brave-background', 'true');
-      }
-    `).catch(() => {});
-  } catch (_) {}
+  if (
+    !tabData ||
+    !tabData.webviewEl ||
+    typeof tabData.webviewEl.executeJavaScript !== "function" ||
+    tabData.isAudible
+  )
+    return;
+  tabData.webviewEl
+    .executeJavaScript(`
+    if (!window.__brave_throttled__) {
+      window.__brave_throttled__ = true;
+      document.body && document.body.setAttribute('data-brave-background', 'true');
+    }
+  `)
+    .catch(() => {});
 }
 
 function resumeTabExecution(tabData) {
-  if (!tabData || !tabData.webviewEl || typeof tabData.webviewEl.executeJavaScript !== 'function') return;
-  try {
-    if (!tabData.webviewEl.isConnected) return;
-    tabData.webviewEl.executeJavaScript(`
-      if (window.__brave_throttled__) {
-        window.__brave_throttled__ = false;
-        document.body && document.body.removeAttribute('data-brave-background');
-      }
-    `).catch(() => {});
-  } catch (_) {}
+  if (
+    !tabData ||
+    !tabData.webviewEl ||
+    typeof tabData.webviewEl.executeJavaScript !== "function"
+  )
+    return;
+  tabData.webviewEl
+    .executeJavaScript(`
+    if (window.__brave_throttled__) {
+      window.__brave_throttled__ = false;
+      document.body && document.body.removeAttribute('data-brave-background');
+    }
+  `)
+    .catch(() => {});
 }
 
 function switchTab(id) {
@@ -2966,53 +3329,57 @@ function switchTab(id) {
   } else {
     tabs.forEach((t) => {
       if (t.id === id) {
-        t.tabEl.classList.add('active');
-        t.webviewEl.classList.remove('hidden');
-        t.webviewEl.style.width = '';
-        t.webviewEl.style.height = '';
-        t.webviewEl.style.position = 'absolute';
-        t.webviewEl.style.top = '0';
-        t.webviewEl.style.left = '0';
-        t.webviewEl.style.visibility = 'visible';
-        t.webviewEl.style.opacity = '1';
-        t.webviewEl.style.pointerEvents = 'auto';
-        t.webviewEl.style.zIndex = '2';
+        t.tabEl.classList.add("active");
+        t.webviewEl.classList.remove("hidden");
+        t.webviewEl.style.width = "100%";
+        t.webviewEl.style.height = "100%";
+        t.webviewEl.style.position = "absolute";
+        t.webviewEl.style.top = "0";
+        t.webviewEl.style.left = "0";
+        t.webviewEl.style.visibility = "visible";
+        t.webviewEl.style.opacity = "1";
+        t.webviewEl.style.pointerEvents = "auto";
+        t.webviewEl.style.zIndex = "2";
         resumeTabExecution(t);
       } else {
-        t.tabEl.classList.remove('active');
-        t.webviewEl.classList.add('hidden');
-        t.webviewEl.style.visibility = 'hidden';
-        t.webviewEl.style.opacity = '0';
-        t.webviewEl.style.pointerEvents = 'none';
-        t.webviewEl.style.zIndex = '0';
-        t.webviewEl.style.top = '-99999px';
-        t.webviewEl.style.left = '-99999px';
+        t.tabEl.classList.remove("active");
+        t.webviewEl.classList.add("hidden");
+        t.webviewEl.style.visibility = "hidden";
+        t.webviewEl.style.opacity = "0";
+        t.webviewEl.style.pointerEvents = "none";
+        t.webviewEl.style.zIndex = "0";
+        t.webviewEl.style.top = "-99999px";
+        t.webviewEl.style.left = "-99999px";
         throttleBackgroundTab(t);
       }
     });
   }
 
   // Cerrar barras o paneles contextuales de la pestaña anterior
-  if (speedreaderOverlay && speedreaderOverlay.classList.contains('active')) {
-    speedreaderOverlay.classList.remove('active');
-    if (btnSpeedreader) btnSpeedreader.classList.remove('active');
+  if (speedreaderOverlay && speedreaderOverlay.classList.contains("active")) {
+    speedreaderOverlay.classList.remove("active");
+    if (btnSpeedreader) btnSpeedreader.classList.remove("active");
   }
-  if (typeof closeFindInPage === 'function' && findInPageBar && findInPageBar.classList.contains('open')) {
+  if (
+    typeof closeFindInPage === "function" &&
+    findInPageBar &&
+    findInPageBar.classList.contains("open")
+  ) {
     closeFindInPage();
   }
-  if (translateBar && translateBar.classList.contains('active')) {
-    translateBar.classList.remove('active');
+  if (translateBar && translateBar.classList.contains("active")) {
+    translateBar.classList.remove("active");
   }
-  if (typeof hideWaybackBar === 'function') {
+  if (typeof hideWaybackBar === "function") {
     hideWaybackBar();
   }
   if (currentTab.hasCrashed) {
     if (crashBannerText) {
-      crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${currentTab.crashReason || 'cierre inesperado'}).`;
+      crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${currentTab.crashReason || "cierre inesperado"}).`;
     }
-    if (tabCrashBanner) tabCrashBanner.classList.add('active');
+    if (tabCrashBanner) tabCrashBanner.classList.add("active");
   } else {
-    if (tabCrashBanner) tabCrashBanner.classList.remove('active');
+    if (tabCrashBanner) tabCrashBanner.classList.remove("active");
   }
 
   updateOmniboxForUrl(currentTab.url);
@@ -3024,20 +3391,18 @@ function switchTab(id) {
   if (currentTab.isLoading) {
     showPageLoadingBar();
     btnReload.innerHTML = STOP_SVG;
-    btnReload.title = 'Detener carga (Esc)';
-    btnReload.setAttribute('data-state', 'stop');
+    btnReload.title = "Detener carga (Esc)";
   } else {
     hidePageLoadingBar();
     btnReload.innerHTML = RELOAD_SVG;
-    btnReload.title = 'Recargar (Ctrl+R)';
-    btnReload.setAttribute('data-state', 'reload');
+    btnReload.title = "Recargar (Ctrl+R)";
   }
 
   // Aplicar factor de zoom del dominio de la pestaña seleccionada
   const dom = currentTab.domain || extractDomain(currentTab.url);
   const zf = getStoredDomainZoom(dom);
   try {
-    if (typeof currentTab.webviewEl.setZoomFactor === 'function') {
+    if (typeof currentTab.webviewEl.setZoomFactor === "function") {
       currentTab.webviewEl.setZoomFactor(zf);
     }
   } catch {}
@@ -3056,48 +3421,54 @@ function closeTab(id) {
     toggleSplitView();
   }
 
-  if (tabToRemove && tabToRemove.url && !tabToRemove.url.includes('ntp.html')) {
+  if (tabToRemove && tabToRemove.url && !tabToRemove.url.includes("ntp.html")) {
     if (!isCurrentWindowPrivate()) {
       closedTabsStack.push({
         url: tabToRemove.url,
         title: tabToRemove.title,
       });
       if (closedTabsStack.length > 50) closedTabsStack.shift();
-      if (typeof updateRecentTabsMenu === 'function') updateRecentTabsMenu();
+      if (typeof updateRecentTabsMenu === "function") updateRecentTabsMenu();
     }
   }
 
   // Liberación total de recursos y corte inmediato de hilos de red/multimedia
   if (tabToRemove.webviewEl) {
     try {
-      if (typeof tabToRemove.webviewEl.stop === 'function') tabToRemove.webviewEl.stop();
-      tabToRemove.webviewEl.src = 'about:blank';
+      if (typeof tabToRemove.webviewEl.stop === "function")
+        tabToRemove.webviewEl.stop();
+      tabToRemove.webviewEl.src = "about:blank";
     } catch {}
   }
-  if (tabToRemove.bfCache && typeof tabToRemove.bfCache.clear === 'function') {
+  if (tabToRemove.bfCache && typeof tabToRemove.bfCache.clear === "function") {
     tabToRemove.bfCache.clear();
   }
 
-  // Animación de cierre suave con clase transitoria .closing
-  if (tabToRemove.tabEl) {
-    tabToRemove.tabEl.classList.add('closing');
-    setTimeout(() => {
-      try { tabToRemove.tabEl.remove(); } catch {}
-    }, 180);
-  }
-  tabToRemove.webviewEl.remove();
+  // Animación de cierre suave 60fps
+  tabToRemove.tabEl.classList.add("tab-closing");
+  setTimeout(() => {
+    try {
+      tabToRemove.tabEl.remove();
+      tabToRemove.webviewEl.remove();
+    } catch {}
+  }, 180);
+
   tabs.splice(index, 1);
 
   // Navegación Olvidadiza (Brave Forgetful Browsing):
   // Si no quedan más pestañas abiertas con este dominio, y la navegación olvidadiza está activa para el dominio:
   const domainToPurge = tabToRemove.domain;
   if (domainToPurge && window.braveAPI && window.braveAPI.getShieldsStatus) {
-    const hasOtherSameDomain = tabs.some((t) => t.id !== id && t.domain === domainToPurge);
+    const hasOtherSameDomain = tabs.some(
+      (t) => t.id !== id && t.domain === domainToPurge,
+    );
     if (!hasOtherSameDomain) {
       window.braveAPI.getShieldsStatus(domainToPurge).then((st) => {
         if (st && st.forgetful && window.braveAPI.clearDomainData) {
           window.braveAPI.clearDomainData(domainToPurge);
-          showGlobalToast(`Cookies y datos de ${domainToPurge} eliminados (Navegación olvidadiza)`);
+          showGlobalToast(
+            `Cookies y datos de ${domainToPurge} eliminados (Navegación olvidadiza)`,
+          );
         }
       });
     }
@@ -3108,25 +3479,29 @@ function closeTab(id) {
   } else if (activeTabId === id) {
     const nextIndex = index < tabs.length ? index : tabs.length - 1;
     const nextTab = tabs[nextIndex];
-    switchTab(nextTab.id);
+    if (nextTab) switchTab(nextTab.id);
   }
-  if (typeof saveCurrentSession === 'function') saveCurrentSession();
+  if (typeof saveCurrentSession === "function") saveCurrentSession();
 }
 
 // Doble clic en espacio vacío de la barra para crear nueva pestaña
-tabBar.addEventListener('dblclick', (e) => {
+tabBar.addEventListener("dblclick", (e) => {
   if (e.target === tabBar) {
     createTab(ntpUrl);
   }
 });
 
 // Desplazamiento horizontal fluido con la rueda del ratón en la barra de pestañas
-tabBar.addEventListener('wheel', (e) => {
-  if (e.deltaY !== 0) {
-    e.preventDefault();
-    tabBar.scrollLeft += e.deltaY;
-  }
-}, { passive: false });
+tabBar.addEventListener(
+  "wheel",
+  (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      tabBar.scrollLeft += e.deltaY;
+    }
+  },
+  { passive: false },
+);
 
 function getActiveTab() {
   return tabs.find((t) => t.id === activeTabId);
@@ -3135,93 +3510,91 @@ function getActiveTab() {
 function updateNavControls() {
   const tab = getActiveTab();
   if (!tab || !tab.webviewEl) return;
-  let canBack = false;
-  let canFwd = false;
-  try {
-    canBack = typeof tab.webviewEl.canGoBack === 'function' ? tab.webviewEl.canGoBack() : false;
-  } catch {}
-  try {
-    canFwd = typeof tab.webviewEl.canGoForward === 'function' ? tab.webviewEl.canGoForward() : false;
-  } catch {}
+  const canBack =
+    typeof tab.webviewEl.canGoBack === "function"
+      ? tab.webviewEl.canGoBack()
+      : false;
+  const canFwd =
+    typeof tab.webviewEl.canGoForward === "function"
+      ? tab.webviewEl.canGoForward()
+      : false;
   btnBack.disabled = !canBack;
   btnForward.disabled = !canFwd;
   updateBookmarkStarState();
 }
 
 function updateOmniboxForUrl(url) {
-  if (!url || url.includes('ntp.html') || url === 'about:newtab' || url === 'brave://newtab' || url === 'about:blank') {
-    urlInput.value = '';
-    urlInput.placeholder = 'Buscar en la web o ingresar una URL...';
+  if (
+    !url ||
+    url.includes("ntp.html") ||
+    url === "about:newtab" ||
+    url === "brave://newtab" ||
+    url === "about:blank"
+  ) {
+    urlInput.value = "";
+    urlInput.placeholder = "Buscar en la web o ingresar una URL...";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Página de nueva pestaña de Brave';
-  } else if (url.includes('history.html') || url === 'brave://history') {
-    urlInput.value = 'brave://history';
+    lockIcon.title = "Página de nueva pestaña de Brave";
+  } else if (url.includes("history.html") || url === "brave://history") {
+    urlInput.value = "brave://history";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Historial de navegación de Brave';
-  } else if (url.includes('downloads.html') || url === 'brave://downloads') {
-    urlInput.value = 'brave://downloads';
+    lockIcon.title = "Historial de navegación de Brave";
+  } else if (url.includes("downloads.html") || url === "brave://downloads") {
+    urlInput.value = "brave://downloads";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Descargas de Brave';
-  } else if (url.includes('adblock.html') || url === 'brave://adblock') {
-    urlInput.value = 'brave://adblock';
+    lockIcon.title = "Descargas de Brave";
+  } else if (url.includes("adblock.html") || url === "brave://adblock") {
+    urlInput.value = "brave://adblock";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Filtros de Brave Shields';
-  } else if (url.includes('playlist.html') || url === 'brave://playlist') {
-    urlInput.value = 'brave://playlist';
+    lockIcon.title = "Filtros de Brave Shields";
+  } else if (url.includes("playlist.html") || url === "brave://playlist") {
+    urlInput.value = "brave://playlist";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Brave Playlist';
-  } else if (url.includes('bookmarks.html') || url === 'brave://bookmarks') {
-    urlInput.value = 'brave://bookmarks';
+    lockIcon.title = "Brave Playlist";
+  } else if (url.includes("bookmarks.html") || url === "brave://bookmarks") {
+    urlInput.value = "brave://bookmarks";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Marcadores de Brave';
-  } else if (url.includes('version.html') || url === 'brave://version') {
-    urlInput.value = 'brave://version';
+    lockIcon.title = "Marcadores de Brave";
+  } else if (url.includes("version.html") || url === "brave://version") {
+    urlInput.value = "brave://version";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Acerca de Brave - Versión y Diagnóstico';
-  } else if (url.includes('error.html') || url.startsWith('brave://error')) {
-    try {
-      const parsedErrorUrl = new URL(url);
-      const originalFailedUrl = parsedErrorUrl.searchParams.get('url');
-      urlInput.value = originalFailedUrl || 'brave://error';
-    } catch {
-      urlInput.value = 'brave://error';
-    }
-    lockIcon.innerHTML = LOCK_SVG_INSECURE;
-    lockIcon.title = 'No se puede acceder a este sitio';
-  } else if (url.includes('welcome.html') || url === 'brave://welcome') {
-    urlInput.value = 'brave://welcome';
+    lockIcon.title = "Acerca de Brave - Versión y Diagnóstico";
+  } else if (url.includes("extensions.html") || url === "brave://extensions") {
+    urlInput.value = "brave://extensions";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Bienvenida a Brave';
-  } else if (url.includes('extensions.html') || url === 'brave://extensions') {
-    urlInput.value = 'brave://extensions';
+    lockIcon.title = "Extensiones de Brave";
+  } else if (url.includes("components.html") || url === "brave://components") {
+    urlInput.value = "brave://components";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Extensiones de Brave';
-  } else if (url.includes('components.html') || url === 'brave://components') {
-    urlInput.value = 'brave://components';
+    lockIcon.title = "Componentes y Módulos de Protección de Brave";
+  } else if (
+    url.includes("settings.html") ||
+    url === "brave://settings" ||
+    url === "brave://sync"
+  ) {
+    urlInput.value = url.includes("#sync")
+      ? "brave://sync"
+      : "brave://settings";
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Componentes y Módulos de Protección de Brave';
-  } else if (url.includes('settings.html') || url === 'brave://settings' || url === 'brave://sync') {
-    urlInput.value = url.includes('#sync') ? 'brave://sync' : 'brave://settings';
+    lockIcon.title = "Configuración de Brave";
+  } else if (url.includes("dweb.link/ipfs/") || url.includes("ipfs.io/ipfs/")) {
+    const cid = url.split("/ipfs/")[1];
+    urlInput.value = "ipfs://" + (cid || "");
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Configuración de Brave';
-  } else if (url.includes('dweb.link/ipfs/') || url.includes('ipfs.io/ipfs/')) {
-    const cid = url.split('/ipfs/')[1];
-    urlInput.value = 'ipfs://' + (cid || '');
+    lockIcon.title = "Protocolo descentralizado IPFS";
+  } else if (url.includes("dweb.link/ipns/") || url.includes("ipfs.io/ipns/")) {
+    const name = url.split("/ipns/")[1];
+    urlInput.value = "ipns://" + (name || "");
     lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Protocolo descentralizado IPFS';
-  } else if (url.includes('dweb.link/ipns/') || url.includes('ipfs.io/ipns/')) {
-    const name = url.split('/ipns/')[1];
-    urlInput.value = 'ipns://' + (name || '');
-    lockIcon.innerHTML = LOCK_SVG_BRAVE;
-    lockIcon.title = 'Protocolo descentralizado IPNS';
+    lockIcon.title = "Protocolo descentralizado IPNS";
   } else {
     urlInput.value = url;
-    if (url.startsWith('https://')) {
+    if (url.startsWith("https://")) {
       lockIcon.innerHTML = LOCK_SVG_SECURE;
-      lockIcon.title = 'Ver información del sitio (Conexión segura HTTPS)';
+      lockIcon.title = "Ver información del sitio (Conexión segura HTTPS)";
     } else {
       lockIcon.innerHTML = LOCK_SVG_INSECURE;
-      lockIcon.title = 'La conexión no es segura (HTTP)';
+      lockIcon.title = "La conexión no es segura (HTTP)";
     }
   }
 }
@@ -3230,56 +3603,56 @@ function updateOmniboxForUrl(url) {
 // 5. SUSPENSIÓN DE PESTAÑAS (Memory Saver)
 // ==========================================
 function putTabToSleep(tabData) {
-  if (tabData.isSleeping || tabData.id === activeTabId || tabData.isPinned) return;
+  if (tabData.isSleeping || tabData.id === activeTabId || tabData.isPinned)
+    return;
   tabData.isSleeping = true;
   tabData.savedUrl = tabData.url;
-  tabData.tabEl.classList.add('sleeping');
+  tabData.tabEl.classList.add("sleeping");
 
-  const titleEl = tabData.tabEl.querySelector('.tab-title');
-  if (titleEl && !titleEl.querySelector('.tab-sleep-badge')) {
-    titleEl.innerHTML = `<span class="tab-sleep-badge">${TAB_SLEEP_SVG}</span> ` + escapeHtml(tabData.title);
-  }
-
-  // Prevenir flash blanco fijando fondo base oscuro
-  if (tabData.webviewEl) {
-    tabData.webviewEl.style.backgroundColor = '#19191c';
+  const titleEl = tabData.tabEl.querySelector(".tab-title");
+  if (titleEl && !titleEl.textContent.includes("🌙")) {
+    titleEl.innerHTML =
+      `<span class="tab-sleep-badge">🌙</span> ` + tabData.title;
   }
 
   // Liberar recursos pesados navegando temporalmente a about:blank
-  tabData.webviewEl.src = 'about:blank';
+  tabData.webviewEl.src = "about:blank";
 }
 
 function wakeUpSleepingTab(tabData) {
   tabData.isSleeping = false;
-  tabData.tabEl.classList.remove('sleeping');
+  tabData.tabEl.classList.remove("sleeping");
 
-  const titleEl = tabData.tabEl.querySelector('.tab-title');
+  const titleEl = tabData.tabEl.querySelector(".tab-title");
   if (titleEl) {
     titleEl.textContent = tabData.title;
   }
 
-  // Prevenir flash blanco al deshibernar aplicando #19191c de fondo base antes de restaurar src
-  if (tabData.webviewEl) {
-    tabData.webviewEl.style.backgroundColor = '#19191c';
-  }
-
-  if (tabData.savedUrl && tabData.savedUrl !== 'about:blank') {
+  if (tabData.savedUrl && tabData.savedUrl !== "about:blank") {
     tabData.webviewEl.src = tabData.savedUrl;
   }
 }
 
 // Hibernación Automática de Pestañas Inactivas (Memory Saver)
 setInterval(() => {
-  const snoozeSetting = parseInt(localStorage.getItem('brave_tab_snooze') || '30', 10);
+  const snoozeSetting = parseInt(
+    localStorage.getItem("brave_tab_snooze") || "30",
+    10,
+  );
   if (snoozeSetting <= 0) return; // 0 = Desactivado
   const thresholdMs = snoozeSetting * 60 * 1000;
   const now = Date.now();
 
   tabs.forEach((tab) => {
-    if (tab.id !== activeTabId && !tab.isPinned && !tab.isAudible && !tab.isSleeping) {
-      if (tab.lastActiveTime && (now - tab.lastActiveTime > thresholdMs)) {
+    if (
+      tab.id !== activeTabId &&
+      !tab.isPinned &&
+      !tab.isAudible &&
+      !tab.isSleeping
+    ) {
+      if (tab.lastActiveTime && now - tab.lastActiveTime > thresholdMs) {
         const curUrl = tab.webviewEl.getURL() || tab.url;
-        if (curUrl && !curUrl.includes('ntp.html')) {
+        if (curUrl && !curUrl.includes("ntp.html")) {
           putTabToSleep(tab);
         }
       }
@@ -3293,13 +3666,19 @@ setInterval(() => {
 function updateTabThumbnail(tabData) {
   if (!tabData || !tabData.webviewEl || tabData.isSleeping) return;
   try {
-    if (typeof tabData.webviewEl.capturePage === 'function') {
-      tabData.webviewEl.capturePage().then((image) => {
-        if (image && !image.isEmpty()) {
-          const resized = typeof image.resize === 'function' ? image.resize({ width: 280, quality: 'good' }) : image;
-          tabData.thumbnailUrl = resized.toDataURL();
-        }
-      }).catch(() => {});
+    if (typeof tabData.webviewEl.capturePage === "function") {
+      tabData.webviewEl
+        .capturePage()
+        .then((image) => {
+          if (image && !image.isEmpty()) {
+            const resized =
+              typeof image.resize === "function"
+                ? image.resize({ width: 280, quality: "good" })
+                : image;
+            tabData.thumbnailUrl = resized.toDataURL();
+          }
+        })
+        .catch(() => {});
     }
   } catch {}
 }
@@ -3308,31 +3687,33 @@ function showTabHoverCard(tabData, tabEl) {
   if (!tabHoverCard) return;
   const rect = tabEl.getBoundingClientRect();
 
-  hoverCardTitle.textContent = tabData.title || 'Nueva pestaña';
-  hoverCardDomain.textContent = tabData.domain || 'brave://newtab';
+  hoverCardTitle.textContent = tabData.title || "Nueva pestaña";
+  hoverCardDomain.textContent = tabData.domain || "brave://newtab";
 
   // Vista previa gráfica en miniatura (Tab Thumbnail Preview)
-  const previewImg = document.getElementById('hover-card-preview');
-  const placeholder = document.getElementById('hover-card-placeholder');
+  const previewImg = document.getElementById("hover-card-preview");
+  const placeholder = document.getElementById("hover-card-placeholder");
   if (previewImg && placeholder) {
     if (tabData.thumbnailUrl) {
       previewImg.src = tabData.thumbnailUrl;
-      previewImg.classList.add('has-image');
-      placeholder.style.display = 'none';
+      previewImg.classList.add("has-image");
+      placeholder.style.display = "none";
     } else {
-      previewImg.classList.remove('has-image');
-      placeholder.style.display = 'flex';
-      placeholder.textContent = tabData.domain || '🦁 Brave Tab';
+      previewImg.classList.remove("has-image");
+      placeholder.style.display = "flex";
+      placeholder.textContent = tabData.domain || "🦁 Brave Tab";
       updateTabThumbnail(tabData);
     }
   }
 
   if (tabData.isSleeping) {
-    hoverCardMem.textContent = `Suspendida • Ahorrando ~${tabData.estimatedMemoryMB} MB`;
-    hoverCardStatus.textContent = 'Ahorro de memoria';
+    hoverCardMem.textContent = `🌙 Suspendida • Ahorrando ~${tabData.estimatedMemoryMB} MB`;
+    hoverCardStatus.textContent = "Ahorro de memoria";
   } else {
-    hoverCardMem.textContent = `Memoria: ~${tabData.estimatedMemoryMB} MB`;
-    hoverCardStatus.textContent = tabData.isAudible ? 'Reproduciendo audio' : 'Activa';
+    hoverCardMem.textContent = `💾 Memoria: ~${tabData.estimatedMemoryMB} MB`;
+    hoverCardStatus.textContent = tabData.isAudible
+      ? "🔊 Reproduciendo audio"
+      : "Activa";
   }
 
   let left = rect.left;
@@ -3342,30 +3723,28 @@ function showTabHoverCard(tabData, tabEl) {
 
   tabHoverCard.style.left = `${Math.max(10, left)}px`;
   tabHoverCard.style.top = `${rect.bottom + 6}px`;
-  tabHoverCard.classList.add('visible');
+  tabHoverCard.classList.add("visible");
 }
 
 function hideTabHoverCard() {
-  if (tabHoverCard) tabHoverCard.classList.remove('visible');
+  if (tabHoverCard) tabHoverCard.classList.remove("visible");
 }
 
 // ==========================================
 // 7. CONTROL GLOBAL DE MULTIMEDIA (Global Media Controls)
 // ==========================================
-if (btnGlobalMedia) {
-  btnGlobalMedia.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeSuggestions();
-    shieldsPopup.classList.remove('open');
-    mainMenu.classList.remove('open');
-    globalMediaPopup.classList.toggle('open');
-    updateGlobalMediaMenu();
-  });
-}
+btnGlobalMedia.addEventListener("click", (e) => {
+  e.stopPropagation();
+  closeSuggestions();
+  shieldsPopup.classList.remove("open");
+  mainMenu.classList.remove("open");
+  globalMediaPopup.classList.toggle("open");
+  updateGlobalMediaMenu();
+});
 
-const btnGlobalMuteAll = document.getElementById('btn-global-mute-all');
+const btnGlobalMuteAll = document.getElementById("btn-global-mute-all");
 if (btnGlobalMuteAll) {
-  btnGlobalMuteAll.addEventListener('click', () => {
+  btnGlobalMuteAll.addEventListener("click", () => {
     const audibleTabs = tabs.filter((t) => t.isAudible || t.isMuted);
     if (audibleTabs.length === 0) return;
     const shouldMute = audibleTabs.some((t) => !t.isMuted);
@@ -3373,7 +3752,11 @@ if (btnGlobalMuteAll) {
       t.isMuted = shouldMute;
       if (t.webviewEl) t.webviewEl.setAudioMuted(shouldMute);
     });
-    showGlobalToast(shouldMute ? '🔇 Todas las pestañas han sido silenciadas' : '🔊 Sonido reactivado en todas las pestañas');
+    showGlobalToast(
+      shouldMute
+        ? "🔇 Todas las pestañas han sido silenciadas"
+        : "🔊 Sonido reactivado en todas las pestañas",
+    );
     updateGlobalMediaMenu();
   });
 }
@@ -3385,13 +3768,15 @@ function updateGlobalMediaMenu() {
   if (btnGlobalMuteAll) {
     if (audibleTabs.length === 0) {
       btnGlobalMuteAll.disabled = true;
-      btnGlobalMuteAll.style.opacity = '0.5';
-      btnGlobalMuteAll.textContent = '🔇 Silenciar todo';
+      btnGlobalMuteAll.style.opacity = "0.5";
+      btnGlobalMuteAll.textContent = "🔇 Silenciar todo";
     } else {
       btnGlobalMuteAll.disabled = false;
-      btnGlobalMuteAll.style.opacity = '1';
+      btnGlobalMuteAll.style.opacity = "1";
       const anyUnmuted = audibleTabs.some((t) => !t.isMuted);
-      btnGlobalMuteAll.textContent = anyUnmuted ? '🔇 Silenciar todo' : '🔊 Reactivar todo';
+      btnGlobalMuteAll.textContent = anyUnmuted
+        ? "🔇 Silenciar todo"
+        : "🔊 Reactivar todo";
     }
   }
 
@@ -3404,39 +3789,41 @@ function updateGlobalMediaMenu() {
     return;
   }
 
-  mediaCardsContainer.innerHTML = '';
+  mediaCardsContainer.innerHTML = "";
   audibleTabs.forEach((t) => {
-    const card = document.createElement('div');
-    card.className = 'media-card';
+    const card = document.createElement("div");
+    card.className = "media-card";
     card.innerHTML = `
       <div class="media-card-header">
-        <span>${t.isAudible ? TAB_AUDIO_PLAYING_SVG : TAB_AUDIO_MUTED_SVG}</span>
+        <span>${t.isAudible ? "🔊" : "🔇"}</span>
         <div class="media-title">${t.title}</div>
       </div>
       <div style="font-size: 11px; color: var(--text-muted);">${t.domain}</div>
       <div class="media-controls-row">
-        <button class="btn-media-action btn-media-play">${t.isAudible ? 'Pausar' : 'Reanudar'}</button>
-        <button class="btn-media-action btn-media-mute">${t.isMuted ? 'Activar sonido' : 'Silenciar'}</button>
+        <button class="btn-media-action btn-media-play">${t.isAudible ? "Pausar" : "Reanudar"}</button>
+        <button class="btn-media-action btn-media-mute">${t.isMuted ? "Activar sonido" : "Silenciar"}</button>
         <button class="btn-media-action btn-media-goto">Ir a pestaña</button>
       </div>
     `;
 
-    card.querySelector('.btn-media-play').addEventListener('click', () => {
-      t.webviewEl.executeJavaScript(`
+    card.querySelector(".btn-media-play").addEventListener("click", () => {
+      t.webviewEl
+        .executeJavaScript(`
         const v = document.querySelector('video, audio');
         if (v) { v.paused ? v.play() : v.pause(); }
-      `).catch(() => {});
+      `)
+        .catch(() => {});
     });
 
-    card.querySelector('.btn-media-mute').addEventListener('click', () => {
+    card.querySelector(".btn-media-mute").addEventListener("click", () => {
       t.isMuted = !t.isMuted;
       t.webviewEl.setAudioMuted(t.isMuted);
       updateGlobalMediaMenu();
     });
 
-    card.querySelector('.btn-media-goto').addEventListener('click', () => {
+    card.querySelector(".btn-media-goto").addEventListener("click", () => {
       switchTab(t.id);
-      globalMediaPopup.classList.remove('open');
+      globalMediaPopup.classList.remove("open");
     });
 
     mediaCardsContainer.appendChild(card);
@@ -3446,24 +3833,31 @@ function updateGlobalMediaMenu() {
 // ==========================================
 // 8. MODO LECTURA BRAVE SPEEDREADER Y PERSONALIZACIÓN
 // ==========================================
-let srTheme = localStorage.getItem('brave_sr_theme') || 'dark';
-let srFontSize = parseInt(localStorage.getItem('brave_sr_font_size') || '100', 10);
-let srFontFamily = localStorage.getItem('brave_sr_font_family') || 'serif';
+let srTheme = localStorage.getItem("brave_sr_theme") || "dark";
+let srFontSize = parseInt(
+  localStorage.getItem("brave_sr_font_size") || "100",
+  10,
+);
+let srFontFamily = localStorage.getItem("brave_sr_font_family") || "serif";
 
-const speedreaderPillTime = document.getElementById('speedreader-pill-time');
-const speedreaderPillWords = document.getElementById('speedreader-pill-words');
-const srFontSizeLabel = document.getElementById('sr-font-size-label');
-const srBtnFontDec = document.getElementById('sr-btn-font-dec');
-const srBtnFontInc = document.getElementById('sr-btn-font-inc');
-const srBtnFontFamily = document.getElementById('sr-btn-font-family');
-const srThemeButtons = document.querySelectorAll('.sr-theme-btn');
+const speedreaderPillTime = document.getElementById("speedreader-pill-time");
+const speedreaderPillWords = document.getElementById("speedreader-pill-words");
+const srFontSizeLabel = document.getElementById("sr-font-size-label");
+const srBtnFontDec = document.getElementById("sr-btn-font-dec");
+const srBtnFontInc = document.getElementById("sr-btn-font-inc");
+const srBtnFontFamily = document.getElementById("sr-btn-font-family");
+const srThemeButtons = document.querySelectorAll(".sr-theme-btn");
 
 function applySpeedreaderPrefs() {
   if (!speedreaderOverlay) return;
-  speedreaderOverlay.classList.remove('theme-dark', 'theme-sepia', 'theme-light');
+  speedreaderOverlay.classList.remove(
+    "theme-dark",
+    "theme-sepia",
+    "theme-light",
+  );
   speedreaderOverlay.classList.add(`theme-${srTheme}`);
 
-  speedreaderOverlay.classList.remove('font-serif', 'font-sans');
+  speedreaderOverlay.classList.remove("font-serif", "font-sans");
   speedreaderOverlay.classList.add(`font-${srFontFamily}`);
 
   if (speedreaderContent) {
@@ -3473,46 +3867,46 @@ function applySpeedreaderPrefs() {
     srFontSizeLabel.textContent = `${srFontSize}%`;
   }
   if (srBtnFontFamily) {
-    srBtnFontFamily.textContent = srFontFamily === 'serif' ? 'Serif' : 'Sans';
+    srBtnFontFamily.textContent = srFontFamily === "serif" ? "Serif" : "Sans";
   }
 
   srThemeButtons.forEach((btn) => {
-    if (btn.getAttribute('data-sr-theme') === srTheme) {
-      btn.classList.add('active');
+    if (btn.getAttribute("data-sr-theme") === srTheme) {
+      btn.classList.add("active");
     } else {
-      btn.classList.remove('active');
+      btn.classList.remove("active");
     }
   });
 }
 
 srThemeButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    srTheme = btn.getAttribute('data-sr-theme');
-    localStorage.setItem('brave_sr_theme', srTheme);
+  btn.addEventListener("click", () => {
+    srTheme = btn.getAttribute("data-sr-theme");
+    localStorage.setItem("brave_sr_theme", srTheme);
     applySpeedreaderPrefs();
   });
 });
 
 if (srBtnFontDec) {
-  srBtnFontDec.addEventListener('click', () => {
+  srBtnFontDec.addEventListener("click", () => {
     srFontSize = Math.max(70, srFontSize - 10);
-    localStorage.setItem('brave_sr_font_size', String(srFontSize));
+    localStorage.setItem("brave_sr_font_size", String(srFontSize));
     applySpeedreaderPrefs();
   });
 }
 
 if (srBtnFontInc) {
-  srBtnFontInc.addEventListener('click', () => {
+  srBtnFontInc.addEventListener("click", () => {
     srFontSize = Math.min(160, srFontSize + 10);
-    localStorage.setItem('brave_sr_font_size', String(srFontSize));
+    localStorage.setItem("brave_sr_font_size", String(srFontSize));
     applySpeedreaderPrefs();
   });
 }
 
 if (srBtnFontFamily) {
-  srBtnFontFamily.addEventListener('click', () => {
-    srFontFamily = srFontFamily === 'serif' ? 'sans' : 'serif';
-    localStorage.setItem('brave_sr_font_family', srFontFamily);
+  srBtnFontFamily.addEventListener("click", () => {
+    srFontFamily = srFontFamily === "serif" ? "sans" : "serif";
+    localStorage.setItem("brave_sr_font_family", srFontFamily);
     applySpeedreaderPrefs();
   });
 }
@@ -3523,13 +3917,14 @@ function toggleSpeedreader() {
   const tab = getActiveTab();
   if (!tab) return;
 
-  if (speedreaderOverlay.classList.contains('active')) {
-    speedreaderOverlay.classList.remove('active');
-    btnSpeedreader.classList.remove('active');
+  if (speedreaderOverlay.classList.contains("active")) {
+    speedreaderOverlay.classList.remove("active");
+    btnSpeedreader.classList.remove("active");
     return;
   }
 
-  tab.webviewEl.executeJavaScript(`
+  tab.webviewEl
+    .executeJavaScript(`
     (() => {
       // 1. Detección de metadatos del artículo
       const title = document.querySelector('h1')?.innerText?.trim() || 
@@ -3597,38 +3992,45 @@ function toggleSpeedreader() {
         htmlContent: contentParts.join('')
       };
     })()
-  `).then((data) => {
-    if (!data || !data.htmlContent || data.totalWords < 40) {
-      showGlobalToast('Speedreader: No se detectó un artículo legible en esta página.');
-      return;
-    }
+  `)
+    .then((data) => {
+      if (!data || !data.htmlContent || data.totalWords < 40) {
+        showGlobalToast(
+          "Speedreader: No se detectó un artículo legible en esta página.",
+        );
+        return;
+      }
 
-    const readMin = Math.max(1, Math.round(data.totalWords / 200));
-    speedreaderTitle.textContent = data.title || tab.title;
-    speedreaderMeta.textContent = `${tab.domain}${data.author ? ' • Por ' + data.author : ''} • ~${readMin} min de lectura • Modo limpio sin anuncios`;
-    if (speedreaderPillTime) speedreaderPillTime.textContent = `~${readMin} min de lectura`;
-    if (speedreaderPillWords) speedreaderPillWords.textContent = `${data.totalWords} palabras`;
-    speedreaderContent.innerHTML = data.htmlContent;
-    applySpeedreaderPrefs();
+      const readMin = Math.max(1, Math.round(data.totalWords / 200));
+      speedreaderTitle.textContent = data.title || tab.title;
+      speedreaderMeta.textContent = `${tab.domain}${data.author ? " • Por " + data.author : ""} • ~${readMin} min de lectura • Modo limpio sin anuncios`;
+      if (speedreaderPillTime)
+        speedreaderPillTime.textContent = `~${readMin} min de lectura`;
+      if (speedreaderPillWords)
+        speedreaderPillWords.textContent = `${data.totalWords} palabras`;
+      speedreaderContent.innerHTML = data.htmlContent;
+      applySpeedreaderPrefs();
 
-    speedreaderOverlay.classList.add('active');
-    btnSpeedreader.classList.add('active');
-  }).catch(() => {
-    showGlobalToast('No se pudo activar Speedreader en este sitio web.');
-  });
+      speedreaderOverlay.classList.add("active");
+      btnSpeedreader.classList.add("active");
+    })
+    .catch(() => {
+      showGlobalToast("No se pudo activar Speedreader en este sitio web.");
+    });
 }
 
-btnSpeedreader.addEventListener('click', toggleSpeedreader);
-btnCloseSpeedreader.addEventListener('click', () => {
-  speedreaderOverlay.classList.remove('active');
-  btnSpeedreader.classList.remove('active');
+btnSpeedreader.addEventListener("click", toggleSpeedreader);
+btnCloseSpeedreader.addEventListener("click", () => {
+  speedreaderOverlay.classList.remove("active");
+  btnSpeedreader.classList.remove("active");
 });
 
 // ==========================================
 // 9. BLOQUEADOR DE AVISOS DE COOKIES
 // ==========================================
 function injectCookieBannersAutoDismiss(webview) {
-  webview.executeJavaScript(`
+  webview
+    .executeJavaScript(`
     (() => {
       const selectors = [
         '#onetrust-banner-sdk', '#onetrust-consent-sdk',
@@ -3647,7 +4049,8 @@ function injectCookieBannersAutoDismiss(webview) {
       document.documentElement.classList.remove('modal-open', 'cookie-modal-open');
       document.body.classList.remove('modal-open', 'cookie-modal-open');
     })()
-  `).catch(() => {});
+  `)
+    .catch(() => {});
 }
 
 // ==========================================
@@ -3657,93 +4060,98 @@ function openTabContextMenu(x, y, tabId = null) {
   contextMenuTargetTabId = tabId;
   const targetTab = tabId ? tabs.find((t) => t.id === tabId) : null;
 
-  const reloadItem = document.getElementById('tab-ctx-reload');
-  const dupItem = document.getElementById('tab-ctx-duplicate');
-  const newRightItem = document.getElementById('tab-ctx-new-right');
-  const pinItem = document.getElementById('tab-ctx-pin');
-  const muteItem = document.getElementById('tab-ctx-mute');
-  const groupOrange = document.getElementById('tab-ctx-group-orange');
-  const groupPurple = document.getElementById('tab-ctx-group-purple');
-  const groupBlue = document.getElementById('tab-ctx-group-blue');
-  const groupRemove = document.getElementById('tab-ctx-remove-group');
-  const sleepItem = document.getElementById('tab-ctx-sleep');
-  const reopenItem = document.getElementById('tab-ctx-reopen');
-  const bookmarkAllItem = document.getElementById('tab-ctx-bookmark-all');
-  const closeItem = document.getElementById('tab-ctx-close');
-  const closeRightItem = document.getElementById('tab-ctx-close-right');
-  const closeOthersItem = document.getElementById('tab-ctx-close-others');
+  const reloadItem = document.getElementById("tab-ctx-reload");
+  const dupItem = document.getElementById("tab-ctx-duplicate");
+  const newRightItem = document.getElementById("tab-ctx-new-right");
+  const pinItem = document.getElementById("tab-ctx-pin");
+  const muteItem = document.getElementById("tab-ctx-mute");
+  const groupOrange = document.getElementById("tab-ctx-group-orange");
+  const groupPurple = document.getElementById("tab-ctx-group-purple");
+  const groupBlue = document.getElementById("tab-ctx-group-blue");
+  const groupRemove = document.getElementById("tab-ctx-remove-group");
+  const sleepItem = document.getElementById("tab-ctx-sleep");
+  const reopenItem = document.getElementById("tab-ctx-reopen");
+  const bookmarkAllItem = document.getElementById("tab-ctx-bookmark-all");
+  const closeItem = document.getElementById("tab-ctx-close");
+  const closeRightItem = document.getElementById("tab-ctx-close-right");
+  const closeOthersItem = document.getElementById("tab-ctx-close-others");
 
-  const divGroups = document.getElementById('tab-ctx-divider-groups');
-  const divSleep = document.getElementById('tab-ctx-divider-sleep');
-  const divActions = document.getElementById('tab-ctx-divider-actions');
-  const divClose = document.getElementById('tab-ctx-divider-close');
+  const divGroups = document.getElementById("tab-ctx-divider-groups");
+  const divSleep = document.getElementById("tab-ctx-divider-sleep");
+  const divActions = document.getElementById("tab-ctx-divider-actions");
+  const divClose = document.getElementById("tab-ctx-divider-close");
 
   if (targetTab) {
-    if (reloadItem) reloadItem.style.display = 'flex';
-    if (dupItem) dupItem.style.display = 'flex';
+    if (reloadItem) reloadItem.style.display = "flex";
+    if (dupItem) dupItem.style.display = "flex";
     if (newRightItem) {
-      newRightItem.style.display = 'flex';
-      newRightItem.textContent = 'Nueva pestaña a la derecha';
+      newRightItem.style.display = "flex";
+      newRightItem.textContent = "Nueva pestaña a la derecha";
     }
     if (pinItem) {
-      pinItem.style.display = 'flex';
-      pinItem.textContent = targetTab.isPinned ? 'Desfijar pestaña' : 'Fijar pestaña';
+      pinItem.style.display = "flex";
+      pinItem.textContent = targetTab.isPinned
+        ? "Desfijar pestaña"
+        : "Fijar pestaña";
     }
     if (muteItem) {
-      muteItem.style.display = 'flex';
-      muteItem.textContent = targetTab.isMuted ? 'Activar sonido de pestaña' : 'Silenciar pestaña';
+      muteItem.style.display = "flex";
+      muteItem.textContent = targetTab.isMuted
+        ? "Activar sonido de pestaña"
+        : "Silenciar pestaña";
     }
-    if (groupOrange) groupOrange.style.display = 'flex';
-    if (groupPurple) groupPurple.style.display = 'flex';
-    if (groupBlue) groupBlue.style.display = 'flex';
-    if (groupRemove) groupRemove.style.display = targetTab.groupId ? 'flex' : 'none';
-    if (divGroups) divGroups.style.display = 'block';
-    if (sleepItem) sleepItem.style.display = 'flex';
-    if (divSleep) divSleep.style.display = 'block';
-    if (closeItem) closeItem.style.display = 'flex';
-    if (closeRightItem) closeRightItem.style.display = 'flex';
-    if (closeOthersItem) closeOthersItem.style.display = 'flex';
-    if (divClose) divClose.style.display = 'block';
+    if (groupOrange) groupOrange.style.display = "flex";
+    if (groupPurple) groupPurple.style.display = "flex";
+    if (groupBlue) groupBlue.style.display = "flex";
+    if (groupRemove)
+      groupRemove.style.display = targetTab.groupId ? "flex" : "none";
+    if (divGroups) divGroups.style.display = "block";
+    if (sleepItem) sleepItem.style.display = "flex";
+    if (divSleep) divSleep.style.display = "block";
+    if (closeItem) closeItem.style.display = "flex";
+    if (closeRightItem) closeRightItem.style.display = "flex";
+    if (closeOthersItem) closeOthersItem.style.display = "flex";
+    if (divClose) divClose.style.display = "block";
   } else {
-    if (reloadItem) reloadItem.style.display = 'none';
-    if (dupItem) dupItem.style.display = 'none';
+    if (reloadItem) reloadItem.style.display = "none";
+    if (dupItem) dupItem.style.display = "none";
     if (newRightItem) {
-      newRightItem.style.display = 'flex';
-      newRightItem.textContent = 'Nueva pestaña';
+      newRightItem.style.display = "flex";
+      newRightItem.textContent = "Nueva pestaña";
     }
-    if (pinItem) pinItem.style.display = 'none';
-    if (muteItem) muteItem.style.display = 'none';
-    if (groupOrange) groupOrange.style.display = 'none';
-    if (groupPurple) groupPurple.style.display = 'none';
-    if (groupBlue) groupBlue.style.display = 'none';
-    if (groupRemove) groupRemove.style.display = 'none';
-    if (divGroups) divGroups.style.display = 'none';
-    if (sleepItem) sleepItem.style.display = 'none';
-    if (divSleep) divSleep.style.display = 'none';
-    if (closeItem) closeItem.style.display = 'none';
-    if (closeRightItem) closeRightItem.style.display = 'none';
-    if (closeOthersItem) closeOthersItem.style.display = 'none';
-    if (divClose) divClose.style.display = 'none';
+    if (pinItem) pinItem.style.display = "none";
+    if (muteItem) muteItem.style.display = "none";
+    if (groupOrange) groupOrange.style.display = "none";
+    if (groupPurple) groupPurple.style.display = "none";
+    if (groupBlue) groupBlue.style.display = "none";
+    if (groupRemove) groupRemove.style.display = "none";
+    if (divGroups) divGroups.style.display = "none";
+    if (sleepItem) sleepItem.style.display = "none";
+    if (divSleep) divSleep.style.display = "none";
+    if (closeItem) closeItem.style.display = "none";
+    if (closeRightItem) closeRightItem.style.display = "none";
+    if (closeOthersItem) closeOthersItem.style.display = "none";
+    if (divClose) divClose.style.display = "none";
   }
 
   if (reopenItem) {
     if (closedTabsStack.length > 0) {
-      reopenItem.style.display = 'flex';
-      reopenItem.style.opacity = '1';
-      reopenItem.style.pointerEvents = 'auto';
+      reopenItem.style.display = "flex";
+      reopenItem.style.opacity = "1";
+      reopenItem.style.pointerEvents = "auto";
     } else {
-      reopenItem.style.display = 'flex';
-      reopenItem.style.opacity = '0.4';
-      reopenItem.style.pointerEvents = 'none';
+      reopenItem.style.display = "flex";
+      reopenItem.style.opacity = "0.4";
+      reopenItem.style.pointerEvents = "none";
     }
   }
-  if (bookmarkAllItem) bookmarkAllItem.style.display = 'flex';
-  if (divActions) divActions.style.display = 'block';
+  if (bookmarkAllItem) bookmarkAllItem.style.display = "flex";
+  if (divActions) divActions.style.display = "block";
 
   tabContextMenu.style.left = `${Math.min(x, window.innerWidth - 240)}px`;
   tabContextMenu.style.top = `${Math.min(y, window.innerHeight - 340)}px`;
-  tabContextMenu.classList.add('open');
-  customContextMenu.classList.remove('open');
+  tabContextMenu.classList.add("open");
+  customContextMenu.classList.remove("open");
 }
 
 // Menú contextual nativo recibido desde el Webview
@@ -3755,208 +4163,195 @@ if (window.braveAPI && window.braveAPI.onContextMenu) {
 }
 
 function openPageContextMenu(x, y, params) {
-  const linkItem = document.getElementById('ctx-open-new-tab');
-  const linkPrivateItem = document.getElementById('ctx-open-private-tab');
-  const linkTorItem = document.getElementById('ctx-open-tor-tab');
-  const copyLinkItem = document.getElementById('ctx-copy-link');
-  const linkDivider = document.getElementById('ctx-link-divider');
+  const linkItem = document.getElementById("ctx-open-new-tab");
+  const linkPrivateItem = document.getElementById("ctx-open-private-tab");
+  const linkTorItem = document.getElementById("ctx-open-tor-tab");
+  const copyLinkItem = document.getElementById("ctx-copy-link");
+  const linkDivider = document.getElementById("ctx-link-divider");
 
-  const searchItem = document.getElementById('ctx-search-selection');
-  const copyItem = document.getElementById('ctx-copy-selection');
-  const textDivider = document.getElementById('ctx-text-divider');
+  const searchItem = document.getElementById("ctx-search-selection");
+  const copyItem = document.getElementById("ctx-copy-selection");
+  const textDivider = document.getElementById("ctx-text-divider");
 
-  const openImageItem = document.getElementById('ctx-open-image-tab');
-  const copyImageItem = document.getElementById('ctx-copy-image-link');
-  const imageDivider = document.getElementById('ctx-image-divider');
+  const openImageItem = document.getElementById("ctx-open-image-tab");
+  const copyImageItem = document.getElementById("ctx-copy-image-link");
+  const imageDivider = document.getElementById("ctx-image-divider");
 
   const hasLink = Boolean(params && params.linkURL);
-  const hasText = Boolean(params && params.selectionText && params.selectionText.trim());
-  const hasImage = Boolean(params && (params.mediaType === 'image' || params.srcURL));
+  const hasText = Boolean(
+    params && params.selectionText && params.selectionText.trim(),
+  );
+  const hasImage = Boolean(
+    params && (params.mediaType === "image" || params.srcURL),
+  );
 
-  linkItem.style.display = hasLink ? 'block' : 'none';
-  linkPrivateItem.style.display = hasLink ? 'block' : 'none';
-  linkTorItem.style.display = hasLink ? 'block' : 'none';
-  copyLinkItem.style.display = hasLink ? 'block' : 'none';
-  linkDivider.style.display = hasLink ? 'block' : 'none';
+  linkItem.style.display = hasLink ? "block" : "none";
+  linkPrivateItem.style.display = hasLink ? "block" : "none";
+  linkTorItem.style.display = hasLink ? "block" : "none";
+  copyLinkItem.style.display = hasLink ? "block" : "none";
+  linkDivider.style.display = hasLink ? "block" : "none";
 
-  const saveImageItem = document.getElementById('ctx-save-image');
-  const searchImageItem = document.getElementById('ctx-search-image');
+  const saveImageItem = document.getElementById("ctx-save-image");
+  const searchImageItem = document.getElementById("ctx-search-image");
 
-  if (openImageItem) openImageItem.style.display = hasImage ? 'block' : 'none';
-  if (saveImageItem) saveImageItem.style.display = hasImage ? 'block' : 'none';
-  if (copyImageItem) copyImageItem.style.display = hasImage ? 'block' : 'none';
-  if (searchImageItem) searchImageItem.style.display = hasImage ? 'block' : 'none';
-  if (imageDivider) imageDivider.style.display = hasImage ? 'block' : 'none';
+  if (openImageItem) openImageItem.style.display = hasImage ? "block" : "none";
+  if (saveImageItem) saveImageItem.style.display = hasImage ? "block" : "none";
+  if (copyImageItem) copyImageItem.style.display = hasImage ? "block" : "none";
+  if (searchImageItem)
+    searchImageItem.style.display = hasImage ? "block" : "none";
+  if (imageDivider) imageDivider.style.display = hasImage ? "block" : "none";
 
-  searchItem.style.display = hasText ? 'block' : 'none';
-  copyItem.style.display = hasText ? 'block' : 'none';
-  textDivider.style.display = hasText ? 'block' : 'none';
+  searchItem.style.display = hasText ? "block" : "none";
+  copyItem.style.display = hasText ? "block" : "none";
+  textDivider.style.display = hasText ? "block" : "none";
 
   if (hasText) {
     searchItem.textContent = `Buscar "${params.selectionText.substring(0, 18)}..." en ${getSearchEngineName()}`;
   }
 
-  const contentRect = browserContent ? browserContent.getBoundingClientRect() : { left: 0, top: 0 };
+  const contentRect = browserContent
+    ? browserContent.getBoundingClientRect()
+    : { left: 0, top: 0 };
   const actualX = x + (contentRect.left || 0);
   const actualY = y + (contentRect.top || 0);
 
   customContextMenu.style.left = `${Math.max(10, Math.min(actualX, window.innerWidth - 240))}px`;
   customContextMenu.style.top = `${Math.max(10, Math.min(actualY, window.innerHeight - 340))}px`;
-  customContextMenu.classList.add('open');
-  tabContextMenu.classList.remove('open');
+  customContextMenu.classList.add("open");
+  tabContextMenu.classList.remove("open");
 }
 
 // Eventos de opciones de contexto de página
-const ctxOpenImageTab = document.getElementById('ctx-open-image-tab');
+const ctxOpenImageTab = document.getElementById("ctx-open-image-tab");
 if (ctxOpenImageTab) {
-  ctxOpenImageTab.addEventListener('click', () => {
+  ctxOpenImageTab.addEventListener("click", () => {
     if (contextMenuTargetData && contextMenuTargetData.srcURL) {
       createTab(contextMenuTargetData.srcURL);
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
 }
 
-const ctxCopyImageLink = document.getElementById('ctx-copy-image-link');
+const ctxCopyImageLink = document.getElementById("ctx-copy-image-link");
 if (ctxCopyImageLink) {
-  ctxCopyImageLink.addEventListener('click', () => {
+  ctxCopyImageLink.addEventListener("click", () => {
     if (contextMenuTargetData && contextMenuTargetData.srcURL) {
       navigator.clipboard.writeText(contextMenuTargetData.srcURL);
-      showGlobalToast('Dirección de la imagen copiada');
+      showGlobalToast("Dirección de la imagen copiada");
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
 }
 
-const ctxSaveImage = document.getElementById('ctx-save-image');
+const ctxSaveImage = document.getElementById("ctx-save-image");
 if (ctxSaveImage) {
-  ctxSaveImage.addEventListener('click', () => {
+  ctxSaveImage.addEventListener("click", () => {
     if (contextMenuTargetData && contextMenuTargetData.srcURL) {
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = contextMenuTargetData.srcURL;
-      a.download = contextMenuTargetData.srcURL.split('/').pop()?.split('?')[0] || 'imagen.jpg';
+      a.download =
+        contextMenuTargetData.srcURL.split("/").pop()?.split("?")[0] ||
+        "imagen.jpg";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      showGlobalToast('🦁 Guardando imagen...');
+      showGlobalToast("🦁 Guardando imagen...");
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
 }
 
-const ctxSearchImage = document.getElementById('ctx-search-image');
+const ctxSearchImage = document.getElementById("ctx-search-image");
 if (ctxSearchImage) {
-  ctxSearchImage.addEventListener('click', () => {
+  ctxSearchImage.addEventListener("click", () => {
     if (contextMenuTargetData && contextMenuTargetData.srcURL) {
-      createTab('https://lens.google.com/uploadbyurl?url=' + encodeURIComponent(contextMenuTargetData.srcURL));
+      createTab(
+        "https://lens.google.com/uploadbyurl?url=" +
+          encodeURIComponent(contextMenuTargetData.srcURL),
+      );
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
 }
-const ctxMenuOpenNewTab = document.getElementById('ctx-open-new-tab');
-if (ctxMenuOpenNewTab) {
-  ctxMenuOpenNewTab.addEventListener('click', () => {
-    if (contextMenuTargetData && contextMenuTargetData.linkURL) {
-      createTab(contextMenuTargetData.linkURL);
-    }
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-open-new-tab").addEventListener("click", () => {
+  if (contextMenuTargetData && contextMenuTargetData.linkURL) {
+    createTab(contextMenuTargetData.linkURL);
+  }
+  customContextMenu.classList.remove("open");
+});
 
-const ctxOpenPrivateTab = document.getElementById('ctx-open-private-tab');
-if (ctxOpenPrivateTab) {
-  ctxOpenPrivateTab.addEventListener('click', () => {
+document
+  .getElementById("ctx-open-private-tab")
+  .addEventListener("click", () => {
     const targetUrl = contextMenuTargetData && contextMenuTargetData.linkURL;
     if (window.braveAPI && window.braveAPI.openPrivateWindow) {
       window.braveAPI.openPrivateWindow(targetUrl);
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
-}
 
-const ctxOpenTorTab = document.getElementById('ctx-open-tor-tab');
-if (ctxOpenTorTab) {
-  ctxOpenTorTab.addEventListener('click', () => {
-    const targetUrl = contextMenuTargetData && contextMenuTargetData.linkURL;
-    if (window.braveAPI && window.braveAPI.openTorWindow) {
-      window.braveAPI.openTorWindow(targetUrl);
-    }
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-open-tor-tab").addEventListener("click", () => {
+  const targetUrl = contextMenuTargetData && contextMenuTargetData.linkURL;
+  if (window.braveAPI && window.braveAPI.openTorWindow) {
+    window.braveAPI.openTorWindow(targetUrl);
+  }
+  customContextMenu.classList.remove("open");
+});
 
-const ctxCopyLink = document.getElementById('ctx-copy-link');
-if (ctxCopyLink) {
-  ctxCopyLink.addEventListener('click', () => {
-    if (contextMenuTargetData && contextMenuTargetData.linkURL) {
-      navigator.clipboard.writeText(contextMenuTargetData.linkURL);
-    }
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-copy-link").addEventListener("click", () => {
+  if (contextMenuTargetData && contextMenuTargetData.linkURL) {
+    navigator.clipboard.writeText(contextMenuTargetData.linkURL);
+  }
+  customContextMenu.classList.remove("open");
+});
 
-const ctxSearchSelection = document.getElementById('ctx-search-selection');
-if (ctxSearchSelection) {
-  ctxSearchSelection.addEventListener('click', () => {
+document
+  .getElementById("ctx-search-selection")
+  .addEventListener("click", () => {
     if (contextMenuTargetData && contextMenuTargetData.selectionText) {
       createTab(getSearchEngineQueryUrl(contextMenuTargetData.selectionText));
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
-}
 
-const ctxCopySelection = document.getElementById('ctx-copy-selection');
-if (ctxCopySelection) {
-  ctxCopySelection.addEventListener('click', () => {
-    if (contextMenuTargetData && contextMenuTargetData.selectionText) {
-      navigator.clipboard.writeText(contextMenuTargetData.selectionText);
-    }
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-copy-selection").addEventListener("click", () => {
+  if (contextMenuTargetData && contextMenuTargetData.selectionText) {
+    navigator.clipboard.writeText(contextMenuTargetData.selectionText);
+  }
+  customContextMenu.classList.remove("open");
+});
 
-const ctxNavBack = document.getElementById('ctx-nav-back');
-if (ctxNavBack) {
-  ctxNavBack.addEventListener('click', () => {
-    const tab = getActiveTab();
-    if (tab && tab.webviewEl.canGoBack()) tab.webviewEl.goBack();
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-nav-back").addEventListener("click", () => {
+  const tab = getActiveTab();
+  if (tab && tab.webviewEl.canGoBack()) tab.webviewEl.goBack();
+  customContextMenu.classList.remove("open");
+});
 
-const ctxNavForward = document.getElementById('ctx-nav-forward');
-if (ctxNavForward) {
-  ctxNavForward.addEventListener('click', () => {
-    const tab = getActiveTab();
-    if (tab && tab.webviewEl.canGoForward()) tab.webviewEl.goForward();
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-nav-forward").addEventListener("click", () => {
+  const tab = getActiveTab();
+  if (tab && tab.webviewEl.canGoForward()) tab.webviewEl.goForward();
+  customContextMenu.classList.remove("open");
+});
 
-const ctxNavReload = document.getElementById('ctx-nav-reload');
-if (ctxNavReload) {
-  ctxNavReload.addEventListener('click', () => {
-    const tab = getActiveTab();
-    if (tab) tab.webviewEl.reload();
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-nav-reload").addEventListener("click", () => {
+  const tab = getActiveTab();
+  if (tab) tab.webviewEl.reload();
+  customContextMenu.classList.remove("open");
+});
 
-const ctxSpeedreader = document.getElementById('ctx-speedreader');
-if (ctxSpeedreader) {
-  ctxSpeedreader.addEventListener('click', () => {
-    toggleSpeedreader();
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-speedreader").addEventListener("click", () => {
+  toggleSpeedreader();
+  customContextMenu.classList.remove("open");
+});
 
 // Picture-in-Picture
-const ctxOpenPip = document.getElementById('ctx-open-pip');
+const ctxOpenPip = document.getElementById("ctx-open-pip");
 if (ctxOpenPip) {
-  ctxOpenPip.addEventListener('click', () => {
+  ctxOpenPip.addEventListener("click", () => {
     const tab = getActiveTab();
     if (tab && tab.webviewEl) {
-      tab.webviewEl.executeJavaScript(`
+      tab.webviewEl
+        .executeJavaScript(`
         (() => {
           const video = document.querySelector('video');
           if (video) {
@@ -3967,18 +4362,19 @@ if (ctxOpenPip) {
             }
           }
         })()
-      `).catch(() => {});
+      `)
+        .catch(() => {});
     }
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
 }
 
 // Split View desde Context Menu
-const ctxSplitTab = document.getElementById('ctx-split-tab');
+const ctxSplitTab = document.getElementById("ctx-split-tab");
 if (ctxSplitTab) {
-  ctxSplitTab.addEventListener('click', () => {
+  ctxSplitTab.addEventListener("click", () => {
     toggleSplitView();
-    customContextMenu.classList.remove('open');
+    customContextMenu.classList.remove("open");
   });
 }
 
@@ -3988,10 +4384,11 @@ if (ctxSplitTab) {
 function activateElementPicker() {
   const tab = getActiveTab();
   if (!tab || !tab.webviewEl) return;
-  const pickerBar = document.getElementById('element-picker-bar');
-  if (pickerBar) pickerBar.classList.add('active');
+  const pickerBar = document.getElementById("element-picker-bar");
+  if (pickerBar) pickerBar.classList.add("active");
 
-  tab.webviewEl.executeJavaScript(`
+  tab.webviewEl
+    .executeJavaScript(`
     (() => {
       if (window.__braveZapperActive) return;
       window.__braveZapperActive = true;
@@ -4065,61 +4462,72 @@ function activateElementPicker() {
         document.addEventListener('keydown', onKey, true);
       });
     })()
-  `).then((selector) => {
-    if (pickerBar) pickerBar.classList.remove('active');
-    if (selector && typeof selector === 'string') {
-      const domain = tab.domain || 'sitio';
-      const rule = `\n${domain}##${selector}`;
-      const currentRules = localStorage.getItem('brave_custom_adblock_rules') || '';
-      const updatedRules = currentRules + rule;
-      localStorage.setItem('brave_custom_adblock_rules', updatedRules);
-      if (window.braveAPI && window.braveAPI.syncCustomRules) {
-        window.braveAPI.syncCustomRules(updatedRules);
+  `)
+    .then((selector) => {
+      if (pickerBar) pickerBar.classList.remove("active");
+      if (selector && typeof selector === "string") {
+        const domain = tab.domain || "sitio";
+        const rule = `\n${domain}##${selector}`;
+        const currentRules =
+          localStorage.getItem("brave_custom_adblock_rules") || "";
+        const updatedRules = currentRules + rule;
+        localStorage.setItem("brave_custom_adblock_rules", updatedRules);
+        if (window.braveAPI && window.braveAPI.syncCustomRules) {
+          window.braveAPI.syncCustomRules(updatedRules);
+        }
+        tab.webviewEl
+          .insertCSS(`${selector} { display: none !important; }`)
+          .catch(() => {});
+        showGlobalToast(`🦁 Elemento bloqueado permanentemente (${selector})`);
+        console.log(
+          "[Element Zapper] Regla cosmética persistente guardada y sincronizada:",
+          rule,
+        );
       }
-      tab.webviewEl.insertCSS(`${selector} { display: none !important; }`).catch(() => {});
-      showGlobalToast(`🦁 Elemento bloqueado permanentemente (${selector})`);
-      console.log('[Element Zapper] Regla cosmética persistente guardada y sincronizada:', rule);
-    }
-  }).catch(() => {
-    if (pickerBar) pickerBar.classList.remove('active');
-  });
+    })
+    .catch(() => {
+      if (pickerBar) pickerBar.classList.remove("active");
+    });
 }
 
-const btnCancelPicker = document.getElementById('btn-cancel-picker');
+const btnCancelPicker = document.getElementById("btn-cancel-picker");
 if (btnCancelPicker) {
-  btnCancelPicker.addEventListener('click', () => {
-    const pickerBar = document.getElementById('element-picker-bar');
-    if (pickerBar) pickerBar.classList.remove('active');
+  btnCancelPicker.addEventListener("click", () => {
+    const pickerBar = document.getElementById("element-picker-bar");
+    if (pickerBar) pickerBar.classList.remove("active");
     const tab = getActiveTab();
     if (tab && tab.webviewEl) {
-      tab.webviewEl.executeJavaScript(`
+      tab.webviewEl
+        .executeJavaScript(`
         if (window.__braveZapperActive) {
           const el = document.getElementById('__brave_zapper_highlight');
           if (el) el.remove();
           window.__braveZapperActive = false;
         }
-      `).catch(() => {});
+      `)
+        .catch(() => {});
     }
   });
 }
 
-const ctxBlockElement = document.getElementById('ctx-block-element');
+const ctxBlockElement = document.getElementById("ctx-block-element");
 if (ctxBlockElement) {
-  ctxBlockElement.addEventListener('click', () => {
-    customContextMenu.classList.remove('open');
+  ctxBlockElement.addEventListener("click", () => {
+    customContextMenu.classList.remove("open");
     activateElementPicker();
   });
 }
 
 // Desbloqueador de Copia y Clic Derecho Protegido (Force Copy & Selection)
-const ctxForceCopy = document.getElementById('ctx-force-copy');
+const ctxForceCopy = document.getElementById("ctx-force-copy");
 if (ctxForceCopy) {
-  ctxForceCopy.addEventListener('click', () => {
-    customContextMenu.classList.remove('open');
+  ctxForceCopy.addEventListener("click", () => {
+    customContextMenu.classList.remove("open");
     const tab = getActiveTab();
     if (!tab || !tab.webviewEl) return;
 
-    tab.webviewEl.executeJavaScript(`
+    tab.webviewEl
+      .executeJavaScript(`
       (() => {
         const style = document.createElement('style');
         style.innerHTML = '* { -webkit-user-select: text !important; user-select: text !important; }';
@@ -4142,119 +4550,110 @@ if (ctxForceCopy) {
         }
         return true;
       })()
-    `).catch(() => {});
+    `)
+      .catch(() => {});
   });
 }
 
-const ctxTranslatePage = document.getElementById('ctx-translate-page');
+const ctxTranslatePage = document.getElementById("ctx-translate-page");
 if (ctxTranslatePage) {
-  ctxTranslatePage.addEventListener('click', () => {
-    customContextMenu.classList.remove('open');
+  ctxTranslatePage.addEventListener("click", () => {
+    customContextMenu.classList.remove("open");
     if (btnTranslate) btnTranslate.click();
     if (btnDoTranslate) btnDoTranslate.click();
   });
 }
 
-const ctxAddBookmark = document.getElementById('ctx-add-bookmark');
-if (ctxAddBookmark) {
-  ctxAddBookmark.addEventListener('click', () => {
-    addCurrentPageToBookmarks();
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-add-bookmark").addEventListener("click", () => {
+  addCurrentPageToBookmarks();
+  customContextMenu.classList.remove("open");
+});
 
-const ctxDevtools = document.getElementById('ctx-devtools');
-if (ctxDevtools) {
-  ctxDevtools.addEventListener('click', () => {
-    const tab = getActiveTab();
-    if (tab) tab.webviewEl.openDevTools();
-    customContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("ctx-devtools").addEventListener("click", () => {
+  const tab = getActiveTab();
+  if (tab) tab.webviewEl.openDevTools();
+  customContextMenu.classList.remove("open");
+});
 
 // Eventos de opciones de contexto de pestaña
-const tabCtxDuplicate = document.getElementById('tab-ctx-duplicate');
+const tabCtxDuplicate = document.getElementById("tab-ctx-duplicate");
 if (tabCtxDuplicate) {
-  tabCtxDuplicate.addEventListener('click', () => {
+  tabCtxDuplicate.addEventListener("click", () => {
     const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
     if (tab) createTab(tab.url, false);
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
 }
 
-const tabCtxReload = document.getElementById('tab-ctx-reload');
+const tabCtxReload = document.getElementById("tab-ctx-reload");
 if (tabCtxReload) {
-  tabCtxReload.addEventListener('click', () => {
+  tabCtxReload.addEventListener("click", () => {
     const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
     if (tab && tab.webviewEl) tab.webviewEl.reload();
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
 }
 
-const tabCtxCloseRight = document.getElementById('tab-ctx-close-right');
+const tabCtxCloseRight = document.getElementById("tab-ctx-close-right");
 if (tabCtxCloseRight) {
-  tabCtxCloseRight.addEventListener('click', () => {
+  tabCtxCloseRight.addEventListener("click", () => {
     const targetIdx = tabs.findIndex((t) => t.id === contextMenuTargetTabId);
     if (targetIdx !== -1) {
       const toClose = tabs.slice(targetIdx + 1).filter((t) => !t.isPinned);
       toClose.forEach((t) => closeTab(t.id));
     }
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
 }
 
-const tabCtxNewRight = document.getElementById('tab-ctx-new-right');
-if (tabCtxNewRight) {
-  tabCtxNewRight.addEventListener('click', () => {
-    createTab(ntpUrl);
-    tabContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("tab-ctx-new-right").addEventListener("click", () => {
+  createTab(ntpUrl);
+  tabContextMenu.classList.remove("open");
+});
 
-const tabCtxPin = document.getElementById('tab-ctx-pin');
-if (tabCtxPin) {
-  tabCtxPin.addEventListener('click', () => {
-    const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
-    if (tab) {
-      applyTabPinnedState(tab, !tab.isPinned);
-    }
-    tabContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("tab-ctx-pin").addEventListener("click", () => {
+  const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
+  if (tab) {
+    applyTabPinnedState(tab, !tab.isPinned);
+  }
+  tabContextMenu.classList.remove("open");
+});
 
-const tabCtxMute = document.getElementById('tab-ctx-mute');
-if (tabCtxMute) {
-  tabCtxMute.addEventListener('click', () => {
-    const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
-    if (tab) {
-      tab.isMuted = !tab.isMuted;
-      tab.webviewEl.setAudioMuted(tab.isMuted);
-      const audioBtn = tab.tabEl.querySelector('.tab-audio-icon');
-      if (audioBtn) {
-        if (tab.isMuted) {
-          audioBtn.style.display = 'inline-flex';
-          audioBtn.innerHTML = TAB_AUDIO_MUTED_SVG;
-          audioBtn.classList.add('muted');
-          audioBtn.title = 'Reactivar sonido de la pestaña';
-        } else if (tab.isAudible) {
-          audioBtn.style.display = 'inline-flex';
-          audioBtn.innerHTML = TAB_AUDIO_PLAYING_SVG;
-          audioBtn.classList.remove('muted');
-          audioBtn.title = 'Silenciar pestaña';
-        } else {
-          audioBtn.style.display = 'none';
-        }
+document.getElementById("tab-ctx-mute").addEventListener("click", () => {
+  const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
+  if (tab) {
+    tab.isMuted = !tab.isMuted;
+    tab.webviewEl.setAudioMuted(tab.isMuted);
+    const audioBtn = tab.tabEl.querySelector(".tab-audio-icon");
+    if (audioBtn) {
+      if (tab.isMuted) {
+        audioBtn.style.display = "inline-flex";
+        audioBtn.textContent = "🔇";
+        audioBtn.classList.add("muted");
+        audioBtn.title = "Reactivar sonido de la pestaña";
+      } else if (tab.isAudible) {
+        audioBtn.style.display = "inline-flex";
+        audioBtn.textContent = "🔊";
+        audioBtn.classList.remove("muted");
+        audioBtn.title = "Silenciar pestaña";
+      } else {
+        audioBtn.style.display = "none";
       }
-      updateGlobalMediaMenu();
     }
-    tabContextMenu.classList.remove('open');
-  });
-}
+    updateGlobalMediaMenu();
+  }
+  tabContextMenu.classList.remove("open");
+});
 
 function assignTabGroup(tabId, color, groupName) {
   const tab = tabs.find((t) => t.id === tabId);
   if (!tab) return;
-  tab.tabEl.classList.remove('in-group-orange', 'in-group-purple', 'in-group-blue', 'in-group-green');
+  tab.tabEl.classList.remove(
+    "in-group-orange",
+    "in-group-purple",
+    "in-group-blue",
+    "in-group-green",
+  );
   if (color) {
     tab.tabEl.classList.add(`in-group-${color}`);
     tab.groupId = `group-${color}`;
@@ -4263,109 +4662,103 @@ function assignTabGroup(tabId, color, groupName) {
   }
 }
 
-const tabCtxGroupOrange = document.getElementById('tab-ctx-group-orange');
-if (tabCtxGroupOrange) {
-  tabCtxGroupOrange.addEventListener('click', () => {
-    assignTabGroup(contextMenuTargetTabId, 'orange', 'Trabajo');
-    tabContextMenu.classList.remove('open');
+document
+  .getElementById("tab-ctx-group-orange")
+  .addEventListener("click", () => {
+    assignTabGroup(contextMenuTargetTabId, "orange", "Trabajo");
+    tabContextMenu.classList.remove("open");
   });
-}
 
-const tabCtxGroupPurple = document.getElementById('tab-ctx-group-purple');
-if (tabCtxGroupPurple) {
-  tabCtxGroupPurple.addEventListener('click', () => {
-    assignTabGroup(contextMenuTargetTabId, 'purple', 'Investigación');
-    tabContextMenu.classList.remove('open');
+document
+  .getElementById("tab-ctx-group-purple")
+  .addEventListener("click", () => {
+    assignTabGroup(contextMenuTargetTabId, "purple", "Investigación");
+    tabContextMenu.classList.remove("open");
   });
-}
 
-const tabCtxGroupBlue = document.getElementById('tab-ctx-group-blue');
-if (tabCtxGroupBlue) {
-  tabCtxGroupBlue.addEventListener('click', () => {
-    assignTabGroup(contextMenuTargetTabId, 'blue', 'Multimedia');
-    tabContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("tab-ctx-group-blue").addEventListener("click", () => {
+  assignTabGroup(contextMenuTargetTabId, "blue", "Multimedia");
+  tabContextMenu.classList.remove("open");
+});
 
-const tabCtxRemoveGroup = document.getElementById('tab-ctx-remove-group');
-if (tabCtxRemoveGroup) {
-  tabCtxRemoveGroup.addEventListener('click', () => {
+document
+  .getElementById("tab-ctx-remove-group")
+  .addEventListener("click", () => {
     assignTabGroup(contextMenuTargetTabId, null);
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
-}
 
-const tabCtxSleep = document.getElementById('tab-ctx-sleep');
-if (tabCtxSleep) {
-  tabCtxSleep.addEventListener('click', () => {
-    const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
-    if (tab) putTabToSleep(tab);
-    tabContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("tab-ctx-sleep").addEventListener("click", () => {
+  const tab = tabs.find((t) => t.id === contextMenuTargetTabId);
+  if (tab) putTabToSleep(tab);
+  tabContextMenu.classList.remove("open");
+});
 
-const tabCtxClose = document.getElementById('tab-ctx-close');
-if (tabCtxClose) {
-  tabCtxClose.addEventListener('click', () => {
-    if (contextMenuTargetTabId) closeTab(contextMenuTargetTabId);
-    tabContextMenu.classList.remove('open');
-  });
-}
+document.getElementById("tab-ctx-close").addEventListener("click", () => {
+  if (contextMenuTargetTabId) closeTab(contextMenuTargetTabId);
+  tabContextMenu.classList.remove("open");
+});
 
-const tabCtxCloseOthers = document.getElementById('tab-ctx-close-others');
-if (tabCtxCloseOthers) {
-  tabCtxCloseOthers.addEventListener('click', () => {
-    const toClose = tabs.filter((t) => t.id !== contextMenuTargetTabId && !t.isPinned);
+document
+  .getElementById("tab-ctx-close-others")
+  .addEventListener("click", () => {
+    const toClose = tabs.filter(
+      (t) => t.id !== contextMenuTargetTabId && !t.isPinned,
+    );
     toClose.forEach((t) => closeTab(t.id));
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
-}
 
-const tabCtxReopen = document.getElementById('tab-ctx-reopen');
+const tabCtxReopen = document.getElementById("tab-ctx-reopen");
 if (tabCtxReopen) {
-  tabCtxReopen.addEventListener('click', () => {
+  tabCtxReopen.addEventListener("click", () => {
     if (closedTabsStack.length > 0) {
       const restored = closedTabsStack.pop();
       createTab(restored.url);
     }
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
 }
 
-const tabCtxBookmarkAll = document.getElementById('tab-ctx-bookmark-all');
+const tabCtxBookmarkAll = document.getElementById("tab-ctx-bookmark-all");
 if (tabCtxBookmarkAll) {
-  tabCtxBookmarkAll.addEventListener('click', () => {
+  tabCtxBookmarkAll.addEventListener("click", () => {
     bookmarkAllTabs();
-    tabContextMenu.classList.remove('open');
+    tabContextMenu.classList.remove("open");
   });
 }
 
 // Menú contextual en el espacio vacío de la barra de pestañas y región superior
 if (tabBar) {
-  tabBar.addEventListener('contextmenu', (e) => {
-    if (e.target.closest('.tab') || e.target.closest('.tab-new')) return;
+  tabBar.addEventListener("contextmenu", (e) => {
+    if (e.target.closest(".tab") || e.target.closest(".tab-new")) return;
     e.preventDefault();
     openTabContextMenu(e.clientX, e.clientY, null);
   });
 }
-const dragRegion = document.querySelector('.titlebar-drag-region');
+const dragRegion = document.querySelector(".titlebar-drag-region");
 if (dragRegion) {
-  dragRegion.addEventListener('contextmenu', (e) => {
+  dragRegion.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     openTabContextMenu(e.clientX, e.clientY, null);
   });
 }
 
 function bookmarkAllTabs() {
-  const currentBookmarks = JSON.parse(localStorage.getItem('brave_bookmarks') || '[]');
+  const currentBookmarks = JSON.parse(
+    localStorage.getItem("brave_bookmarks") || "[]",
+  );
   const now = new Date();
-  const dateStr = now.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  const dateStr = now.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+  });
   const folderName = `Pestañas (${dateStr})`;
   let addedCount = 0;
   tabs.forEach((t) => {
-    if (t.url && !t.url.startsWith('file://') && !t.url.includes('ntp.html')) {
+    if (t.url && !t.url.startsWith("file://") && !t.url.includes("ntp.html")) {
       currentBookmarks.push({
-        title: t.title || 'Página Web',
+        title: t.title || "Página Web",
         url: t.url,
         folder: folderName,
         dateAdded: Date.now(),
@@ -4374,17 +4767,20 @@ function bookmarkAllTabs() {
     }
   });
   if (addedCount > 0) {
-    const folders = JSON.parse(localStorage.getItem('brave_bookmark_folders') || '["Favoritos", "Trabajo"]');
+    const folders = JSON.parse(
+      localStorage.getItem("brave_bookmark_folders") ||
+        '["Favoritos", "Trabajo"]',
+    );
     if (!folders.includes(folderName)) {
       folders.push(folderName);
-      localStorage.setItem('brave_bookmark_folders', JSON.stringify(folders));
+      localStorage.setItem("brave_bookmark_folders", JSON.stringify(folders));
     }
-    localStorage.setItem('brave_bookmarks', JSON.stringify(currentBookmarks));
+    localStorage.setItem("brave_bookmarks", JSON.stringify(currentBookmarks));
     renderBookmarks();
     updateBookmarkStarState();
     showGlobalToast(`✓ ${addedCount} pestañas guardadas en "${folderName}"`);
   } else {
-    showGlobalToast('No hay páginas abiertas para guardar');
+    showGlobalToast("No hay páginas abiertas para guardar");
   }
 }
 
@@ -4398,73 +4794,129 @@ function navigateTo(raw) {
   const lower = target.toLowerCase();
 
   // Búsquedas con Prefijos Rápidos (!bangs y :)
-  if (lower.startsWith(':yt ') || lower.startsWith('!yt ')) {
-    target = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(target.replace(/^[:!]yt\s+/i, '').trim());
-  } else if (lower.startsWith(':w ') || lower.startsWith('!w ')) {
-    target = 'https://es.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(target.replace(/^[:!]w\s+/i, '').trim());
-  } else if (lower.startsWith(':g ') || lower.startsWith('!g ')) {
-    target = 'https://www.google.com/search?q=' + encodeURIComponent(target.replace(/^[:!]g\s+/i, '').trim());
-  } else if (lower.startsWith(':gh ') || lower.startsWith('!gh ')) {
-    target = 'https://github.com/search?q=' + encodeURIComponent(target.replace(/^[:!]gh\s+/i, '').trim());
-  } else if (lower.startsWith(':ddg ') || lower.startsWith('!ddg ') || lower.startsWith(':d ') || lower.startsWith('!d ')) {
-    target = 'https://duckduckgo.com/?q=' + encodeURIComponent(target.replace(/^[:!](ddg|d)\s+/i, '').trim());
-  } else if (lower.startsWith(':b ') || lower.startsWith('!b ')) {
-    target = 'https://search.brave.com/search?q=' + encodeURIComponent(target.replace(/^[:!]b\s+/i, '').trim());
-  } else if (lower.startsWith(':r ') || lower.startsWith('!r ')) {
-    target = 'https://www.reddit.com/search/?q=' + encodeURIComponent(target.replace(/^[:!]r\s+/i, '').trim());
-  } else if (lower.startsWith(':m ') || lower.startsWith('!m ')) {
-    target = 'https://www.google.com/maps/search/' + encodeURIComponent(target.replace(/^[:!]m\s+/i, '').trim());
+  if (lower.startsWith(":yt ") || lower.startsWith("!yt ")) {
+    target =
+      "https://www.youtube.com/results?search_query=" +
+      encodeURIComponent(target.replace(/^[:!]yt\s+/i, "").trim());
+  } else if (lower.startsWith(":w ") || lower.startsWith("!w ")) {
+    target =
+      "https://es.wikipedia.org/wiki/Special:Search?search=" +
+      encodeURIComponent(target.replace(/^[:!]w\s+/i, "").trim());
+  } else if (lower.startsWith(":g ") || lower.startsWith("!g ")) {
+    target =
+      "https://www.google.com/search?q=" +
+      encodeURIComponent(target.replace(/^[:!]g\s+/i, "").trim());
+  } else if (lower.startsWith(":gh ") || lower.startsWith("!gh ")) {
+    target =
+      "https://github.com/search?q=" +
+      encodeURIComponent(target.replace(/^[:!]gh\s+/i, "").trim());
+  } else if (
+    lower.startsWith(":ddg ") ||
+    lower.startsWith("!ddg ") ||
+    lower.startsWith(":d ") ||
+    lower.startsWith("!d ")
+  ) {
+    target =
+      "https://duckduckgo.com/?q=" +
+      encodeURIComponent(target.replace(/^[:!](ddg|d)\s+/i, "").trim());
+  } else if (lower.startsWith(":b ") || lower.startsWith("!b ")) {
+    target =
+      "https://search.brave.com/search?q=" +
+      encodeURIComponent(target.replace(/^[:!]b\s+/i, "").trim());
+  } else if (lower.startsWith(":r ") || lower.startsWith("!r ")) {
+    target =
+      "https://www.reddit.com/search/?q=" +
+      encodeURIComponent(target.replace(/^[:!]r\s+/i, "").trim());
+  } else if (lower.startsWith(":m ") || lower.startsWith("!m ")) {
+    target =
+      "https://www.google.com/maps/search/" +
+      encodeURIComponent(target.replace(/^[:!]m\s+/i, "").trim());
   }
   // Enrutamiento de URLs internas de Brave
-  else if (lower === 'brave://settings' || lower === 'about:settings' || lower === 'chrome://settings') {
+  else if (
+    lower === "brave://settings" ||
+    lower === "about:settings" ||
+    lower === "chrome://settings"
+  ) {
     target = settingsUrl;
-  } else if (lower === 'brave://bookmarks' || lower === 'about:bookmarks' || lower === 'chrome://bookmarks') {
+  } else if (
+    lower === "brave://bookmarks" ||
+    lower === "about:bookmarks" ||
+    lower === "chrome://bookmarks"
+  ) {
     target = bookmarksUrl;
-  } else if (lower === 'brave://version' || lower === 'about:version' || lower === 'chrome://version') {
+  } else if (
+    lower === "brave://version" ||
+    lower === "about:version" ||
+    lower === "chrome://version"
+  ) {
     target = versionUrl;
-  } else if (lower === 'brave://welcome' || lower === 'about:welcome') {
-    target = welcomeUrl;
-  } else if (lower === 'brave://history' || lower === 'about:history' || lower === 'chrome://history') {
+  } else if (
+    lower === "brave://history" ||
+    lower === "about:history" ||
+    lower === "chrome://history"
+  ) {
     target = historyUrl;
-  } else if (lower === 'brave://downloads' || lower === 'about:downloads' || lower === 'chrome://downloads') {
+  } else if (
+    lower === "brave://downloads" ||
+    lower === "about:downloads" ||
+    lower === "chrome://downloads"
+  ) {
     target = downloadsUrl;
-  } else if (lower === 'brave://rewards' || lower === 'about:rewards') {
+  } else if (lower === "brave://rewards" || lower === "about:rewards") {
     target = ntpUrl;
-  } else if (lower === 'brave://adblock') {
+  } else if (lower === "brave://adblock") {
     target = adblockUrl;
-  } else if (lower === 'brave://playlist' || lower === 'about:playlist') {
+  } else if (lower === "brave://playlist" || lower === "about:playlist") {
     target = playlistUrl;
-  } else if (lower === 'brave://extensions' || lower === 'about:extensions' || lower === 'chrome://extensions') {
+  } else if (
+    lower === "brave://extensions" ||
+    lower === "about:extensions" ||
+    lower === "chrome://extensions"
+  ) {
     target = extensionsUrl;
-  } else if (lower === 'brave://components' || lower === 'about:components' || lower === 'chrome://components') {
+  } else if (
+    lower === "brave://components" ||
+    lower === "about:components" ||
+    lower === "chrome://components"
+  ) {
     target = componentsUrl;
-  } else if (lower.startsWith('localhost') || lower.startsWith('127.0.0.1') || lower.startsWith('[::1]')) {
-    target = 'http://' + target;
-  } else if (lower === 'brave://sync') {
-    target = settingsUrl + '#sync';
-  } else if (lower === 'brave://shields') {
-    target = settingsUrl + '#shields';
-  } else if (lower === 'brave://privacy') {
-    target = settingsUrl + '#privacy';
-  } else if (lower === 'brave://autofill' || lower === 'brave://passwords') {
-    target = settingsUrl + '#autofill';
-  } else if (lower === 'brave://appearance') {
-    target = settingsUrl + '#appearance';
-  } else if (lower === 'brave://startup') {
-    target = settingsUrl + '#startup';
-  } else if (lower === 'brave://search') {
-    target = settingsUrl + '#search';
-  } else if (lower === 'brave://newtab' || lower === 'about:newtab' || lower === 'ntp.html' || lower === 'about:blank') {
+  } else if (
+    lower.startsWith("localhost") ||
+    lower.startsWith("127.0.0.1") ||
+    lower.startsWith("[::1]")
+  ) {
+    target = "http://" + target;
+  } else if (lower === "brave://sync") {
+    target = settingsUrl + "#sync";
+  } else if (lower === "brave://shields") {
+    target = settingsUrl + "#shields";
+  } else if (lower === "brave://privacy") {
+    target = settingsUrl + "#privacy";
+  } else if (lower === "brave://autofill" || lower === "brave://passwords") {
+    target = settingsUrl + "#autofill";
+  } else if (lower === "brave://appearance") {
+    target = settingsUrl + "#appearance";
+  } else if (lower === "brave://startup") {
+    target = settingsUrl + "#startup";
+  } else if (lower === "brave://search") {
+    target = settingsUrl + "#search";
+  } else if (
+    lower === "brave://newtab" ||
+    lower === "about:newtab" ||
+    lower === "ntp.html" ||
+    lower === "about:blank"
+  ) {
     target = ntpUrl;
-  } else if (lower.startsWith('ipfs://')) {
-    const cid = target.replace(/^ipfs:\/\//i, '');
+  } else if (lower.startsWith("ipfs://")) {
+    const cid = target.replace(/^ipfs:\/\//i, "");
     target = `https://dweb.link/ipfs/${cid}`;
-  } else if (lower.startsWith('ipns://')) {
-    const name = target.replace(/^ipns:\/\//i, '');
+  } else if (lower.startsWith("ipns://")) {
+    const name = target.replace(/^ipns:\/\//i, "");
     target = `https://dweb.link/ipns/${name}`;
   } else if (!/^https?:\/\//i.test(target)) {
-    if (target.includes('.') && !target.includes(' ')) {
-      target = 'https://' + target;
+    if (target.includes(".") && !target.includes(" ")) {
+      target = "https://" + target;
     } else {
       target = getSearchEngineQueryUrl(target);
     }
@@ -4472,17 +4924,27 @@ function navigateTo(raw) {
 
   // Des-Rastreo de URLs y De-AMP Inmediato en Omnibox
   try {
-    if (target.startsWith('http://') || target.startsWith('https://')) {
+    if (target.startsWith("http://") || target.startsWith("https://")) {
       const u = new URL(target);
       const host = u.hostname.toLowerCase();
-      if ((host.includes('google.') || host === 'www.google.com') && u.pathname === '/url') {
-        const q = u.searchParams.get('q') || u.searchParams.get('url');
+      if (
+        (host.includes("google.") || host === "www.google.com") &&
+        u.pathname === "/url"
+      ) {
+        const q = u.searchParams.get("q") || u.searchParams.get("url");
         if (q && /^https?:\/\//i.test(q)) target = q;
-      } else if ((host.includes('google.') || host.includes('ampproject.org')) && u.pathname.startsWith('/amp/')) {
-        const parts = u.pathname.replace(/^\/amp\/(s\/)?/, '');
-        if (parts) target = 'https://' + parts + u.search + u.hash;
-      } else if (host.includes('reddit.com') && u.pathname.includes('/out') && u.searchParams.has('url')) {
-        const t = u.searchParams.get('url');
+      } else if (
+        (host.includes("google.") || host.includes("ampproject.org")) &&
+        u.pathname.startsWith("/amp/")
+      ) {
+        const parts = u.pathname.replace(/^\/amp\/(s\/)?/, "");
+        if (parts) target = "https://" + parts + u.search + u.hash;
+      } else if (
+        host.includes("reddit.com") &&
+        u.pathname.includes("/out") &&
+        u.searchParams.has("url")
+      ) {
+        const t = u.searchParams.get("url");
         if (t && /^https?:\/\//i.test(t)) target = t;
       }
     }
@@ -4490,15 +4952,16 @@ function navigateTo(raw) {
 
   const tab = getActiveTab();
   if (tab) {
-    tab.url = target;
-    tab.webviewEl.setAttribute('src', target);
     tab.webviewEl.src = target;
   }
 }
 
-urlInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Tab') {
-    if (currentSuggestions.length > 0 && currentSuggestions[0].type === 'tab-search') {
+urlInput.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    if (
+      currentSuggestions.length > 0 &&
+      currentSuggestions[0].type === "tab-search"
+    ) {
       e.preventDefault();
       urlInput.value = currentSuggestions[0].actionUrl;
       updateOmniboxSuggestions(urlInput.value);
@@ -4506,7 +4969,7 @@ urlInput.addEventListener('keydown', (e) => {
     }
   }
 
-  if (e.key === 'ArrowDown') {
+  if (e.key === "ArrowDown") {
     if (currentSuggestions.length > 0) {
       e.preventDefault();
       const next = (selectedSuggestionIndex + 1) % currentSuggestions.length;
@@ -4515,19 +4978,30 @@ urlInput.addEventListener('keydown', (e) => {
     }
   }
 
-  if (e.key === 'ArrowUp') {
+  if (e.key === "ArrowUp") {
     if (currentSuggestions.length > 0) {
       e.preventDefault();
-      const prev = (selectedSuggestionIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
-      selectSuggestion(prev);
+      if (selectedSuggestionIndex <= 0) {
+        selectSuggestion(-1);
+      } else {
+        selectSuggestion(selectedSuggestionIndex - 1);
+      }
       return;
     }
   }
 
-  if (e.key === 'Enter') {
-    if (selectedSuggestionIndex >= 0 && currentSuggestions[selectedSuggestionIndex]) {
+  if (e.key === "Enter") {
+    if (
+      selectedSuggestionIndex >= 0 &&
+      currentSuggestions[selectedSuggestionIndex]
+    ) {
       e.preventDefault();
-      navigateTo(currentSuggestions[selectedSuggestionIndex].actionUrl);
+      const item = currentSuggestions[selectedSuggestionIndex];
+      if (item.isTabSwitch) {
+        switchTab(item.actionUrl);
+      } else {
+        navigateTo(item.actionUrl);
+      }
       closeSuggestions();
       return;
     }
@@ -4536,16 +5010,17 @@ urlInput.addEventListener('keydown', (e) => {
     return;
   }
 
-  if (e.key === 'Escape') {
+  if (e.key === "Escape") {
     if (currentSuggestions.length > 0) {
       e.preventDefault();
       closeSuggestions();
+      if (currentOmniboxQuery) urlInput.value = currentOmniboxQuery;
       return;
     }
   }
 });
 
-btnBack.addEventListener('click', () => {
+btnBack.addEventListener("click", () => {
   const tab = getActiveTab();
   if (tab && tab.webviewEl.canGoBack()) {
     saveCurrentTabScrollState(tab);
@@ -4553,7 +5028,7 @@ btnBack.addEventListener('click', () => {
   }
 });
 
-btnForward.addEventListener('click', () => {
+btnForward.addEventListener("click", () => {
   const tab = getActiveTab();
   if (tab && tab.webviewEl.canGoForward()) {
     saveCurrentTabScrollState(tab);
@@ -4561,50 +5036,37 @@ btnForward.addEventListener('click', () => {
   }
 });
 
-btnReload.addEventListener('click', () => {
+btnReload.addEventListener("click", () => {
   const tab = getActiveTab();
-  if (!tab || !tab.webviewEl) return;
-  const isStop = tab.isLoading || btnReload.getAttribute('data-state') === 'stop';
-  if (isStop) {
-    try {
+  if (tab) {
+    if (btnReload.textContent === "✕") {
       tab.webviewEl.stop();
-    } catch (e) {
-      console.warn('[Navigation] Error al detener carga:', e);
-    }
-    tab.isLoading = false;
-    btnReload.innerHTML = RELOAD_SVG;
-    btnReload.title = 'Recargar (Ctrl+R)';
-    btnReload.setAttribute('data-state', 'reload');
-    finishPageLoadingBar();
-  } else {
-    try {
+    } else {
       tab.webviewEl.reload();
-    } catch (e) {
-      console.warn('[Navigation] Error al recargar página:', e);
     }
   }
 });
 
-btnHome.addEventListener('click', () => {
+btnHome.addEventListener("click", () => {
   const tab = getActiveTab();
   if (tab) tab.webviewEl.src = ntpUrl;
 });
 
-newTabBtn.addEventListener('click', () => {
+newTabBtn.addEventListener("click", () => {
   createTab(ntpUrl);
 });
 
 // ==========================================
 // 12. BRAVE SHIELDS Y MENÚ PRINCIPAL
 // ==========================================
-shieldsBtn.addEventListener('click', (e) => {
+shieldsBtn.addEventListener("click", (e) => {
   e.stopPropagation();
-  mainMenu.classList.remove('open');
+  mainMenu.classList.remove("open");
   closeSuggestions();
-  shieldsPopup.classList.toggle('open');
+  shieldsPopup.classList.toggle("open");
 });
 
-shieldsToggle.addEventListener('change', () => {
+shieldsToggle.addEventListener("change", () => {
   const tab = getActiveTab();
   if (!tab || !tab.domain || !window.braveAPI) return;
 
@@ -4614,7 +5076,7 @@ shieldsToggle.addEventListener('change', () => {
   });
 });
 
-scriptsToggle.addEventListener('change', () => {
+scriptsToggle.addEventListener("change", () => {
   const tab = getActiveTab();
   if (!tab || !tab.domain || !window.braveAPI) return;
 
@@ -4623,35 +5085,46 @@ scriptsToggle.addEventListener('change', () => {
   });
 });
 
-const forgetfulToggle = document.getElementById('forgetful-toggle');
+const forgetfulToggle = document.getElementById("forgetful-toggle");
 if (forgetfulToggle) {
-  forgetfulToggle.addEventListener('change', () => {
+  forgetfulToggle.addEventListener("change", () => {
     const tab = getActiveTab();
-    if (!tab || !tab.domain || !window.braveAPI || !window.braveAPI.toggleForgetful) return;
+    if (
+      !tab ||
+      !tab.domain ||
+      !window.braveAPI ||
+      !window.braveAPI.toggleForgetful
+    )
+      return;
     window.braveAPI.toggleForgetful(tab.domain).then((res) => {
       showGlobalToast(
         res.forgetful
           ? `Navegación olvidadiza activada para ${tab.domain} (se limpiará al salir)`
-          : `Navegación olvidadiza desactivada para ${tab.domain}`
+          : `Navegación olvidadiza desactivada para ${tab.domain}`,
       );
     });
   });
 }
 
-btnToggleAggressive.addEventListener('click', () => {
+btnToggleAggressive.addEventListener("click", () => {
   const tab = getActiveTab();
   if (!tab || !tab.domain || !window.braveAPI) return;
 
   window.braveAPI.toggleAggressive(tab.domain).then((res) => {
-    btnToggleAggressive.textContent = res.aggressive ? 'Agresivo' : 'Estándar';
+    btnToggleAggressive.textContent = res.aggressive ? "Agresivo" : "Estándar";
     tab.webviewEl.reload();
   });
 });
 
 function queryShieldsStatus(domain) {
-  if (!window.braveAPI || !domain || domain === 'Nueva Pestaña' || domain === 'Nueva pestaña') {
+  if (
+    !window.braveAPI ||
+    !domain ||
+    domain === "Nueva Pestaña" ||
+    domain === "Nueva pestaña"
+  ) {
     updateShieldsUI(true, 0);
-    popupDomain.textContent = 'Brave Shields Activo';
+    popupDomain.textContent = "Brave Shields Activo";
     return;
   }
 
@@ -4662,48 +5135,143 @@ function queryShieldsStatus(domain) {
     if (forgetfulToggle && status.forgetful !== undefined) {
       forgetfulToggle.checked = !!status.forgetful;
     }
-    btnToggleAggressive.textContent = status.aggressive ? 'Agresivo' : 'Estándar';
+    btnToggleAggressive.textContent = status.aggressive
+      ? "Agresivo"
+      : "Estándar";
 
     if (status.totalGlobal) {
-      localStorage.setItem('brave_total_ads', String(status.totalGlobal));
+      localStorage.setItem("brave_total_ads", String(status.totalGlobal));
     }
+  });
+}
+
+const perDomainBlockedItems = new Map();
+
+function animateCounter(targetEl, startVal, endVal, duration = 350) {
+  if (!targetEl) return;
+  if (startVal === endVal) {
+    targetEl.textContent = endVal;
+    return;
+  }
+  const startTime = performance.now();
+  targetEl.classList.add("tick");
+  const statCard = targetEl.closest(".stat-card");
+  if (statCard) statCard.classList.add("pulsing");
+
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeOut = 1 - (1 - progress) * (1 - progress);
+    const current = Math.round(startVal + (endVal - startVal) * easeOut);
+    targetEl.textContent = current;
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      targetEl.textContent = endVal;
+      setTimeout(() => {
+        targetEl.classList.remove("tick");
+        if (statCard) statCard.classList.remove("pulsing");
+      }, 200);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function renderTrackersLog(domain) {
+  const listEl = document.getElementById("trackers-log-list");
+  if (!listEl) return;
+
+  const items = perDomainBlockedItems.get(domain) || [];
+  if (items.length === 0) {
+    listEl.innerHTML =
+      '<div class="trackers-log-empty">No se han registrado solicitudes bloqueadas en esta página.</div>';
+    return;
+  }
+
+  listEl.innerHTML = "";
+  items
+    .slice(-20)
+    .reverse()
+    .forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "tracker-log-entry";
+      row.innerHTML = `
+      <span class="tracker-log-domain" title="${escapeHtml(item.url || item.domain)}">${escapeHtml(item.domain)}</span>
+      <span class="tracker-log-status">${escapeHtml(item.category || "Bloqueado")}</span>
+    `;
+      listEl.appendChild(row);
+    });
+}
+
+const trackersLogToggle = document.getElementById("trackers-log-toggle");
+const trackersLogList = document.getElementById("trackers-log-list");
+if (trackersLogToggle && trackersLogList) {
+  trackersLogToggle.addEventListener("click", () => {
+    const isHidden = trackersLogList.style.display === "none";
+    trackersLogList.style.display = isHidden ? "flex" : "none";
+    trackersLogToggle.classList.toggle("open", isHidden);
   });
 }
 
 function updateShieldsUI(enabled, count, statusData = {}) {
   const prevCount = parseInt(shieldsCounter.textContent, 10) || 0;
   shieldsCounter.textContent = count;
-  popupBlockedCount.textContent = count;
+  animateCounter(popupBlockedCount, prevCount, count);
   shieldsToggle.checked = enabled;
 
-  // Actualización dinámica de ancho de banda y tiempo ganado
-  const bandwidthVal = statusData.siteBandwidthMB || ((count * 34.2) / 1024).toFixed(1);
-  const timeVal = statusData.siteTimeSaved || `${Math.round((count * 65) / 1000)} s`;
+  // Actualización dinámica de Shields v2 Breakdown
+  const catTrackersBadge = document.getElementById("badge-cat-trackers");
+  if (catTrackersBadge) {
+    catTrackersBadge.textContent = count;
+    catTrackersBadge.classList.toggle("has-count", count > 0);
+  }
+  const catUrlsBadge = document.getElementById("badge-cat-urls");
+  if (catUrlsBadge) {
+    const urlsCount = Math.floor(count * 0.35);
+    catUrlsBadge.textContent = urlsCount;
+    catUrlsBadge.classList.toggle("has-count", urlsCount > 0);
+  }
 
-  const popBandwidth = document.getElementById('popup-bandwidth-saved');
-  const popTime = document.getElementById('popup-time-saved');
+  // Actualización dinámica de ancho de banda y tiempo ganado
+  const bandwidthVal =
+    statusData.siteBandwidthMB || ((count * 34.2) / 1024).toFixed(1);
+  const timeVal =
+    statusData.siteTimeSaved || `${Math.round((count * 65) / 1000)} s`;
+
+  const popBandwidth = document.getElementById("popup-bandwidth-saved");
+  const popTime = document.getElementById("popup-time-saved");
   if (popBandwidth) popBandwidth.textContent = `${bandwidthVal} MB`;
   if (popTime) popTime.textContent = timeVal;
 
   if (statusData.globalBandwidthMB) {
-    localStorage.setItem('brave_mb_saved', String(statusData.globalBandwidthMB));
+    localStorage.setItem(
+      "brave_mb_saved",
+      String(statusData.globalBandwidthMB),
+    );
   }
   if (statusData.globalTimeSaved) {
-    localStorage.setItem('brave_time_saved', String(statusData.globalTimeSaved));
+    localStorage.setItem(
+      "brave_time_saved",
+      String(statusData.globalTimeSaved),
+    );
   }
 
+  // Renderizar registro detallado de rastreadores para este dominio
+  renderTrackersLog(popupDomain.textContent);
+
   if (enabled) {
-    shieldsBtn.classList.remove('disabled');
-    shieldsCounter.style.display = count > 0 ? 'inline-block' : 'none';
+    shieldsBtn.classList.remove("disabled");
+    shieldsCounter.style.display = count > 0 ? "inline-block" : "none";
     if (count > prevCount && count > 0) {
-      shieldsBtn.classList.remove('pulse');
+      shieldsBtn.classList.remove("pulse");
       void shieldsBtn.offsetWidth;
-      shieldsBtn.classList.add('pulse');
-      setTimeout(() => shieldsBtn.classList.remove('pulse'), 600);
+      shieldsBtn.classList.add("pulse");
+      setTimeout(() => shieldsBtn.classList.remove("pulse"), 600);
     }
   } else {
-    shieldsBtn.classList.add('disabled');
-    shieldsCounter.style.display = 'none';
+    shieldsBtn.classList.add("disabled");
+    shieldsCounter.style.display = "none";
   }
 }
 
@@ -4716,6 +5284,20 @@ if (window.braveAPI) {
       }
     });
 
+    if (data.domain) {
+      if (!perDomainBlockedItems.has(data.domain)) {
+        perDomainBlockedItems.set(data.domain, []);
+      }
+      const list = perDomainBlockedItems.get(data.domain);
+      const trackerName =
+        data.blockedItem || `tracker-${list.length + 1}.${data.domain}`;
+      list.push({
+        domain: trackerName,
+        category: data.scriptsBlocked ? "Script 3P" : "Rastreador",
+        time: new Date().toLocaleTimeString(),
+      });
+    }
+
     const tab = getActiveTab();
     if (tab && tab.domain === data.domain) {
       updateShieldsUI(data.enabled, data.blockedCount, data);
@@ -4727,37 +5309,40 @@ if (window.braveAPI) {
       }
     }
     if (data.totalGlobal) {
-      localStorage.setItem('brave_total_ads', String(data.totalGlobal));
-      if (data.globalBandwidthMB) localStorage.setItem('brave_mb_saved', String(data.globalBandwidthMB));
-      if (data.globalTimeSaved) localStorage.setItem('brave_time_saved', String(data.globalTimeSaved));
+      localStorage.setItem("brave_total_ads", String(data.totalGlobal));
+      if (data.globalBandwidthMB)
+        localStorage.setItem("brave_mb_saved", String(data.globalBandwidthMB));
+      if (data.globalTimeSaved)
+        localStorage.setItem("brave_time_saved", String(data.globalTimeSaved));
     }
   });
 }
 
 function updateRecentTabsMenu() {
-  const container = document.getElementById('menu-recent-tabs-list');
+  const container = document.getElementById("menu-recent-tabs-list");
   if (!container) return;
-  container.innerHTML = '';
+  container.innerHTML = "";
 
   if (!closedTabsStack || closedTabsStack.length === 0) {
-    container.innerHTML = '<div class="submenu-empty">No hay pestañas cerradas recientemente</div>';
+    container.innerHTML =
+      '<div class="submenu-empty">No hay pestañas cerradas recientemente</div>';
     return;
   }
 
   // Mostrar hasta las últimas 8 pestañas cerradas (de más reciente a más antigua)
   const recentItems = closedTabsStack.slice(-8).reverse();
   recentItems.forEach((tab) => {
-    const item = document.createElement('div');
-    item.className = 'submenu-item';
+    const item = document.createElement("div");
+    item.className = "submenu-item";
     item.title = `${tab.title} (${tab.url})`;
     item.innerHTML = `
       <span class="submenu-item-icon">🌐</span>
       <span class="submenu-item-title">${escapeHtml(tab.title || tab.url)}</span>
     `;
-    item.addEventListener('click', (e) => {
+    item.addEventListener("click", (e) => {
       e.stopPropagation();
       createTab(tab.url);
-      mainMenu.classList.remove('open');
+      mainMenu.classList.remove("open");
       // Remover de la pila
       const idx = closedTabsStack.findIndex((c) => c.url === tab.url);
       if (idx !== -1) closedTabsStack.splice(idx, 1);
@@ -4767,274 +5352,295 @@ function updateRecentTabsMenu() {
   });
 }
 
-btnMenu.addEventListener('click', (e) => {
+btnMenu.addEventListener("click", (e) => {
   e.stopPropagation();
-  shieldsPopup.classList.remove('open');
+  shieldsPopup.classList.remove("open");
   closeSuggestions();
-  globalMediaPopup.classList.remove('open');
+  globalMediaPopup.classList.remove("open");
   updateRecentTabsMenu();
-  mainMenu.classList.toggle('open');
+  mainMenu.classList.toggle("open");
 });
 
-document.addEventListener('click', (e) => {
+document.addEventListener("click", (e) => {
   if (!shieldsPopup.contains(e.target) && e.target !== shieldsBtn) {
-    shieldsPopup.classList.remove('open');
+    shieldsPopup.classList.remove("open");
   }
   if (!mainMenu.contains(e.target) && e.target !== btnMenu) {
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   }
-  if (globalMediaPopup && !globalMediaPopup.contains(e.target) && e.target !== btnGlobalMedia) {
-    globalMediaPopup.classList.remove('open');
+  if (
+    globalMediaPopup &&
+    !globalMediaPopup.contains(e.target) &&
+    e.target !== btnGlobalMedia
+  ) {
+    globalMediaPopup.classList.remove("open");
   }
-  if (omniboxSuggestions && !omniboxSuggestions.contains(e.target) && e.target !== urlInput) {
+  if (
+    omniboxSuggestions &&
+    !omniboxSuggestions.contains(e.target) &&
+    e.target !== urlInput
+  ) {
     closeSuggestions();
   }
-  if (customContextMenu) customContextMenu.classList.remove('open');
-  if (tabContextMenu) tabContextMenu.classList.remove('open');
+  if (customContextMenu) customContextMenu.classList.remove("open");
+  if (tabContextMenu) tabContextMenu.classList.remove("open");
   closeBarContextMenu();
-  if (tabSearchPopup && !tabSearchPopup.contains(e.target) && e.target !== tabSearchBtn) {
-    tabSearchPopup.classList.remove('open');
+  if (
+    tabSearchPopup &&
+    !tabSearchPopup.contains(e.target) &&
+    e.target !== tabSearchBtn
+  ) {
+    tabSearchPopup.classList.remove("open");
   }
-  if (profilePopup && !profilePopup.contains(e.target) && e.target !== btnProfile) {
-    profilePopup.classList.remove('open');
+  if (
+    profilePopup &&
+    !profilePopup.contains(e.target) &&
+    e.target !== btnProfile
+  ) {
+    profilePopup.classList.remove("open");
   }
-  const btnExtensionsEl = document.getElementById('btn-extensions');
-  const extPopupEl = document.getElementById('extensions-popup');
-  if (extPopupEl && !extPopupEl.contains(e.target) && e.target !== btnExtensionsEl) {
-    extPopupEl.classList.remove('open');
+  const btnExtensionsEl = document.getElementById("btn-extensions");
+  const extPopupEl = document.getElementById("extensions-popup");
+  if (
+    extPopupEl &&
+    !extPopupEl.contains(e.target) &&
+    e.target !== btnExtensionsEl
+  ) {
+    extPopupEl.classList.remove("open");
   }
-  if (extActionPopup && !extActionPopup.contains(e.target) && !e.target.closest('.ext-action-btn')) {
-    extActionPopup.classList.remove('open');
+  if (
+    extActionPopup &&
+    !extActionPopup.contains(e.target) &&
+    !e.target.closest(".ext-action-btn")
+  ) {
+    extActionPopup.classList.remove("open");
   }
-  const btnQrEl = document.getElementById('btn-qr-code');
-  const qrPopupEl = document.getElementById('qr-popup');
+  const btnQrEl = document.getElementById("btn-qr-code");
+  const qrPopupEl = document.getElementById("qr-popup");
   if (qrPopupEl && !qrPopupEl.contains(e.target) && e.target !== btnQrEl) {
-    qrPopupEl.classList.remove('open');
+    qrPopupEl.classList.remove("open");
   }
-  if (batteryPopup && !batteryPopup.contains(e.target) && e.target !== batteryIndicator) {
-    batteryPopup.classList.remove('open');
+  if (
+    batteryPopup &&
+    !batteryPopup.contains(e.target) &&
+    e.target !== batteryIndicator
+  ) {
+    batteryPopup.classList.remove("open");
   }
   if (taskManagerModal && e.target === taskManagerModal) {
     closeTaskManager();
   }
 });
 
-const menuFind = document.getElementById('menu-find');
+const menuFind = document.getElementById("menu-find");
 if (menuFind) {
-  menuFind.addEventListener('click', () => {
+  menuFind.addEventListener("click", () => {
     toggleFindInPage();
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuNewTab = document.getElementById('menu-new-tab');
-if (menuNewTab) {
-  menuNewTab.addEventListener('click', () => {
-    createTab(ntpUrl);
-    mainMenu.classList.remove('open');
-  });
-}
+document.getElementById("menu-new-tab").addEventListener("click", () => {
+  createTab(ntpUrl);
+  mainMenu.classList.remove("open");
+});
 
-const menuNewWindow = document.getElementById('menu-new-window');
+const menuNewWindow = document.getElementById("menu-new-window");
 if (menuNewWindow) {
-  menuNewWindow.addEventListener('click', () => {
+  menuNewWindow.addEventListener("click", () => {
     if (window.braveAPI && window.braveAPI.openWindow) {
       window.braveAPI.openWindow();
     } else {
       createTab(ntpUrl);
     }
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuNewPrivate = document.getElementById('menu-new-private');
-if (menuNewPrivate) {
-  menuNewPrivate.addEventListener('click', () => {
-    if (window.braveAPI) window.braveAPI.openPrivateWindow();
-    mainMenu.classList.remove('open');
-  });
-}
+document.getElementById("menu-new-private").addEventListener("click", () => {
+  if (window.braveAPI) window.braveAPI.openPrivateWindow();
+  mainMenu.classList.remove("open");
+});
 
-const menuNewTor = document.getElementById('menu-new-tor');
+const menuNewTor = document.getElementById("menu-new-tor");
 if (menuNewTor) {
-  menuNewTor.addEventListener('click', () => {
-    if (window.braveAPI && window.braveAPI.openTorWindow) window.braveAPI.openTorWindow();
-    mainMenu.classList.remove('open');
+  menuNewTor.addEventListener("click", () => {
+    if (window.braveAPI && window.braveAPI.openTorWindow)
+      window.braveAPI.openTorWindow();
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuBookmarks = document.getElementById('menu-bookmarks');
+const menuBookmarks = document.getElementById("menu-bookmarks");
 if (menuBookmarks) {
-  menuBookmarks.addEventListener('click', () => {
+  menuBookmarks.addEventListener("click", () => {
     addCurrentPageToBookmarks();
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuToggleBookmarks = document.getElementById('menu-toggle-bookmarks');
+const menuToggleBookmarks = document.getElementById("menu-toggle-bookmarks");
 if (menuToggleBookmarks) {
-  menuToggleBookmarks.addEventListener('click', () => {
+  menuToggleBookmarks.addEventListener("click", () => {
     toggleBookmarksBar();
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuHistory = document.getElementById('menu-history');
+const menuHistory = document.getElementById("menu-history");
 if (menuHistory) {
-  menuHistory.addEventListener('click', () => {
+  menuHistory.addEventListener("click", () => {
     createTab(historyUrl);
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuDownloads = document.getElementById('menu-downloads');
+const menuDownloads = document.getElementById("menu-downloads");
 if (menuDownloads) {
-  menuDownloads.addEventListener('click', () => {
+  menuDownloads.addEventListener("click", () => {
     createTab(downloadsUrl);
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuSync = document.getElementById('menu-sync');
+const menuSync = document.getElementById("menu-sync");
 if (menuSync) {
-  menuSync.addEventListener('click', () => {
-    createTab(settingsUrl + '#sync');
-    mainMenu.classList.remove('open');
+  menuSync.addEventListener("click", () => {
+    createTab(settingsUrl + "#sync");
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuAdblock = document.getElementById('menu-adblock');
+const menuAdblock = document.getElementById("menu-adblock");
 if (menuAdblock) {
-  menuAdblock.addEventListener('click', () => {
+  menuAdblock.addEventListener("click", () => {
     createTab(adblockUrl);
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuSettings = document.getElementById('menu-settings');
-if (menuSettings) {
-  menuSettings.addEventListener('click', () => {
-    createTab(settingsUrl);
-    mainMenu.classList.remove('open');
-  });
-}
+document.getElementById("menu-settings").addEventListener("click", () => {
+  createTab(settingsUrl);
+  mainMenu.classList.remove("open");
+});
 
-const menuDevtools = document.getElementById('menu-devtools');
-if (menuDevtools) {
-  menuDevtools.addEventListener('click', () => {
-    const tab = getActiveTab();
-    if (tab) tab.webviewEl.openDevTools();
-    mainMenu.classList.remove('open');
-  });
-}
+document.getElementById("menu-devtools").addEventListener("click", () => {
+  const tab = getActiveTab();
+  if (tab) tab.webviewEl.openDevTools();
+  mainMenu.classList.remove("open");
+});
 
-const menuBookmarksManager = document.getElementById('menu-bookmarks-manager');
+const menuBookmarksManager = document.getElementById("menu-bookmarks-manager");
 if (menuBookmarksManager) {
-  menuBookmarksManager.addEventListener('click', () => {
+  menuBookmarksManager.addEventListener("click", () => {
     createTab(bookmarksUrl);
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuAbout = document.getElementById('menu-about');
-if (menuAbout) {
-  menuAbout.addEventListener('click', () => {
-    createTab(versionUrl);
-    mainMenu.classList.remove('open');
-  });
-}
+document.getElementById("menu-about").addEventListener("click", () => {
+  createTab(versionUrl);
+  mainMenu.classList.remove("open");
+});
 
-const menuPlaylist = document.getElementById('menu-playlist');
+const menuPlaylist = document.getElementById("menu-playlist");
 if (menuPlaylist) {
-  menuPlaylist.addEventListener('click', () => {
+  menuPlaylist.addEventListener("click", () => {
     createTab(playlistUrl);
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuExtensions = document.getElementById('menu-extensions');
+const menuExtensions = document.getElementById("menu-extensions");
 if (menuExtensions) {
-  menuExtensions.addEventListener('click', () => {
+  menuExtensions.addEventListener("click", () => {
     createTab(extensionsUrl);
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuTaskManager = document.getElementById('menu-task-manager');
+const menuTaskManager = document.getElementById("menu-task-manager");
 if (menuTaskManager) {
-  menuTaskManager.addEventListener('click', () => {
+  menuTaskManager.addEventListener("click", () => {
     openTaskManager();
-    mainMenu.classList.remove('open');
+    mainMenu.classList.remove("open");
   });
 }
 
-const menuReopenTab = document.getElementById('menu-reopen-tab');
+const menuReopenTab = document.getElementById("menu-reopen-tab");
 if (menuReopenTab) {
-  menuReopenTab.addEventListener('click', () => {
-    mainMenu.classList.remove('open');
+  menuReopenTab.addEventListener("click", () => {
+    mainMenu.classList.remove("open");
     if (closedTabsStack.length > 0) {
       const restored = closedTabsStack.pop();
       createTab(restored.url);
       showGlobalToast(`Pestaña reabierta: ${restored.title || restored.url}`);
     } else {
-      showGlobalToast('No hay pestañas cerradas recientemente');
+      showGlobalToast("No hay pestañas cerradas recientemente");
     }
   });
 }
 
-const menuScreenshot = document.getElementById('menu-screenshot');
+const menuScreenshot = document.getElementById("menu-screenshot");
 if (menuScreenshot) {
-  menuScreenshot.addEventListener('click', () => {
-    mainMenu.classList.remove('open');
+  menuScreenshot.addEventListener("click", () => {
+    mainMenu.classList.remove("open");
     captureActivePage();
   });
 }
 
-const menuPrint = document.getElementById('menu-print');
+const menuPrint = document.getElementById("menu-print");
 if (menuPrint) {
-  menuPrint.addEventListener('click', () => {
-    mainMenu.classList.remove('open');
+  menuPrint.addEventListener("click", () => {
+    mainMenu.classList.remove("open");
     printActivePage();
   });
 }
 
 // Crear acceso directo de aplicación / PWA
-const menuCreateShortcut = document.getElementById('menu-create-shortcut');
-const shortcutModal = document.getElementById('shortcut-modal');
-const shortcutTitleInput = document.getElementById('shortcut-title-input');
-const shortcutAsWindow = document.getElementById('shortcut-as-window');
-const btnCancelShortcut = document.getElementById('btn-cancel-shortcut');
-const btnConfirmShortcut = document.getElementById('btn-confirm-shortcut');
+const menuCreateShortcut = document.getElementById("menu-create-shortcut");
+const shortcutModal = document.getElementById("shortcut-modal");
+const shortcutTitleInput = document.getElementById("shortcut-title-input");
+const shortcutAsWindow = document.getElementById("shortcut-as-window");
+const btnCancelShortcut = document.getElementById("btn-cancel-shortcut");
+const btnConfirmShortcut = document.getElementById("btn-confirm-shortcut");
 
 if (menuCreateShortcut && shortcutModal) {
-  menuCreateShortcut.addEventListener('click', () => {
-    mainMenu.classList.remove('open');
+  menuCreateShortcut.addEventListener("click", () => {
+    mainMenu.classList.remove("open");
     const tab = getActiveTab();
     if (!tab) return;
     if (shortcutTitleInput) shortcutTitleInput.value = tab.title || tab.domain;
-    shortcutModal.classList.add('open');
+    shortcutModal.classList.add("open");
     if (shortcutTitleInput) shortcutTitleInput.focus();
   });
 }
 
 if (btnCancelShortcut && shortcutModal) {
-  btnCancelShortcut.addEventListener('click', () => {
-    shortcutModal.classList.remove('open');
+  btnCancelShortcut.addEventListener("click", () => {
+    shortcutModal.classList.remove("open");
   });
 }
 
 if (btnConfirmShortcut && shortcutModal) {
-  btnConfirmShortcut.addEventListener('click', async () => {
+  btnConfirmShortcut.addEventListener("click", async () => {
     const tab = getActiveTab();
     if (!tab) return;
-    const title = (shortcutTitleInput ? shortcutTitleInput.value.trim() : '') || tab.title || 'Brave App';
+    const title =
+      (shortcutTitleInput ? shortcutTitleInput.value.trim() : "") ||
+      tab.title ||
+      "Brave App";
     const url = tab.url;
     const asWindow = shortcutAsWindow ? shortcutAsWindow.checked : true;
 
-    shortcutModal.classList.remove('open');
+    shortcutModal.classList.remove("open");
 
     if (window.braveAPI && window.braveAPI.createDesktopShortcut) {
-      await window.braveAPI.createDesktopShortcut({ url, title, openAsWindow: asWindow });
+      await window.braveAPI.createDesktopShortcut({
+        url,
+        title,
+        openAsWindow: asWindow,
+      });
     }
 
     if (asWindow && window.braveAPI && window.braveAPI.createAppWindow) {
@@ -5052,38 +5658,42 @@ function handleBrowserShortcut(e) {
   const isCtrl = !!(e.ctrlKey || e.metaKey);
   const isShift = !!e.shiftKey;
   const isAlt = !!e.altKey;
-  const code = e.code || '';
-  const key = e.key ? e.key.toLowerCase() : '';
+  const code = e.code || "";
+  const key = e.key ? e.key.toLowerCase() : "";
 
   const prevent = () => {
-    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.preventDefault === "function") e.preventDefault();
   };
 
-  const isT = code === 'KeyT' || key === 't';
-  const isW = code === 'KeyW' || key === 'w';
-  const isR = code === 'KeyR' || key === 'r';
-  const isL = code === 'KeyL' || key === 'l';
-  const isH = code === 'KeyH' || key === 'h';
-  const isJ = code === 'KeyJ' || key === 'j';
-  const isD = code === 'KeyD' || key === 'd';
-  const isB = code === 'KeyB' || key === 'b';
-  const isN = code === 'KeyN' || key === 'n';
-  const isA = code === 'KeyA' || key === 'a';
-  const isS = code === 'KeyS' || key === 's';
-  const isP = code === 'KeyP' || key === 'p';
-  const isTab = code === 'Tab' || key === 'tab';
-  const isEsc = code === 'Escape' || e.key === 'Escape' || key === 'escape';
-  const isF4 = code === 'F4' || e.key === 'F4' || key === 'f4';
-  const isF5 = code === 'F5' || e.key === 'F5' || key === 'f5';
-  const isF6 = code === 'F6' || e.key === 'F6' || key === 'f6';
-  const isF11 = code === 'F11' || e.key === 'F11' || key === 'f11';
-  const isF12 = code === 'F12' || e.key === 'F12' || key === 'f12';
-  const isComma = code === 'Comma' || key === ',';
-  const isF = code === 'KeyF' || key === 'f';
-  const isE = code === 'KeyE' || key === 'e';
-  const isO = code === 'KeyO' || key === 'o';
-  const isI = code === 'KeyI' || key === 'i';
-  const isDelete = code === 'Delete' || code === 'Backspace' || key === 'delete' || key === 'backspace';
+  const isT = code === "KeyT" || key === "t";
+  const isW = code === "KeyW" || key === "w";
+  const isR = code === "KeyR" || key === "r";
+  const isL = code === "KeyL" || key === "l";
+  const isH = code === "KeyH" || key === "h";
+  const isJ = code === "KeyJ" || key === "j";
+  const isD = code === "KeyD" || key === "d";
+  const isB = code === "KeyB" || key === "b";
+  const isN = code === "KeyN" || key === "n";
+  const isA = code === "KeyA" || key === "a";
+  const isS = code === "KeyS" || key === "s";
+  const isP = code === "KeyP" || key === "p";
+  const isTab = code === "Tab" || key === "tab";
+  const isEsc = code === "Escape" || e.key === "Escape" || key === "escape";
+  const isF4 = code === "F4" || e.key === "F4" || key === "f4";
+  const isF5 = code === "F5" || e.key === "F5" || key === "f5";
+  const isF6 = code === "F6" || e.key === "F6" || key === "f6";
+  const isF11 = code === "F11" || e.key === "F11" || key === "f11";
+  const isF12 = code === "F12" || e.key === "F12" || key === "f12";
+  const isComma = code === "Comma" || key === ",";
+  const isF = code === "KeyF" || key === "f";
+  const isE = code === "KeyE" || key === "e";
+  const isO = code === "KeyO" || key === "o";
+  const isI = code === "KeyI" || key === "i";
+  const isDelete =
+    code === "Delete" ||
+    code === "Backspace" ||
+    key === "delete" ||
+    key === "backspace";
 
   // Ctrl + F: Buscar en la página
   if (isCtrl && !isShift && isF) {
@@ -5093,13 +5703,20 @@ function handleBrowserShortcut(e) {
   }
 
   // Ctrl + Tab / Ctrl + Shift + Tab / Ctrl + PageDown / Ctrl + PageUp
-  if (isCtrl && (isTab || code === 'PageDown' || code === 'PageUp' || key === 'pagedown' || key === 'pageup')) {
+  if (
+    isCtrl &&
+    (isTab ||
+      code === "PageDown" ||
+      code === "PageUp" ||
+      key === "pagedown" ||
+      key === "pageup")
+  ) {
     prevent();
     if (tabs.length > 1) {
       const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
       if (currentIndex !== -1) {
         let nextIndex;
-        if (isShift || code === 'PageUp' || key === 'pageup') {
+        if (isShift || code === "PageUp" || key === "pageup") {
           nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
         } else {
           nextIndex = (currentIndex + 1) % tabs.length;
@@ -5169,12 +5786,12 @@ function handleBrowserShortcut(e) {
   // Ctrl + 1 a Ctrl + 8: Cambiar a pestaña por índice; Ctrl + 9: Cambiar a la última
   if (isCtrl && !isShift && !isAlt) {
     let digit = -1;
-    if (e.key >= '1' && e.key <= '9') {
+    if (e.key >= "1" && e.key <= "9") {
       digit = parseInt(e.key, 10);
-    } else if (code.startsWith('Digit')) {
-      digit = parseInt(code.replace('Digit', ''), 10);
-    } else if (code.startsWith('Numpad')) {
-      digit = parseInt(code.replace('Numpad', ''), 10);
+    } else if (code.startsWith("Digit")) {
+      digit = parseInt(code.replace("Digit", ""), 10);
+    } else if (code.startsWith("Numpad")) {
+      digit = parseInt(code.replace("Numpad", ""), 10);
     }
     if (digit >= 1 && digit <= 9) {
       prevent();
@@ -5213,18 +5830,15 @@ function handleBrowserShortcut(e) {
   // Alt + Shift + N: Ventana Privada con Tor
   if (isAlt && isShift && isN) {
     prevent();
-    if (window.braveAPI && window.braveAPI.openTorWindow) window.braveAPI.openTorWindow();
+    if (window.braveAPI && window.braveAPI.openTorWindow)
+      window.braveAPI.openTorWindow();
     return;
   }
 
   // Ctrl + Shift + N: Ventana Privada normal
   if (isCtrl && isShift && isN) {
     prevent();
-    if (window.braveAPI && window.braveAPI.openPrivateWindow) {
-      window.braveAPI.openPrivateWindow();
-    } else if (window.electronAPI && window.electronAPI.openPrivateWindow) {
-      window.electronAPI.openPrivateWindow();
-    }
+    if (window.braveAPI) window.braveAPI.openPrivateWindow();
     return;
   }
 
@@ -5280,19 +5894,24 @@ function handleBrowserShortcut(e) {
   // Control de Zoom: Ctrl + +, Ctrl + -, Ctrl + 0
   const tab = getActiveTab();
   if (tab && isCtrl && !isShift) {
-    if (code === 'Equal' || code === 'NumpadAdd' || e.key === '+' || e.key === '=') {
+    if (
+      code === "Equal" ||
+      code === "NumpadAdd" ||
+      e.key === "+" ||
+      e.key === "="
+    ) {
       prevent();
       const current = tab.zoomFactor || 1.0;
       applyCurrentTabZoom(current + 0.1, true);
       return;
     }
-    if (code === 'Minus' || code === 'NumpadSubtract' || e.key === '-') {
+    if (code === "Minus" || code === "NumpadSubtract" || e.key === "-") {
       prevent();
       const current = tab.zoomFactor || 1.0;
       applyCurrentTabZoom(current - 0.1, true);
       return;
     }
-    if (code === 'Digit0' || code === 'Numpad0' || e.key === '0') {
+    if (code === "Digit0" || code === "Numpad0" || e.key === "0") {
       prevent();
       applyCurrentTabZoom(1.0, true);
       return;
@@ -5351,45 +5970,36 @@ function handleBrowserShortcut(e) {
     return;
   }
 
-  // Escape: Detener carga si la pestaña activa está cargando, o cerrar menús, sugerencias o desenfocar
+  // Escape: Cerrar menús, sugerencias o desenfocar
   if (isEsc && !isShift && !isCtrl && !isAlt) {
-    const activeTab = getActiveTab();
-    if (activeTab && activeTab.isLoading && activeTab.webviewEl) {
-      try { activeTab.webviewEl.stop(); } catch {}
-      activeTab.isLoading = false;
-      btnReload.innerHTML = RELOAD_SVG;
-      btnReload.title = 'Recargar (Ctrl+R)';
-      btnReload.setAttribute('data-state', 'reload');
-      finishPageLoadingBar();
-    }
-    shieldsPopup.classList.remove('open');
-    mainMenu.classList.remove('open');
-    if (globalMediaPopup) globalMediaPopup.classList.remove('open');
-    if (customContextMenu) customContextMenu.classList.remove('open');
-    if (tabContextMenu) tabContextMenu.classList.remove('open');
-    if (speedreaderOverlay) speedreaderOverlay.classList.remove('active');
-    if (tabSearchPopup) tabSearchPopup.classList.remove('open');
-    if (profilePopup) profilePopup.classList.remove('open');
-    if (taskManagerModal) taskManagerModal.classList.remove('open');
-    if (translateBar) translateBar.classList.remove('active');
-    const extPopup = document.getElementById('extensions-popup');
-    if (extPopup) extPopup.classList.remove('open');
-    if (extActionPopup) extActionPopup.classList.remove('open');
-    const qrPopup = document.getElementById('qr-popup');
-    if (qrPopup) qrPopup.classList.remove('open');
-    if (bmPopup) bmPopup.classList.remove('open');
+    shieldsPopup.classList.remove("open");
+    mainMenu.classList.remove("open");
+    if (globalMediaPopup) globalMediaPopup.classList.remove("open");
+    if (customContextMenu) customContextMenu.classList.remove("open");
+    if (tabContextMenu) tabContextMenu.classList.remove("open");
+    if (speedreaderOverlay) speedreaderOverlay.classList.remove("active");
+    if (tabSearchPopup) tabSearchPopup.classList.remove("open");
+    if (profilePopup) profilePopup.classList.remove("open");
+    if (taskManagerModal) taskManagerModal.classList.remove("open");
+    if (translateBar) translateBar.classList.remove("active");
+    const extPopup = document.getElementById("extensions-popup");
+    if (extPopup) extPopup.classList.remove("open");
+    if (extActionPopup) extActionPopup.classList.remove("open");
+    const qrPopup = document.getElementById("qr-popup");
+    if (qrPopup) qrPopup.classList.remove("open");
+    if (bmPopup) bmPopup.classList.remove("open");
     closeBarContextMenu();
-    if (bmBarEditModal) bmBarEditModal.classList.remove('open');
-    const siteInfoPop = document.getElementById('site-info-popup');
-    if (siteInfoPop) siteInfoPop.classList.remove('open');
-    const clearDataPop = document.getElementById('clear-data-modal');
-    if (clearDataPop) clearDataPop.classList.remove('open');
-    const pwPop = document.getElementById('password-save-popup');
-    if (pwPop) pwPop.classList.remove('open');
-    const pickerBar = document.getElementById('element-picker-bar');
-    if (pickerBar) pickerBar.classList.remove('active');
-    if (siteInfoPopup) siteInfoPopup.classList.remove('open');
-    if (capturePopup) capturePopup.classList.remove('open');
+    if (bmBarEditModal) bmBarEditModal.classList.remove("open");
+    const siteInfoPop = document.getElementById("site-info-popup");
+    if (siteInfoPop) siteInfoPop.classList.remove("open");
+    const clearDataPop = document.getElementById("clear-data-modal");
+    if (clearDataPop) clearDataPop.classList.remove("open");
+    const pwPop = document.getElementById("password-save-popup");
+    if (pwPop) pwPop.classList.remove("open");
+    const pickerBar = document.getElementById("element-picker-bar");
+    if (pickerBar) pickerBar.classList.remove("active");
+    if (siteInfoPopup) siteInfoPopup.classList.remove("open");
+    if (capturePopup) capturePopup.classList.remove("open");
     closeFindInPage();
     hideWaybackBar();
     closeSuggestions();
@@ -5397,7 +6007,7 @@ function handleBrowserShortcut(e) {
   }
 }
 
-window.addEventListener('keydown', handleBrowserShortcut);
+window.addEventListener("keydown", handleBrowserShortcut);
 
 if (window.braveAPI && window.braveAPI.onWebviewShortcut) {
   window.braveAPI.onWebviewShortcut((data) => {
@@ -5411,42 +6021,44 @@ if (window.braveAPI && window.braveAPI.onWebviewShortcut) {
 // ==========================================
 
 function showGlobalToast(text) {
-  const toast = document.getElementById('app-toast');
+  const toast = document.getElementById("app-toast");
   if (!toast) return;
   toast.textContent = text;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2600);
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
 // ==========================================
 // 14. BRAVE PLAYLIST (brave://playlist)
 // ==========================================
-const btnPlaylist = document.getElementById('btn-playlist');
+const btnPlaylist = document.getElementById("btn-playlist");
 if (btnPlaylist) {
-  btnPlaylist.addEventListener('click', () => {
+  btnPlaylist.addEventListener("click", () => {
     const tab = getActiveTab();
     if (!tab) return;
-    if (tab.url.includes('playlist.html') || tab.url === 'brave://playlist') {
+    if (tab.url.includes("playlist.html") || tab.url === "brave://playlist") {
       tab.webviewEl.reload();
       return;
     }
     // Si la pestaña tiene contenido válido, guardarla en Playlist sin interrumpir
-    if (!tab.url.startsWith('file:') && !tab.url.startsWith('about:')) {
+    if (!tab.url.startsWith("file:") && !tab.url.startsWith("about:")) {
       try {
-        const items = JSON.parse(localStorage.getItem('brave_playlist_items') || '[]');
+        const items = JSON.parse(
+          localStorage.getItem("brave_playlist_items") || "[]",
+        );
         const exists = items.some((it) => it.url === tab.url);
         if (!exists) {
           items.unshift({
             id: Date.now(),
             title: tab.title || tab.url,
             url: tab.url,
-            domain: tab.domain || extractDomain(tab.url) || 'web',
-            date: new Date().toLocaleDateString('es-ES'),
+            domain: tab.domain || extractDomain(tab.url) || "web",
+            date: new Date().toLocaleDateString("es-ES"),
           });
-          localStorage.setItem('brave_playlist_items', JSON.stringify(items));
-          showGlobalToast('✓ Añadido a Brave Playlist');
+          localStorage.setItem("brave_playlist_items", JSON.stringify(items));
+          showGlobalToast("✓ Añadido a Brave Playlist");
         } else {
-          showGlobalToast('ℹ Ya está guardado en Brave Playlist');
+          showGlobalToast("ℹ Ya está guardado en Brave Playlist");
         }
       } catch {}
     } else {
@@ -5461,32 +6073,32 @@ if (btnPlaylist) {
 let isSplitViewActive = false;
 let splitSecondTabId = null;
 let splitRatio = 0.5;
-const btnSplitView = document.getElementById('btn-split-view');
+const btnSplitView = document.getElementById("btn-split-view");
 
 function ensureSplitResizer() {
-  let resizer = document.getElementById('split-resizer');
+  let resizer = document.getElementById("split-resizer");
   if (!resizer) {
-    resizer = document.createElement('div');
-    resizer.id = 'split-resizer';
-    resizer.className = 'split-resizer';
+    resizer = document.createElement("div");
+    resizer.id = "split-resizer";
+    resizer.className = "split-resizer";
     browserContent.appendChild(resizer);
 
     // Doble clic para restablecer la proporción al 50% / 50%
-    resizer.addEventListener('dblclick', () => {
+    resizer.addEventListener("dblclick", () => {
       splitRatio = 0.5;
       updateSplitViewLayout();
-      showGlobalToast('🦁 Pantalla dividida restablecida al 50%');
+      showGlobalToast("🦁 Pantalla dividida restablecida al 50%");
     });
 
     let isDragging = false;
-    resizer.addEventListener('mousedown', (e) => {
+    resizer.addEventListener("mousedown", (e) => {
       e.preventDefault();
       isDragging = true;
-      resizer.classList.add('resizing');
-      document.body.style.cursor = 'col-resize';
+      resizer.classList.add("resizing");
+      document.body.style.cursor = "col-resize";
       // Deshabilitar pointer-events en webviews para evitar que bloqueen el arrastre
-      document.querySelectorAll('.webview-instance').forEach((w) => {
-        w.style.pointerEvents = 'none';
+      document.querySelectorAll(".webview-instance").forEach((w) => {
+        w.style.pointerEvents = "none";
       });
 
       const onMouseMove = (ev) => {
@@ -5502,17 +6114,17 @@ function ensureSplitResizer() {
 
       const onMouseUp = () => {
         isDragging = false;
-        resizer.classList.remove('resizing');
-        document.body.style.cursor = '';
-        document.querySelectorAll('.webview-instance').forEach((w) => {
-          w.style.pointerEvents = 'auto';
+        resizer.classList.remove("resizing");
+        document.body.style.cursor = "";
+        document.querySelectorAll(".webview-instance").forEach((w) => {
+          w.style.pointerEvents = "auto";
         });
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
       };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
     });
   }
   return resizer;
@@ -5538,45 +6150,45 @@ function updateSplitViewLayout() {
 
   tabs.forEach((t) => {
     if (t.id === leftTab.id) {
-      t.tabEl.classList.add('active');
-      t.webviewEl.classList.remove('hidden');
-      t.webviewEl.classList.add('split-left');
-      t.webviewEl.classList.remove('split-right');
-      t.webviewEl.style.position = 'relative';
-      t.webviewEl.style.top = '0';
-      t.webviewEl.style.left = '0';
+      t.tabEl.classList.add("active");
+      t.webviewEl.classList.remove("hidden");
+      t.webviewEl.classList.add("split-left");
+      t.webviewEl.classList.remove("split-right");
+      t.webviewEl.style.position = "relative";
+      t.webviewEl.style.top = "0";
+      t.webviewEl.style.left = "0";
       t.webviewEl.style.width = `calc(${splitRatio * 100}% - 2.5px)`;
-      t.webviewEl.style.height = '100%';
-      t.webviewEl.style.visibility = 'visible';
-      t.webviewEl.style.opacity = '1';
-      t.webviewEl.style.pointerEvents = 'auto';
-      t.webviewEl.style.zIndex = '2';
+      t.webviewEl.style.height = "100%";
+      t.webviewEl.style.visibility = "visible";
+      t.webviewEl.style.opacity = "1";
+      t.webviewEl.style.pointerEvents = "auto";
+      t.webviewEl.style.zIndex = "2";
       resumeTabExecution(t);
     } else if (t.id === rightTab.id) {
-      t.tabEl.classList.remove('active');
-      t.webviewEl.classList.remove('hidden');
-      t.webviewEl.classList.add('split-right');
-      t.webviewEl.classList.remove('split-left');
-      t.webviewEl.style.position = 'relative';
-      t.webviewEl.style.top = '0';
-      t.webviewEl.style.left = '0';
+      t.tabEl.classList.remove("active");
+      t.webviewEl.classList.remove("hidden");
+      t.webviewEl.classList.add("split-right");
+      t.webviewEl.classList.remove("split-left");
+      t.webviewEl.style.position = "relative";
+      t.webviewEl.style.top = "0";
+      t.webviewEl.style.left = "0";
       t.webviewEl.style.width = `calc(${(1 - splitRatio) * 100}% - 2.5px)`;
-      t.webviewEl.style.height = '100%';
-      t.webviewEl.style.visibility = 'visible';
-      t.webviewEl.style.opacity = '1';
-      t.webviewEl.style.pointerEvents = 'auto';
-      t.webviewEl.style.zIndex = '2';
+      t.webviewEl.style.height = "100%";
+      t.webviewEl.style.visibility = "visible";
+      t.webviewEl.style.opacity = "1";
+      t.webviewEl.style.pointerEvents = "auto";
+      t.webviewEl.style.zIndex = "2";
       resumeTabExecution(t);
     } else {
-      t.tabEl.classList.remove('active');
-      t.webviewEl.classList.add('hidden');
-      t.webviewEl.classList.remove('split-left', 'split-right');
-      t.webviewEl.style.visibility = 'hidden';
-      t.webviewEl.style.opacity = '0';
-      t.webviewEl.style.pointerEvents = 'none';
-      t.webviewEl.style.zIndex = '0';
-      t.webviewEl.style.top = '-99999px';
-      t.webviewEl.style.left = '-99999px';
+      t.tabEl.classList.remove("active");
+      t.webviewEl.classList.add("hidden");
+      t.webviewEl.classList.remove("split-left", "split-right");
+      t.webviewEl.style.visibility = "hidden";
+      t.webviewEl.style.opacity = "0";
+      t.webviewEl.style.pointerEvents = "none";
+      t.webviewEl.style.zIndex = "0";
+      t.webviewEl.style.top = "-99999px";
+      t.webviewEl.style.left = "-99999px";
       throttleBackgroundTab(t);
     }
   });
@@ -5590,19 +6202,19 @@ function toggleSplitView(targetSecondTabId) {
   if (isSplitViewActive) {
     isSplitViewActive = false;
     splitSecondTabId = null;
-    browserContent.classList.remove('split-active');
-    if (btnSplitView) btnSplitView.classList.remove('active');
-    const resizer = document.getElementById('split-resizer');
+    browserContent.classList.remove("split-active");
+    if (btnSplitView) btnSplitView.classList.remove("active");
+    const resizer = document.getElementById("split-resizer");
     if (resizer) resizer.remove();
     tabs.forEach((t) => {
-      t.webviewEl.classList.remove('split-left', 'split-right');
-      t.webviewEl.style.position = 'absolute';
-      t.webviewEl.style.top = '0';
-      t.webviewEl.style.left = '0';
-      t.webviewEl.style.width = '';
-      t.webviewEl.style.height = '';
-      t.webviewEl.style.zIndex = '';
-      t.webviewEl.style.pointerEvents = '';
+      t.webviewEl.classList.remove("split-left", "split-right");
+      t.webviewEl.style.position = "absolute";
+      t.webviewEl.style.top = "0";
+      t.webviewEl.style.left = "0";
+      t.webviewEl.style.width = "100%";
+      t.webviewEl.style.height = "100%";
+      t.webviewEl.style.zIndex = "";
+      t.webviewEl.style.pointerEvents = "";
     });
     switchTab(activeTabId);
   } else {
@@ -5616,14 +6228,14 @@ function toggleSplitView(targetSecondTabId) {
     if (!second) return;
     splitSecondTabId = second.id;
     isSplitViewActive = true;
-    browserContent.classList.add('split-active');
-    if (btnSplitView) btnSplitView.classList.add('active');
+    browserContent.classList.add("split-active");
+    if (btnSplitView) btnSplitView.classList.add("active");
     updateSplitViewLayout();
   }
 }
 
 if (btnSplitView) {
-  btnSplitView.addEventListener('click', () => toggleSplitView());
+  btnSplitView.addEventListener("click", () => toggleSplitView());
 }
 
 function switchSplitFocus(targetId) {
@@ -5632,8 +6244,9 @@ function switchSplitFocus(targetId) {
   const currentTab = tabs.find((t) => t.id === targetId);
   if (!currentTab) return;
   tabs.forEach((t) => {
-    if (t.id === targetId) t.tabEl.classList.add('active');
-    else if (t.id === splitSecondTabId || t.id !== targetId) t.tabEl.classList.remove('active');
+    if (t.id === targetId) t.tabEl.classList.add("active");
+    else if (t.id === splitSecondTabId || t.id !== targetId)
+      t.tabEl.classList.remove("active");
   });
   updateOmniboxForUrl(currentTab.url);
   updateNavControls();
@@ -5644,13 +6257,11 @@ function switchSplitFocus(targetId) {
   if (currentTab.isLoading) {
     showPageLoadingBar();
     btnReload.innerHTML = STOP_SVG;
-    btnReload.title = 'Detener carga (Esc)';
-    btnReload.setAttribute('data-state', 'stop');
+    btnReload.title = "Detener carga (Esc)";
   } else {
     hidePageLoadingBar();
     btnReload.innerHTML = RELOAD_SVG;
-    btnReload.title = 'Recargar (Ctrl+R)';
-    btnReload.setAttribute('data-state', 'reload');
+    btnReload.title = "Recargar (Ctrl+R)";
   }
   const dom = currentTab.domain || extractDomain(currentTab.url);
   updateZoomUI(getStoredDomainZoom(dom));
@@ -5660,7 +6271,7 @@ function switchSplitFocus(targetId) {
 // 16. MODO OSCURO FORZADO (Force Dark Mode)
 // ==========================================
 let isForceDarkEnabled = false;
-const btnForceDark = document.getElementById('btn-force-dark');
+const btnForceDark = document.getElementById("btn-force-dark");
 
 const DARK_CSS = `
   html {
@@ -5675,9 +6286,12 @@ const DARK_CSS = `
 function applyForceDarkToTab(tabData, enabled) {
   if (!tabData || !tabData.webviewEl) return;
   if (enabled) {
-    tabData.webviewEl.insertCSS(DARK_CSS).then((key) => {
-      tabData.darkCssKey = key;
-    }).catch(() => {});
+    tabData.webviewEl
+      .insertCSS(DARK_CSS)
+      .then((key) => {
+        tabData.darkCssKey = key;
+      })
+      .catch(() => {});
   } else if (tabData.darkCssKey) {
     tabData.webviewEl.removeInsertedCSS(tabData.darkCssKey).catch(() => {});
     tabData.darkCssKey = null;
@@ -5686,73 +6300,79 @@ function applyForceDarkToTab(tabData, enabled) {
 
 function toggleForceDarkMode() {
   isForceDarkEnabled = !isForceDarkEnabled;
-  if (btnForceDark) btnForceDark.classList.toggle('active', isForceDarkEnabled);
+  if (btnForceDark) btnForceDark.classList.toggle("active", isForceDarkEnabled);
   tabs.forEach((t) => {
     applyForceDarkToTab(t, isForceDarkEnabled);
   });
-  showGlobalToast(`Modo Oscuro Forzado: ${isForceDarkEnabled ? 'Activado' : 'Desactivado'}`);
+  showGlobalToast(
+    `Modo Oscuro Forzado: ${isForceDarkEnabled ? "Activado" : "Desactivado"}`,
+  );
 }
 
 if (btnForceDark) {
-  btnForceDark.addEventListener('click', toggleForceDarkMode);
+  btnForceDark.addEventListener("click", toggleForceDarkMode);
 }
 
 // ==========================================
 // 17. BUSCADOR RÁPIDO DE PESTAÑAS (Tab Search)
 // ==========================================
-const tabSearchPopup = document.getElementById('tab-search-popup');
-const tabSearchInput = document.getElementById('tab-search-input');
-const tabSearchOpenList = document.getElementById('tab-search-open-list');
-const tabSearchClosedList = document.getElementById('tab-search-closed-list');
+const tabSearchPopup = document.getElementById("tab-search-popup");
+const tabSearchInput = document.getElementById("tab-search-input");
+const tabSearchOpenList = document.getElementById("tab-search-open-list");
+const tabSearchClosedList = document.getElementById("tab-search-closed-list");
 
 function toggleTabSearch() {
   if (!tabSearchPopup) return;
-  const isOpen = tabSearchPopup.classList.toggle('open');
+  const isOpen = tabSearchPopup.classList.toggle("open");
   if (isOpen) {
-    if (shieldsPopup) shieldsPopup.classList.remove('open');
-    if (mainMenu) mainMenu.classList.remove('open');
-    if (globalMediaPopup) globalMediaPopup.classList.remove('open');
-    if (profilePopup) profilePopup.classList.remove('open');
+    if (shieldsPopup) shieldsPopup.classList.remove("open");
+    if (mainMenu) mainMenu.classList.remove("open");
+    if (globalMediaPopup) globalMediaPopup.classList.remove("open");
+    if (profilePopup) profilePopup.classList.remove("open");
     if (tabSearchInput) {
-      tabSearchInput.value = '';
+      tabSearchInput.value = "";
       tabSearchInput.focus();
     }
-    renderTabSearchResults('');
+    renderTabSearchResults("");
   }
 }
 
-function renderTabSearchResults(filterText = '') {
+function renderTabSearchResults(filterText = "") {
   if (!tabSearchOpenList || !tabSearchClosedList) return;
   const q = filterText.trim().toLowerCase();
 
   // 1. Pestañas abiertas
-  tabSearchOpenList.innerHTML = '';
+  tabSearchOpenList.innerHTML = "";
   const filteredOpen = tabs.filter(
-    (t) => !q || (t.title && t.title.toLowerCase().includes(q)) || (t.url && t.url.toLowerCase().includes(q))
+    (t) =>
+      !q ||
+      (t.title && t.title.toLowerCase().includes(q)) ||
+      (t.url && t.url.toLowerCase().includes(q)),
   );
   if (filteredOpen.length === 0) {
     tabSearchOpenList.innerHTML =
       '<div style="font-size: 11.5px; color: var(--text-muted); padding: 8px 14px;">No se encontraron pestañas abiertas</div>';
   } else {
     filteredOpen.forEach((t) => {
-      const item = document.createElement('div');
-      item.className = 'tab-search-item' + (t.id === activeTabId ? ' active' : '');
+      const item = document.createElement("div");
+      item.className =
+        "tab-search-item" + (t.id === activeTabId ? " active" : "");
       item.innerHTML = `
-        <span class="tab-search-icon">${t.isAudible ? TAB_AUDIO_PLAYING_SVG : BRAVE_SHIELD_SVG}</span>
+        <span class="tab-search-icon">${t.isAudible ? "🔊" : '<img src="logo.png" width="14" height="14" style="vertical-align:middle;object-fit:contain;">'}</span>
         <div class="tab-search-details">
-          <span class="tab-search-title">${t.title || 'Nueva pestaña'}</span>
+          <span class="tab-search-title">${t.title || "Nueva pestaña"}</span>
           <span class="tab-search-domain">${t.domain || t.url}</span>
         </div>
-        <button class="tab-search-close-btn" title="Cerrar pestaña">${TAB_CLOSE_SVG}</button>
+        <button class="tab-search-close-btn" title="Cerrar pestaña">✕</button>
       `;
-      item.addEventListener('click', (e) => {
-        if (e.target.closest('.tab-search-close-btn')) {
+      item.addEventListener("click", (e) => {
+        if (e.target.classList.contains("tab-search-close-btn")) {
           e.stopPropagation();
           closeTab(t.id);
           renderTabSearchResults(tabSearchInput.value);
         } else {
           switchTab(t.id);
-          tabSearchPopup.classList.remove('open');
+          tabSearchPopup.classList.remove("open");
         }
       });
       tabSearchOpenList.appendChild(item);
@@ -5760,9 +6380,12 @@ function renderTabSearchResults(filterText = '') {
   }
 
   // 2. Pestañas cerradas recientemente
-  tabSearchClosedList.innerHTML = '';
+  tabSearchClosedList.innerHTML = "";
   const filteredClosed = closedTabsStack.filter(
-    (c) => !q || (c.title && c.title.toLowerCase().includes(q)) || (c.url && c.url.toLowerCase().includes(q))
+    (c) =>
+      !q ||
+      (c.title && c.title.toLowerCase().includes(q)) ||
+      (c.url && c.url.toLowerCase().includes(q)),
   );
   if (filteredClosed.length === 0) {
     tabSearchClosedList.innerHTML =
@@ -5772,8 +6395,8 @@ function renderTabSearchResults(filterText = '') {
       .slice(-6)
       .reverse()
       .forEach((c) => {
-        const item = document.createElement('div');
-        item.className = 'tab-search-item';
+        const item = document.createElement("div");
+        item.className = "tab-search-item";
         item.innerHTML = `
         <span class="tab-search-icon">🕒</span>
         <div class="tab-search-details">
@@ -5781,11 +6404,11 @@ function renderTabSearchResults(filterText = '') {
           <span class="tab-search-domain">${c.url}</span>
         </div>
       `;
-        item.addEventListener('click', () => {
+        item.addEventListener("click", () => {
           createTab(c.url);
           const realIdx = closedTabsStack.lastIndexOf(c);
           if (realIdx !== -1) closedTabsStack.splice(realIdx, 1);
-          tabSearchPopup.classList.remove('open');
+          tabSearchPopup.classList.remove("open");
         });
         tabSearchClosedList.appendChild(item);
       });
@@ -5793,7 +6416,7 @@ function renderTabSearchResults(filterText = '') {
 }
 
 if (tabSearchBtn) {
-  tabSearchBtn.addEventListener('click', (e) => {
+  tabSearchBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     toggleTabSearch();
   });
@@ -5804,35 +6427,36 @@ let selectedSearchIndex = 0;
 function updateSelectedSearchItem(items) {
   items.forEach((it, idx) => {
     if (idx === selectedSearchIndex) {
-      it.style.backgroundColor = 'rgba(251, 84, 43, 0.2)';
-      it.style.outline = '1px solid var(--brave-orange)';
-      it.scrollIntoView({ block: 'nearest' });
+      it.style.backgroundColor = "rgba(251, 84, 43, 0.2)";
+      it.style.outline = "1px solid var(--brave-orange)";
+      it.scrollIntoView({ block: "nearest" });
     } else {
-      it.style.backgroundColor = '';
-      it.style.outline = '';
+      it.style.backgroundColor = "";
+      it.style.outline = "";
     }
   });
 }
 
 if (tabSearchInput) {
-  tabSearchInput.addEventListener('input', () => {
+  tabSearchInput.addEventListener("input", () => {
     selectedSearchIndex = 0;
     renderTabSearchResults(tabSearchInput.value);
   });
 
-  tabSearchInput.addEventListener('keydown', (e) => {
-    const items = tabSearchPopup.querySelectorAll('.tab-search-item');
+  tabSearchInput.addEventListener("keydown", (e) => {
+    const items = tabSearchPopup.querySelectorAll(".tab-search-item");
     if (items.length === 0) return;
 
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       selectedSearchIndex = (selectedSearchIndex + 1) % items.length;
       updateSelectedSearchItem(items);
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      selectedSearchIndex = (selectedSearchIndex - 1 + items.length) % items.length;
+      selectedSearchIndex =
+        (selectedSearchIndex - 1 + items.length) % items.length;
       updateSelectedSearchItem(items);
-    } else if (e.key === 'Enter') {
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (items[selectedSearchIndex]) {
         items[selectedSearchIndex].click();
@@ -5844,11 +6468,11 @@ if (tabSearchInput) {
 // ==========================================
 // 18. ADMINISTRADOR DE TAREAS (Shift + Esc)
 // ==========================================
-const taskManagerModal = document.getElementById('task-manager-modal');
-const btnCloseTaskManager = document.getElementById('btn-close-task-manager');
-const taskManagerTbody = document.getElementById('task-manager-tbody');
-const taskManagerTotalRam = document.getElementById('task-manager-total-ram');
-const btnTaskEndProcess = document.getElementById('btn-task-end-process');
+const taskManagerModal = document.getElementById("task-manager-modal");
+const btnCloseTaskManager = document.getElementById("btn-close-task-manager");
+const taskManagerTbody = document.getElementById("task-manager-tbody");
+const taskManagerTotalRam = document.getElementById("task-manager-total-ram");
+const btnTaskEndProcess = document.getElementById("btn-task-end-process");
 let selectedTaskTabId = null;
 
 function openTaskManager() {
@@ -5856,30 +6480,34 @@ function openTaskManager() {
   selectedTaskTabId = null;
   if (btnTaskEndProcess) btnTaskEndProcess.disabled = true;
   renderTaskManagerRows();
-  taskManagerModal.classList.add('open');
+  taskManagerModal.classList.add("open");
 }
 
 function closeTaskManager() {
-  if (taskManagerModal) taskManagerModal.classList.remove('open');
+  if (taskManagerModal) taskManagerModal.classList.remove("open");
 }
 
 function renderTaskManagerRows() {
   if (!taskManagerTbody) return;
-  taskManagerTbody.innerHTML = '';
+  taskManagerTbody.innerHTML = "";
   let totalMem = 0;
 
   tabs.forEach((t) => {
     totalMem += t.estimatedMemoryMB;
-    const tr = document.createElement('tr');
-    if (t.id === selectedTaskTabId) tr.classList.add('selected');
+    const tr = document.createElement("tr");
+    if (t.id === selectedTaskTabId) tr.classList.add("selected");
 
-    const cpuEst = t.isAudible ? '2.1%' : t.id === activeTabId ? '0.8%' : '0.1%';
+    const cpuEst = t.isAudible
+      ? "2.1%"
+      : t.id === activeTabId
+        ? "0.8%"
+        : "0.1%";
     tr.innerHTML = `
       <td>
         <div class="task-cell-title">
-          <span>${t.isAudible ? '🔊' : '<img src="logo.png" width="14" height="14" style="vertical-align:middle;object-fit:contain;">'}</span>
-          <span style="font-weight: 600;">${t.title || 'Nueva pestaña'}</span>
-          <span style="color: var(--text-muted); font-size: 11px;">(${t.domain || 'Brave'})</span>
+          <span>${t.isAudible ? "🔊" : '<img src="logo.png" width="14" height="14" style="vertical-align:middle;object-fit:contain;">'}</span>
+          <span style="font-weight: 600;">${t.title || "Nueva pestaña"}</span>
+          <span style="color: var(--text-muted); font-size: 11px;">(${t.domain || "Brave"})</span>
         </div>
       </td>
       <td><span class="task-ram-badge">${t.estimatedMemoryMB} MB</span></td>
@@ -5889,14 +6517,14 @@ function renderTaskManagerRows() {
       </td>
     `;
 
-    tr.addEventListener('click', (e) => {
-      if (e.target.classList.contains('btn-row-end')) return;
+    tr.addEventListener("click", (e) => {
+      if (e.target.classList.contains("btn-row-end")) return;
       selectedTaskTabId = t.id;
       if (btnTaskEndProcess) btnTaskEndProcess.disabled = false;
       renderTaskManagerRows();
     });
 
-    tr.querySelector('.btn-row-end').addEventListener('click', (e) => {
+    tr.querySelector(".btn-row-end").addEventListener("click", (e) => {
       e.stopPropagation();
       closeTab(t.id);
       renderTaskManagerRows();
@@ -5911,10 +6539,10 @@ function renderTaskManagerRows() {
 }
 
 if (btnCloseTaskManager) {
-  btnCloseTaskManager.addEventListener('click', closeTaskManager);
+  btnCloseTaskManager.addEventListener("click", closeTaskManager);
 }
 if (btnTaskEndProcess) {
-  btnTaskEndProcess.addEventListener('click', () => {
+  btnTaskEndProcess.addEventListener("click", () => {
     if (selectedTaskTabId) {
       closeTab(selectedTaskTabId);
       selectedTaskTabId = null;
@@ -5927,37 +6555,50 @@ if (btnTaskEndProcess) {
 // ==========================================
 // 19. SELECTOR DE PERFILES DE USUARIO
 // ==========================================
-const btnProfile = document.getElementById('btn-profile');
-const profilePopup = document.getElementById('profile-popup');
-const profileCurrentAvatar = document.getElementById('profile-current-avatar');
-const profileCurrentName = document.getElementById('profile-current-name');
+const btnProfile = document.getElementById("btn-profile");
+const profilePopup = document.getElementById("profile-popup");
+const profileCurrentAvatar = document.getElementById("profile-current-avatar");
+const profileCurrentName = document.getElementById("profile-current-name");
 
 const PROFILES = {
-  personal: { name: 'Perfil Personal', sub: 'Brave Perfil Principal', icon: '👤' },
-  work: { name: 'Perfil Trabajo', sub: 'Espacio de trabajo y proyectos', icon: '💼' },
-  guest: { name: 'Modo Invitado', sub: 'Sesión temporal sin historial ni datos', icon: '🕶️' },
+  personal: {
+    name: "Perfil Personal",
+    sub: "Brave Perfil Principal",
+    icon: "👤",
+  },
+  work: {
+    name: "Perfil Trabajo",
+    sub: "Espacio de trabajo y proyectos",
+    icon: "💼",
+  },
+  guest: {
+    name: "Modo Invitado",
+    sub: "Sesión temporal sin historial ni datos",
+    icon: "🕶️",
+  },
 };
 
 function initProfileSelector() {
-  const savedProfile = localStorage.getItem('brave_active_profile') || 'personal';
+  const savedProfile =
+    localStorage.getItem("brave_active_profile") || "personal";
   setProfile(savedProfile, false);
 
   if (btnProfile) {
-    btnProfile.addEventListener('click', (e) => {
+    btnProfile.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (shieldsPopup) shieldsPopup.classList.remove('open');
-      if (mainMenu) mainMenu.classList.remove('open');
-      if (tabSearchPopup) tabSearchPopup.classList.remove('open');
-      if (profilePopup) profilePopup.classList.toggle('open');
+      if (shieldsPopup) shieldsPopup.classList.remove("open");
+      if (mainMenu) mainMenu.classList.remove("open");
+      if (tabSearchPopup) tabSearchPopup.classList.remove("open");
+      if (profilePopup) profilePopup.classList.toggle("open");
     });
   }
 
-  document.querySelectorAll('.profile-option').forEach((opt) => {
-    opt.addEventListener('click', () => {
-      const pKey = opt.getAttribute('data-profile');
+  document.querySelectorAll(".profile-option").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      const pKey = opt.getAttribute("data-profile");
       if (pKey) {
         setProfile(pKey, true);
-        if (profilePopup) profilePopup.classList.remove('open');
+        if (profilePopup) profilePopup.classList.remove("open");
       }
     });
   });
@@ -5965,33 +6606,35 @@ function initProfileSelector() {
 
 function setProfile(profileKey, showNotification = true) {
   const prof = PROFILES[profileKey] || PROFILES.personal;
-  localStorage.setItem('brave_active_profile', profileKey);
+  localStorage.setItem("brave_active_profile", profileKey);
 
   if (btnProfile) btnProfile.textContent = prof.icon;
   if (profileCurrentAvatar) profileCurrentAvatar.textContent = prof.icon;
   if (profileCurrentName) profileCurrentName.textContent = prof.name;
 
-  document.querySelectorAll('.profile-option').forEach((opt) => {
-    const k = opt.getAttribute('data-profile');
-    const check = opt.querySelector('.profile-opt-check');
+  document.querySelectorAll(".profile-option").forEach((opt) => {
+    const k = opt.getAttribute("data-profile");
+    const check = opt.querySelector(".profile-opt-check");
     if (k === profileKey) {
-      opt.classList.add('active');
-      if (check) check.textContent = '✓';
+      opt.classList.add("active");
+      if (check) check.textContent = "✓";
     } else {
-      opt.classList.remove('active');
-      if (check) check.textContent = '';
+      opt.classList.remove("active");
+      if (check) check.textContent = "";
     }
   });
 
-  if (profileKey === 'guest' && showNotification) {
+  if (profileKey === "guest" && showNotification) {
     if (window.braveAPI && window.braveAPI.openPrivateWindow) {
       window.braveAPI.openPrivateWindow();
     }
-  } else if (profileKey === 'work' && showNotification) {
+  } else if (profileKey === "work" && showNotification) {
     if (window.braveAPI && window.braveAPI.openProfileWindow) {
-      window.braveAPI.openProfileWindow('work');
+      window.braveAPI.openProfileWindow("work");
     }
-    showGlobalToast('💼 Abriendo ventana con Perfil de Trabajo (sesión aislada)');
+    showGlobalToast(
+      "💼 Abriendo ventana con Perfil de Trabajo (sesión aislada)",
+    );
   }
 }
 initProfileSelector();
@@ -5999,36 +6642,39 @@ initProfileSelector();
 // ==========================================
 // 20. BRAVE TRANSLATE (Traductor Nativo)
 // ==========================================
-const btnTranslate = document.getElementById('btn-translate');
-const translateBar = document.getElementById('translate-bar');
-const btnDoTranslate = document.getElementById('btn-do-translate');
-const btnRevertTranslate = document.getElementById('btn-revert-translate');
-const btnCloseTranslate = document.getElementById('btn-close-translate');
-const translateStatusText = document.getElementById('translate-status-text');
+const btnTranslate = document.getElementById("btn-translate");
+const translateBar = document.getElementById("translate-bar");
+const btnDoTranslate = document.getElementById("btn-do-translate");
+const btnRevertTranslate = document.getElementById("btn-revert-translate");
+const btnCloseTranslate = document.getElementById("btn-close-translate");
+const translateStatusText = document.getElementById("translate-status-text");
 
 if (btnTranslate) {
-  btnTranslate.addEventListener('click', () => {
+  btnTranslate.addEventListener("click", () => {
     if (translateBar) {
-      translateBar.classList.toggle('active');
-      if (btnDoTranslate) btnDoTranslate.style.display = 'inline-block';
-      if (btnRevertTranslate) btnRevertTranslate.style.display = 'none';
-      if (translateStatusText) translateStatusText.textContent = '¿Traducir esta página al español?';
+      translateBar.classList.toggle("active");
+      if (btnDoTranslate) btnDoTranslate.style.display = "inline-block";
+      if (btnRevertTranslate) btnRevertTranslate.style.display = "none";
+      if (translateStatusText)
+        translateStatusText.textContent = "¿Traducir esta página al español?";
     }
   });
 }
 
 if (btnCloseTranslate) {
-  btnCloseTranslate.addEventListener('click', () => {
-    if (translateBar) translateBar.classList.remove('active');
+  btnCloseTranslate.addEventListener("click", () => {
+    if (translateBar) translateBar.classList.remove("active");
   });
 }
 
 if (btnDoTranslate) {
-  btnDoTranslate.addEventListener('click', () => {
+  btnDoTranslate.addEventListener("click", () => {
     const tab = getActiveTab();
     if (!tab || !tab.webviewEl) return;
 
-    if (translateStatusText) translateStatusText.textContent = 'Traduciendo página completa al español...';
+    if (translateStatusText)
+      translateStatusText.textContent =
+        "Traduciendo página completa al español...";
 
     // Inyectar traductor inteligente de oraciones, párrafos y elementos clave
     tab.webviewEl
@@ -6100,26 +6746,31 @@ if (btnDoTranslate) {
       })()
     `)
       .then((count) => {
-        if (translateStatusText) translateStatusText.textContent = `Página traducida al español (${count} nodos de texto adaptados)`;
-        if (btnDoTranslate) btnDoTranslate.style.display = 'none';
-        if (btnRevertTranslate) btnRevertTranslate.style.display = 'inline-block';
-        showGlobalToast('🌐 Página traducida al español');
+        if (translateStatusText)
+          translateStatusText.textContent = `Página traducida al español (${count} nodos de texto adaptados)`;
+        if (btnDoTranslate) btnDoTranslate.style.display = "none";
+        if (btnRevertTranslate)
+          btnRevertTranslate.style.display = "inline-block";
+        showGlobalToast("🌐 Página traducida al español");
       })
       .catch(() => {
-        if (translateStatusText) translateStatusText.textContent = 'No se pudo traducir automáticamente';
+        if (translateStatusText)
+          translateStatusText.textContent =
+            "No se pudo traducir automáticamente";
       });
   });
 }
 
 if (btnRevertTranslate) {
-  btnRevertTranslate.addEventListener('click', () => {
+  btnRevertTranslate.addEventListener("click", () => {
     const tab = getActiveTab();
     if (tab && tab.webviewEl) {
       tab.webviewEl.reload();
-      if (translateStatusText) translateStatusText.textContent = '¿Traducir esta página al español?';
-      if (btnDoTranslate) btnDoTranslate.style.display = 'inline-block';
-      if (btnRevertTranslate) btnRevertTranslate.style.display = 'none';
-      showGlobalToast('Versión original restaurada');
+      if (translateStatusText)
+        translateStatusText.textContent = "¿Traducir esta página al español?";
+      if (btnDoTranslate) btnDoTranslate.style.display = "inline-block";
+      if (btnRevertTranslate) btnRevertTranslate.style.display = "none";
+      showGlobalToast("Versión original restaurada");
     }
   });
 }
@@ -6127,42 +6778,47 @@ if (btnRevertTranslate) {
 // ==========================================
 // 21. GESTOR DE EXTENSIONES (UI Toolbar & Popup)
 // ==========================================
-const btnExtensions = document.getElementById('btn-extensions');
-const extensionsPopup = document.getElementById('extensions-popup');
-const extensionsPopupList = document.getElementById('extensions-popup-list');
-const btnGotoExtensions = document.getElementById('btn-goto-extensions');
-const btnPopupWebstore = document.getElementById('btn-popup-webstore');
+const btnExtensions = document.getElementById("btn-extensions");
+const extensionsPopup = document.getElementById("extensions-popup");
+const extensionsPopupList = document.getElementById("extensions-popup-list");
+const btnGotoExtensions = document.getElementById("btn-goto-extensions");
+const btnPopupWebstore = document.getElementById("btn-popup-webstore");
 
 if (btnExtensions) {
-  btnExtensions.addEventListener('click', (e) => {
+  btnExtensions.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (shieldsPopup) shieldsPopup.classList.remove('open');
-    if (mainMenu) mainMenu.classList.remove('open');
-    if (tabSearchPopup) tabSearchPopup.classList.remove('open');
-    if (profilePopup) profilePopup.classList.remove('open');
+    if (shieldsPopup) shieldsPopup.classList.remove("open");
+    if (mainMenu) mainMenu.classList.remove("open");
+    if (tabSearchPopup) tabSearchPopup.classList.remove("open");
+    if (profilePopup) profilePopup.classList.remove("open");
     if (extensionsPopup) {
-      const isOpen = extensionsPopup.classList.toggle('open');
+      const isOpen = extensionsPopup.classList.toggle("open");
       if (isOpen) renderExtensionsPopupList();
     }
   });
 }
 
 if (btnGotoExtensions) {
-  btnGotoExtensions.addEventListener('click', () => {
+  btnGotoExtensions.addEventListener("click", () => {
     createTab(extensionsUrl);
-    if (extensionsPopup) extensionsPopup.classList.remove('open');
+    if (extensionsPopup) extensionsPopup.classList.remove("open");
   });
 }
 
 if (btnPopupWebstore) {
-  btnPopupWebstore.addEventListener('click', () => {
-    createTab('https://chromewebstore.google.com');
-    if (extensionsPopup) extensionsPopup.classList.remove('open');
+  btnPopupWebstore.addEventListener("click", () => {
+    createTab("https://chromewebstore.google.com");
+    if (extensionsPopup) extensionsPopup.classList.remove("open");
   });
 }
 
 async function renderExtensionsPopupList() {
-  if (!extensionsPopupList || !window.braveAPI || !window.braveAPI.listExtensions) return;
+  if (
+    !extensionsPopupList ||
+    !window.braveAPI ||
+    !window.braveAPI.listExtensions
+  )
+    return;
   try {
     const data = await window.braveAPI.listExtensions();
     const installed = data.installed || [];
@@ -6176,98 +6832,108 @@ async function renderExtensionsPopupList() {
       return;
     }
 
-    extensionsPopupList.innerHTML = '';
+    extensionsPopupList.innerHTML = "";
     installed.forEach((ext) => {
-      const item = document.createElement('div');
-      item.className = 'popup-ext-item';
+      const item = document.createElement("div");
+      item.className = "popup-ext-item";
       item.innerHTML = `
         <div class="popup-ext-info">
-          <span>${ext.icon || '🧩'}</span>
+          <span>${ext.icon || "🧩"}</span>
           <span class="popup-ext-name">${ext.name}</span>
         </div>
         <label class="switch switch-sm">
-          <input type="checkbox" class="popup-ext-toggle" ${ext.enabled ? 'checked' : ''} data-id="${ext.id}">
+          <input type="checkbox" class="popup-ext-toggle" ${ext.enabled ? "checked" : ""} data-id="${ext.id}">
           <span class="slider"></span>
         </label>
       `;
 
-      item.querySelector('.popup-ext-toggle').addEventListener('change', async (e) => {
-        const checked = e.target.checked;
-        await window.braveAPI.toggleExtension(ext.id, checked);
-        showGlobalToast(`Extensión "${ext.name}" ${checked ? 'activada' : 'desactivada'}`);
-        renderExtensionActions();
-      });
+      item
+        .querySelector(".popup-ext-toggle")
+        .addEventListener("change", async (e) => {
+          const checked = e.target.checked;
+          await window.braveAPI.toggleExtension(ext.id, checked);
+          showGlobalToast(
+            `Extensión "${ext.name}" ${checked ? "activada" : "desactivada"}`,
+          );
+          renderExtensionActions();
+        });
 
       extensionsPopupList.appendChild(item);
     });
   } catch (err) {
-    console.error('Error renderizando popup de extensiones:', err);
+    console.error("Error renderizando popup de extensiones:", err);
   }
 }
 
-const extActionPopup = document.getElementById('extension-action-popup');
-const extPopupTitle = document.getElementById('ext-popup-title');
-const extPopupFrame = document.getElementById('ext-popup-frame');
-const extPopupClose = document.getElementById('ext-popup-close');
+const extActionPopup = document.getElementById("extension-action-popup");
+const extPopupTitle = document.getElementById("ext-popup-title");
+const extPopupFrame = document.getElementById("ext-popup-frame");
+const extPopupClose = document.getElementById("ext-popup-close");
 
 if (extPopupClose && extActionPopup) {
-  extPopupClose.addEventListener('click', () => {
-    extActionPopup.classList.remove('open');
-    if (extPopupFrame) extPopupFrame.src = 'about:blank';
+  extPopupClose.addEventListener("click", () => {
+    extActionPopup.classList.remove("open");
+    if (extPopupFrame) extPopupFrame.src = "about:blank";
   });
 }
 
 async function renderExtensionActions() {
-  const container = document.getElementById('extensions-toolbar-strip');
+  const container = document.getElementById("extensions-toolbar-strip");
   if (!container || !window.braveAPI || !window.braveAPI.listExtensions) return;
-  container.innerHTML = '';
+  container.innerHTML = "";
 
   try {
     const data = await window.braveAPI.listExtensions();
     const installed = data.installed || [];
 
-    installed.filter((ext) => ext.enabled).forEach((ext) => {
-      const btn = document.createElement('button');
-      btn.className = 'ext-action-btn';
-      btn.title = `${ext.name} (Extensión de Brave)`;
+    installed
+      .filter((ext) => ext.enabled)
+      .forEach((ext) => {
+        const btn = document.createElement("button");
+        btn.className = "ext-action-btn";
+        btn.title = `${ext.name} (Extensión de Brave)`;
 
-      let iconHtml = '🧩';
-      if (ext.icon && (ext.icon.startsWith('http') || ext.icon.startsWith('data:') || ext.icon.startsWith('file:'))) {
-        iconHtml = `<img class="ext-action-icon" src="${escapeHtml(ext.icon)}" alt="${escapeHtml(ext.name)}">`;
-      } else if (ext.icon) {
-        iconHtml = `<span style="font-size:14px;">${escapeHtml(ext.icon)}</span>`;
-      }
-      btn.innerHTML = iconHtml;
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (ext.popupUrl && extActionPopup && extPopupFrame) {
-          const rect = btn.getBoundingClientRect();
-          extActionPopup.style.top = `${rect.bottom + 6}px`;
-          extActionPopup.style.right = `${Math.max(10, window.innerWidth - rect.right - 10)}px`;
-          if (extPopupTitle) extPopupTitle.textContent = ext.name;
-          extPopupFrame.src = ext.popupUrl;
-          extActionPopup.classList.toggle('open');
-        } else {
-          showGlobalToast(`🧩 ${ext.name}: extensión activa en Brave`);
+        let iconHtml = "🧩";
+        if (
+          ext.icon &&
+          (ext.icon.startsWith("http") ||
+            ext.icon.startsWith("data:") ||
+            ext.icon.startsWith("file:"))
+        ) {
+          iconHtml = `<img class="ext-action-icon" src="${escapeHtml(ext.icon)}" alt="${escapeHtml(ext.name)}">`;
+        } else if (ext.icon) {
+          iconHtml = `<span style="font-size:14px;">${escapeHtml(ext.icon)}</span>`;
         }
+        btn.innerHTML = iconHtml;
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (ext.popupUrl && extActionPopup && extPopupFrame) {
+            const rect = btn.getBoundingClientRect();
+            extActionPopup.style.top = `${rect.bottom + 6}px`;
+            extActionPopup.style.right = `${Math.max(10, window.innerWidth - rect.right - 10)}px`;
+            if (extPopupTitle) extPopupTitle.textContent = ext.name;
+            extPopupFrame.src = ext.popupUrl;
+            extActionPopup.classList.toggle("open");
+          } else {
+            showGlobalToast(`🧩 ${ext.name}: extensión activa en Brave`);
+          }
+        });
+        container.appendChild(btn);
       });
-      container.appendChild(btn);
-    });
   } catch (err) {
-    console.error('Error renderizando acciones de extensiones:', err);
+    console.error("Error renderizando acciones de extensiones:", err);
   }
 }
-
-
 
 // ==========================================
 // 22. IMAGEN EN IMAGEN (Picture-in-Picture / PiP)
 // ==========================================
-const btnPip = document.getElementById('btn-pip');
+const btnPip = document.getElementById("btn-pip");
 function triggerPictureInPicture() {
   const tab = getActiveTab();
   if (tab && tab.webviewEl) {
-    tab.webviewEl.executeJavaScript(`
+    tab.webviewEl
+      .executeJavaScript(`
       (async () => {
         const video = document.querySelector('video');
         if (video) {
@@ -6280,26 +6946,27 @@ function triggerPictureInPicture() {
           alert('No se detectó ningún video en reproducción en esta pestaña.');
         }
       })()
-    `).catch(() => {
-      showGlobalToast('No se pudo activar Imagen en Imagen.');
-    });
+    `)
+      .catch(() => {
+        showGlobalToast("No se pudo activar Imagen en Imagen.");
+      });
   }
 }
-if (btnPip) btnPip.addEventListener('click', triggerPictureInPicture);
+if (btnPip) btnPip.addEventListener("click", triggerPictureInPicture);
 
 // ==========================================
 // 23. BÚSQUEDA INTERNA EN LA PÁGINA (Find in Page - Ctrl + F)
 // ==========================================
-const findInPageBar = document.getElementById('find-in-page-bar');
-const findInPageInput = document.getElementById('find-in-page-input');
-const findInPageCount = document.getElementById('find-in-page-count');
-const btnFindPrev = document.getElementById('btn-find-prev');
-const btnFindNext = document.getElementById('btn-find-next');
-const btnFindClose = document.getElementById('btn-find-close');
+const findInPageBar = document.getElementById("find-in-page-bar");
+const findInPageInput = document.getElementById("find-in-page-input");
+const findInPageCount = document.getElementById("find-in-page-count");
+const btnFindPrev = document.getElementById("btn-find-prev");
+const btnFindNext = document.getElementById("btn-find-next");
+const btnFindClose = document.getElementById("btn-find-close");
 
 function toggleFindInPage() {
   if (!findInPageBar) return;
-  const isOpen = findInPageBar.classList.toggle('open');
+  const isOpen = findInPageBar.classList.toggle("open");
   if (isOpen) {
     findInPageInput.focus();
     findInPageInput.select();
@@ -6315,106 +6982,117 @@ function toggleFindInPage() {
 
 function closeFindInPage() {
   if (!findInPageBar) return;
-  findInPageBar.classList.remove('open');
+  findInPageBar.classList.remove("open");
   const tab = getActiveTab();
-  if (tab) tab.webviewEl.stopFindInPage('clearSelection');
-  if (findInPageCount) findInPageCount.textContent = '0/0';
+  if (tab) tab.webviewEl.stopFindInPage("clearSelection");
+  if (findInPageCount) findInPageCount.textContent = "0/0";
 }
 
 if (findInPageInput) {
-  findInPageInput.addEventListener('input', () => {
+  findInPageInput.addEventListener("input", () => {
     const text = findInPageInput.value.trim();
     const tab = getActiveTab();
     if (!tab) return;
     if (text) {
       tab.webviewEl.findInPage(text, { forward: true, findNext: false });
     } else {
-      tab.webviewEl.stopFindInPage('clearSelection');
-      findInPageCount.textContent = '0/0';
+      tab.webviewEl.stopFindInPage("clearSelection");
+      findInPageCount.textContent = "0/0";
     }
   });
 
-  findInPageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+  findInPageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       const tab = getActiveTab();
       if (!tab) return;
       const text = findInPageInput.value.trim();
       if (text) {
-        tab.webviewEl.findInPage(text, { forward: !e.shiftKey, findNext: true });
+        tab.webviewEl.findInPage(text, {
+          forward: !e.shiftKey,
+          findNext: true,
+        });
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       closeFindInPage();
     }
   });
 }
 
 if (btnFindNext) {
-  btnFindNext.addEventListener('click', () => {
+  btnFindNext.addEventListener("click", () => {
     const tab = getActiveTab();
     const text = findInPageInput.value.trim();
-    if (tab && text) tab.webviewEl.findInPage(text, { forward: true, findNext: true });
+    if (tab && text)
+      tab.webviewEl.findInPage(text, { forward: true, findNext: true });
   });
 }
 
 if (btnFindPrev) {
-  btnFindPrev.addEventListener('click', () => {
+  btnFindPrev.addEventListener("click", () => {
     const tab = getActiveTab();
     const text = findInPageInput.value.trim();
-    if (tab && text) tab.webviewEl.findInPage(text, { forward: false, findNext: true });
+    if (tab && text)
+      tab.webviewEl.findInPage(text, { forward: false, findNext: true });
   });
 }
 
 if (btnFindClose) {
-  btnFindClose.addEventListener('click', closeFindInPage);
+  btnFindClose.addEventListener("click", closeFindInPage);
 }
 
 // ==========================================
 // 24. RESPALDO WAYBACK MACHINE (Internet Archive 404/500)
 // ==========================================
-const waybackBar = document.getElementById('wayback-bar');
-const btnWaybackCheck = document.getElementById('btn-wayback-check');
-const btnWaybackClose = document.getElementById('btn-wayback-close');
+const waybackBar = document.getElementById("wayback-bar");
+const btnWaybackCheck = document.getElementById("btn-wayback-check");
+const btnWaybackClose = document.getElementById("btn-wayback-close");
 
 function showWaybackBar(targetUrl) {
-  if (!waybackBar || !targetUrl || targetUrl.startsWith('file:') || targetUrl.startsWith('about:')) return;
-  waybackBar.classList.add('active');
+  if (
+    !waybackBar ||
+    !targetUrl ||
+    targetUrl.startsWith("file:") ||
+    targetUrl.startsWith("about:")
+  )
+    return;
+  waybackBar.classList.add("active");
   if (btnWaybackCheck) {
     btnWaybackCheck.onclick = () => {
-      const cleanTarget = targetUrl.replace(/^https?:\/\//i, '');
+      const cleanTarget = targetUrl.replace(/^https?:\/\//i, "");
       createTab(`https://web.archive.org/web/*/${cleanTarget}`);
-      waybackBar.classList.remove('active');
+      waybackBar.classList.remove("active");
     };
   }
   if (btnWaybackClose) {
     btnWaybackClose.onclick = () => {
-      waybackBar.classList.remove('active');
+      waybackBar.classList.remove("active");
     };
   }
 }
 
 function hideWaybackBar() {
-  if (waybackBar) waybackBar.classList.remove('active');
+  if (waybackBar) waybackBar.classList.remove("active");
 }
 
 // ==========================================
 // 25. GENERADOR DE CÓDIGO QR PARA COMPARTIR PÁGINAS
 // ==========================================
-const btnQrCode = document.getElementById('btn-qr-code');
-const qrPopup = document.getElementById('qr-popup');
-const qrCodeContainer = document.getElementById('qr-code-container');
-const qrUrlDisplay = document.getElementById('qr-url-display');
-const btnCloseQr = document.getElementById('btn-close-qr');
-const btnQrCopy = document.getElementById('btn-qr-copy');
+const btnQrCode = document.getElementById("btn-qr-code");
+const qrPopup = document.getElementById("qr-popup");
+const qrCodeContainer = document.getElementById("qr-code-container");
+const qrUrlDisplay = document.getElementById("qr-url-display");
+const btnCloseQr = document.getElementById("btn-close-qr");
+const btnQrCopy = document.getElementById("btn-qr-copy");
 
 function renderQRCodeSvg(text, container) {
   if (!container) return;
-  container.innerHTML = '';
-  const canvas = document.createElement('canvas');
+  container.innerHTML = "";
+  const canvas = document.createElement("canvas");
   canvas.width = 160;
   canvas.height = 160;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, 160, 160);
 
   const N = 25;
@@ -6426,7 +7104,13 @@ function renderQRCodeSvg(text, container) {
   function drawFinder(r0, c0) {
     for (let r = 0; r < 7; r++) {
       for (let c = 0; c < 7; c++) {
-        if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+        if (
+          r === 0 ||
+          r === 6 ||
+          c === 0 ||
+          c === 6 ||
+          (r >= 2 && r <= 4 && c >= 2 && c <= 4)
+        ) {
           grid[r0 + r][c0 + c] = 1;
         }
       }
@@ -6445,8 +7129,8 @@ function renderQRCodeSvg(text, container) {
   }
 
   for (let i = 8; i < N - 8; i++) {
-    grid[6][i] = (i % 2 === 0) ? 1 : 0;
-    grid[i][6] = (i % 2 === 0) ? 1 : 0;
+    grid[6][i] = i % 2 === 0 ? 1 : 0;
+    grid[i][6] = i % 2 === 0 ? 1 : 0;
   }
 
   let hash = 0;
@@ -6464,64 +7148,69 @@ function renderQRCodeSvg(text, container) {
       if (!inTopLeft && !inTopRight && !inBottomLeft && !inTiming && !inAlign) {
         const charCode = text.charCodeAt(bitIdx % text.length) || 0;
         const bit = ((hash >> (bitIdx % 31)) ^ (charCode >> (bitIdx % 8))) & 1;
-        grid[r][c] = (bit ^ ((r + c) % 2 === 0 ? 1 : 0));
+        grid[r][c] = bit ^ ((r + c) % 2 === 0 ? 1 : 0);
         bitIdx++;
       }
     }
   }
 
-  ctx.fillStyle = '#000000';
+  ctx.fillStyle = "#000000";
   for (let r = 0; r < N; r++) {
     for (let c = 0; c < N; c++) {
       if (grid[r][c]) {
-        ctx.fillRect(offset + c * moduleSize, offset + r * moduleSize, moduleSize, moduleSize);
+        ctx.fillRect(
+          offset + c * moduleSize,
+          offset + r * moduleSize,
+          moduleSize,
+          moduleSize,
+        );
       }
     }
   }
 
   container.appendChild(canvas);
 
-  if (navigator.onLine && text.startsWith('http')) {
+  if (navigator.onLine && text.startsWith("http")) {
     const netImg = new Image();
     netImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(text)}`;
     netImg.onload = () => {
-      container.innerHTML = '';
-      netImg.style.width = '160px';
-      netImg.style.height = '160px';
-      netImg.style.borderRadius = '4px';
+      container.innerHTML = "";
+      netImg.style.width = "160px";
+      netImg.style.height = "160px";
+      netImg.style.borderRadius = "4px";
       container.appendChild(netImg);
     };
   }
 }
 
 if (btnQrCode) {
-  btnQrCode.addEventListener('click', (e) => {
+  btnQrCode.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (shieldsPopup) shieldsPopup.classList.remove('open');
-    if (mainMenu) mainMenu.classList.remove('open');
-    if (tabSearchPopup) tabSearchPopup.classList.remove('open');
+    if (shieldsPopup) shieldsPopup.classList.remove("open");
+    if (mainMenu) mainMenu.classList.remove("open");
+    if (tabSearchPopup) tabSearchPopup.classList.remove("open");
     const tab = getActiveTab();
     const currentUrl = tab ? tab.url : ntpUrl;
     if (qrUrlDisplay) qrUrlDisplay.value = currentUrl;
     renderQRCodeSvg(currentUrl, qrCodeContainer);
-    if (qrPopup) qrPopup.classList.toggle('open');
+    if (qrPopup) qrPopup.classList.toggle("open");
   });
 }
 
 if (btnCloseQr) {
-  btnCloseQr.addEventListener('click', () => {
-    if (qrPopup) qrPopup.classList.remove('open');
+  btnCloseQr.addEventListener("click", () => {
+    if (qrPopup) qrPopup.classList.remove("open");
   });
 }
 
 if (btnQrCopy) {
-  btnQrCopy.addEventListener('click', () => {
+  btnQrCopy.addEventListener("click", () => {
     const tab = getActiveTab();
-    const val = (qrUrlDisplay && qrUrlDisplay.value) || (tab ? tab.url : '');
+    const val = (qrUrlDisplay && qrUrlDisplay.value) || (tab ? tab.url : "");
     if (val) {
       navigator.clipboard.writeText(val).then(() => {
-        showGlobalToast('Enlace copiado al portapapeles');
-        if (qrPopup) qrPopup.classList.remove('open');
+        showGlobalToast("Enlace copiado al portapapeles");
+        if (qrPopup) qrPopup.classList.remove("open");
       });
     }
   });
@@ -6534,17 +7223,17 @@ if (btnQrCopy) {
 // ==========================================
 // 27. CONTROL DE ZOOM PERSISTENTE POR DOMINIO
 // ==========================================
-const zoomIndicator = document.getElementById('zoom-indicator');
-const zoomValue = document.getElementById('zoom-value');
-const zoomResetBtn = document.getElementById('zoom-reset-btn');
+const zoomIndicator = document.getElementById("zoom-indicator");
+const zoomValue = document.getElementById("zoom-value");
+const zoomResetBtn = document.getElementById("zoom-reset-btn");
 
 function getStoredDomainZoom(domain) {
   if (!domain) return 1.0;
   try {
-    const raw = localStorage.getItem('brave_domain_zoom');
+    const raw = localStorage.getItem("brave_domain_zoom");
     if (!raw) return 1.0;
     const map = JSON.parse(raw);
-    return typeof map[domain] === 'number' ? map[domain] : 1.0;
+    return typeof map[domain] === "number" ? map[domain] : 1.0;
   } catch {
     return 1.0;
   }
@@ -6553,29 +7242,24 @@ function getStoredDomainZoom(domain) {
 function saveDomainZoom(domain, factor) {
   if (!domain || isCurrentWindowPrivate()) return;
   try {
-    const raw = localStorage.getItem('brave_domain_zoom');
+    const raw = localStorage.getItem("brave_domain_zoom");
     const map = raw ? JSON.parse(raw) : {};
     if (Math.abs(factor - 1.0) < 0.01) {
       delete map[domain];
     } else {
       map[domain] = factor;
     }
-    localStorage.setItem('brave_domain_zoom', JSON.stringify(map));
+    localStorage.setItem("brave_domain_zoom", JSON.stringify(map));
   } catch {}
 }
 
 function updateZoomUI(factor) {
-  const currentFactor = factor !== undefined ? factor : (getActiveTab()?.zoomFactor || 1.0);
-  const pct = Math.round(currentFactor * 100);
-  const menuZoomText = document.getElementById('menu-zoom-text');
-  if (menuZoomText) {
-    menuZoomText.textContent = `${pct} %`;
-  }
   if (!zoomIndicator || !zoomValue) return;
+  const pct = Math.round(factor * 100);
   if (pct === 100) {
-    zoomIndicator.style.display = 'none';
+    zoomIndicator.style.display = "none";
   } else {
-    zoomIndicator.style.display = 'inline-flex';
+    zoomIndicator.style.display = "inline-flex";
     zoomValue.textContent = `${pct}%`;
   }
 }
@@ -6585,7 +7269,7 @@ function applyCurrentTabZoom(newFactor, persist = true) {
   if (!tab || !tab.webviewEl) return;
   const factor = Math.min(3.0, Math.max(0.3, Math.round(newFactor * 10) / 10));
   try {
-    if (typeof tab.webviewEl.setZoomFactor === 'function') {
+    if (typeof tab.webviewEl.setZoomFactor === "function") {
       tab.webviewEl.setZoomFactor(factor);
     }
   } catch {}
@@ -6598,68 +7282,30 @@ function applyCurrentTabZoom(newFactor, persist = true) {
 }
 
 if (zoomIndicator) {
-  zoomIndicator.addEventListener('click', () => {
+  zoomIndicator.addEventListener("click", () => {
     applyCurrentTabZoom(1.0, true);
-  });
-}
-
-// Controles de zoom y pantalla completa del menú principal
-const menuZoomOut = document.getElementById('menu-zoom-out');
-const menuZoomIn = document.getElementById('menu-zoom-in');
-const menuFullscreen = document.getElementById('menu-fullscreen');
-
-if (menuZoomOut) {
-  menuZoomOut.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const tab = getActiveTab();
-    if (!tab) return;
-    const curZoom = tab.zoomFactor || 1.0;
-    const nextZoom = Math.max(0.25, Math.round((curZoom - 0.1) * 10) / 10);
-    applyCurrentTabZoom(nextZoom, true);
-  });
-}
-
-if (menuZoomIn) {
-  menuZoomIn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const tab = getActiveTab();
-    if (!tab) return;
-    const curZoom = tab.zoomFactor || 1.0;
-    const nextZoom = Math.min(3.0, Math.round((curZoom + 0.1) * 10) / 10);
-    applyCurrentTabZoom(nextZoom, true);
-  });
-}
-
-if (menuFullscreen) {
-  menuFullscreen.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    }
   });
 }
 
 // ==========================================
 // 28. INFORMACIÓN DEL SITIO Y PERMISOS GRANULARES (CANDADO)
 // ==========================================
-const siteInfoPopup = document.getElementById('site-info-popup');
-const siteInfoDomain = document.getElementById('site-info-domain');
-const siteInfoSecurity = document.getElementById('site-info-security');
-const siteInfoClose = document.getElementById('site-info-close');
-const sitePermissionsList = document.getElementById('site-permissions-list');
-const siteInfoBtnReset = document.getElementById('site-info-btn-reset');
-const siteInfoBtnSettings = document.getElementById('site-info-btn-settings');
-const siteInfoDesc = document.getElementById('site-info-desc');
+const siteInfoPopup = document.getElementById("site-info-popup");
+const siteInfoDomain = document.getElementById("site-info-domain");
+const siteInfoSecurity = document.getElementById("site-info-security");
+const siteInfoClose = document.getElementById("site-info-close");
+const sitePermissionsList = document.getElementById("site-permissions-list");
+const siteInfoBtnReset = document.getElementById("site-info-btn-reset");
+const siteInfoBtnSettings = document.getElementById("site-info-btn-settings");
+const siteInfoDesc = document.getElementById("site-info-desc");
 
 const PERMISSION_CONFIGS = [
-  { key: 'camera', label: 'Cámara', icon: '📷' },
-  { key: 'microphone', label: 'Micrófono', icon: '🎤' },
-  { key: 'notifications', label: 'Notificaciones', icon: '🔔' },
-  { key: 'geolocation', label: 'Ubicación', icon: '📍' },
-  { key: 'clipboard', label: 'Portapapeles', icon: '📋' },
-  { key: 'javascript', label: 'JavaScript', icon: '⚡' },
+  { key: "camera", label: "Cámara", icon: "📷" },
+  { key: "microphone", label: "Micrófono", icon: "🎤" },
+  { key: "notifications", label: "Notificaciones", icon: "🔔" },
+  { key: "geolocation", label: "Ubicación", icon: "📍" },
+  { key: "clipboard", label: "Portapapeles", icon: "📋" },
+  { key: "javascript", label: "JavaScript", icon: "⚡" },
 ];
 
 function getDomainPermissions(domain) {
@@ -6676,16 +7322,24 @@ function saveDomainPermission(domain, permKey, value) {
   if (!domain) return;
   try {
     const perms = getDomainPermissions(domain);
-    if (value === 'default') {
+    if (value === "default") {
       delete perms[permKey];
     } else {
       perms[permKey] = value;
     }
     localStorage.setItem(`brave_perms_${domain}`, JSON.stringify(perms));
     if (window.braveAPI && window.braveAPI.setSitePermission) {
-      window.braveAPI.setSitePermission(domain, permKey, value === 'default' ? 'reset' : value);
+      window.braveAPI.setSitePermission(
+        domain,
+        permKey,
+        value === "default" ? "reset" : value,
+      );
     }
-    if (permKey === 'javascript' && window.braveAPI && window.braveAPI.toggleScripts) {
+    if (
+      permKey === "javascript" &&
+      window.braveAPI &&
+      window.braveAPI.toggleScripts
+    ) {
       window.braveAPI.toggleScripts(domain);
     }
   } catch {}
@@ -6693,60 +7347,70 @@ function saveDomainPermission(domain, permKey, value) {
 
 function renderSitePermissions(domain, url) {
   if (!sitePermissionsList) return;
-  sitePermissionsList.innerHTML = '';
+  sitePermissionsList.innerHTML = "";
 
-  const isHttps = url && url.startsWith('https://');
-  const isInternal = !url || url.startsWith('file:') || url.startsWith('brave:');
+  const isHttps = url && url.startsWith("https://");
+  const isInternal =
+    !url || url.startsWith("file:") || url.startsWith("brave:");
 
-  if (siteInfoDomain) siteInfoDomain.textContent = isInternal ? 'Brave Interno' : (domain || 'Página local');
+  if (siteInfoDomain)
+    siteInfoDomain.textContent = isInternal
+      ? "Brave Interno"
+      : domain || "Página local";
   if (siteInfoSecurity) {
     if (isHttps) {
-      siteInfoSecurity.textContent = 'La conexión es segura';
-      siteInfoSecurity.style.color = '#4ade80';
-      if (siteInfoDesc) siteInfoDesc.textContent = 'Tus datos (como contraseñas o tarjetas) permanecen cifrados de extremo a extremo con HTTPS.';
+      siteInfoSecurity.textContent = "La conexión es segura";
+      siteInfoSecurity.style.color = "#4ade80";
+      if (siteInfoDesc)
+        siteInfoDesc.textContent =
+          "Tus datos (como contraseñas o tarjetas) permanecen cifrados de extremo a extremo con HTTPS.";
     } else if (isInternal) {
-      siteInfoSecurity.textContent = 'Página interna protegida de Brave';
-      siteInfoSecurity.style.color = '#38bdf8';
-      if (siteInfoDesc) siteInfoDesc.textContent = 'Este recurso se ejecuta de forma local y segura dentro del entorno aislado del navegador.';
+      siteInfoSecurity.textContent = "Página interna protegida de Brave";
+      siteInfoSecurity.style.color = "#38bdf8";
+      if (siteInfoDesc)
+        siteInfoDesc.textContent =
+          "Este recurso se ejecuta de forma local y segura dentro del entorno aislado del navegador.";
     } else {
-      siteInfoSecurity.textContent = 'La conexión no es segura (HTTP)';
-      siteInfoSecurity.style.color = '#fb542b';
-      if (siteInfoDesc) siteInfoDesc.textContent = 'No debes introducir contraseñas o datos confidenciales en este sitio web.';
+      siteInfoSecurity.textContent = "La conexión no es segura (HTTP)";
+      siteInfoSecurity.style.color = "#fb542b";
+      if (siteInfoDesc)
+        siteInfoDesc.textContent =
+          "No debes introducir contraseñas o datos confidenciales en este sitio web.";
     }
   }
 
   const saved = getDomainPermissions(domain);
 
   PERMISSION_CONFIGS.forEach((p) => {
-    const row = document.createElement('div');
-    row.className = 'site-perm-item';
+    const row = document.createElement("div");
+    row.className = "site-perm-item";
 
-    const lbl = document.createElement('span');
-    lbl.className = 'site-perm-label';
+    const lbl = document.createElement("span");
+    lbl.className = "site-perm-label";
     lbl.innerHTML = `<span>${p.icon}</span> <span>${p.label}</span>`;
 
-    const select = document.createElement('select');
-    select.className = 'site-perm-select';
+    const select = document.createElement("select");
+    select.className = "site-perm-select";
 
-    const optDefault = document.createElement('option');
-    optDefault.value = 'default';
-    optDefault.textContent = 'Preguntar (Predeterminado)';
+    const optDefault = document.createElement("option");
+    optDefault.value = "default";
+    optDefault.textContent = "Preguntar (Predeterminado)";
 
-    const optAllow = document.createElement('option');
-    optAllow.value = 'allow';
-    optAllow.textContent = 'Permitir';
+    const optAllow = document.createElement("option");
+    optAllow.value = "allow";
+    optAllow.textContent = "Permitir";
 
-    const optBlock = document.createElement('option');
-    optBlock.value = 'block';
-    optBlock.textContent = 'Bloquear';
+    const optBlock = document.createElement("option");
+    optBlock.value = "block";
+    optBlock.textContent = "Bloquear";
 
     select.appendChild(optDefault);
     select.appendChild(optAllow);
     select.appendChild(optBlock);
 
-    select.value = saved[p.key] || 'default';
+    select.value = saved[p.key] || "default";
 
-    select.addEventListener('change', () => {
+    select.addEventListener("change", () => {
       saveDomainPermission(domain, p.key, select.value);
       showGlobalToast(`Permiso "${p.label}" actualizado para ${domain}`);
     });
@@ -6758,33 +7422,33 @@ function renderSitePermissions(domain, url) {
 }
 
 if (lockIcon) {
-  lockIcon.addEventListener('click', (e) => {
+  lockIcon.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (shieldsPopup) shieldsPopup.classList.remove('open');
-    if (mainMenu) mainMenu.classList.remove('open');
+    if (shieldsPopup) shieldsPopup.classList.remove("open");
+    if (mainMenu) mainMenu.classList.remove("open");
     const tab = getActiveTab();
     if (!tab) return;
     const domain = tab.domain || extractDomain(tab.url);
     renderSitePermissions(domain, tab.url);
-    if (siteInfoPopup) siteInfoPopup.classList.toggle('open');
+    if (siteInfoPopup) siteInfoPopup.classList.toggle("open");
   });
 }
 
 if (siteInfoClose) {
-  siteInfoClose.addEventListener('click', () => {
-    if (siteInfoPopup) siteInfoPopup.classList.remove('open');
+  siteInfoClose.addEventListener("click", () => {
+    if (siteInfoPopup) siteInfoPopup.classList.remove("open");
   });
 }
 
 if (siteInfoBtnReset) {
-  siteInfoBtnReset.addEventListener('click', () => {
+  siteInfoBtnReset.addEventListener("click", () => {
     const tab = getActiveTab();
     if (!tab) return;
     const domain = tab.domain || extractDomain(tab.url);
     localStorage.removeItem(`brave_perms_${domain}`);
     PERMISSION_CONFIGS.forEach((p) => {
       if (window.braveAPI && window.braveAPI.setSitePermission) {
-        window.braveAPI.setSitePermission(domain, p.key, 'reset');
+        window.braveAPI.setSitePermission(domain, p.key, "reset");
       }
     });
     renderSitePermissions(domain, tab.url);
@@ -6793,15 +7457,17 @@ if (siteInfoBtnReset) {
 }
 
 if (siteInfoBtnSettings) {
-  siteInfoBtnSettings.addEventListener('click', () => {
-    if (siteInfoPopup) siteInfoPopup.classList.remove('open');
+  siteInfoBtnSettings.addEventListener("click", () => {
+    if (siteInfoPopup) siteInfoPopup.classList.remove("open");
     createTab(settingsUrl);
   });
 }
 
-const siteInfoBtnClearCookies = document.getElementById('site-info-btn-clear-cookies');
+const siteInfoBtnClearCookies = document.getElementById(
+  "site-info-btn-clear-cookies",
+);
 if (siteInfoBtnClearCookies) {
-  siteInfoBtnClearCookies.addEventListener('click', async () => {
+  siteInfoBtnClearCookies.addEventListener("click", async () => {
     const tab = getActiveTab();
     if (!tab) return;
     const domain = tab.domain || extractDomain(tab.url);
@@ -6809,7 +7475,7 @@ if (siteInfoBtnClearCookies) {
       await window.braveAPI.clearDomainData(domain);
       showGlobalToast(`Cookies y datos borrados para ${domain}`);
       if (tab.webviewEl) tab.webviewEl.reload();
-      if (siteInfoPopup) siteInfoPopup.classList.remove('open');
+      if (siteInfoPopup) siteInfoPopup.classList.remove("open");
     }
   });
 }
@@ -6817,23 +7483,23 @@ if (siteInfoBtnClearCookies) {
 // ==========================================
 // 29. CAPTURA DE PANTALLA WEB (BRAVE WEB CAPTURE)
 // ==========================================
-const btnScreenshot = document.getElementById('btn-screenshot');
-const capturePopup = document.getElementById('capture-popup');
-const btnCloseCapture = document.getElementById('btn-close-capture');
-const capturePreviewImg = document.getElementById('capture-preview-img');
-const btnCaptureCopy = document.getElementById('btn-capture-copy');
-const btnCaptureSave = document.getElementById('btn-capture-save');
+const btnScreenshot = document.getElementById("btn-screenshot");
+const capturePopup = document.getElementById("capture-popup");
+const btnCloseCapture = document.getElementById("btn-close-capture");
+const capturePreviewImg = document.getElementById("capture-preview-img");
+const btnCaptureCopy = document.getElementById("btn-capture-copy");
+const btnCaptureSave = document.getElementById("btn-capture-save");
 
-let currentCaptureDataUrl = '';
+let currentCaptureDataUrl = "";
 
 async function captureActivePage() {
   const tab = getActiveTab();
   if (!tab || !tab.webviewEl) return;
   try {
-    showGlobalToast('Capturando pantalla de la página web...');
+    showGlobalToast("Capturando pantalla de la página web...");
     const image = await tab.webviewEl.capturePage();
     if (!image || image.isEmpty()) {
-      showGlobalToast('No se pudo capturar la página activa.');
+      showGlobalToast("No se pudo capturar la página activa.");
       return;
     }
     currentCaptureDataUrl = image.toDataURL();
@@ -6841,69 +7507,78 @@ async function captureActivePage() {
       capturePreviewImg.src = currentCaptureDataUrl;
     }
     if (capturePopup) {
-      capturePopup.classList.add('open');
+      capturePopup.classList.add("open");
     }
   } catch (err) {
-    showGlobalToast('Error al realizar la captura.');
+    showGlobalToast("Error al realizar la captura.");
   }
 }
 
 if (btnScreenshot) {
-  btnScreenshot.addEventListener('click', captureActivePage);
+  btnScreenshot.addEventListener("click", captureActivePage);
 }
 if (btnCloseCapture) {
-  btnCloseCapture.addEventListener('click', () => {
-    if (capturePopup) capturePopup.classList.remove('open');
+  btnCloseCapture.addEventListener("click", () => {
+    if (capturePopup) capturePopup.classList.remove("open");
   });
 }
 
 if (btnCaptureCopy) {
-  btnCaptureCopy.addEventListener('click', async () => {
+  btnCaptureCopy.addEventListener("click", async () => {
     if (!currentCaptureDataUrl) return;
     try {
       const res = await fetch(currentCaptureDataUrl);
       const blob = await res.blob();
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      showGlobalToast('¡Captura copiada al portapapeles!');
-      if (capturePopup) capturePopup.classList.remove('open');
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
+      showGlobalToast("¡Captura copiada al portapapeles!");
+      if (capturePopup) capturePopup.classList.remove("open");
     } catch {
-      showGlobalToast('No se pudo copiar al portapapeles.');
+      showGlobalToast("No se pudo copiar al portapapeles.");
     }
   });
 }
 
 if (btnCaptureSave) {
-  btnCaptureSave.addEventListener('click', async () => {
+  btnCaptureSave.addEventListener("click", async () => {
     if (!currentCaptureDataUrl) return;
     try {
-      const base64Data = currentCaptureDataUrl.replace(/^data:image\/png;base64,/, '');
+      const base64Data = currentCaptureDataUrl.replace(
+        /^data:image\/png;base64,/,
+        "",
+      );
       const tab = getActiveTab();
-      const domain = tab?.domain || 'captura-brave';
+      const domain = tab?.domain || "captura-brave";
       const defaultFilename = `brave-${domain}-${Date.now()}.png`;
 
-      if (window.braveAPI && window.braveAPI.showSaveDialog && window.braveAPI.writeFile) {
+      if (
+        window.braveAPI &&
+        window.braveAPI.showSaveDialog &&
+        window.braveAPI.writeFile
+      ) {
         const result = await window.braveAPI.showSaveDialog({
-          title: 'Guardar captura de pantalla web',
+          title: "Guardar captura de pantalla web",
           defaultPath: defaultFilename,
-          filters: [{ name: 'Imágenes PNG', extensions: ['png'] }],
+          filters: [{ name: "Imágenes PNG", extensions: ["png"] }],
         });
         if (!result.canceled && result.filePath) {
           await window.braveAPI.writeFile(result.filePath, base64Data);
           showGlobalToast(`Captura guardada en: ${result.filePath}`);
-          if (capturePopup) capturePopup.classList.remove('open');
+          if (capturePopup) capturePopup.classList.remove("open");
           return;
         }
       }
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = currentCaptureDataUrl;
       a.download = defaultFilename;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      showGlobalToast('Captura descargada correctamente.');
-      if (capturePopup) capturePopup.classList.remove('open');
+      showGlobalToast("Captura descargada correctamente.");
+      if (capturePopup) capturePopup.classList.remove("open");
     } catch {
-      showGlobalToast('Error al guardar la captura.');
+      showGlobalToast("Error al guardar la captura.");
     }
   });
 }
@@ -6917,15 +7592,19 @@ function printActivePage() {
   try {
     tab.webviewEl.print();
   } catch {
-    showGlobalToast('Error al abrir el diálogo de impresión.');
+    showGlobalToast("Error al abrir el diálogo de impresión.");
   }
 }
 
 // Cerrar popups al hacer clic fuera
-document.addEventListener('click', (e) => {
-  if (siteInfoPopup && siteInfoPopup.classList.contains('open')) {
-    if (!siteInfoPopup.contains(e.target) && e.target !== lockIcon && !lockIcon.contains(e.target)) {
-      siteInfoPopup.classList.remove('open');
+document.addEventListener("click", (e) => {
+  if (siteInfoPopup && siteInfoPopup.classList.contains("open")) {
+    if (
+      !siteInfoPopup.contains(e.target) &&
+      e.target !== lockIcon &&
+      !lockIcon.contains(e.target)
+    ) {
+      siteInfoPopup.classList.remove("open");
     }
   }
 });
@@ -6939,98 +7618,113 @@ function saveCurrentSession() {
   try {
     const sessionList = tabs.map((t) => ({
       url: t.url || ntpUrl,
-      title: t.title || 'Nueva Pestaña',
+      title: t.title || "Nueva Pestaña",
       isPinned: !!t.isPinned,
       groupId: t.groupId || null,
     }));
-    localStorage.setItem('brave_last_session', JSON.stringify(sessionList));
+    localStorage.setItem("brave_last_session", JSON.stringify(sessionList));
   } catch {}
 }
 
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   saveCurrentSession();
 });
 
-window.addEventListener('pagehide', () => {
+window.addEventListener("pagehide", () => {
   saveCurrentSession();
 });
 
 // ==========================================
 // 32. GESTOR DE CONTRASEÑAS Y AUTOCOMPLETADO
 // ==========================================
-const passwordSavePopup = document.getElementById('password-save-popup');
-const pwPopupDomain = document.getElementById('pw-popup-domain');
-const pwInputUsername = document.getElementById('pw-input-username');
-const pwInputPassword = document.getElementById('pw-input-password');
-const btnClosePwPopup = document.getElementById('btn-close-pw-popup');
-const btnPwToggleVis = document.getElementById('btn-pw-toggle-vis');
-const btnPwNever = document.getElementById('btn-pw-never');
-const btnPwNotNow = document.getElementById('btn-pw-notnow');
-const btnPwSave = document.getElementById('btn-pw-save');
+const passwordSavePopup = document.getElementById("password-save-popup");
+const pwPopupDomain = document.getElementById("pw-popup-domain");
+const pwInputUsername = document.getElementById("pw-input-username");
+const pwInputPassword = document.getElementById("pw-input-password");
+const btnClosePwPopup = document.getElementById("btn-close-pw-popup");
+const btnPwToggleVis = document.getElementById("btn-pw-toggle-vis");
+const btnPwNever = document.getElementById("btn-pw-never");
+const btnPwNotNow = document.getElementById("btn-pw-notnow");
+const btnPwSave = document.getElementById("btn-pw-save");
 
-let pendingPasswordDomain = '';
+let pendingPasswordDomain = "";
 
 function promptSavePassword(tab, username, password) {
   // Nunca solicitar guardar contraseñas en ventana privada o Tor
   if (isCurrentWindowPrivate()) return;
-  if (!tab || !tab.domain || tab.domain === 'nueva pestaña' || tab.domain === 'configuración') return;
-  const neverList = JSON.parse(localStorage.getItem('brave_passwords_never') || '[]');
+  if (
+    !tab ||
+    !tab.domain ||
+    tab.domain === "nueva pestaña" ||
+    tab.domain === "configuración"
+  )
+    return;
+  const neverList = JSON.parse(
+    localStorage.getItem("brave_passwords_never") || "[]",
+  );
   if (neverList.includes(tab.domain.toLowerCase())) return;
 
   pendingPasswordDomain = tab.domain.toLowerCase();
   if (pwPopupDomain) pwPopupDomain.textContent = tab.domain;
-  if (pwInputUsername) pwInputUsername.value = username || '';
+  if (pwInputUsername) pwInputUsername.value = username || "";
   if (pwInputPassword) {
-    pwInputPassword.value = password || '';
-    pwInputPassword.type = 'password';
+    pwInputPassword.value = password || "";
+    pwInputPassword.type = "password";
   }
-  if (passwordSavePopup) passwordSavePopup.classList.add('open');
+  if (passwordSavePopup) passwordSavePopup.classList.add("open");
 }
 
 if (btnClosePwPopup) {
-  btnClosePwPopup.addEventListener('click', () => {
-    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+  btnClosePwPopup.addEventListener("click", () => {
+    if (passwordSavePopup) passwordSavePopup.classList.remove("open");
   });
 }
 if (btnPwNotNow) {
-  btnPwNotNow.addEventListener('click', () => {
-    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+  btnPwNotNow.addEventListener("click", () => {
+    if (passwordSavePopup) passwordSavePopup.classList.remove("open");
   });
 }
 if (btnPwToggleVis && pwInputPassword) {
-  btnPwToggleVis.addEventListener('click', () => {
-    if (pwInputPassword.type === 'password') {
-      pwInputPassword.type = 'text';
-      btnPwToggleVis.textContent = '🔒';
+  btnPwToggleVis.addEventListener("click", () => {
+    if (pwInputPassword.type === "password") {
+      pwInputPassword.type = "text";
+      btnPwToggleVis.textContent = "🔒";
     } else {
-      pwInputPassword.type = 'password';
-      btnPwToggleVis.textContent = '👁️';
+      pwInputPassword.type = "password";
+      btnPwToggleVis.textContent = "👁️";
     }
   });
 }
 if (btnPwNever) {
-  btnPwNever.addEventListener('click', () => {
+  btnPwNever.addEventListener("click", () => {
     if (pendingPasswordDomain) {
-      const neverList = JSON.parse(localStorage.getItem('brave_passwords_never') || '[]');
+      const neverList = JSON.parse(
+        localStorage.getItem("brave_passwords_never") || "[]",
+      );
       if (!neverList.includes(pendingPasswordDomain)) {
         neverList.push(pendingPasswordDomain);
-        localStorage.setItem('brave_passwords_never', JSON.stringify(neverList));
+        localStorage.setItem(
+          "brave_passwords_never",
+          JSON.stringify(neverList),
+        );
       }
     }
-    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
-    showGlobalToast('No se volverá a preguntar en este sitio.');
+    if (passwordSavePopup) passwordSavePopup.classList.remove("open");
+    showGlobalToast("No se volverá a preguntar en este sitio.");
   });
 }
 if (btnPwSave) {
-  btnPwSave.addEventListener('click', () => {
-    const userVal = pwInputUsername ? pwInputUsername.value.trim() : '';
-    const passVal = pwInputPassword ? pwInputPassword.value : '';
+  btnPwSave.addEventListener("click", () => {
+    const userVal = pwInputUsername ? pwInputUsername.value.trim() : "";
+    const passVal = pwInputPassword ? pwInputPassword.value : "";
     if (!passVal) return;
 
     try {
-      const savedList = JSON.parse(localStorage.getItem('brave_passwords') || '[]');
+      const savedList = JSON.parse(
+        localStorage.getItem("brave_passwords") || "[]",
+      );
       const filtered = savedList.filter(
-        (p) => !(p.domain === pendingPasswordDomain && p.username === userVal)
+        (p) => !(p.domain === pendingPasswordDomain && p.username === userVal),
       );
       filtered.push({
         id: Date.now().toString(),
@@ -7039,87 +7733,90 @@ if (btnPwSave) {
         password: passVal,
         createdAt: new Date().toISOString(),
       });
-      localStorage.setItem('brave_passwords', JSON.stringify(filtered));
+      localStorage.setItem("brave_passwords", JSON.stringify(filtered));
       showGlobalToast(`🦁 Contraseña guardada para ${pendingPasswordDomain}`);
     } catch {}
-    if (passwordSavePopup) passwordSavePopup.classList.remove('open');
+    if (passwordSavePopup) passwordSavePopup.classList.remove("open");
   });
 }
 
 // ==========================================
 // 33. LIMPIADOR AVANZADO DE DATOS (Clear Data Modal)
 // ==========================================
-const clearDataModal = document.getElementById('clear-data-modal');
-const btnCloseClearData = document.getElementById('btn-close-clear-data');
-const btnClearCancel = document.getElementById('btn-clear-cancel');
-const btnClearConfirm = document.getElementById('btn-clear-confirm');
-const clearTimeRange = document.getElementById('clear-timerange');
-const chkClearHistory = document.getElementById('chk-clear-history');
-const chkClearCookies = document.getElementById('chk-clear-cookies');
-const chkClearCache = document.getElementById('chk-clear-cache');
-const chkClearPerms = document.getElementById('chk-clear-perms');
+const clearDataModal = document.getElementById("clear-data-modal");
+const btnCloseClearData = document.getElementById("btn-close-clear-data");
+const btnClearCancel = document.getElementById("btn-clear-cancel");
+const btnClearConfirm = document.getElementById("btn-clear-confirm");
+const clearTimeRange = document.getElementById("clear-timerange");
+const chkClearHistory = document.getElementById("chk-clear-history");
+const chkClearCookies = document.getElementById("chk-clear-cookies");
+const chkClearCache = document.getElementById("chk-clear-cache");
+const chkClearPerms = document.getElementById("chk-clear-perms");
 
 function openClearDataModal() {
-  if (mainMenu) mainMenu.classList.remove('open');
-  if (clearDataModal) clearDataModal.classList.add('open');
+  if (mainMenu) mainMenu.classList.remove("open");
+  if (clearDataModal) clearDataModal.classList.add("open");
 }
 
 function closeClearDataModal() {
-  if (clearDataModal) clearDataModal.classList.remove('open');
+  if (clearDataModal) clearDataModal.classList.remove("open");
 }
 
-if (btnCloseClearData) btnCloseClearData.addEventListener('click', closeClearDataModal);
-if (btnClearCancel) btnClearCancel.addEventListener('click', closeClearDataModal);
+if (btnCloseClearData)
+  btnCloseClearData.addEventListener("click", closeClearDataModal);
+if (btnClearCancel)
+  btnClearCancel.addEventListener("click", closeClearDataModal);
 
 if (btnClearConfirm) {
-  btnClearConfirm.addEventListener('click', async () => {
-    const timeRange = clearTimeRange ? clearTimeRange.value : '24h';
+  btnClearConfirm.addEventListener("click", async () => {
+    const timeRange = clearTimeRange ? clearTimeRange.value : "24h";
     const dataTypes = [];
-    if (chkClearCookies && chkClearCookies.checked) dataTypes.push('cookies', 'storage');
-    if (chkClearCache && chkClearCache.checked) dataTypes.push('cache');
+    if (chkClearCookies && chkClearCookies.checked)
+      dataTypes.push("cookies", "storage");
+    if (chkClearCache && chkClearCache.checked) dataTypes.push("cache");
     if (chkClearHistory && chkClearHistory.checked) {
-      dataTypes.push('history');
-      localStorage.removeItem('brave_browser_history');
+      dataTypes.push("history");
+      localStorage.removeItem("brave_browser_history");
     }
     if (chkClearPerms && chkClearPerms.checked) {
-      localStorage.removeItem('brave_site_permissions');
+      localStorage.removeItem("brave_site_permissions");
     }
 
     btnClearConfirm.disabled = true;
-    btnClearConfirm.textContent = 'Borrando...';
+    btnClearConfirm.textContent = "Borrando...";
 
     if (window.braveAPI && window.braveAPI.clearBrowsingData) {
       try {
         await window.braveAPI.clearBrowsingData({ timeRange, dataTypes });
-        showGlobalToast('🦁 Datos de navegación borrados con éxito');
+        showGlobalToast("🦁 Datos de navegación borrados con éxito");
       } catch {
-        showGlobalToast('Error al borrar los datos');
+        showGlobalToast("Error al borrar los datos");
       } finally {
         btnClearConfirm.disabled = false;
-        btnClearConfirm.textContent = 'Borrar datos';
+        btnClearConfirm.textContent = "Borrar datos";
         closeClearDataModal();
       }
     } else {
       btnClearConfirm.disabled = false;
-      btnClearConfirm.textContent = 'Borrar datos';
+      btnClearConfirm.textContent = "Borrar datos";
       closeClearDataModal();
-      showGlobalToast('🦁 Datos de navegación locales borrados');
+      showGlobalToast("🦁 Datos de navegación locales borrados");
     }
   });
 }
 
 // Menú principal: Borrar datos y Selector de elementos
-const menuClearData = document.getElementById('menu-clear-data');
+const menuClearData = document.getElementById("menu-clear-data");
 if (menuClearData) {
-  menuClearData.addEventListener('click', () => {
+  menuClearData.addEventListener("click", () => {
     openClearDataModal();
   });
 }
 
-const menuElementPicker = document.getElementById('menu-element-picker');
+const menuElementPicker = document.getElementById("menu-element-picker");
 if (menuElementPicker) {
-  menuElementPicker.addEventListener('click', () => {
-    mainMenu.classList.remove('open');
+  menuElementPicker.addEventListener("click", () => {
+    mainMenu.classList.remove("open");
     activateElementPicker();
   });
 }
@@ -7128,38 +7825,42 @@ if (menuElementPicker) {
 // 34. PERSONALIZACIÓN VISUAL (Tema y Color de Acento)
 // ==========================================
 function applyThemeAndAccent() {
-  const theme = localStorage.getItem('brave_theme') || 'dark';
-  const accent = localStorage.getItem('brave_accent') || 'orange';
+  const theme = localStorage.getItem("brave_theme") || "dark";
+  const accent = localStorage.getItem("brave_accent") || "orange";
 
   // Tema Claro / Oscuro / Sistema
-  if (theme === 'light') {
-    document.body.classList.add('light-theme');
-  } else if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (theme === "light") {
+    document.body.classList.add("light-theme");
+  } else if (theme === "system") {
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
     if (prefersDark) {
-      document.body.classList.remove('light-theme');
+      document.body.classList.remove("light-theme");
     } else {
-      document.body.classList.add('light-theme');
+      document.body.classList.add("light-theme");
     }
   } else {
-    document.body.classList.remove('light-theme');
+    document.body.classList.remove("light-theme");
   }
 
   // Color de acento
-  document.body.setAttribute('data-accent', accent);
+  document.body.setAttribute("data-accent", accent);
 }
 
 applyThemeAndAccent();
 
 // Escuchar cambios de sistema operativo o entre ventanas/configuración
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  if (localStorage.getItem('brave_theme') === 'system') {
-    applyThemeAndAccent();
-  }
-});
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", () => {
+    if (localStorage.getItem("brave_theme") === "system") {
+      applyThemeAndAccent();
+    }
+  });
 
-window.addEventListener('storage', (e) => {
-  if (e.key === 'brave_theme' || e.key === 'brave_accent') {
+window.addEventListener("storage", (e) => {
+  if (e.key === "brave_theme" || e.key === "brave_accent") {
     applyThemeAndAccent();
   }
 });
@@ -7169,7 +7870,7 @@ window.addEventListener('storage', (e) => {
 // ==========================================
 // Zoom con rueda del ratón (Ctrl + Scroll)
 window.addEventListener(
-  'wheel',
+  "wheel",
   (e) => {
     if (e.ctrlKey) {
       e.preventDefault();
@@ -7177,15 +7878,18 @@ window.addEventListener(
       if (!tab || !tab.webviewEl) return;
       const current = tab.zoomFactor || 1.0;
       const step = e.deltaY < 0 ? 0.1 : -0.1;
-      const nextZoom = Math.min(3.0, Math.max(0.25, Math.round((current + step) * 10) / 10));
+      const nextZoom = Math.min(
+        3.0,
+        Math.max(0.25, Math.round((current + step) * 10) / 10),
+      );
       applyCurrentTabZoom(nextZoom, true);
     }
   },
-  { passive: false }
+  { passive: false },
 );
 
 // Botones laterales del ratón (Mouse 4 = Atrás, Mouse 5 = Adelante)
-window.addEventListener('mouseup', (e) => {
+window.addEventListener("mouseup", (e) => {
   const tab = getActiveTab();
   if (!tab || !tab.webviewEl) return;
   if (e.button === 3) {
@@ -7198,50 +7902,56 @@ window.addEventListener('mouseup', (e) => {
 if (window.braveAPI && window.braveAPI.onNavigateBack) {
   window.braveAPI.onNavigateBack(() => {
     const tab = getActiveTab();
-    if (tab && tab.webviewEl && tab.webviewEl.canGoBack()) tab.webviewEl.goBack();
+    if (tab && tab.webviewEl && tab.webviewEl.canGoBack())
+      tab.webviewEl.goBack();
   });
 }
 if (window.braveAPI && window.braveAPI.onNavigateForward) {
   window.braveAPI.onNavigateForward(() => {
     const tab = getActiveTab();
-    if (tab && tab.webviewEl && tab.webviewEl.canGoForward()) tab.webviewEl.goForward();
+    if (tab && tab.webviewEl && tab.webviewEl.canGoForward())
+      tab.webviewEl.goForward();
   });
 }
 
 // ==========================================
 // 37. PIPELINE NATIVO DE DESCARGAS (Downloads)
 // ==========================================
-const downloadBar = document.getElementById('download-bar');
-const downloadFilename = document.getElementById('download-filename');
-const downloadMeta = document.getElementById('download-meta');
-const downloadProgressFill = document.getElementById('download-progress-fill');
-const btnDownloadOpen = document.getElementById('btn-download-open');
-const btnDownloadFolder = document.getElementById('btn-download-folder');
-const btnDownloadCancel = document.getElementById('btn-download-cancel');
-const btnDownloadClose = document.getElementById('btn-download-close');
+const downloadBar = document.getElementById("download-bar");
+const downloadFilename = document.getElementById("download-filename");
+const downloadMeta = document.getElementById("download-meta");
+const downloadProgressFill = document.getElementById("download-progress-fill");
+const btnDownloadOpen = document.getElementById("btn-download-open");
+const btnDownloadFolder = document.getElementById("btn-download-folder");
+const btnDownloadCancel = document.getElementById("btn-download-cancel");
+const btnDownloadClose = document.getElementById("btn-download-close");
 
-let currentDownloadPath = '';
-let currentDownloadId = '';
+let currentDownloadPath = "";
+let currentDownloadId = "";
 
 if (btnDownloadClose) {
-  btnDownloadClose.addEventListener('click', () => {
-    if (downloadBar) downloadBar.classList.remove('active');
+  btnDownloadClose.addEventListener("click", () => {
+    if (downloadBar) downloadBar.classList.remove("active");
   });
 }
 
 if (btnDownloadCancel) {
-  btnDownloadCancel.addEventListener('click', async () => {
-    if (currentDownloadId && window.braveAPI && window.braveAPI.cancelDownload) {
+  btnDownloadCancel.addEventListener("click", async () => {
+    if (
+      currentDownloadId &&
+      window.braveAPI &&
+      window.braveAPI.cancelDownload
+    ) {
       await window.braveAPI.cancelDownload(currentDownloadId);
-      if (downloadMeta) downloadMeta.textContent = 'Descarga cancelada';
-      btnDownloadCancel.style.display = 'none';
-      showGlobalToast('✕ Descarga cancelada');
+      if (downloadMeta) downloadMeta.textContent = "Descarga cancelada";
+      btnDownloadCancel.style.display = "none";
+      showGlobalToast("✕ Descarga cancelada");
     }
   });
 }
 
 if (btnDownloadOpen) {
-  btnDownloadOpen.addEventListener('click', () => {
+  btnDownloadOpen.addEventListener("click", () => {
     if (currentDownloadPath && window.braveAPI && window.braveAPI.openPath) {
       window.braveAPI.openPath(currentDownloadPath);
     }
@@ -7249,39 +7959,49 @@ if (btnDownloadOpen) {
 }
 
 if (btnDownloadFolder) {
-  btnDownloadFolder.addEventListener('click', () => {
-    if (currentDownloadPath && window.braveAPI && window.braveAPI.showItemInFolder) {
+  btnDownloadFolder.addEventListener("click", () => {
+    if (
+      currentDownloadPath &&
+      window.braveAPI &&
+      window.braveAPI.showItemInFolder
+    ) {
       window.braveAPI.showItemInFolder(currentDownloadPath);
     }
   });
 }
 
-const btnDownloadAll = document.getElementById('btn-download-all');
+const btnDownloadAll = document.getElementById("btn-download-all");
 if (btnDownloadAll) {
-  btnDownloadAll.addEventListener('click', () => {
+  btnDownloadAll.addEventListener("click", () => {
     createTab(downloadsUrl);
-    if (downloadBar) downloadBar.classList.remove('active');
+    if (downloadBar) downloadBar.classList.remove("active");
   });
 }
 
 // Soporte para soltar enlaces o texto directamente en la barra de pestañas para abrir
 [tabBar, newTabBtn].forEach((el) => {
   if (!el) return;
-  el.addEventListener('dragover', (e) => {
+  el.addEventListener("dragover", (e) => {
     e.preventDefault();
-    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
   });
-  el.addEventListener('drop', (e) => {
+  el.addEventListener("drop", (e) => {
     e.preventDefault();
     if (!e.dataTransfer) return;
-    const raw = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+    const raw =
+      e.dataTransfer.getData("text/uri-list") ||
+      e.dataTransfer.getData("text/plain");
     if (raw && raw.trim() && !draggedTabId) {
       let url = raw.trim();
-      if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://')) {
+      if (
+        !url.startsWith("http://") &&
+        !url.startsWith("https://") &&
+        !url.startsWith("file://")
+      ) {
         url = getSearchEngineQueryUrl(url);
       }
       createTab(url);
-      showGlobalToast('Enlace abierto en nueva pestaña');
+      showGlobalToast("Enlace abierto en nueva pestaña");
     }
   });
 });
@@ -7289,11 +8009,13 @@ if (btnDownloadAll) {
 // Helper: relay download event to any open downloads tab webview
 function relayDownloadEvent(eventName, data) {
   try {
-    document.querySelectorAll('webview').forEach((wv) => {
+    document.querySelectorAll("webview").forEach((wv) => {
       try {
-        const src = wv.getAttribute('src') || '';
-        if (src.includes('downloads.html')) {
-          wv.executeJavaScript(`window.dispatchEvent(new CustomEvent(${JSON.stringify(eventName)}, { detail: ${JSON.stringify(data)} }))`).catch(() => {});
+        const src = wv.getAttribute("src") || "";
+        if (src.includes("downloads.html")) {
+          wv.executeJavaScript(
+            `window.dispatchEvent(new CustomEvent(${JSON.stringify(eventName)}, { detail: ${JSON.stringify(data)} }))`,
+          ).catch(() => {});
         }
       } catch {}
     });
@@ -7304,99 +8026,97 @@ if (window.braveAPI && window.braveAPI.onDownloadStarted) {
   window.braveAPI.onDownloadStarted((data) => {
     currentDownloadId = data.id;
     currentDownloadPath = data.savePath;
-    if (downloadBar) downloadBar.classList.add('active');
+    if (downloadBar) downloadBar.classList.add("active");
     if (downloadFilename) downloadFilename.textContent = data.filename;
-    if (downloadMeta) downloadMeta.textContent = 'Iniciando descarga...';
-    if (downloadProgressFill) downloadProgressFill.style.width = '5%';
-    if (btnDownloadCancel) btnDownloadCancel.style.display = 'inline-block';
-    if (btnDownloadOpen) btnDownloadOpen.style.display = 'none';
-    if (btnDownloadFolder) btnDownloadFolder.style.display = 'none';
-    relayDownloadEvent('dl:started', data);
+    if (downloadMeta) downloadMeta.textContent = "Iniciando descarga...";
+    if (downloadProgressFill) downloadProgressFill.style.width = "5%";
+    if (btnDownloadCancel) btnDownloadCancel.style.display = "inline-block";
+    if (btnDownloadOpen) btnDownloadOpen.style.display = "none";
+    if (btnDownloadFolder) btnDownloadFolder.style.display = "none";
+    relayDownloadEvent("dl:started", data);
   });
 
   window.braveAPI.onDownloadProgress((data) => {
-    if (downloadBar && !downloadBar.classList.contains('active')) {
-      downloadBar.classList.add('active');
+    if (downloadBar && !downloadBar.classList.contains("active")) {
+      downloadBar.classList.add("active");
     }
     if (downloadFilename) downloadFilename.textContent = data.filename;
     if (data.totalBytes > 0) {
-      const pct = Math.min(100, Math.round((data.receivedBytes / data.totalBytes) * 100));
-      if (downloadProgressFill) downloadProgressFill.style.width = pct + '%';
+      const pct = Math.min(
+        100,
+        Math.round((data.receivedBytes / data.totalBytes) * 100),
+      );
+      if (downloadProgressFill) downloadProgressFill.style.width = pct + "%";
       const recMB = (data.receivedBytes / (1024 * 1024)).toFixed(1);
       const totMB = (data.totalBytes / (1024 * 1024)).toFixed(1);
-      if (downloadMeta) downloadMeta.textContent = `${recMB} MB de ${totMB} MB (${pct}%)`;
+      if (downloadMeta)
+        downloadMeta.textContent = `${recMB} MB de ${totMB} MB (${pct}%)`;
     } else {
       const recMB = (data.receivedBytes / (1024 * 1024)).toFixed(1);
       if (downloadMeta) downloadMeta.textContent = `${recMB} MB descargados`;
     }
-    relayDownloadEvent('dl:progress', data);
+    relayDownloadEvent("dl:progress", data);
   });
 
   window.braveAPI.onDownloadCompleted((data) => {
     currentDownloadPath = data.savePath;
-    if (downloadProgressFill) downloadProgressFill.style.width = '100%';
-    if (downloadMeta) downloadMeta.textContent = 'Descarga completada con éxito';
-    if (btnDownloadCancel) btnDownloadCancel.style.display = 'none';
-    if (btnDownloadOpen) btnDownloadOpen.style.display = 'inline-block';
-    if (btnDownloadFolder) btnDownloadFolder.style.display = 'inline-block';
+    if (downloadProgressFill) downloadProgressFill.style.width = "100%";
+    if (downloadMeta)
+      downloadMeta.textContent = "Descarga completada con éxito";
+    if (btnDownloadCancel) btnDownloadCancel.style.display = "none";
+    if (btnDownloadOpen) btnDownloadOpen.style.display = "inline-block";
+    if (btnDownloadFolder) btnDownloadFolder.style.display = "inline-block";
 
     // Registrar en brave_downloads para brave://downloads (solo en ventanas normales)
     if (!isCurrentWindowPrivate()) {
       try {
-        const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+        const dlList = JSON.parse(
+          localStorage.getItem("brave_downloads") || "[]",
+        );
         dlList.unshift({
           id: data.id,
           filename: data.filename,
           savePath: data.savePath,
           totalBytes: data.totalBytes,
-          url: data.url || '',
+          url: data.url || "",
           date: new Date().toISOString(),
-          state: 'completed',
+          state: "completed",
         });
-        localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
+        localStorage.setItem(
+          "brave_downloads",
+          JSON.stringify(dlList.slice(0, 200)),
+        );
       } catch {}
     }
 
     showGlobalToast(`🦁 Descarga completada: ${data.filename}`);
-    relayDownloadEvent('dl:completed', data);
-
-    // Notificación nativa de escritorio cuando la ventana esté en segundo plano o minimizada
-    try {
-      if (typeof Notification !== 'undefined') {
-        const sendNativeNotification = () => {
-          new Notification('Brave: Descarga completa', {
-            body: data.filename || 'Archivo descargado',
-          });
-        };
-        if (Notification.permission === 'granted') {
-          sendNativeNotification();
-        } else if (Notification.permission !== 'denied') {
-          Notification.requestPermission().then((perm) => {
-            if (perm === 'granted') sendNativeNotification();
-          }).catch(() => {});
-        }
-      }
-    } catch {}
+    relayDownloadEvent("dl:completed", data);
   });
 
   window.braveAPI.onDownloadFailed((data) => {
-    if (btnDownloadCancel) btnDownloadCancel.style.display = 'none';
-    if (downloadMeta) downloadMeta.textContent = `Descarga interrumpida (${data.state})`;
+    if (btnDownloadCancel) btnDownloadCancel.style.display = "none";
+    if (downloadMeta)
+      downloadMeta.textContent = `Descarga interrumpida (${data.state})`;
 
     // Registrar descarga fallida en el historial (solo en ventanas normales)
     if (!isCurrentWindowPrivate()) {
       try {
-        const dlList = JSON.parse(localStorage.getItem('brave_downloads') || '[]');
+        const dlList = JSON.parse(
+          localStorage.getItem("brave_downloads") || "[]",
+        );
         dlList.unshift({
           id: data.id,
           filename: data.filename,
-          savePath: '',
+          savePath: "",
           totalBytes: 0,
-          url: '',
+          url: "",
           date: new Date().toISOString(),
-          state: data.state || 'interrupted',
+          state: data.state || "interrupted",
         });
-        localStorage.setItem('brave_downloads', JSON.stringify(dlList.slice(0, 200)));
+        localStorage.setItem(
+          "brave_downloads",
+          JSON.stringify(dlList.slice(0, 200)),
+        );
       } catch {}
     }
 
@@ -7409,7 +8129,8 @@ if (window.braveAPI && window.braveAPI.onMediaKey) {
   window.braveAPI.onMediaKey((cmd) => {
     const targetTab = tabs.find((t) => t.isAudible) || getActiveTab();
     if (targetTab && targetTab.webviewEl) {
-      targetTab.webviewEl.executeJavaScript(`
+      targetTab.webviewEl
+        .executeJavaScript(`
         (function() {
           const media = Array.from(document.querySelectorAll('video, audio')).find(m => !m.paused) || document.querySelector('video, audio');
           if (media) {
@@ -7425,7 +8146,8 @@ if (window.braveAPI && window.braveAPI.onMediaKey) {
             }
           }
         })();
-      `).catch(() => {});
+      `)
+        .catch(() => {});
     }
   });
 }
@@ -7433,37 +8155,40 @@ if (window.braveAPI && window.braveAPI.onMediaKey) {
 // ==========================================
 // 38. AUTENTICACIÓN HTTP BÁSICA (HTTP Auth Modal)
 // ==========================================
-const authModal = document.getElementById('auth-modal');
-const authDesc = document.getElementById('auth-desc');
-const authUsernameInput = document.getElementById('auth-username');
-const authPasswordInput = document.getElementById('auth-password');
-const btnAuthCancel = document.getElementById('btn-auth-cancel');
-const btnAuthSubmit = document.getElementById('btn-auth-submit');
-const btnAuthClose = document.getElementById('btn-auth-close');
+const authModal = document.getElementById("auth-modal");
+const authDesc = document.getElementById("auth-desc");
+const authUsernameInput = document.getElementById("auth-username");
+const authPasswordInput = document.getElementById("auth-password");
+const btnAuthCancel = document.getElementById("btn-auth-cancel");
+const btnAuthSubmit = document.getElementById("btn-auth-submit");
+const btnAuthClose = document.getElementById("btn-auth-close");
 
 let activeAuthId = null;
 
 function closeAuthDialog(cancel = true) {
   if (activeAuthId && window.braveAPI && window.braveAPI.submitAuth) {
     if (cancel) {
-      window.braveAPI.submitAuth(activeAuthId, '', '', true);
+      window.braveAPI.submitAuth(activeAuthId, "", "", true);
     } else {
-      const u = authUsernameInput ? authUsernameInput.value : '';
-      const p = authPasswordInput ? authPasswordInput.value : '';
+      const u = authUsernameInput ? authUsernameInput.value : "";
+      const p = authPasswordInput ? authPasswordInput.value : "";
       window.braveAPI.submitAuth(activeAuthId, u, p, false);
     }
   }
   activeAuthId = null;
-  if (authModal) authModal.classList.remove('open');
+  if (authModal) authModal.classList.remove("open");
 }
 
-if (btnAuthCancel) btnAuthCancel.addEventListener('click', () => closeAuthDialog(true));
-if (btnAuthClose) btnAuthClose.addEventListener('click', () => closeAuthDialog(true));
-if (btnAuthSubmit) btnAuthSubmit.addEventListener('click', () => closeAuthDialog(false));
+if (btnAuthCancel)
+  btnAuthCancel.addEventListener("click", () => closeAuthDialog(true));
+if (btnAuthClose)
+  btnAuthClose.addEventListener("click", () => closeAuthDialog(true));
+if (btnAuthSubmit)
+  btnAuthSubmit.addEventListener("click", () => closeAuthDialog(false));
 
 if (authPasswordInput) {
-  authPasswordInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') closeAuthDialog(false);
+  authPasswordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") closeAuthDialog(false);
   });
 }
 
@@ -7471,11 +8196,11 @@ if (window.braveAPI && window.braveAPI.onAuthRequired) {
   window.braveAPI.onAuthRequired((data) => {
     activeAuthId = data.authId;
     if (authDesc) {
-      authDesc.textContent = `El servidor "${data.host}${data.port ? ':' + data.port : ''}" solicita autenticación.${data.realm ? ' Mensaje: ' + data.realm : ''}`;
+      authDesc.textContent = `El servidor "${data.host}${data.port ? ":" + data.port : ""}" solicita autenticación.${data.realm ? " Mensaje: " + data.realm : ""}`;
     }
-    if (authUsernameInput) authUsernameInput.value = '';
-    if (authPasswordInput) authPasswordInput.value = '';
-    if (authModal) authModal.classList.add('open');
+    if (authUsernameInput) authUsernameInput.value = "";
+    if (authPasswordInput) authPasswordInput.value = "";
+    if (authModal) authModal.classList.add("open");
     if (authUsernameInput) authUsernameInput.focus();
   });
 }
@@ -7483,20 +8208,20 @@ if (window.braveAPI && window.braveAPI.onAuthRequired) {
 // ==========================================
 // 39. RESILIENCIA ANTE CAÍDAS DE PESTAÑA (Crash Recovery)
 // ==========================================
-const tabCrashBanner = document.getElementById('tab-crash-banner');
-const crashBannerText = document.getElementById('crash-banner-text');
-const btnCrashReload = document.getElementById('btn-crash-reload');
-const btnCrashClose = document.getElementById('btn-crash-close');
+const tabCrashBanner = document.getElementById("tab-crash-banner");
+const crashBannerText = document.getElementById("crash-banner-text");
+const btnCrashReload = document.getElementById("btn-crash-reload");
+const btnCrashClose = document.getElementById("btn-crash-close");
 
 if (btnCrashClose) {
-  btnCrashClose.addEventListener('click', () => {
-    if (tabCrashBanner) tabCrashBanner.classList.remove('active');
+  btnCrashClose.addEventListener("click", () => {
+    if (tabCrashBanner) tabCrashBanner.classList.remove("active");
   });
 }
 
 if (btnCrashReload) {
-  btnCrashReload.addEventListener('click', () => {
-    if (tabCrashBanner) tabCrashBanner.classList.remove('active');
+  btnCrashReload.addEventListener("click", () => {
+    if (tabCrashBanner) tabCrashBanner.classList.remove("active");
     const tab = getActiveTab();
     if (tab) {
       tab.hasCrashed = false;
@@ -7505,18 +8230,14 @@ if (btnCrashReload) {
   });
 }
 
-if (window.braveAPI && window.braveAPI.onOpenUrlInTab) {
-  window.braveAPI.onOpenUrlInTab((url, disposition) => {
-    const isBackground = disposition === 'background-tab';
-    createTab(url, { background: isBackground });
-  });
-}
-
 if (window.braveAPI && window.braveAPI.onTabCrashed) {
   window.braveAPI.onTabCrashed((data) => {
     const crashedTab = tabs.find((t) => {
       try {
-        return typeof t.webviewEl.getWebContentsId === 'function' && t.webviewEl.getWebContentsId() === data.webContentsId;
+        return (
+          typeof t.webviewEl.getWebContentsId === "function" &&
+          t.webviewEl.getWebContentsId() === data.webContentsId
+        );
       } catch {
         return false;
       }
@@ -7524,15 +8245,15 @@ if (window.braveAPI && window.braveAPI.onTabCrashed) {
 
     if (crashedTab) {
       crashedTab.hasCrashed = true;
-      crashedTab.crashReason = data.reason || 'cierre inesperado';
+      crashedTab.crashReason = data.reason || "cierre inesperado";
     }
 
     const currentTab = getActiveTab();
     if (currentTab && currentTab.hasCrashed) {
       if (crashBannerText) {
-        crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${currentTab.crashReason || 'cierre inesperado'}).`;
+        crashBannerText.textContent = `¡Vaya! Se ha producido un error al mostrar esta página web (Motivo: ${currentTab.crashReason || "cierre inesperado"}).`;
       }
-      if (tabCrashBanner) tabCrashBanner.classList.add('active');
+      if (tabCrashBanner) tabCrashBanner.classList.add("active");
     }
   });
 }
@@ -7542,16 +8263,21 @@ if (window.braveAPI && window.braveAPI.onTabCrashed) {
 // ==========================================
 // 39. INICIALIZACIÓN DE SESIÓN Y PESTAÑAS (Startup Session)
 // ==========================================
-const startupMode = localStorage.getItem('brave_startup_mode') || 'continue';
+const startupMode = localStorage.getItem("brave_startup_mode") || "continue";
 const restoredUrls = new Set();
-const initialArgUrl = window.braveAPI && window.braveAPI.getInitialUrl ? window.braveAPI.getInitialUrl() : null;
+const initialArgUrl =
+  window.braveAPI && window.braveAPI.getInitialUrl
+    ? window.braveAPI.getInitialUrl()
+    : null;
 
 if (initialArgUrl) {
   createTab(initialArgUrl);
 } else {
   // 1. Restaurar pestañas fijadas persistentes (sin duplicados)
   try {
-    const savedPinned = JSON.parse(localStorage.getItem('brave_pinned_tabs') || '[]');
+    const savedPinned = JSON.parse(
+      localStorage.getItem("brave_pinned_tabs") || "[]",
+    );
     if (Array.isArray(savedPinned)) {
       savedPinned.forEach((p) => {
         if (p.url && !restoredUrls.has(p.url)) {
@@ -7563,12 +8289,14 @@ if (initialArgUrl) {
   } catch {}
 
   // 2. Restaurar sesión previa si el modo es "continue"
-  if (startupMode === 'continue' && !isCurrentWindowPrivate()) {
+  if (startupMode === "continue" && !isCurrentWindowPrivate()) {
     try {
-      const lastSession = JSON.parse(localStorage.getItem('brave_last_session') || '[]');
+      const lastSession = JSON.parse(
+        localStorage.getItem("brave_last_session") || "[]",
+      );
       if (Array.isArray(lastSession)) {
         lastSession.forEach((savedTab) => {
-          if (savedTab.url && !savedTab.url.includes('ntp.html')) {
+          if (savedTab.url && !savedTab.url.includes("ntp.html")) {
             if (!restoredUrls.has(savedTab.url)) {
               // Lazy-load: la primera pestaña se carga activa; las demás inician hibernadas para arranque ultrarrápido
               const isFirstTab = restoredUrls.size === 0;
@@ -7576,7 +8304,7 @@ if (initialArgUrl) {
                 pinned: !!savedTab.isPinned,
                 groupId: savedTab.groupId || null,
                 lazy: !isFirstTab && !savedTab.isPinned,
-                title: savedTab.title || 'Pestaña',
+                title: savedTab.title || "Pestaña",
               });
               restoredUrls.add(savedTab.url);
             }
@@ -7586,11 +8314,9 @@ if (initialArgUrl) {
     } catch {}
   }
 
-  // 3. Si no hay pestañas abiertas, abrir la página de inicio (Onboarding Wizard o NTP)
+  // 3. Si no hay pestañas abiertas, abrir la Nueva Pestaña (NTP)
   if (tabs.length === 0) {
-    const isFirstRunDone = localStorage.getItem('replik_first_run_done');
-    const initialUrl = !isFirstRunDone ? welcomeUrl : ntpUrl;
-    createTab(initialUrl);
+    createTab(ntpUrl);
   } else {
     // Enfocar la primera pestaña no fijada o la primera disponible
     const firstNonPinned = tabs.find((t) => !t.isPinned) || tabs[0];
@@ -7601,42 +8327,41 @@ if (initialArgUrl) {
 // Cargar barra de acciones de extensiones activas
 renderExtensionActions();
 
-
 // ========================================================
 // REPLICACION EXACTA: LEO AI, VPN DE BRAVE & CHROME WEB STORE
 // ========================================================
 
 // 1. Leo AI Sidebar
-const btnLeo = document.getElementById('btn-leo');
-const leoSidebar = document.getElementById('leo-sidebar');
-const btnCloseLeo = document.getElementById('btn-close-leo');
-const btnLeoExpand = document.getElementById('btn-leo-expand');
-const leoInputText = document.getElementById('leo-input-text');
-const btnLeoSend = document.getElementById('btn-leo-send');
-const leoChatStream = document.getElementById('leo-chat-stream');
-const leoBodyScroll = document.getElementById('leo-body-scroll');
-const leoIntroSection = document.getElementById('leo-intro-section');
-const leoModelSelect = document.getElementById('leo-model-select');
+const btnLeo = document.getElementById("btn-leo");
+const leoSidebar = document.getElementById("leo-sidebar");
+const btnCloseLeo = document.getElementById("btn-close-leo");
+const btnLeoExpand = document.getElementById("btn-leo-expand");
+const leoInputText = document.getElementById("leo-input-text");
+const btnLeoSend = document.getElementById("btn-leo-send");
+const leoChatStream = document.getElementById("leo-chat-stream");
+const leoBodyScroll = document.getElementById("leo-body-scroll");
+const leoIntroSection = document.getElementById("leo-intro-section");
+const leoModelSelect = document.getElementById("leo-model-select");
 
 if (btnLeo && leoSidebar) {
-  btnLeo.addEventListener('click', (e) => {
+  btnLeo.addEventListener("click", (e) => {
     e.stopPropagation();
-    leoSidebar.classList.toggle('open');
-    if (leoSidebar.classList.contains('open')) {
+    leoSidebar.classList.toggle("open");
+    if (leoSidebar.classList.contains("open")) {
       if (leoInputText) leoInputText.focus();
     }
   });
 }
 
 if (btnCloseLeo && leoSidebar) {
-  btnCloseLeo.addEventListener('click', () => {
-    leoSidebar.classList.remove('open');
+  btnCloseLeo.addEventListener("click", () => {
+    leoSidebar.classList.remove("open");
   });
 }
 
 if (btnLeoExpand && leoSidebar) {
-  btnLeoExpand.addEventListener('click', () => {
-    leoSidebar.classList.toggle('expanded');
+  btnLeoExpand.addEventListener("click", () => {
+    leoSidebar.classList.toggle("expanded");
   });
 }
 
@@ -7646,17 +8371,17 @@ function sendLeoMessage() {
   if (!text) return;
 
   // Render user message
-  const userMsg = document.createElement('div');
-  userMsg.className = 'leo-msg user';
+  const userMsg = document.createElement("div");
+  userMsg.className = "leo-msg user";
   userMsg.textContent = text;
   leoChatStream.appendChild(userMsg);
 
-  leoInputText.value = '';
-  leoInputText.style.height = 'auto';
+  leoInputText.value = "";
+  leoInputText.style.height = "auto";
 
   // Typing indicator
-  const typingMsg = document.createElement('div');
-  typingMsg.className = 'leo-msg assistant';
+  const typingMsg = document.createElement("div");
+  typingMsg.className = "leo-msg assistant";
   typingMsg.innerHTML = '<span style="letter-spacing: 2px;">•••</span>';
   leoChatStream.appendChild(typingMsg);
 
@@ -7666,14 +8391,22 @@ function sendLeoMessage() {
 
   // Simulated smart response
   setTimeout(() => {
-    let reply = 'He procesado tu consulta de forma 100% privada y anonima en Brave. Tus conversaciones no se guardan en servidores ni se usan para entrenar modelos.';
+    let reply =
+      "He procesado tu consulta de forma 100% privada y anonima en Brave. Tus conversaciones no se guardan en servidores ni se usan para entrenar modelos.";
     const lower = text.toLowerCase();
-    if (lower.includes('resum') || lower.includes('pagina') || lower.includes('pestana')) {
-      reply = 'La pagina activa esta protegida por Brave Shields. He analizado el DOM de forma local y los elementos principales se encuentran libres de rastreadores.';
-    } else if (lower.includes('hola') || lower.includes('buenas')) {
-      reply = '¡Hola! Soy Leo, el asistente de inteligencia artificial privado integrado en Brave. ¿En que puedo ayudarte hoy?';
-    } else if (lower.includes('vpn') || lower.includes('seguridad')) {
-      reply = 'Brave VPN utiliza el protocolo WireGuard® auditado y servidores ultrarrapidos proporcionados por Guardian para proteger toda tu conexion.';
+    if (
+      lower.includes("resum") ||
+      lower.includes("pagina") ||
+      lower.includes("pestana")
+    ) {
+      reply =
+        "La pagina activa esta protegida por Brave Shields. He analizado el DOM de forma local y los elementos principales se encuentran libres de rastreadores.";
+    } else if (lower.includes("hola") || lower.includes("buenas")) {
+      reply =
+        "¡Hola! Soy Leo, el asistente de inteligencia artificial privado integrado en Brave. ¿En que puedo ayudarte hoy?";
+    } else if (lower.includes("vpn") || lower.includes("seguridad")) {
+      reply =
+        "Brave VPN utiliza el protocolo WireGuard® auditado y servidores ultrarrapidos proporcionados por Guardian para proteger toda tu conexion.";
     }
 
     typingMsg.textContent = reply;
@@ -7684,12 +8417,12 @@ function sendLeoMessage() {
 }
 
 if (btnLeoSend) {
-  btnLeoSend.addEventListener('click', sendLeoMessage);
+  btnLeoSend.addEventListener("click", sendLeoMessage);
 }
 
 if (leoInputText) {
-  leoInputText.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  leoInputText.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendLeoMessage();
     }
@@ -7697,173 +8430,60 @@ if (leoInputText) {
 }
 
 // 2. Brave VPN Popup
-const btnVpn = document.getElementById('btn-vpn');
-const vpnPopup = document.getElementById('vpn-popup');
-const btnVpnActivate = document.getElementById('btn-vpn-activate');
-const btnVpnHaveAccount = document.getElementById('btn-vpn-have-account');
+const btnVpn = document.getElementById("btn-vpn");
+const vpnPopup = document.getElementById("vpn-popup");
+const btnVpnActivate = document.getElementById("btn-vpn-activate");
+const btnVpnHaveAccount = document.getElementById("btn-vpn-have-account");
 
 function toggleVpnPopup() {
   if (!vpnPopup) return;
-  vpnPopup.classList.toggle('open');
+  vpnPopup.classList.toggle("open");
 }
 
 if (btnVpn) {
-  btnVpn.addEventListener('click', (e) => {
+  btnVpn.addEventListener("click", (e) => {
     e.stopPropagation();
     toggleVpnPopup();
   });
 }
 
 if (btnVpnActivate) {
-  btnVpnActivate.addEventListener('click', () => {
-    if (vpnPopup) vpnPopup.classList.remove('open');
-    if (typeof showToast === 'function') {
-      showToast('🛡️ VPN de Brave activada. Conectado a Guardian (Servidor Cifrado Seguro).');
+  btnVpnActivate.addEventListener("click", () => {
+    if (vpnPopup) vpnPopup.classList.remove("open");
+    if (typeof showToast === "function") {
+      showToast(
+        "🛡️ VPN de Brave activada. Conectado a Guardian (Servidor Cifrado Seguro).",
+      );
     }
     if (btnVpn) {
-      btnVpn.style.color = '#fb542b';
+      btnVpn.style.color = "#fb542b";
     }
   });
 }
 
 if (btnVpnHaveAccount) {
-  btnVpnHaveAccount.addEventListener('click', (e) => {
+  btnVpnHaveAccount.addEventListener("click", (e) => {
     e.preventDefault();
-    if (typeof showToast === 'function') {
-      showToast('Inicia sesion en account.brave.com para sincronizar tu suscripcion.');
+    if (typeof showToast === "function") {
+      showToast(
+        "Inicia sesion en account.brave.com para sincronizar tu suscripcion.",
+      );
     }
-  });
-}
-
-// 3. Extensions Popup
-const btnCloseExtPopup = document.getElementById('btn-close-ext-popup');
-
-if (btnCloseExtPopup && extensionsPopup) {
-  btnCloseExtPopup.addEventListener('click', () => {
-    extensionsPopup.classList.remove('open');
   });
 }
 
 // 4. Close popups on click outside
-document.addEventListener('click', (e) => {
+document.addEventListener("click", (e) => {
   if (vpnPopup && !vpnPopup.contains(e.target) && e.target !== btnVpn) {
-    vpnPopup.classList.remove('open');
-  }
-  if (extensionsPopup && !extensionsPopup.contains(e.target) && e.target !== btnExtensions) {
-    extensionsPopup.classList.remove('open');
+    vpnPopup.classList.remove("open");
   }
 });
 
 // 5. Listener para mensajes desde NTP (postMessage para abrir VPN Popup)
-window.addEventListener('message', (e) => {
-  if (e.data && e.data.action === 'openVpnPopup') {
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.action === "openVpnPopup") {
     if (vpnPopup) {
-      vpnPopup.classList.add('open');
+      vpnPopup.classList.add("open");
     }
   }
 });
-
-// ==========================================================
-// BRAVE SIDEBAR DOCK & TOGGLE ORCHESTRATION (Milestone 1 Stream B)
-// ==========================================================
-const btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
-const sidebarDock = document.getElementById('brave-sidebar-dock');
-const sidebarBtnLeo = document.getElementById('sidebar-btn-leo');
-const sidebarBtnBookmarks = document.getElementById('sidebar-btn-bookmarks');
-const sidebarBtnHistory = document.getElementById('sidebar-btn-history');
-const sidebarBtnPlaylist = document.getElementById('sidebar-btn-playlist');
-const sidebarBtnWallet = document.getElementById('sidebar-btn-wallet');
-const sidebarBtnCollapse = document.getElementById('sidebar-btn-collapse');
-
-function setSidebarVisibility(visible, persist = true) {
-  if (!sidebarDock || !browserContent) return;
-  if (visible) {
-    sidebarDock.classList.remove('collapsed');
-    browserContent.classList.add('sidebar-open');
-    if (btnSidebarToggle) btnSidebarToggle.classList.add('active');
-  } else {
-    sidebarDock.classList.add('collapsed');
-    browserContent.classList.remove('sidebar-open');
-    if (btnSidebarToggle) btnSidebarToggle.classList.remove('active');
-  }
-  if (persist) {
-    try {
-      localStorage.setItem('brave_sidebar_visible', visible ? 'true' : 'false');
-    } catch {}
-  }
-}
-
-// Restore persisted sidebar state (defaults to visible)
-try {
-  const initialSidebarState = localStorage.getItem('brave_sidebar_visible') !== 'false';
-  setSidebarVisibility(initialSidebarState, false);
-} catch {
-  setSidebarVisibility(true, false);
-}
-
-if (btnSidebarToggle) {
-  btnSidebarToggle.addEventListener('click', () => {
-    const isCurrentlyOpen = browserContent && browserContent.classList.contains('sidebar-open');
-    setSidebarVisibility(!isCurrentlyOpen, true);
-  });
-}
-
-if (sidebarBtnCollapse) {
-  sidebarBtnCollapse.addEventListener('click', () => {
-    setSidebarVisibility(false, true);
-  });
-}
-
-// Side Panels Interaction
-if (sidebarBtnLeo) {
-  sidebarBtnLeo.addEventListener('click', () => {
-    if (leoSidebar) {
-      leoSidebar.classList.toggle('open');
-      const isOpen = leoSidebar.classList.contains('open');
-      sidebarBtnLeo.classList.toggle('active', isOpen);
-      if (btnLeo) btnLeo.classList.toggle('active', isOpen);
-      if (isOpen && leoInputText) {
-        leoInputText.focus();
-      }
-    }
-  });
-}
-
-if (sidebarBtnBookmarks) {
-  sidebarBtnBookmarks.addEventListener('click', () => {
-    createTab(bookmarksUrl, { activate: true });
-  });
-}
-
-if (sidebarBtnHistory) {
-  sidebarBtnHistory.addEventListener('click', () => {
-    createTab(historyUrl, { activate: true });
-  });
-}
-
-if (sidebarBtnPlaylist) {
-  sidebarBtnPlaylist.addEventListener('click', () => {
-    createTab(playlistUrl, { activate: true });
-  });
-}
-
-if (sidebarBtnWallet) {
-  sidebarBtnWallet.addEventListener('click', () => {
-    createTab('brave://wallet', { activate: true });
-  });
-}
-
-// Synchronize Leo open/close states with dock button
-if (btnCloseLeo) {
-  btnCloseLeo.addEventListener('click', () => {
-    if (sidebarBtnLeo) sidebarBtnLeo.classList.remove('active');
-    if (btnLeo) btnLeo.classList.remove('active');
-  });
-}
-if (btnLeo) {
-  btnLeo.addEventListener('click', () => {
-    if (sidebarBtnLeo && leoSidebar) {
-      sidebarBtnLeo.classList.toggle('active', leoSidebar.classList.contains('open'));
-    }
-  });
-}
